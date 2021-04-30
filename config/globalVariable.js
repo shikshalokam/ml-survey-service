@@ -1,40 +1,22 @@
 let fs = require("fs"),
   path = require("path");
 const requireAll = require("require-all");
-mkdirp(path.join(__dirname + "/../logs/" + process.env.NODE_ENV));
 mkdirp(path.join(__dirname + "/../" + "uploads"));
 
 gen = Object.assign(global, {});
 
 module.exports = function () {
-  var Log = require("log");
-  // let createStream = fs.createWriteStream(
-  //   __dirname +
-  //     "/../logs/" +
-  //     process.env.NODE_ENV +
-  //     "/log-" +
-  //     new Date().getTime() +
-  //     ".log",
-  //   { flags: "w" }
-  // );
-  // let readStream = fs.createReadStream(__dirname +'/../logs/'+process.env.NODE_ENV + '/logs.log');
   global.async = require("async");
   global.ROOT_PATH = path.join(__dirname, '..')
   global.GENERIC_HELPERS_PATH = ROOT_PATH + "/generics/helpers"
   global.MODULES_BASE_PATH = ROOT_PATH + "/module"
-  global.log = new Log(global.config.log);
   global._ = require("lodash");
   gen.utils = require(ROOT_PATH + "/generics/helpers/utils");
-  global.config = require(".");
 
+  require(".");
+  
   global.httpStatusCode = 
   require(ROOT_PATH + "/generics/httpStatusCodes");
-
-  global.ENABLE_DEBUG_LOGGING = process.env.ENABLE_DEBUG_LOGGING || "ON";
-  global.ENABLE_BUNYAN_LOGGING = process.env.ENABLE_BUNYAN_LOGGING || "ON";
-
-
-  global.REQUEST_TIMEOUT_FOR_REPORTS = process.env.REQUEST_TIMEOUT_FOR_REPORTS || 120000;
 
   // boostrap all models
   global.models = requireAll({

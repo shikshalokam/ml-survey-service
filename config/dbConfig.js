@@ -6,7 +6,7 @@ const mongoose_timestamp = require("mongoose-timestamp");
 const mongoose_ttl = require("mongoose-ttl");
 let ObjectId = mongoose.Types.ObjectId;
 
-var DB = function(config) {
+var DB = function() {
   
   // Added to remove depreciation warnings from logs.
   mongoose.set('useCreateIndex', true)
@@ -14,12 +14,15 @@ var DB = function(config) {
   mongoose.set('useUnifiedTopology', true)
   
   var db = mongoose.createConnection(
-    config.host + "/" + config.database,
-    config.options
+    process.env.MONGODB_URL,
+    {
+      useNewUrlParser: true
+    }
   );
+
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function() {
-    log.debug("Connected to DB");
+    console.log("Connected to DB");
   });
 
   var createModel = function(opts) {
@@ -34,6 +37,7 @@ var DB = function(config) {
       createdAt: "createdAt",
       updatedAt: "updatedAt"
     });
+
     schema.plugin(mongoose_autopopulate);
     schema.plugin(mongoose_delete, { overrideMethods: true, deletedAt: true });
 
@@ -49,10 +53,6 @@ var DB = function(config) {
         });
       }
     }
-
-    //static
-    //if(opts.static)
-    //schema.statics[opts.static.methodName] = opts.static.method;
 
     var model = db.model(opts.name, schema, opts.name);
     return model;

@@ -11,7 +11,6 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper");
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
-const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
@@ -385,6 +384,7 @@ module.exports = class SurveysHelper {
                         message: messageConstants.apiResponses.SURVEY_SOLUTION_IMPORTED,
                         data: {
                             solutionId: newSolution._id,
+                            solutionExternalId: newSolution.externalId,
                             link: appsPortalBaseUrl + appName + messageConstants.common.TAKE_SURVEY + link
                         }
                     });
@@ -663,7 +663,7 @@ module.exports = class SurveysHelper {
                             message: `Failed to push notification for survey ${surveyData.surveyId.toString()} in the solution ${surveyData.solutionName}`
                         }
                     }
-                    slackClient.kafkaErrorAlert(errorObject)
+                    console.log(errorObject);
                     throw new Error(`Failed to push notification for survey ${surveyData.surveyId.toString()} in the solution ${surveyData.solutionName}`);
                 }
 
@@ -1675,5 +1675,57 @@ module.exports = class SurveysHelper {
         }
     })
   }
+
+  /**
+      * Get survey solution link.
+      * @method
+      * @name getLink
+      * @param  {String} solutionId - solution external Id.
+      * @param  {String} appName - name of app.
+      * @returns {getLink} - sharable link 
+     */
+
+    static getLink(solutionId, appName) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveyData = await solutionsHelper.solutionDocuments({
+                        externalId : solutionId,
+                        isReusable : false,
+                        type : messageConstants.common.SURVEY
+
+                        },[
+                            "link"
+                    ]);
+
+                if(!surveyData.length) {
+                    throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
+                }
+
+                let appDetails = await kendraService.getAppDetails(appName);
+                
+                if(appDetails.result === false){
+                    throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
+                }
+
+                let link = appsPortalBaseUrl + appName + messageConstants.common.TAKE_SURVEY + surveyData[0].link;
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.SURVEY_LINK_GENERATED,
+                    data: link
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+    
     
 }

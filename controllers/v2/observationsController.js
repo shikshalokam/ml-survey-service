@@ -930,7 +930,7 @@ module.exports = class Observations extends v1Observation {
               req.query.solutionId,
               req.userDetails.userId,
               req.body,
-              req.rspObj.userToken 
+              req.userDetails.userToken 
             );
 
             return resolve(solutionData);

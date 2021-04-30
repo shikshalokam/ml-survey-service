@@ -20,7 +20,7 @@ function health_check() {
         try {
 
             let healthCheckUrl = 
-            process.env.KENDRA_APPLICATION_ENDPOINT +  "/healthCheckStatus";
+            process.env.ML_CORE_SERVICE_URL +  "/healthCheckStatus";
 
             const options = {
                 headers : {

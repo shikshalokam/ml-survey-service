@@ -211,6 +211,14 @@ module.exports = class Submission extends Abstract {
 
       try {
 
+        if( req.headers.deviceid ) {
+          req.body.evidence["deviceId"] = req.headers.deviceid;
+        }
+
+        if( req.headers["user-agent"] ) {
+          req.body.evidence["userAgent"] = req.headers["user-agent"];
+        }
+        
         let response = await submissionsHelper.createEvidencesInSubmission(req, "submissions", false);
 
         if (response.result.status && response.result.status === "completed") {

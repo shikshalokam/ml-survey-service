@@ -222,6 +222,14 @@ module.exports = class SurveySubmissions extends Abstract {
         if (isSubmissionAllowed.data.allowed && isSubmissionAllowed.data.allowed == false) {
             throw new Error(messageConstants.apiResponses.MULTIPLE_SUBMISSIONS_NOT_ALLOWED)
         }
+
+        if( req.headers.deviceid ) {
+          req.body.evidence["deviceId"] = req.headers.deviceid;
+        }
+
+        if( req.headers["user-agent"] ) {
+          req.body.evidence["userAgent"] = req.headers["user-agent"];
+        }
           
         let response = await submissionsHelper.createEvidencesInSubmission
         (  

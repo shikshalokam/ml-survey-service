@@ -12,7 +12,6 @@ const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 let entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
-const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 
 /**
     * AssessmentsHelper
@@ -587,10 +586,27 @@ module.exports = class AssessmentsHelper {
               }
 
               let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                userDetails.userToken,
-                userDetails.userId
+              await userService.profile(
+                  userDetails.userToken,
+                  userDetails.userId
               );
+
+              if (!organisationAndRootOrganisation.success) {
+                  throw {
+                      message: messageConstants.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                      status: httpStatusCode.bad_request.status
+                  }
+              }
+
+              let organisationAndRootOrganisation = {
+                  createdFor :
+                  organisationAndRootOrganisation.organisations.map(
+                      organisation => {
+                          return organisation.organisationId
+                      }
+                  ),
+                  rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
+              }
 
               let createdFor =  organisationAndRootOrganisation.createdFor;
               let rootOrganisations = organisationAndRootOrganisation.rootOrganisations;

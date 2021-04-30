@@ -11,7 +11,7 @@ const mongoose = require("mongoose");
 function health_check() {
     return new Promise( async (resolve,reject) => {
 
-        const db = mongoose.createConnection(process.env.MONGODB_URL + "/" + process.env.DB);
+        const db = mongoose.createConnection(process.env.MONGODB_URL);
           
         db.on("error", function () {
             return resolve(false)
