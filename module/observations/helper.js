@@ -105,7 +105,7 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                let organisationAndRootOrganisation = {
+                let organisation = {
                     createdFor :
                     organisationAndRootOrganisation.organisations.map(
                         organisation => {
@@ -149,8 +149,8 @@ module.exports = class ObservationsHelper {
                         userId,
                         _.omit(data,["entities"]),
                         true,
-                        organisationAndRootOrganisation.createdFor,
-                        organisationAndRootOrganisation.rootOrganisations
+                        organisation.createdFor,
+                        organisation.rootOrganisations
                     );
 
                 } else {
@@ -163,7 +163,7 @@ module.exports = class ObservationsHelper {
                     data,
                     userId,
                     solutionData,
-                    organisationAndRootOrganisation
+                    organisation
                 );
 
                 return resolve(_.pick(observationData, ["_id", "name", "description"]));
@@ -1061,10 +1061,27 @@ module.exports = class ObservationsHelper {
             try {
   
               let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                token,
-                userId
+              await userService.profile(
+                  token,
+                  userId
               );
+
+              if (!organisationAndRootOrganisation.success) {
+                throw {
+                    message: messageConstants.apiResponses.USER_ORGANISATION_NOT_FOUND,
+                    status: httpStatusCode.bad_request.status
+                }
+              }
+
+              let organisation = {
+                  createdFor :
+                  organisationAndRootOrganisation.organisations.map(
+                      organisation => {
+                          return organisation.organisationId
+                      }
+                  ),
+                  rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
+              }
 
               let solutionInformation =  {
                 name : requestedData.name,
@@ -1084,8 +1101,8 @@ module.exports = class ObservationsHelper {
                 userId,
                 solutionInformation,
                 true,
-                organisationAndRootOrganisation.createdFor,
-                organisationAndRootOrganisation.rootOrganisations
+                organisation.createdFor,
+                organisation.rootOrganisations
               );
 
               let startDate = new Date();
@@ -1111,7 +1128,7 @@ module.exports = class ObservationsHelper {
                 observationData,
                 userId,
                 createdSolutionAndProgram,
-                organisationAndRootOrganisation
+                organisation
               );
 
               createdSolutionAndProgram["observationName"] = observation.name;

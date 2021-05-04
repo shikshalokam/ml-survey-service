@@ -598,7 +598,7 @@ module.exports = class AssessmentsHelper {
                   }
               }
 
-              let organisationAndRootOrganisation = {
+              let organisation = {
                   createdFor :
                   organisationAndRootOrganisation.organisations.map(
                       organisation => {
@@ -608,8 +608,8 @@ module.exports = class AssessmentsHelper {
                   rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
               }
 
-              let createdFor =  organisationAndRootOrganisation.createdFor;
-              let rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
+              let createdFor =  organisation.createdFor;
+              let rootOrganisations = organisation.rootOrganisations;
   
               let createdSolutionAndProgram = 
               await solutionsHelper.createProgramAndSolutionFromTemplate(
