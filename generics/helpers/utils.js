@@ -259,6 +259,11 @@ function removeDuplicatesFromArray(data, key) {
   return uniqueArray;
 }
 
+function convertStringToBoolean(stringData) {
+  let stringToBoolean = (stringData === "TRUE" || stringData === "true");
+  return stringToBoolean;
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -279,5 +284,6 @@ module.exports = {
   isValidMongoId : isValidMongoId,
   generateUUId : generateUUId,
   md5Hash : md5Hash,
-  removeDuplicatesFromArray : removeDuplicatesFromArray
+  removeDuplicatesFromArray : removeDuplicatesFromArray,
+  convertStringToBoolean : convertStringToBoolean
 };

@@ -64,7 +64,7 @@ module.exports = class InstitutionalAssessments {
                   req.pageSize, 
                   req.pageNo,
                   req.userDetails.userId,
-                  req.userDetails.userToken  
+                  req.rspObj.userToken  
                 );
 
                 return resolve(institutionalAssessmentSolutions);

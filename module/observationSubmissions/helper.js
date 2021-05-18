@@ -7,6 +7,7 @@
 
 // Dependencies
 
+let slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 let kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const emailClient = require(ROOT_PATH + "/generics/helpers/emailCommunications");
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
@@ -138,8 +139,7 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
-                    console.log(errorObject);
+                    slackClient.kafkaErrorAlert(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -189,8 +189,7 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
-                    console.log(errorObject);
+                    slackClient.kafkaErrorAlert(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -232,8 +231,7 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
-                    console.log(errorObject);
+                    slackClient.kafkaErrorAlert(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -476,7 +474,11 @@ module.exports = class ObservationSubmissionsHelper {
                 "observationId",
                 "scoringSystem",
                 "isRubricDriven",
-                "criteriaLevelReport"
+                "criteriaLevelReport",
+                "evidencesStatus.name", 
+                "evidencesStatus.externalId", 
+                "evidencesStatus.isSubmitted", 
+                "evidencesStatus.submissions"
             ];
 
             let result = await this.observationSubmissionsDocument
@@ -496,13 +498,32 @@ module.exports = class ObservationSubmissionsHelper {
                 })
             }
 
-            result = result.map(resultedData=>{
+            result = result.map(resultedData => {
                 resultedData.observationName =  
                 resultedData.observationInformation && resultedData.observationInformation.name ? 
                 resultedData.observationInformation.name : "";
 
                 resultedData.submissionDate = resultedData.completedDate ? resultedData.completedDate : "";
                 resultedData.ratingCompletedAt = resultedData.ratingCompletedAt ? resultedData.ratingCompletedAt : "";
+
+                resultedData.evidencesStatus = 
+                resultedData.evidencesStatus.map(evidence=>{ 
+                        
+                    let evidenceStatus = {
+                        name : evidence.name,
+                        code : evidence.externalId,
+                        status : messageConstants.common.SUBMISSION_STATUS_COMPLETED
+                    };
+
+                    if( !evidence.isSubmitted ){ 
+                        evidenceStatus["status"] = 
+                        evidence.submissions.length > 0 ? 
+                        messageConstants.common.DRAFT :
+                        messageConstants.common.SUBMISSION_STATUS_NOT_STARTED;
+                    }
+
+                    return evidenceStatus;
+                }); 
 
                 delete resultedData.observationInformation;
                 return _.omit(resultedData,["completedDate"]);
@@ -671,8 +692,7 @@ module.exports = class ObservationSubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                
-                console.log(errorObject);
+                slackClient.kafkaErrorAlert(errorObject);
             }
 
             return resolve(kafkaMessage);

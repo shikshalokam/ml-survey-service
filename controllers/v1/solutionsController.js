@@ -1541,7 +1541,7 @@ module.exports = class Solutions extends Abstract {
 
                 let result = await observationsHelper.verifyLink(
                     req.params._id,
-                    req.userDetails.userToken,
+                    req.rspObj.userToken,
                     req.userDetails.userId,
                     req.body
                 );

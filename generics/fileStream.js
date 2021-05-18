@@ -9,17 +9,15 @@ let FileStream = class FileStream {
     const currentDate = new Date();
     const fileExtensionWithTime = moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD_HH_mm") + ".csv";
 
-    if( !fs.existsSync("public")) {
-      fs.mkdirSync("public");
+    if( !fs.existsSync(process.env.PUBLIC_FOLDER_PATH)) {
+      fs.mkdirSync(process.env.PUBLIC_FOLDER_PATH);
     }
 
-    let csvReportsPath = "./public/reports" ;
-
-    if( !fs.existsSync("public" + "/" + csvReportsPath)) {
-      fs.mkdirSync("public" + "/" + csvReportsPath);
+    if( !fs.existsSync(process.env.PUBLIC_FOLDER_PATH + "/" + process.env.CSV_REPORTS_PATH)) {
+      fs.mkdirSync(process.env.PUBLIC_FOLDER_PATH + "/" + process.env.CSV_REPORTS_PATH);
     }
 
-    const filePath = `${"public"}/${csvReportsPath}/${moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD")}/`;
+    const filePath = `${process.env.PUBLIC_FOLDER_PATH}/${process.env.CSV_REPORTS_PATH}/${moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD")}/`;
 
     if (!fs.existsSync(filePath)) {
       fs.mkdirSync(filePath);

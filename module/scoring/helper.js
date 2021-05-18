@@ -6,6 +6,7 @@
  */
 
 // Dependencies
+const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const mathJs = require(ROOT_PATH + "/generics/helpers/mathFunctions");
 
 
@@ -412,7 +413,7 @@ module.exports = class ScoringHelper {
 
                                                     result.criteriaErrors.push(errorObject);
 
-                                                    console.log(errorObject);
+                                                    slackClient.rubricErrorLogs(errorObject);
 
                                                     errorWhileParsingCriteriaExpression = true;
 
@@ -813,7 +814,7 @@ module.exports = class ScoringHelper {
                                                         
                                                         themeErrors.push(errorObject);
 
-                                                        console.log(errorObject);
+                                                        slackClient.rubricErrorLogs(errorObject);
 
                                                         errorWhileParsingThemeExpression = true;
 

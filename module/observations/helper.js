@@ -10,6 +10,7 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper");
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
+const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfObservationSubmissionsLength = 500;
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
@@ -21,7 +22,6 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
-const userService = require( ROOT_PATH + "/generics/services/users" );
 
 /**
     * ObservationsHelper
@@ -93,27 +93,10 @@ module.exports = class ObservationsHelper {
                 }
 
                 let organisationAndRootOrganisation = 
-                await userService.profile(
+                await shikshalokamHelper.getOrganisationsAndRootOrganisations(
                     requestingUserAuthToken,
                     userId
                 );
-
-                if (!organisationAndRootOrganisation.success) {
-                    throw {
-                        message: messageConstants.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                        status: httpStatusCode.bad_request.status
-                    }
-                }
-
-                let organisation = {
-                    createdFor :
-                    organisationAndRootOrganisation.organisations.map(
-                        organisation => {
-                            return organisation.organisationId
-                        }
-                    ),
-                    rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
-                }
 
                 let solutionData = 
                 await solutionHelper.solutionDocuments({
@@ -149,8 +132,8 @@ module.exports = class ObservationsHelper {
                         userId,
                         _.omit(data,["entities"]),
                         true,
-                        organisation.createdFor,
-                        organisation.rootOrganisations
+                        organisationAndRootOrganisation.createdFor,
+                        organisationAndRootOrganisation.rootOrganisations
                     );
 
                 } else {
@@ -163,7 +146,7 @@ module.exports = class ObservationsHelper {
                     data,
                     userId,
                     solutionData,
-                    organisation
+                    organisationAndRootOrganisation
                 );
 
                 return resolve(_.pick(observationData, ["_id", "name", "description"]));
@@ -721,7 +704,7 @@ module.exports = class ObservationsHelper {
                             message: `Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`
                         }
                     }
-                    console.log(errorObject)
+                    slackClient.kafkaErrorAlert(errorObject)
                     throw new Error(`Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`);
                 }
 
@@ -1061,27 +1044,10 @@ module.exports = class ObservationsHelper {
             try {
   
               let organisationAndRootOrganisation = 
-              await userService.profile(
-                  token,
-                  userId
+              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
+                token,
+                userId
               );
-
-              if (!organisationAndRootOrganisation.success) {
-                throw {
-                    message: messageConstants.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                    status: httpStatusCode.bad_request.status
-                }
-              }
-
-              let organisation = {
-                  createdFor :
-                  organisationAndRootOrganisation.organisations.map(
-                      organisation => {
-                          return organisation.organisationId
-                      }
-                  ),
-                  rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
-              }
 
               let solutionInformation =  {
                 name : requestedData.name,
@@ -1101,8 +1067,8 @@ module.exports = class ObservationsHelper {
                 userId,
                 solutionInformation,
                 true,
-                organisation.createdFor,
-                organisation.rootOrganisations
+                organisationAndRootOrganisation.createdFor,
+                organisationAndRootOrganisation.rootOrganisations
               );
 
               let startDate = new Date();
@@ -1128,7 +1094,7 @@ module.exports = class ObservationsHelper {
                 observationData,
                 userId,
                 createdSolutionAndProgram,
-                organisation
+                organisationAndRootOrganisation
               );
 
               createdSolutionAndProgram["observationName"] = observation.name;
@@ -1694,6 +1660,27 @@ module.exports = class ObservationsHelper {
 
                 let result =
                 await database.models.observations.aggregate(aggregateData);
+
+                if( result[0].data.length > 0 ) {
+                    
+                    let solutionIds = [];
+
+                    result[0].data.forEach(resultedData => {
+                        solutionIds.push(resultedData.solutionId);
+                    });
+
+                    let solutionDocuments = 
+                    await solutionHelper.solutionDocuments({
+                        _id: { $in : solutionIds }
+                    },["language","creator"]);
+
+                    solutionDocuments.forEach(solutionDocument => {
+                        let solution = result[0].data.find(resultData => resultData.solutionId.toString() === solutionDocument._id.toString());
+                        solution["language"] = solutionDocument.language;
+                        solution["creator"] = solutionDocument.creator ? solutionDocument.creator : "";
+                    });
+
+                }
 
                 return resolve({
                     success: true,

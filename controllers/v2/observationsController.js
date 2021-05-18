@@ -333,14 +333,14 @@ module.exports = class Observations extends v1Observation {
     }
 
     /**
-     * @api {post} /assessment/api/v2/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber Assessments
+     * @api {post} /assessment/api/v2/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber&ecmMethod=ecmMethod Assessments
      * @apiVersion 2.0.0
      * @apiName Assessments
      * @apiGroup Observations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiParam {String} entityId Entity ID.
      * @apiParam {Int} submissionNumber Submission Number.
-     * @apiSampleRequest /assessment/api/v2/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1
+     * @apiSampleRequest /assessment/api/v2/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
      * @apiParamExample {json} Request:
      * {
      *  "role" : "HM",
@@ -549,7 +549,11 @@ module.exports = class Observations extends v1Observation {
                     result: {}
                 };
 
-                let observationDocument = await database.models.observations.findOne({ _id: req.params._id, createdBy: req.userDetails.userId, status: {$ne:"inactive"},entities: ObjectId(req.query.entityId) }).lean();
+                let observationDocument = await database.models.observations.findOne({ 
+                    _id: req.params._id, 
+                     createdBy: req.userDetails.userId,
+                     status: {$ne:"inactive"}, 
+                     entities: ObjectId(req.query.entityId) }).lean();
 
                 if (!observationDocument) {
                     return resolve({ 
@@ -557,7 +561,7 @@ module.exports = class Observations extends v1Observation {
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-
+               
                 let entityQueryObject = { _id: req.query.entityId, entityType: observationDocument.entityType };
                 let entityDocument = await database.models.entities.findOne(
                     entityQueryObject,
@@ -601,6 +605,16 @@ module.exports = class Observations extends v1Observation {
                         status: httpStatusCode.bad_request.status, 
                         message: responseMessage 
                     });
+                }
+
+                
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if(!solutionDocument.evidenceMethods[req.query.ecmMethod] ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.ECM_NOT_EXIST
+                        });
+                    }
                 }
 
                 let programQueryObject = {
@@ -727,10 +741,10 @@ module.exports = class Observations extends v1Observation {
                     submissionDocument.userRoleInformation = req.body;
                 }
 
-                 if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
-        submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
-        submissionDocument["project"] = solutionDocument.project;
-      }
+                if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
+                    submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
+                    submissionDocument["project"] = solutionDocument.project;
+                }
                 
                 let assessment = {};
 
@@ -835,12 +849,21 @@ module.exports = class Observations extends v1Observation {
                 submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
                 submissionDocument.criteria = submissionDocumentCriterias;
                 submissionDocument.submissionNumber = submissionNumber;
+            
 
                 let submissionDoc = await observationsHelper.findSubmission(
                     submissionDocument
                 );
 
                 assessment.submissionId = submissionDoc.result._id;
+
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if( evidenceMethodArray[req.query.ecmMethod] ) {
+                        evidenceMethodArray = {
+                            [req.query.ecmMethod] : evidenceMethodArray[req.query.ecmMethod]
+                        };
+                    }
+                }
 
                 const parsedAssessment = await assessmentsHelper.parseQuestionsV2(
                     Object.values(evidenceMethodArray),
@@ -930,7 +953,7 @@ module.exports = class Observations extends v1Observation {
               req.query.solutionId,
               req.userDetails.userId,
               req.body,
-              req.userDetails.userToken 
+              req.rspObj.userToken 
             );
 
             return resolve(solutionData);

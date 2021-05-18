@@ -63,7 +63,7 @@ module.exports = class Observations {
                   req.pageSize, 
                   req.pageNo,
                   req.userDetails.userId,
-                  req.userDetails.userToken  
+                  req.rspObj.userToken  
                 );
 
                 return resolve(observationSolutions);

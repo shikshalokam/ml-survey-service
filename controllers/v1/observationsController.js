@@ -268,7 +268,7 @@ module.exports = class Observations extends Abstract {
                     req.query.solutionId, 
                     req.body.data, 
                     req.userDetails.id, 
-                    req.userDetails.userToken,
+                    req.rspObj.userToken,
                     req.query.programId
                 );
 
@@ -661,14 +661,14 @@ module.exports = class Observations extends Abstract {
 
 
     /**
-     * @api {get} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber Assessments
+     * @api {get} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber&ecmMethod=ecmMethod Assessments
      * @apiVersion 1.0.0
      * @apiName Assessments
      * @apiGroup Observations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiParam {String} entityId Entity ID.
      * @apiParam {Int} submissionNumber Submission Number.
-     * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1
+     * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
      * @apiUse successBody
      * @apiUse errorBody
      */
@@ -748,6 +748,15 @@ module.exports = class Observations extends Abstract {
                         status:  httpStatusCode.bad_request.status, 
                         message: responseMessage 
                     });
+                }
+
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if(!solutionDocument.evidenceMethods[req.query.ecmMethod] ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.ECM_NOT_EXIST
+                        });
+                    }
                 }
                 
                 let programQueryObject = {
@@ -976,6 +985,14 @@ module.exports = class Observations extends Abstract {
                 );
 
                 assessment.submissionId = submissionDoc.result._id;
+
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if( evidenceMethodArray[req.query.ecmMethod] ) {
+                        evidenceMethodArray = {
+                            [req.query.ecmMethod] : evidenceMethodArray[req.query.ecmMethod]
+                        };
+                    }
+                }
 
                 const parsedAssessment = await assessmentsHelper.parseQuestions(
                     Object.values(evidenceMethodArray),
@@ -1271,7 +1288,7 @@ module.exports = class Observations extends Abstract {
                 let userIdByExternalId;
 
                 if (users.length > 0) {
-                    userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.userDetails.userToken, users);
+                    userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.rspObj.userToken, users);
                     if(Object.keys(userIdByExternalId).length > 0) {
                         Object.values(userIdByExternalId).forEach(userDetails => {
                             usersKeycloakIdMap[userDetails] = true;
@@ -1283,7 +1300,7 @@ module.exports = class Observations extends Abstract {
                     
                     let userOrganisationDetails = await observationsHelper.getUserOrganisationDetails(
                         Object.keys(usersKeycloakIdMap), 
-                        req.userDetails.userToken
+                        req.rspObj.userToken
                     );
 
                     usersKeycloakIdMap = userOrganisationDetails.data;
@@ -1802,7 +1819,7 @@ module.exports = class Observations extends Abstract {
                 
                 let observations = await observationsHelper.bulkCreateByUserRoleAndEntity(
                     req.body,
-                    req.userDetails.userToken
+                    req.rspObj.userToken
                 );
 
                 return resolve(observations);
@@ -2065,7 +2082,7 @@ module.exports = class Observations extends Abstract {
 
                 let observations = await observationsHelper.entities(
                     req.userDetails.userId,
-                    req.userDetails.userToken,
+                    req.rspObj.userToken,
                     req.params._id ? req.params._id : "",
                     req.query.solutionId, 
                     req.body
