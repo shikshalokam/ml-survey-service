@@ -532,40 +532,37 @@ module.exports = class Observations extends Abstract {
     }
 
     /**
-     * @api {get} /assessment/api/v1/observations/searchEntities/:observationId?search=:searchText&limit=1&page=1 Search Entities
-     * @apiVersion 1.0.0
+     * @api {get} /assessment/api/v1/observations/searchEntities?solutionId=:solutionId&search=:searchText&limit=1&page=1&parentEntityId=:parentEntityId Search Entities based on observationId or solutionId
+     * @apiVersion 2.0.0
      * @apiName Search Entities
      * @apiGroup Observations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /assessment/api/v1/observations/searchEntities/5d1a002d2dfd8135bc8e1615?search=&limit=100&page=1
+     * @apiSampleRequest /assessment/api/v1/observations/searchEntities?observationId=5d4bdcab44277a08145d7258&search=a&limit=10&page=1&parentEntityId=5beaa888af0065f0e0a10515
+     * @apiParamExample {json} Response:
+     "result": [
+        {
+            "data": [
+                {
+                    "_id": "5bfe53ea1d0c350d61b78d0f",
+                    "name": "Shri Shiv Middle School, Shiv Kutti, Teliwara, Delhi",
+                    "externalId": "1208138",
+                    "addressLine1": "Shiv Kutti, Teliwara",
+                    "addressLine2": ""
+                }
+            ],
+            "count": 1
+        }
+    ]
      * @apiUse successBody
      * @apiUse errorBody
-     * @apiParamExample {json} Response:
-        {
-            "message": "Entities fetched successfully",
-            "status": 200,
-            "result": [
-                {
-                    "data": [
-                        {
-                            "_id": "5c5b1581e7e84d1d1be9175f",
-                            "name": "Vijaya krishna.T",
-                            "selected": false
-                        }
-                    ],
-                    "count": 435
-                }
-            ]
-        }
      */
 
-
-    /**
+       /**
     * Search entities in observation.
     * @method
     * @name searchEntities
     * @param {Object} req -request Data.
-    * @param {String} req.params._id -observation id. 
+    * @param {String} req.query.observationId -observation id. 
     * @returns {JSON} List of entities in observations.
     */
 
@@ -579,27 +576,132 @@ module.exports = class Observations extends Abstract {
                     result: {}
                 };
 
-                let observationDocument = await database.models.observations.findOne(
-                    {
-                        _id: req.params._id,
-                        createdBy: req.userDetails.userId,
-                        status: { $ne: "inactive" }
-                    },
-                    {
-                        entityTypeId: 1,
-                        entities: 1
-                    }
-                ).lean();
+                let userId = req.userDetails.userId;
+                let result;
 
-                if (!observationDocument) {
-                    throw { 
-                        status: httpStatusCode.bad_request.status, 
-                        message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND 
+                let projection = [];
+
+                if ( req.query.observationId ) {
+                    let findObject = {};
+                    findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_OBJECT_ID] = req.query.observationId;
+                    findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_CREATED_BY] = userId;
+
+                    projection.push(
+                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE_ID, 
+                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITIES, 
+                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE
+                    );
+
+                    let observationDocument = 
+                    await observationsHelper.observationDocuments(findObject, projection);
+                    result = observationDocument[0];
+                }
+
+                if ( req.query.solutionId ) {
+                    let findQuery = {
+                        _id: ObjectId(req.query.solutionId)
+                    };
+
+                    projection.push(
+                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE_ID, 
+                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE
+                    );
+
+                    let solutionDocument = await solutionsHelper.solutionDocuments(findQuery, projection);
+                    result = _.merge(solutionDocument[0]);
+                }
+
+                let userAllowedEntities = new Array;
+
+                // try {
+                //     userAllowedEntities = await userExtensionHelper.getUserEntitiyUniverseByEntityType(userId, result.entityType);
+                // } catch (error) {
+                //     userAllowedEntities = [];
+                // }
+
+                let messageData = messageConstants.apiResponses.ENTITY_FETCHED;
+
+                if( !(userAllowedEntities.length > 0) && req.query.parentEntityId ) {
+
+                    let entityType = entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP+"."+result.entityType;
+
+                    let entitiesData = await entitiesHelper.entityDocuments({
+                        _id:req.query.parentEntityId
+                      }, [
+                        entityType,
+                        "entityType",
+                        "metaInformation.name",
+                        "metaInformation.addressLine1",
+                        "metaInformation.addressLine2",
+                        "metaInformation.externalId",
+                        "metaInformation.districtName"
+                      ]);
+
+                    if( entitiesData.length > 0 && entitiesData[0].groups && entitiesData[0].groups[result.entityType]  ) {
+                        userAllowedEntities = 
+                        entitiesData[0][entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP][result.entityType];
+                    } else {
+
+                        response.result = [];
+                        if( entitiesData[0] && entitiesData[0].entityType === result.entityType ) {
+
+                            if( entitiesData[0].metaInformation ) {
+                                
+                                if( entitiesData[0].metaInformation.name ) {
+                                    entitiesData[0]["name"] = entitiesData[0].metaInformation.name;
+                                }
+
+                                if( entitiesData[0].metaInformation.externalId ) {
+                                    entitiesData[0]["externalId"] = entitiesData[0].metaInformation.externalId;
+                                }
+
+                                if( entitiesData[0].metaInformation.addressLine1 ) {
+                                    entitiesData[0]["addressLine1"] = entitiesData[0].metaInformation.addressLine1;
+                                }
+
+                                if( entitiesData[0].metaInformation.addressLine2 ) {
+                                    entitiesData[0]["addressLine2"] = entitiesData[0].metaInformation.addressLine2;
+                                }
+
+                                if( entitiesData[0].metaInformation.districtName ) {
+                                    entitiesData[0]["districtName"] = entitiesData[0].metaInformation.districtName;
+                                }
+
+                                entitiesData[0] = _.pick(
+                                    entitiesData[0],
+                                    ["_id","name","externalId","addressLine1","addressLine2","districtName"]
+                                )
+                            }
+
+                            let data = 
+                            await entitiesHelper.observationSearchEntitiesResponse(
+                                entitiesData,
+                                result.entities
+                            );
+
+                            response["message"] = messageData;
+
+                            response.result.push({
+                                "count" : 1,
+                                "data" : data
+                            });
+
+                        } else {
+                            response["message"] = 
+                            messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                            
+                            response.result.push({
+                                "count":0,
+                                "data" : []
+                            });
+                        }  
+
+                        return resolve(response);
                     }
                 }
 
                 let userAclInformation = await userExtensionHelper.userAccessControlList(
-                    req.userDetails.userId
+                    userId
                 );
 
                 let tags = [];
@@ -610,34 +712,30 @@ module.exports = class Observations extends Abstract {
                 ) {
                     Object.values(userAclInformation.acl).forEach(acl=>{
                         tags = tags.concat(acl);
-                    });
+                    })
                 }
 
-                let entityDocuments = 
-                await entitiesHelper.search(
-                    observationDocument.entityTypeId, 
+                let entityDocuments = await entitiesHelper.search(
+                    result.entityTypeId, 
                     req.searchText, 
                     req.pageSize, 
-                    req.pageNo,
+                    req.pageNo, 
+                    
+                    userAllowedEntities && userAllowedEntities.length > 0 ? 
+                    userAllowedEntities : 
                     false,
                     tags
                 );
 
-                let observationEntityIds = observationDocument.entities.map(entity => entity.toString());
+                let data = 
+                await entitiesHelper.observationSearchEntitiesResponse(
+                    entityDocuments[0].data,
+                    result.entities
+                )
 
-                entityDocuments[0].data.forEach(eachMetaData => {
-                    eachMetaData.selected = (observationEntityIds.includes(eachMetaData._id.toString())) ? true : false;
-                    if(eachMetaData.districtName && eachMetaData.districtName != "") {
-                        eachMetaData.name += ", "+eachMetaData.districtName;
-                    }
+                entityDocuments[0].data = data;
 
-                    if( eachMetaData.externalId && eachMetaData.externalId !== "" ) {
-                        eachMetaData.name += ", "+eachMetaData.externalId;
-                    }
-                })
-
-                let messageData = messageConstants.apiResponses.ENTITY_FETCHED;
-                if (!entityDocuments[0].count) {
+                if ( !(entityDocuments[0].count) ) {
                     entityDocuments[0].count = 0;
                     messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
                 }
@@ -645,7 +743,6 @@ module.exports = class Observations extends Abstract {
                 response["message"] = messageData;
 
                 return resolve(response);
-
 
             } catch (error) {
                 return reject({
@@ -661,26 +758,208 @@ module.exports = class Observations extends Abstract {
 
 
     /**
-     * @api {get} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber&ecmMethod=ecmMethod Assessments
-     * @apiVersion 1.0.0
+     * @api {post} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber&ecmMethod=ecmMethod Assessments
+     * @apiVersion 2.0.0
      * @apiName Assessments
      * @apiGroup Observations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiParam {String} entityId Entity ID.
      * @apiParam {Int} submissionNumber Submission Number.
      * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
-     * @apiUse successBody
-     * @apiUse errorBody
-     */
+     * @apiParamExample {json} Request:
+     * {
+     *  "role" : "HM",
+        "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+        "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+        "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
+     }
+     * @apiParamExample {json} Response:
+     * {
+        "evidences": [
+            {
+                "code": "BL",
+                "sections": [
+                    {
+                        "code": "SQ",
+                        "questions": [
+                            {
+                                "_id": "",
+                                "question": "",
+                                "options": "",
+                                "children": "",
+                                "questionGroup": "",
+                                "fileName": "",
+                                "instanceQuestions": "",
+                                "deleted": "",
+                                "tip": "",
+                                "externalId": "",
+                                "visibleIf": "",
+                                "file": "",
+                                "responseType": "pageQuestions",
+                                "validation": "",
+                                "page": "p1",
+                                "showRemarks": "",
+                                "isCompleted": "",
+                                "remarks": "",
+                                "value": "",
+                                "canBeNotApplicable": "",
+                                "usedForScoring": "",
+                                "modeOfCollection": "",
+                                "questionType": "",
+                                "accessibility": "",
+                                "updatedAt": "",
+                                "createdAt": "",
+                                "__v": "",
+                                "evidenceMethod": "",
+                                "payload": "",
+                                "startTime": "",
+                                "endTime": "",
+                                "pageQuestions": [
+                                    {
+                                        "_id": "5be4e40e9a14ba4b5038dcfb",
+                                        "question": [
+                                            "Are all empty rooms and terrace areas locked securely? ",
+                                            ""
+                                        ],
+                                        "options": [
+                                            {
+                                                "value": "R1",
+                                                "label": "None"
+                                            },
+                                            {
+                                                "value": "R2",
+                                                "label": "Some"
+                                            },
+                                            {
+                                                "value": "R3",
+                                                "label": "Most"
+                                            },
+                                            {
+                                                "value": "R4",
+                                                "label": "All"
+                                            }
+                                        ],
+                                        "children": [],
+                                        "questionGroup": [
+                                            "A1"
+                                        ],
+                                        "fileName": [],
+                                        "instanceQuestions": [],
+                                        "deleted": false,
+                                        "tip": "",
+                                        "externalId": "LW/SS/22",
+                                        "visibleIf": "",
+                                        "file": "",
+                                        "responseType": "radio",
+                                        "validation": {
+                                            "required": true
+                                        },
+                                        "page": "p1",
+                                        "showRemarks": false,
+                                        "isCompleted": false,
+                                        "remarks": "",
+                                        "value": "",
+                                        "canBeNotApplicable": "false",
+                                        "usedForScoring": "",
+                                        "modeOfCollection": "onfield",
+                                        "questionType": "auto",
+                                        "accessibility": "local",
+                                        "updatedAt": "2018-11-09T01:34:06.839Z",
+                                        "createdAt": "2018-11-09T01:34:06.839Z",
+                                        "__v": 0,
+                                        "evidenceMethod": "LW",
+                                        "payload": {
+                                            "criteriaId": "5be1616549e0121f01b2180c",
+                                            "responseType": "radio",
+                                            "evidenceMethod": "LW",
+                                            "rubricLevel": ""
+                                        },
+                                        "startTime": "",
+                                        "endTime": ""
+                                    },
+                                    {
+                                        "_id": "5be445459a14ba4b5038dce8",
+                                        "question": [
+                                            "Is the list of important phone numbers displayed? ",
+                                            ""
+                                        ],
+                                        "options": [
+                                            {
+                                                "value": "R1",
+                                                "label": "Yes"
+                                            },
+                                            {
+                                                "value": "R2",
+                                                "label": "No"
+                                            }
+                                        ],
+                                        "children": [],
+                                        "questionGroup": [
+                                            "A1"
+                                        ],
+                                        "fileName": [],
+                                        "instanceQuestions": [],
+                                        "deleted": false,
+                                        "tip": "Look for Fire, Ambulance, Childline, Police, Child Welfare Committee, Hospital/ Doctor  ",
+                                        "externalId": "LW/SS/17",
+                                        "visibleIf": "",
+                                        "file": {
+                                            "required": true,
+                                            "type": [
+                                                "image/jpeg"
+                                            ],
+                                            "minCount": 1,
+                                            "maxCount": 0,
+                                            "caption": false
+                                        },
+                                        "responseType": "radio",
+                                        "validation": {
+                                            "required": true
+                                        },
+                                        "showRemarks": false,
+                                        "isCompleted": false,
+                                        "remarks": "",
+                                        "value": "",
+                                        "page": "p1",
+                                        "canBeNotApplicable": "false",
+                                        "usedForScoring": "",
+                                        "modeOfCollection": "onfield",
+                                        "questionType": "auto",
+                                        "accessibility": "local",
+                                        "updatedAt": "2018-11-08T14:16:37.565Z",
+                                        "createdAt": "2018-11-08T14:16:37.565Z",
+                                        "__v": 0,
+                                        "evidenceMethod": "LW",
+                                        "payload": {
+                                            "criteriaId": "5be15e0749e0121f01b21809",
+                                            "responseType": "radio",
+                                            "evidenceMethod": "LW",
+                                            "rubricLevel": ""
+                                        },
+                                        "startTime": "",
+                                        "endTime": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
 
-     /**
+        /**
     * Assessment for observation.
     * @method
     * @name assessment
     * @param {Object} req -request Data.
     * @param {String} req.params._id -observation id. 
     * @param {String} req.query.entityId - entity id.
-    * @param {String} req.query.submissionNumber - submission number 
+    * @param {String} req.query.submissionNumber - submission number
+    * @param {String} req.userDetails.allRoles -user roles.
     * @returns {JSON} - Observation Assessment details.
     */
 
@@ -691,20 +970,23 @@ module.exports = class Observations extends Abstract {
             try {
 
                 let response = {
-                    message : messageConstants.apiResponses.ASSESSMENT_FETCHED,
-                    result : {}
+                    message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
+                    result: {}
                 };
 
-                let observationDocument = await database.models.observations.findOne({ _id: req.params._id, createdBy: req.userDetails.userId, status: { $ne: "inactive" }, entities: ObjectId(req.query.entityId) }).lean();
+                let observationDocument = await database.models.observations.findOne({ 
+                    _id: req.params._id, 
+                     createdBy: req.userDetails.userId,
+                     status: {$ne:"inactive"}, 
+                     entities: ObjectId(req.query.entityId) }).lean();
 
                 if (!observationDocument) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
-                        message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND 
+                        message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-
-
+               
                 let entityQueryObject = { _id: req.query.entityId, entityType: observationDocument.entityType };
                 let entityDocument = await database.models.entities.findOne(
                     entityQueryObject,
@@ -712,7 +994,7 @@ module.exports = class Observations extends Abstract {
                         metaInformation: 1,
                         entityTypeId: 1,
                         entityType: 1,
-                        registryDetails : 1
+                        registryDetails: 1
                     }
                 ).lean();
 
@@ -745,11 +1027,12 @@ module.exports = class Observations extends Abstract {
                 if (!solutionDocument) {
                     let responseMessage = messageConstants.apiResponses.SOLUTION_NOT_FOUND;
                     return resolve({ 
-                        status:  httpStatusCode.bad_request.status, 
+                        status: httpStatusCode.bad_request.status, 
                         message: responseMessage 
                     });
                 }
 
+                
                 if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
                     if(!solutionDocument.evidenceMethods[req.query.ecmMethod] ) {
                         return resolve({ 
@@ -758,7 +1041,7 @@ module.exports = class Observations extends Abstract {
                         });
                     }
                 }
-                
+
                 let programQueryObject = {
                     _id: observationDocument.programId,
                     status: "active",
@@ -774,7 +1057,7 @@ module.exports = class Observations extends Abstract {
                         "isAPrivateProgram"
                     ]
                 );
-                
+
                 if ( !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
@@ -782,7 +1065,7 @@ module.exports = class Observations extends Abstract {
                 /*
                 <- Currently not required for bodh-2:10 as roles is not given in user 
                 */
-               
+
                 // let currentUserAssessmentRole = await assessmentsHelper.getUserRole(req.userDetails.allRoles);
                 // let profileFieldAccessibility = (solutionDocument.roles && solutionDocument.roles[currentUserAssessmentRole] && solutionDocument.roles[currentUserAssessmentRole].acl && solutionDocument.roles[currentUserAssessmentRole].acl.entityProfile) ? solutionDocument.roles[currentUserAssessmentRole].acl.entityProfile : "";
 
@@ -831,6 +1114,7 @@ module.exports = class Observations extends Abstract {
                     // form: form
                 };
 
+
                 let solutionDocumentFieldList = await observationsHelper.solutionDocumentFieldListInResponse()
 
                 response.result.solution = await _.pick(solutionDocument, solutionDocumentFieldList);
@@ -852,9 +1136,9 @@ module.exports = class Observations extends Abstract {
                     frameworkExternalId: solutionDocument.frameworkExternalId,
                     entityTypeId: solutionDocument.entityTypeId,
                     entityType: solutionDocument.entityType,
-                    observationId: observationDocument._id,
                     scoringSystem: solutionDocument.scoringSystem,
                     isRubricDriven: solutionDocument.isRubricDriven,
+                    observationId: observationDocument._id,
                     observationInformation: {
                         ..._.omit(observationDocument, ["_id", "entities", "deleted", "__v"])
                     },
@@ -868,12 +1152,27 @@ module.exports = class Observations extends Abstract {
                     submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
                 }
 
+                if (req.body && req.body.role) {
+                    
+                    let roleDocument = await userRolesHelper.list
+                    ( { code : req.body.role },
+                      [ "_id"]
+                    )
+
+                    if (roleDocument[0]._id) {
+                        req.body.roleId = roleDocument[0]._id; 
+                    }
+
+                    submissionDocument.userRoleInformation = req.body;
+                }
+
                 if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
                     submissionDocument["project"] = solutionDocument.project;
                 }
-
+                
                 let assessment = {};
+
                 assessment.name = solutionDocument.name;
                 assessment.description = solutionDocument.description;
                 assessment.externalId = solutionDocument.externalId;
@@ -905,14 +1204,10 @@ module.exports = class Observations extends Abstract {
                 let submissionDocumentEvidences = {};
                 let submissionDocumentCriterias = [];
                 Object.keys(solutionDocument.evidenceMethods).forEach(solutionEcm => {
-                    if(!(solutionDocument.evidenceMethods[solutionEcm].isActive === false)) {
-                        solutionDocument.evidenceMethods[solutionEcm].startTime = "";
-                        solutionDocument.evidenceMethods[solutionEcm].endTime = "";
-                        solutionDocument.evidenceMethods[solutionEcm].isSubmitted = false;
-                        solutionDocument.evidenceMethods[solutionEcm].submissions = new Array;
-                    } else {
-                        delete solutionDocument.evidenceMethods[solutionEcm];
-                    }
+                    solutionDocument.evidenceMethods[solutionEcm].startTime = "";
+                    solutionDocument.evidenceMethods[solutionEcm].endTime = "";
+                    solutionDocument.evidenceMethods[solutionEcm].isSubmitted = false;
+                    solutionDocument.evidenceMethods[solutionEcm].submissions = new Array;
                 })
                 submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
@@ -928,14 +1223,14 @@ module.exports = class Observations extends Abstract {
 
                     criteria.evidences.forEach(evidenceMethod => {
 
-                        if (submissionDocumentEvidences[evidenceMethod.code] && evidenceMethod.code) {
+                        if (evidenceMethod.code) {
 
                             if (!evidenceMethodArray[evidenceMethod.code]) {
 
                                 evidenceMethod.sections.forEach(ecmSection => {
                                     ecmSection.name = solutionDocument.sections[ecmSection.code];
                                 })
-                                _.merge(evidenceMethod, submissionDocumentEvidences[evidenceMethod.code])
+                                _.merge(evidenceMethod, submissionDocumentEvidences[evidenceMethod.code]);
                                 evidenceMethodArray[evidenceMethod.code] = evidenceMethod;
 
                             } else {
@@ -979,6 +1274,7 @@ module.exports = class Observations extends Abstract {
                 submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
                 submissionDocument.criteria = submissionDocumentCriterias;
                 submissionDocument.submissionNumber = submissionNumber;
+            
 
                 let submissionDoc = await observationsHelper.findSubmission(
                     submissionDocument
@@ -994,7 +1290,7 @@ module.exports = class Observations extends Abstract {
                     }
                 }
 
-                const parsedAssessment = await assessmentsHelper.parseQuestions(
+                const parsedAssessment = await assessmentsHelper.parseQuestionsV2(
                     Object.values(evidenceMethodArray),
                     entityDocumentQuestionGroup,
                     submissionDoc.result.evidences,
