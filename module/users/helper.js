@@ -654,8 +654,6 @@ module.exports = class UserHelper {
     return new Promise(async (resolve, reject) => {
         try {
 
-            console.log(userId)
-
             let userPrivateProgram = "";
             let dateFormat = gen.utils.epochTime();
 
