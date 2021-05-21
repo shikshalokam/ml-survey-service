@@ -11,6 +11,7 @@ const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const shikshalokamGenericHelper = require(ROOT_PATH + "/generics/helpers/shikshalokam");
 const elasticSearchData = require(ROOT_PATH + "/generics/helpers/elasticSearch");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
 /**
     * UserExtensionHelper
@@ -218,8 +219,9 @@ module.exports = class UserExtensionHelper {
                 }, {
                         code: 1,
                         title: 1,
-                        entityTypes: 1
-                    });
+                        entityTypes: 1,
+                        isAPlatformRole: 1
+                });
 
                 let userRoleMap = {};
                 let userRoleAllowedEntityTypes = {};
@@ -228,7 +230,8 @@ module.exports = class UserExtensionHelper {
                     userRoleMap[userRole.code] = {
                         roleId: userRole._id,
                         code: userRole.code,
-                        entities: []
+                        entities: [],
+                        isAPlatformRole: userRole.isAPlatformRole
                     };
                     userRoleAllowedEntityTypes[userRole.code] = new Array;
                     if (userRole.entityTypes && userRole.entityTypes.length > 0) {
@@ -237,13 +240,6 @@ module.exports = class UserExtensionHelper {
                         })
                     }
                 })
-
-                let entityOperation = {
-                    "ADD": 1,
-                    "APPEND": 1,
-                    "REMOVE": 1,
-                    "OVERRIDE": 1
-                };
 
                 let userToKeycloakIdMap = {};
                 let userKeycloakId = "";
@@ -267,32 +263,25 @@ module.exports = class UserExtensionHelper {
 
                     try {
 
-                        if (!userRoleMap[userRole.role]) {
-                            throw messageConstants.apiResponses.INVALID_ROLE_CODE;
+                        if (userRole.role && !userRoleMap[userRole.role]) {
+                            userRole["_SYSTEM_ID"] = "";
+                            userRole.status = messageConstants.apiResponses.INVALID_ROLE_CODE;
+                            userRolesUploadedData.push(userRole);
+                            continue;
                         }
 
-                        if (!entityOperation[userRole.entityOperation]) {
-                            throw messageConstants.apiResponses.INVALID_ENTITY_OPERATION;
-                        }
-
-                        let entityQueryObject = {
-                            _id: userRole.entity
-                        };
-
-                        if (userRoleAllowedEntityTypes[userRole.role] && userRoleAllowedEntityTypes[userRole.role].length > 0) {
-                            entityQueryObject.entityTypeId = {
-                                $in: userRoleAllowedEntityTypes[userRole.role]
-                            };
-                        }
-                        let existingEntity = await database.models.entities.findOne(
-                            entityQueryObject,
-                            {
-                                _id: 1
-                            }
-                        );
-
-                        if (!existingEntity || !existingEntity._id) {
-                            throw messageConstants.apiResponses.INVALID_ENTITY_ID;
+                        if (
+                            userRole.platform_role && 
+                            (
+                                !userRoleMap[userRole.platform_role] ||
+                                !userRoleMap[userRole.platform_role].isAPlatformRole
+                            )
+                        ) {
+                            userRole["_SYSTEM_ID"] = "";
+                            userRole.status = messageConstants.apiResponses.INVALID_ROLE_CODE;
+                            delete userRoleMap[userRole.platform_role].isAPlatformRole;
+                            userRolesUploadedData.push(userRole);
+                            continue;
                         }
 
                         if (userToKeycloakIdMap[userRole.user]) {
@@ -316,87 +305,90 @@ module.exports = class UserExtensionHelper {
                             }
                         }
 
-                        let existingUserRole = await database.models.userExtension.findOne(
-                            {
-                                userId: userKeycloakId
-                            },
-                            {
-                                roles: 1
+                        if (userRole.entity) {
+                            
+                            let entityQueryObject = {
+                                _id: userRole.entity
+                            };
+
+                            if (userRoleAllowedEntityTypes[userRole.role] && userRoleAllowedEntityTypes[userRole.role].length > 0) {
+                                entityQueryObject.entityTypeId = {
+                                    $in: userRoleAllowedEntityTypes[userRole.role]
+                                };
                             }
+                        
+                            const entityDetails = await entitiesHelper.entityDocuments(
+                                entityQueryObject,
+                                ["_id"]
+                            );
+
+                            if (!entityDetails.length > 0) {
+                                userRole["_SYSTEM_ID"] = "";
+                                userRole.status = messageConstants.apiResponses.INVALID_ENTITY_ID;
+                                userRolesUploadedData.push(userRole);
+                                continue;
+                            }
+
+                        }
+
+                        let programIds = [];
+
+                        if (userRole.programs && userRole.programs.length > 0) {
+                            const programDocuments = 
+                            await programsHelper.list({
+                                externalId : { $in : userRole.programs } 
+                            },["_id"]);
+
+                            if ( !programDocuments.length > 0 ) {
+                                userRole["_SYSTEM_ID"] = "";
+                                userRole.status = messageConstants.apiResponses.PROGRAM_NOT_FOUND;
+                                userRolesUploadedData.push(userRole);
+                                continue;
+                            }
+
+                            programIds = programDocuments.map(program => {
+                                return program._id;
+                            });
+                        }
+
+                        let existingUser = await this.userExtensionDocuments(
+                            {userId: userKeycloakId},
+                            ["roles","platformRoles"]
                         );
 
-                        let user;
+                        let user = "";
+                        existingUser = existingUser[0];
+                        
+                        if (!existingUser) {
 
-                        if (existingUserRole && existingUserRole._id) {
+                            let userInformation = {
+                                "userId": userKeycloakId,
+                                "externalId": userRole.user,
+                                "status": "active",
+                                "updatedBy": userDetails.id,
+                                "createdBy": userDetails.id
+                            };
 
-                            let userRoleToUpdate;
 
-                            if (existingUserRole.roles && existingUserRole.roles.length > 0) {
-                                userRoleToUpdate = _.findIndex(existingUserRole.roles, { 'code': userRole.role });
+                            if (userRole.entityOperation) {
+                                userInformation["roles"] = [{
+                                    roleId: userRoleMap[userRole.role].roleId,
+                                    code: userRoleMap[userRole.role].code,
+                                    entities:  [ObjectId(userRole.entity)],
+                                    acl: userRole.acl
+                                }];
                             }
 
-                            if (!(userRoleToUpdate >= 0)) {
-                                userRoleToUpdate = existingUserRole.roles.length;
-                                userRoleMap[userRole.role].entities = new Array;
-                                existingUserRole.roles.push(userRoleMap[userRole.role]);
+                            if (userRole.programOperation) {
+                                userInformation["platformRoles"] = [{
+                                    roleId: userRoleMap[userRole.platform_role].roleId,
+                                    code: userRoleMap[userRole.platform_role].code,
+                                    programs: programIds
+                                }];
                             }
-
-                            existingUserRole.roles[userRoleToUpdate].entities = 
-                            existingUserRole.roles[userRoleToUpdate].entities.map(
-                                eachEntity => eachEntity.toString()
-                            );
-
-                            if (userRole.entityOperation == "OVERRIDE") {
-
-                                existingUserRole.roles[userRoleToUpdate].entities = [userRole.entity];
-                                existingUserRole.roles[userRoleToUpdate].acl = userRole.acl;
-
-                            } else if (userRole.entityOperation == "APPEND" || userRole.entityOperation == "ADD") {
-
-                                existingUserRole.roles[userRoleToUpdate].entities.push(userRole.entity);
-                                existingUserRole.roles[userRoleToUpdate].entities = _.uniq(existingUserRole.roles[userRoleToUpdate].entities);
-
-                            } else if (userRole.entityOperation == "REMOVE") {
-
-                                _.pull(existingUserRole.roles[userRoleToUpdate].entities, userRole.entity);
-                                
-                                removeUserFromEntity = true;
-                            }
-
-                            existingUserRole.roles[userRoleToUpdate].entities = existingUserRole.roles[userRoleToUpdate].entities.map(eachEntity => ObjectId(eachEntity));
-
-                            user =
-                            await database.models.userExtension.findOneAndUpdate(
-                                {
-                                    _id: existingUserRole._id
-                                },
-                                _.merge({
-                                    "roles": existingUserRole.roles,
-                                    "updatedBy": userDetails.id
-                                }, _.omit(userRole, ["externalId", "userId", "createdBy", "updatedBy", "createdAt", "updatedAt"])),
-                                {
-                                    new : true,
-                                    returnNewDocument : true
-                                }
-                            );
-
-                            userRole["_SYSTEM_ID"] = existingUserRole._id;
-                            userRole.status = "Success";
-
-                        } else {
-                            let roles = [userRoleMap[userRole.role]];
-                            roles[0].entities = [ObjectId(userRole.entity)];
-                            roles[0].acl = userRole.acl
 
                             user = await database.models.userExtension.create(
-                                _.merge({
-                                    "roles": roles,
-                                    "userId": userKeycloakId,
-                                    "externalId": userRole.user,
-                                    "status": "active",
-                                    "updatedBy": userDetails.id,
-                                    "createdBy": userDetails.id
-                                }, _.omit(userRole, ["externalId", "userId", "createdBy", "updatedBy", "createdAt", "updatedAt", "status", "roles"]))
+                                userInformation
                             );
 
                             if (user._id) {
@@ -406,14 +398,112 @@ module.exports = class UserExtensionHelper {
                                 userRole["_SYSTEM_ID"] = "";
                                 userRole.status = "Failed to create the user role.";
                             }
+                        } else {
 
+                            let updateQuery = {};
+
+                            if (userRole.entityOperation) {
+                                
+                                let userRoleToUpdate;
+
+                                if (existingUser.roles && existingUser.roles.length > 0) {
+                                    userRoleToUpdate = _.findIndex(existingUser.roles, { 'code': userRole.role });
+                                }
+
+                                if (!(userRoleToUpdate >= 0)) {
+                                    userRoleToUpdate = existingUser.roles.length;
+                                    userRoleMap[userRole.role].entities = new Array;
+                                    existingUser.roles.push(userRoleMap[userRole.role]);
+                                }
+
+                                existingUser.roles[userRoleToUpdate].entities = 
+                                existingUser.roles[userRoleToUpdate].entities.map(
+                                    eachEntity => eachEntity.toString()
+                                );
+
+                                if (userRole.entityOperation == "OVERRIDE") {
+
+                                    existingUser.roles[userRoleToUpdate].entities = [userRole.entity];
+                                    existingUser.roles[userRoleToUpdate].acl = userRole.acl;
+
+                                } else if (userRole.entityOperation == "APPEND" || userRole.entityOperation == "ADD") {
+
+                                    existingUser.roles[userRoleToUpdate].entities.push(userRole.entity);
+                                    existingUser.roles[userRoleToUpdate].entities = _.uniq(existingUser.roles[userRoleToUpdate].entities);
+
+                                } else if (userRole.entityOperation == "REMOVE") {
+
+                                    _.pull(existingUser.roles[userRoleToUpdate].entities, userRole.entity);
+                                    removeUserFromEntity = true;
+                                }
+
+                                existingUser.roles[userRoleToUpdate].entities = existingUser.roles[userRoleToUpdate].entities.map(eachEntity => ObjectId(eachEntity));
+                                updateQuery["roles"] = existingUser.roles;
+                            } 
+                            
+                            if (userRole.programOperation) {
+
+                                let userPlatformRoleToUpdate;
+
+                                if (existingUser.platformRoles && existingUser.platformRoles.length > 0) {
+                                    userPlatformRoleToUpdate = _.findIndex(existingUser.platformRoles, { 'code': userRole.platform_role });
+                                }
+
+                                if (!(userPlatformRoleToUpdate >= 0)) {
+                                    userPlatformRoleToUpdate = existingUser.platformRoles.length;
+                                    userPlatformRoleToUpdate[userRole.platform_role].programs = new Array;
+                                    existingUser.platformRoles.push(userRoleMap[userRole.platform_role]);
+                                }
+
+                                existingUser.platformRoles[userPlatformRoleToUpdate].programs = 
+                                existingUser.platformRoles[userPlatformRoleToUpdate].programs.map(
+                                    program => program.toString()
+                                );
+                                
+                                if (userRole.programOperation == "OVERRIDE") {
+                                    existingUser.platformRoles[userPlatformRoleToUpdate].programs = programIds;
+                                } else if (userRole.programOperation == "APPEND" || userRole.programOperation == "ADD") {
+                                    
+                                    existingUser.platformRoles[userPlatformRoleToUpdate].programs =
+                                    existingUser.platformRoles[userPlatformRoleToUpdate].programs.concat(programIds);
+                                    existingUser.platformRoles[userPlatformRoleToUpdate].programs = 
+                                    _.uniq(existingUser.platformRoles[userPlatformRoleToUpdate].programs);
+
+                                } else if (userRole.programOperation == "REMOVE") {
+
+                                    if (programIds.length > 0 ) {
+                                        programIds.forEach(programId => {
+                                            _.pull(existingUser.platformRoles[userPlatformRoleToUpdate].programs,programId.toString());
+                                        })
+                                    }
+                                }
+
+                                existingUser.platformRoles[userPlatformRoleToUpdate].programs = existingUser.platformRoles[userPlatformRoleToUpdate].programs.map(eachProgram => ObjectId(eachProgram));
+
+                                updateQuery["platformRoles"] = existingUser.platformRoles;
+                            }
+
+                            user =
+                            await database.models.userExtension.findOneAndUpdate(
+                                {
+                                    _id: existingUser._id
+                                },
+                                updateQuery,
+                                {
+                                    new : true,
+                                    returnNewDocument : true
+                                }
+                            );
+
+                            userRole["_SYSTEM_ID"] = existingUser._id;
+                            userRole.status = "Success";
                         }
 
                         let entityObject = {};
 
-                        if (removeUserFromEntity){
-                           entityObject.entityId = userRole.entity;
-                           entityObject.role = userRole.role;
+                        if (removeUserFromEntity) {
+                            entityObject.entityId = userRole.entity;
+                            entityObject.role = userRole.role;
                         }
                       
                         await this.pushUserToElasticSearch(user._doc, entityObject);

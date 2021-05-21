@@ -1744,9 +1744,7 @@ module.exports = class SurveysHelper {
                 success : false
             };
 
-            surveyReportPage = gen.utils.convertStringToBoolean(surveyReportPage);
-
-            if ( surveyReportPage === "" || surveyReportPage ) {
+            if ( surveyReportPage === "" || gen.utils.convertStringToBoolean(surveyReportPage) ) {
                 
                 surveySolutions = await surveySubmissionsHelper.surveySolutions(
                     userId,

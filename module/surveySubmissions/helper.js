@@ -433,7 +433,7 @@ module.exports = class SurveySubmissionsHelper {
 
                 if (userId == "") {
                     throw new Error(messageConstants.apiResponses.USER_ID_REQUIRED_CHECK)
-                }
+                }   
 
                 let result = {
                     data: [],
@@ -505,8 +505,11 @@ module.exports = class SurveySubmissionsHelper {
                     surveySubmissions[0].data.forEach( async surveySubmission => {
 
                         let submissionStatus = surveySubmission.status;
-                        if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
-                             surveySubmission.status = messageConstants.common.EXPIRED
+
+                        if (surveyReportPage === "") {
+                            if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
+                                surveySubmission.status = messageConstants.common.EXPIRED
+                           }
                         }
                         
                         surveySubmission.name = surveySubmission.surveyInformation.name;
