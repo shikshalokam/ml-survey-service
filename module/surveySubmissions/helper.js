@@ -7,7 +7,6 @@
 
 // Dependencies
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
-const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
 /**
@@ -126,7 +125,8 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                slackClient.kafkaErrorAlert(errorObject);
+
+                console.log(errorObject);
             }
 
             return resolve(kafkaMessage);
@@ -182,7 +182,8 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                slackClient.kafkaErrorAlert(errorObject);
+
+                console.log(errorObject);
             }
 
             return resolve(kafkaMessage);
@@ -433,7 +434,7 @@ module.exports = class SurveySubmissionsHelper {
 
                 if (userId == "") {
                     throw new Error(messageConstants.apiResponses.USER_ID_REQUIRED_CHECK)
-                }   
+                }
 
                 let result = {
                     data: [],

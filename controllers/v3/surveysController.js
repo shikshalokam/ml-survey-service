@@ -355,14 +355,14 @@ module.exports = class Surveys extends v2Survey {
                     surveyId,
                     req.query.solutionId,
                     req.userDetails.userId,
-                    req.rspObj.userToken
+                    req.userDetails.userToken
                 );
             } else {
 
                 surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,
                     req.userDetails.userId,
-                    req.rspObj.userToken,
+                    req.userDetails.userToken,
                     req.body,
                     messageConstants.common.VERSION_3
                 );
