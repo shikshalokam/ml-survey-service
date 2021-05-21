@@ -11,7 +11,6 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper");
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
-const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
@@ -664,7 +663,7 @@ module.exports = class SurveysHelper {
                             message: `Failed to push notification for survey ${surveyData.surveyId.toString()} in the solution ${surveyData.solutionName}`
                         }
                     }
-                    slackClient.kafkaErrorAlert(errorObject)
+                    console.log(errorObject);
                     throw new Error(`Failed to push notification for survey ${surveyData.surveyId.toString()} in the solution ${surveyData.solutionName}`);
                 }
 
@@ -1744,9 +1743,7 @@ module.exports = class SurveysHelper {
                 success : false
             };
 
-            surveyReportPage = gen.utils.convertStringToBoolean(surveyReportPage);
-
-            if ( surveyReportPage === "" || surveyReportPage ) {
+            if ( surveyReportPage === "" || gen.utils.convertStringToBoolean(surveyReportPage) ) {
                 
                 surveySolutions = await surveySubmissionsHelper.surveySolutions(
                     userId,

@@ -268,7 +268,7 @@ module.exports = class Observations extends Abstract {
                     req.query.solutionId, 
                     req.body.data, 
                     req.userDetails.id, 
-                    req.rspObj.userToken,
+                    req.userDetails.userToken,
                     req.query.programId
                 );
 
@@ -1584,7 +1584,7 @@ module.exports = class Observations extends Abstract {
                 let userIdByExternalId;
 
                 if (users.length > 0) {
-                    userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.rspObj.userToken, users);
+                    userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.userDetails.userToken, users);
                     if(Object.keys(userIdByExternalId).length > 0) {
                         Object.values(userIdByExternalId).forEach(userDetails => {
                             usersKeycloakIdMap[userDetails] = true;
@@ -1596,7 +1596,7 @@ module.exports = class Observations extends Abstract {
                     
                     let userOrganisationDetails = await observationsHelper.getUserOrganisationDetails(
                         Object.keys(usersKeycloakIdMap), 
-                        req.rspObj.userToken
+                        req.userDetails.userToken
                     );
 
                     usersKeycloakIdMap = userOrganisationDetails.data;
@@ -2115,7 +2115,7 @@ module.exports = class Observations extends Abstract {
                 
                 let observations = await observationsHelper.bulkCreateByUserRoleAndEntity(
                     req.body,
-                    req.rspObj.userToken
+                    req.userDetails.userToken
                 );
 
                 return resolve(observations);
@@ -2378,7 +2378,7 @@ module.exports = class Observations extends Abstract {
 
                 let observations = await observationsHelper.entities(
                     req.userDetails.userId,
-                    req.rspObj.userToken,
+                    req.userDetails.userToken,
                     req.params._id ? req.params._id : "",
                     req.query.solutionId, 
                     req.body

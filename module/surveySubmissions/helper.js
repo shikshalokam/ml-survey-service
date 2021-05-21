@@ -7,7 +7,6 @@
 
 // Dependencies
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
-const slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
 /**
@@ -126,7 +125,8 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                slackClient.kafkaErrorAlert(errorObject);
+
+                console.log(errorObject);
             }
 
             return resolve(kafkaMessage);
@@ -182,7 +182,8 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                slackClient.kafkaErrorAlert(errorObject);
+
+                console.log(errorObject);
             }
 
             return resolve(kafkaMessage);
@@ -505,8 +506,11 @@ module.exports = class SurveySubmissionsHelper {
                     surveySubmissions[0].data.forEach( async surveySubmission => {
 
                         let submissionStatus = surveySubmission.status;
-                        if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
-                             surveySubmission.status = messageConstants.common.EXPIRED
+
+                        if (surveyReportPage === "") {
+                            if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
+                                surveySubmission.status = messageConstants.common.EXPIRED
+                           }
                         }
                         
                         surveySubmission.name = surveySubmission.surveyInformation.name;

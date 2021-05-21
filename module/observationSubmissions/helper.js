@@ -7,7 +7,6 @@
 
 // Dependencies
 
-let slackClient = require(ROOT_PATH + "/generics/helpers/slackCommunications");
 let kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const emailClient = require(ROOT_PATH + "/generics/helpers/emailCommunications");
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
@@ -139,7 +138,8 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    slackClient.kafkaErrorAlert(errorObject);
+
+                    console.log(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -189,7 +189,8 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    slackClient.kafkaErrorAlert(errorObject);
+
+                    console.log(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -231,7 +232,8 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    slackClient.kafkaErrorAlert(errorObject);
+
+                    console.log(errorObject);
                 }
 
                 return resolve(kafkaMessage);
@@ -692,7 +694,9 @@ module.exports = class ObservationSubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                slackClient.kafkaErrorAlert(errorObject);
+
+                console.log(errorObject);
+
             }
 
             return resolve(kafkaMessage);

@@ -15,5 +15,4 @@ const v2Survey = require(ROOT_PATH + "/controllers/v2/surveysController");
 */
 module.exports = class Surveys extends v2Survey {
 
-
 }

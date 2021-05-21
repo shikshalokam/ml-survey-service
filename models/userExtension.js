@@ -33,6 +33,7 @@ module.exports = {
       improvementProjects : {
         type : Array,
         default : []
-      }
+      },
+      platformRoles: Array
     }
   }
