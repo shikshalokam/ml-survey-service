@@ -15,5 +15,6 @@ module.exports = {
     GET_USERS_BY_ENTITY_AND_ROLE : "api/v1/entities/getUsersByEntityAndRole", //kendra service
     SOLUTIONS_BASED_ON_ROLE_LOCATION : "api/v1/solutions/forUserRoleAndLocation",
     SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION : "api/v1/solutions/detailsBasedOnRoleAndLocation",
-    GET_PROJECT_TEMPLATE_LISTS : "api/v1/project/templates/listByIds"
+    GET_PROJECT_TEMPLATE_LISTS : "api/v1/project/templates/listByIds",
+    DOWNLOADABLE_FILE_URL: "api/v1/cloud-services/files/getDownloadableUrl"
 }

@@ -255,7 +255,7 @@ module.exports = class EntityAssessors extends Abstract {
    * @param {Object} req - All requested Data.
    * @param {String} req.userDetails.userId - Logged in user id.
    * @param {Object} req.files - requested files.
-   * @param {String} req.rspObj.userToken - requested user token.
+   * @param {String} req.userDetails.userToken - requested user token.
    * @returns {JSON} - message indicating entity assessors created.
    */
 
@@ -274,7 +274,7 @@ module.exports = class EntityAssessors extends Abstract {
 
       let assessorData = await csv().fromString(req.files.assessors.data.toString());
 
-      await entityAssessorsHelper.upload(assessorData, null, null, req.userDetails.userId, req.rspObj.userToken);
+      await entityAssessorsHelper.upload(assessorData, null, null, req.userDetails.userId, req.userDetails.userToken);
 
       let response = { message : messageConstants.apiResponses.ASSESSOR_CREATED };
 
@@ -314,7 +314,7 @@ module.exports = class EntityAssessors extends Abstract {
    * @param {String} req.query.programId - program id.
    * @param {String} req.query.solutionId - solution id. 
    * @param {Object} req.files - requested files.
-   * @param {String} req.rspObj.userToken - requested user token.
+   * @param {String} req.userDetails.userToken - requested user token.
    * @returns {JSON} - message indicating entity assessors created.
   */
 
@@ -327,7 +327,7 @@ module.exports = class EntityAssessors extends Abstract {
         let programId = req.query.programId;
         let solutionId = req.query.solutionId;
 
-        await entityAssessorsHelper.upload(req.files, programId, solutionId, req.userDetails.userId, req.rspObj.userToken);
+        await entityAssessorsHelper.upload(req.files, programId, solutionId, req.userDetails.userId, req.userDetails.userToken);
 
         let response = { message: messageConstants.apiResponses.ASSESSOR_CREATED };
 

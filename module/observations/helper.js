@@ -21,7 +21,6 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
-const userService = require( ROOT_PATH + "/generics/services/users" );
 
 /**
     * ObservationsHelper
@@ -704,7 +703,6 @@ module.exports = class ObservationsHelper {
                             message: `Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`
                         }
                     }
-
                     console.log(errorObject)
                     throw new Error(`Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`);
                 }
@@ -1605,6 +1603,7 @@ module.exports = class ObservationsHelper {
                     $match : {
                         createdBy : userId,
                         deleted : false,
+                        referenceFrom: {$ne: messageConstants.common.PROJECT}
                     }
                 };
 

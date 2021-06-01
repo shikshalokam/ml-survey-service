@@ -138,7 +138,6 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-
                     console.log(errorObject);
                 }
 
@@ -189,7 +188,6 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-
                     console.log(errorObject);
                 }
 
@@ -232,7 +230,6 @@ module.exports = class ObservationSubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-
                     console.log(errorObject);
                 }
 
@@ -694,9 +691,7 @@ module.exports = class ObservationSubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-
                 console.log(errorObject);
-
             }
 
             return resolve(kafkaMessage);
@@ -1051,7 +1046,8 @@ module.exports = class ObservationSubmissionsHelper {
                  _id: { $in: solutionIds }
             },
                 ["name",
-                 "programName"
+                 "programName",
+                 "allowMultipleAssessemts"
                 ]
             )
 
@@ -1074,6 +1070,7 @@ module.exports = class ObservationSubmissionsHelper {
                     if (solutionMap[singleSubmission.solutionId]) {
                         solutionObject.programName = solutionMap[singleSubmission.solutionId]["programName"];
                         solutionObject.name = solutionMap[singleSubmission.solutionId]["name"];
+                        solutionObject.allowMultipleAssessemts = solutionMap[singleSubmission.solutionId]["allowMultipleAssessemts"];
                     }
                 })
                 delete solutionObject.entityId;

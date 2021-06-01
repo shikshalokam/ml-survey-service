@@ -849,7 +849,20 @@ module.exports = class Observations extends v1Observation {
                 submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
                 submissionDocument.criteria = submissionDocumentCriterias;
                 submissionDocument.submissionNumber = submissionNumber;
-            
+
+                submissionDocument["appInformation"] = {};
+  
+                if (req.headers["x-app-id"] || req.headers.appname ) {
+                    submissionDocument["appInformation"]["appName"] = 
+                    req.headers["x-app-id"] ? req.headers["x-app-id"] :
+                    req.headers.appname;
+                } 
+  
+                if (req.headers["x-app-ver"] || req.headers.appversion) {
+                    submissionDocument["appInformation"]["appVersion"] = 
+                    req.headers["x-app-ver"] ? req.headers["x-app-ver"] :
+                    req.headers.appversion;
+                }
 
                 let submissionDoc = await observationsHelper.findSubmission(
                     submissionDocument
