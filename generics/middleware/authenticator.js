@@ -1,40 +1,16 @@
-const jwtDecode = require('jwt-decode');
-let slackClient = require("../helpers/slackCommunications");
-var ApiInterceptor = require("./lib/apiInterceptor");
-var messageUtil = require("./lib/messageUtil");
-var responseCode = require("../httpStatusCodes");
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
-var shikshalokam = require("../helpers/shikshalokam");
+const keycloakPublicKeyPath = process.env.KEYCLOAK_PUBLIC_KEY_PATH + "/";
+const PEM_FILE_BEGIN_STRING = "-----BEGIN PUBLIC KEY-----";
+const PEM_FILE_END_STRING = "-----END PUBLIC KEY-----";
 
-var reqMsg = messageUtil.REQUEST;
-var keyCloakConfig = {
-  authServerUrl: process.env.sunbird_keycloak_auth_server_url,
-  realm: process.env.sunbird_keycloak_realm,
-  clientId: process.env.sunbird_keycloak_client_id,
-  public: process.env.sunbird_keycloak_public
+var invalidTokenMsg = {
+    "status" : 'ERR_TOKEN_FIELD_MISSING',
+    "message" : 'Required field token is missing',
+    "currentDate" : new Date().toISOString()
 };
 
-var cacheConfig = {
-  store: process.env.sunbird_cache_store,
-  ttl: process.env.sunbird_cache_ttl
-};
-
-var respUtil = function (resp) {
-  return {
-    status: resp.errCode,
-    message: resp.errMsg,
-    currentDate: new Date().toISOString()
-  };
-};
-
-var tokenAuthenticationFailureMessageToSlack = function (req, token, msg) {
-  let jwtInfomration = jwtDecode(token)
-  jwtInfomration["x-authenticated-user-token"] = token
-  const tokenByPassAllowedLog = { method: req.method, url: req.url, headers: req.headers, body: req.body, errorMsg: msg, customFields: jwtInfomration }
-  slackClient.sendExceptionLogMessage(tokenByPassAllowedLog)
-}
-
-var apiInterceptor = new ApiInterceptor(keyCloakConfig, cacheConfig);
 var removedHeaders = [
   "host",
   "origin",
@@ -51,13 +27,6 @@ var removedHeaders = [
   "connection"
 ];
 
-async function getAllRoles(obj) {
-  let roles = await obj.roles;
-  await _.forEach(obj.organisations, async value => {
-    roles = await roles.concat(value.roles);
-  });
-  return roles;
-}
 
 module.exports = async function (req, res, next) {
 
@@ -83,7 +52,7 @@ module.exports = async function (req, res, next) {
 
       const slackMessageForBadRequest = { userIP: req.headers["x-real-ip"], method: req.method, url: req.url, headers: req.headers, body: req.body, errorMsg: msg, customFields: null };
 
-      slackClient.badSharedLinkAccessAttemptAlert(slackMessageForBadRequest);
+      console.log(slackMessageForBadRequest);
 
       let rspObj = {};
 
@@ -117,10 +86,7 @@ module.exports = async function (req, res, next) {
   ]
 
   var token = req.headers["x-authenticated-user-token"];
-  if (!req.rspObj) req.rspObj = {};
-  var rspObj = req.rspObj;
 
-  
   let internalAccessApiPaths = [
     "createGesture", 
     "createEmoji", 
@@ -138,14 +104,10 @@ module.exports = async function (req, res, next) {
       performInternalAccessTokenCheck = true;
     }
   }));
-
   
   if (performInternalAccessTokenCheck) {
     if (req.headers["internal-access-token"] !== process.env.INTERNAL_ACCESS_TOKEN) {
-      rspObj.errCode = reqMsg.TOKEN.MISSING_CODE;
-      rspObj.errMsg = reqMsg.TOKEN.MISSING_MESSAGE;
-      rspObj.responseCode = responseCode.unauthorized.status;
-      return res.status(401).send(respUtil(rspObj));
+      return res.status(401).send(invalidTokenMsg);
     }
   }
 
@@ -161,10 +123,7 @@ module.exports = async function (req, res, next) {
   
   if (performInternalAccessTokenAndTokenCheck) {
     if (req.headers["internal-access-token"] !== process.env.INTERNAL_ACCESS_TOKEN  || !token) {
-      rspObj.errCode = reqMsg.TOKEN.MISSING_CODE;
-      rspObj.errMsg = reqMsg.TOKEN.MISSING_MESSAGE;
-      rspObj.responseCode = responseCode.unauthorized.status;
-      return res.status(401).send(respUtil(rspObj));
+      return res.status(401).send(invalidTokenMsg);
     }
   }
 
@@ -179,10 +138,7 @@ module.exports = async function (req, res, next) {
   
   if (performInternalAccessTokenOrTokenCheck && !token) {
     if (req.headers["internal-access-token"] !== process.env.INTERNAL_ACCESS_TOKEN ) {
-      rspObj.errCode = reqMsg.TOKEN.MISSING_CODE;
-      rspObj.errMsg = reqMsg.TOKEN.MISSING_MESSAGE;
-      rspObj.responseCode = responseCode.unauthorized.status;
-      return res.status(401).send(respUtil(rspObj));
+      return res.status(401).send(invalidTokenMsg);
     }
     else {
         next();
@@ -192,109 +148,66 @@ module.exports = async function (req, res, next) {
 
   for (let pointerToByPassPath = 0; pointerToByPassPath < paths.length; pointerToByPassPath++) {
     if ((req.path.includes(paths[pointerToByPassPath]) || (req.query.csv && req.query.csv == true)) && req.headers["internal-access-token"] === process.env.INTERNAL_ACCESS_TOKEN) {
-      req.setTimeout(parseInt(REQUEST_TIMEOUT_FOR_REPORTS));
+      req.setTimeout(parseInt(120000));
       next();
       return
     }
-  }
-
-
-  let tokenCheckByPassAllowedForURL = false
-  let tokenCheckByPassAllowedForUser = false
-  let tokenCheckByPassAllowedUserDetails = {}
-  if (process.env.DISABLE_TOKEN_ON_OFF && process.env.DISABLE_TOKEN_ON_OFF === "ON" && process.env.DISABLE_TOKEN_CHECK_FOR_API && process.env.DISABLE_TOKEN_CHECK_FOR_API != "") {
-    process.env.DISABLE_TOKEN_CHECK_FOR_API.split(',').forEach(allowedEndpoints => {
-      if (req.path.includes(allowedEndpoints)) {
-        tokenCheckByPassAllowedForURL = true
-        let allowedUsersPath = "DISABLE_TOKEN_" + allowedEndpoints + "_USERS"
-        if (process.env[allowedUsersPath] && process.env[allowedUsersPath] == "ALL") {
-          tokenCheckByPassAllowedForUser = true
-          tokenCheckByPassAllowedUserDetails = {
-            id: process.env.DISABLE_TOKEN_DEFAULT_USERID,
-            userId: process.env.DISABLE_TOKEN_DEFAULT_USERID,
-            roles: [process.env.DISABLE_TOKEN_DEFAULT_USER_ROLE],
-            name: process.env.DISABLE_TOKEN_DEFAULT_USER_NAME,
-            email: process.env.DISABLE_TOKEN_DEFAULT_USER_EMAIL,
-          }
-        } else if (process.env[allowedUsersPath]) {
-          let jwtInfo = jwtDecode(token)
-          process.env[allowedUsersPath].split(',').forEach(allowedUser => {
-            if (allowedUser == jwtInfo.sub) {
-              tokenCheckByPassAllowedForUser = true
-              tokenCheckByPassAllowedUserDetails = {
-                id: jwtInfo.sub,
-                userId: jwtInfo.sub,
-                roles: [process.env.DISABLE_TOKEN_DEFAULT_USER_ROLE],
-                name: jwtInfo.name,
-                email: jwtInfo.email,
-              }
-            }
-          })
-        }
-      }
-    })
   }
 
   if (!token) {
-    rspObj.errCode = reqMsg.TOKEN.MISSING_CODE;
-    rspObj.errMsg = reqMsg.TOKEN.MISSING_MESSAGE;
-    rspObj.responseCode = responseCode.unauthorized.status;
-    return res.status(401).send(respUtil(rspObj));
+    return res.status(401).send(invalidTokenMsg);
   }
 
-  apiInterceptor.validateToken(token, function (err, tokenData) {
-    // console.error(err, tokenData, rspObj);
+  var decoded = jwt.decode(token, { complete: true });
+  if(decoded === null || decoded.header === undefined){
+    return res.status(401).send(invalidTokenMsg);
+  }
 
-    if (err && tokenCheckByPassAllowedForURL && tokenCheckByPassAllowedForUser) {
-      req.rspObj.userId = tokenCheckByPassAllowedUserDetails.userId;
-      req.rspObj.userToken = req.headers["x-authenticated-user-token"];
-      delete req.headers["x-authenticated-userid"];
-      delete req.headers["x-authenticated-user-token"];
-      req.headers["x-authenticated-userid"] = tokenCheckByPassAllowedUserDetails.userId;
-      req.rspObj = rspObj;
-      req.userDetails = tokenCheckByPassAllowedUserDetails;
-      req.userDetails.userToken = req.rspObj.userToken
-      req.userDetails.allRoles = tokenCheckByPassAllowedUserDetails.roles;
+  const kid = decoded.header.kid;
+  let cert = "";
+  let path = keycloakPublicKeyPath + kid;
+  
+  if (fs.existsSync(path)) {
 
-      tokenAuthenticationFailureMessageToSlack(req, token, "TOKEN BYPASS ALLOWED")
-      next();
-      return
+    let accessKeyFile  = await fs.readFileSync(path);
+
+    if(accessKeyFile) {
+      if(!accessKeyFile.includes(PEM_FILE_BEGIN_STRING)){
+        await fs.writeFileSync(path,PEM_FILE_BEGIN_STRING+"\n"+accessKeyFile+"\n"+PEM_FILE_END_STRING)
+      }   
     }
+    
+    cert = fs.readFileSync(path);
+    jwt.verify(token, cert, { algorithm: ['sha1', 'RS256', 'HS256'] }, function (err, decode) {
 
-    if (err) {
-      rspObj.errCode = reqMsg.TOKEN.INVALID_CODE;
-      rspObj.errMsg = reqMsg.TOKEN.INVALID_MESSAGE;
-      rspObj.responseCode = responseCode.unauthorized.status;
-      tokenAuthenticationFailureMessageToSlack(req, token, "TOKEN VERIFICATION WITH KEYCLOAK FAILED")
-      return res.status(401).send(respUtil(rspObj));
-    } else {
-      req.rspObj.userId = tokenData.userId;
-      req.rspObj.userToken = req.headers["x-authenticated-user-token"];
-      delete req.headers["x-authenticated-userid"];
-      delete req.headers["x-authenticated-user-token"];
-      // rspObj.telemetryData.actor = utilsService.getTelemetryActorData(req);
-      req.headers["x-authenticated-userid"] = tokenData.userId;
-      req.rspObj = rspObj;
-      shikshalokam
-        .userInfo(token, tokenData.userId)
-        .then(async userDetails => {
-          if (userDetails.responseCode == "OK") {
-            req.userDetails = userDetails.result.response;
-            req.userDetails.userToken = req.rspObj.userToken
-            req.userDetails.allRoles = await getAllRoles(req.userDetails);
-            next();
-          } else {
-            tokenAuthenticationFailureMessageToSlack(req, token, "TOKEN VERIFICATION - FAILED TO GET USER DETAIL FROM LEARNER SERVICE")
-            rspObj.errCode = reqMsg.TOKEN.INVALID_CODE;
-            rspObj.errMsg = reqMsg.TOKEN.INVALID_MESSAGE;
-            rspObj.responseCode = responseCode.unauthorized.status;
-            return res.status(401).send(respUtil(rspObj));
-          }
-        })
-        .catch(error => {
-          tokenAuthenticationFailureMessageToSlack(req, token, "TOKEN VERIFICATION - ERROR FETCHING USER DETAIL FROM LEARNER SERVICE")
-          return res.status(401).send(error);
-        });
-    }
-  });
+      if (err) {
+        return res.status(401).send(invalidTokenMsg);
+      }
+
+      if (decode !== undefined) {
+        const expiry = decode.exp;
+        const now = new Date();
+        if (now.getTime() > expiry * 1000) {
+          return res.status(401).send(invalidTokenMsg);
+        }
+
+        req.userDetails = {
+          userToken : token,
+          id : decode.sub.split(":").pop(),
+          userId : decode.sub.split(":").pop(),
+          userName : decode.preferred_username,
+          email : decode.email,
+          firstName : decode.name
+        }
+
+        next();
+      
+      } else {
+        return res.status(401).send(invalidTokenMsg);
+      }
+
+    });
+  } else {
+    return res.status(401).send(invalidTokenMsg);
+  }
 };
