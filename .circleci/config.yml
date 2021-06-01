@@ -1,0 +1,37 @@
+version: 2.17
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.0.0
+    working_directory: ~/project/
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - run:
+          name: install-npm
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{checksum "package.json"}}
+          paths:
+            - ./node_modules
+      - run:
+          name: Executing unit test cases
+          command: npm test
+      
+      - run: 
+          name: Install sonar scanner
+          command: 'sudo npm install -g sonarqube-scanner'
+          
+      - run: 
+          name: Sonar scanner
+          command: |
+                  sonar-scanner
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
