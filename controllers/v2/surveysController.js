@@ -234,7 +234,7 @@ module.exports = class Surveys extends v1Survey{
                     surveyId,
                     req.query.solutionId,
                     req.userDetails.userId,
-                    req.rspObj.userToken
+                    req.userDetails.userToken
                 );
                 
             } else {
@@ -244,7 +244,7 @@ module.exports = class Surveys extends v1Survey{
                 surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,
                     req.userDetails.userId,
-                    req.rspObj.userToken,
+                    req.userDetails.userToken,
                     bodyData
                 );
             }

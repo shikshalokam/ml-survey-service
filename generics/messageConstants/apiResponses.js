@@ -359,5 +359,6 @@ module.exports = {
     "SURVEY_LINK_GENERATED" : "Survey solution link generated successfully",
     "SUBMISSION_NOT_ALLOWED" : "Submission not allowed",
     "SUBMISSION_ALLOWED" : "Submission is allowed",
-    "INVALID_PROGRAM_OPERATION": "Invalid program operation."
+    "INVALID_PROGRAM_OPERATION": "Invalid program operation.",
+    "ATTACHMENTS_URL_NOT_FOUND": "Not found attachment url"
 }
