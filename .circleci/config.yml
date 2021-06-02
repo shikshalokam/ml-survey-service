@@ -20,7 +20,7 @@ jobs:
             - ./node_modules
       - run:
           name: Executing unit test cases
-          command: npm test
+          command: npm run coverage
       
       - run: 
           name: Install sonar scanner
