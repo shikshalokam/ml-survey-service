@@ -321,6 +321,47 @@ const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solution
         }
     })
 }
+
+/**
+  * Get downloadable file.
+  * @function
+  * @name downloadableUrls
+  * @param {Object} bodyData - body data.
+  * @returns {Array} Downloadable file.
+*/
+
+const downloadableUrls = function (bodyData) {
+
+    let fileDownloadUrl = kendraServiceBaseURL + messageConstants.endpoints.DOWNLOADABLE_FILE_URL; 
+
+    return new Promise((resolve, reject) => {
+        try {
+
+            const kendraCallBack = function (err, response) {
+                if (err) {
+                    return reject({
+                        status : httpStatusCode.bad_request.status,
+                        message : messageConstants.apiResponses.KENDRA_SERVICE_DOWN
+                    })
+                } else {
+                    let downloadableImage = response.body;
+                    return resolve(downloadableImage);
+                }
+            }
+
+            request.post(fileDownloadUrl, {
+                headers: {
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                },
+                json : bodyData
+            }, kendraCallBack);
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
  
 module.exports = {
     getDownloadableUrl : getDownloadableUrl,
@@ -328,5 +369,6 @@ module.exports = {
     getAppDetails : getAppDetails,
     getUsersByEntityAndRole : getUsersByEntityAndRole,
     solutionBasedOnRoleAndLocation : solutionBasedOnRoleAndLocation,
-    solutionDetailsBasedOnRoleAndLocation : solutionDetailsBasedOnRoleAndLocation
+    solutionDetailsBasedOnRoleAndLocation : solutionDetailsBasedOnRoleAndLocation,
+    downloadableUrls: downloadableUrls
 };

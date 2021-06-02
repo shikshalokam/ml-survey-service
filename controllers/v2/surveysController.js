@@ -17,12 +17,12 @@ module.exports = class Surveys extends v1Survey{
 
 
     /**
-    * @api {post} /assessment/api/v2/surveys/details/:surveyId?solutionId=:solutionId
+    * @api {post} /assessment/api/v2/surveys/details/:(surveyId/Link)?solutionId=:solutionId Get the survey details by link or Survey Id
     * Survey details.
     * @apiVersion 2.0.0
     * @apiGroup Surveys
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /assessment/api/v2/surveys/details/5de8a220c210d4700813e695?solutionId=5f5b38ec45365677f64b2843
+    * @apiSampleRequest /assessment/api/v2/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
     * @apiParamExample {json}  Request-Body:
     * {
     *   "role" : "HM",
@@ -210,6 +210,8 @@ module.exports = class Surveys extends v1Survey{
     * @method
     * @name details
     * @param  {Request} req request body.
+    * @param  {req.param._id} Either surveyId or link.
+    * @param  {req.query.solutionId} solutionId (not required in the case of passing link).
     * @returns {Object} returns survey details information.
     * Result will have the details of survey.
     */
@@ -218,16 +220,34 @@ module.exports = class Surveys extends v1Survey{
     return new Promise(async (resolve, reject) => {
         try {
 
-            let surveyId = req.params._id ? req.params._id : "";
-           
-            let surveyDetails = await surveysHelper.detailsV2
-            (   
-                req.body,
-                surveyId,
-                req.query.solutionId,
-                req.userDetails.userId,
-                req.userDetails.userToken
-            );
+            let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
+
+            let surveyDetails = {};
+
+            if( validateSurveyId || req.query.solutionId ) {
+
+                let surveyId = req.params._id ? req.params._id : "";
+       
+                surveyDetails = await surveysHelper.detailsV2
+                (   
+                    req.body,
+                    surveyId,
+                    req.query.solutionId,
+                    req.userDetails.userId,
+                    req.userDetails.userToken
+                );
+                
+            } else {
+
+                let bodyData = req.body ? req.body : {};
+
+                surveyDetails = await surveysHelper.getDetailsByLink(
+                    req.params._id,
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
+                    bodyData
+                );
+            }
 
             return resolve({
                 message: surveyDetails.message,
