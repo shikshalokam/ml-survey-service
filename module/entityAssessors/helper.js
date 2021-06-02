@@ -6,7 +6,6 @@
  */
 
 //Dependencies
-const moment = require("moment");
 let shikshalokam = require(ROOT_PATH + "/generics/helpers/shikshalokam");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfSubmissionsLength = 500;
@@ -531,6 +530,7 @@ module.exports = class EntityAssessorHelper {
                                 message: `Failed to push entity notification for entity ${entity.entityName} in program ${entity.programName} and solution ${entity.solutionName}`
                             }
                         };
+                        
                         console.log(errorObject);
                         return resolve({
                             success : false

@@ -25,8 +25,7 @@ var templateLists = function (improvementProjectIds,token) {
     }
 
     const improvementProjectsUrl = 
-    process.env.IMPROVEMENT_PROJECT_HOST + 
-    process.env.IMPROVEMENT_PROJECT_BASE_URL + 
+    process.env.ML_PROJECT_SERVICE_URL + 
     messageConstants.endpoints.GET_PROJECT_TEMPLATE_LISTS;
 
     return new Promise((resolve, reject) => {

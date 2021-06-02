@@ -173,11 +173,12 @@ module.exports = async function (req, res, next) {
 
     if(accessKeyFile) {
       if(!accessKeyFile.includes(PEM_FILE_BEGIN_STRING)){
-        await fs.writeFileSync(path,PEM_FILE_BEGIN_STRING+"\n"+accessKeyFile+"\n"+PEM_FILE_END_STRING)
-      }   
+        cert = PEM_FILE_BEGIN_STRING+"\n"+accessKeyFile+"\n"+PEM_FILE_END_STRING;
+      }else {
+        cert = fs.readFileSync(path);
+      }  
     }
-    
-    cert = fs.readFileSync(path);
+
     jwt.verify(token, cert, { algorithm: ['sha1', 'RS256', 'HS256'] }, function (err, decode) {
 
       if (err) {
