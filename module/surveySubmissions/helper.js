@@ -443,7 +443,7 @@ module.exports = class SurveySubmissionsHelper {
 
                 let submissionMatchQuery = { "$match": { "createdBy": userId } };
 
-                if( surveyReportPage ){
+                if (gen.utils.convertStringToBoolean(surveyReportPage) ) {
                     submissionMatchQuery["$match"]["status"] = messageConstants.common.SUBMISSION_STATUS_COMPLETED; 
                 }
                 
