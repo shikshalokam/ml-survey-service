@@ -396,7 +396,7 @@ module.exports = class Surveys extends Abstract {
      * @apiParamExample {json} Request:
      * {
      *  "role" : "HM",
-   		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+        "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
       }
@@ -959,7 +959,8 @@ module.exports = class Surveys extends Abstract {
                     req.pageSize,
                     req.pageNo,
                     req.searchText,
-                    req.query.filter
+                    req.query.filter,
+                    req.query.surveyReportPage
                 );
 
                 return resolve({
@@ -976,8 +977,8 @@ module.exports = class Surveys extends Abstract {
             }
         })
     }
-
     
+
     /**
     * @api {get} /assessment/api/v1/surveys/getLink/{{surveySolutionId}}?appName:appName 
     * @apiVersion 1.0.0

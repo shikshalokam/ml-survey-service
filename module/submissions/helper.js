@@ -491,23 +491,34 @@ module.exports = class SubmissionsHelper {
                         evidencesStatusToBeChanged['startTime'] = req.body.evidence.startTime;
                         evidencesStatusToBeChanged['endTime'] = req.body.evidence.endTime;
                         evidencesStatusToBeChanged['hasConflicts'] = false;
-                        evidencesStatusToBeChanged['submissions'].push(_.omit(req.body.evidence, "answers"));
+                        evidencesStatusToBeChanged['submissions'].push(_.omit(req.body.evidence, ["answers","status"]));
 
                         updateObject.$push = {
                             ["evidences." + req.body.evidence.externalId + ".submissions"]: req.body.evidence
                         };
                         updateObject.$set = {
                             answers: _.assignIn(submissionDocument.answers, answerArray),
-                            ["evidences." + req.body.evidence.externalId + ".isSubmitted"]: true,
+                            ["evidences." + req.body.evidence.externalId + ".isSubmitted"] : true,
                             ["evidences." + req.body.evidence.externalId + ".notApplicable"]: req.body.evidence.notApplicable,
                             ["evidences." + req.body.evidence.externalId + ".startTime"]: req.body.evidence.startTime,
                             ["evidences." + req.body.evidence.externalId + ".endTime"]: req.body.evidence.endTime,
                             ["evidences." + req.body.evidence.externalId + ".hasConflicts"]: false,
-                            evidencesStatus: submissionDocument.evidencesStatus,
                             status: (submissionDocument.status === "started") ? "inprogress" : submissionDocument.status
                         };
+
+                        if( 
+                            req.body.evidence.status && 
+                            req.body.evidence.status === messageConstants.common.DRAFT 
+                        ) {
+                            evidencesStatusToBeChanged['isSubmitted'] = false;
+                            updateObject["$set"]["evidences." + req.body.evidence.externalId + ".isSubmitted"] = false;
+                            delete req.body.evidence.status;
+                        }
+
+                        updateObject["$set"]["evidencesStatus"] = submissionDocument.evidencesStatus;
+
                     } else {
-                        
+
                         let submissionAllowed = await this.isAllowed(
                             req.params._id,
                             req.body.evidence.externalId,
@@ -664,7 +675,7 @@ module.exports = class SubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
+
                     console.log(errorObject);
                 }
 
@@ -705,7 +716,7 @@ module.exports = class SubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
+
                     console.log(errorObject);
                 }
 
@@ -956,7 +967,7 @@ module.exports = class SubmissionsHelper {
                             message:kafkaMessage.message
                         }
                     };
-                    
+
                     console.log(errorObject);
                 }
 
@@ -1872,7 +1883,7 @@ module.exports = class SubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                
+
                 console.log(errorObject);
             }
 
@@ -1929,7 +1940,7 @@ module.exports = class SubmissionsHelper {
     })
   }
 
-    /**
+   /**
    * Check whether submission is allowed or not.
    * @method
    * @name isAllowed
@@ -1970,10 +1981,7 @@ module.exports = class SubmissionsHelper {
                 }
                 
                 if (!submissionDocument.length) {
-                    return resolve({
-                        status : httpStatusCode.bad_request.status,
-                        message : messageConstants.apiResponses.SUBMISSION_NOT_FOUND
-                    })
+                    throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
                 }
     
                 if ( submissionDocument[0].evidencesStatus[0].isSubmitted ) {

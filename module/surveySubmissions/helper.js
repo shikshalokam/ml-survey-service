@@ -125,7 +125,7 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                
+
                 console.log(errorObject);
             }
 
@@ -182,7 +182,7 @@ module.exports = class SurveySubmissionsHelper {
                         message:kafkaMessage.message
                     }
                 };
-                
+
                 console.log(errorObject);
             }
 
@@ -428,7 +428,7 @@ module.exports = class SurveySubmissionsHelper {
     * @returns {Json} - survey list.
     */
 
-    static surveyList(userId = "", pageNo, pageSize, search,filter) {
+    static surveyList(userId = "", pageNo, pageSize, search,filter, surveyReportPage = "") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -443,6 +443,10 @@ module.exports = class SurveySubmissionsHelper {
 
                 let submissionMatchQuery = { "$match": { "createdBy": userId } };
 
+                if( surveyReportPage ){
+                    submissionMatchQuery["$match"]["status"] = messageConstants.common.SUBMISSION_STATUS_COMPLETED; 
+                }
+                
                 if (search !== "") {
                     submissionMatchQuery["$match"]["$or"] = [
                         { "surveyInformation.name": new RegExp(search, 'i') },
@@ -500,15 +504,33 @@ module.exports = class SurveySubmissionsHelper {
 
                 if (surveySubmissions[0].data && surveySubmissions[0].data.length > 0) {
                     surveySubmissions[0].data.forEach( async surveySubmission => {
-                        if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
-                             surveySubmission.status = messageConstants.common.EXPIRED
+
+                        let submissionStatus = surveySubmission.status;
+
+                        if (surveyReportPage === "") {
+                            if (new Date() > new Date(surveySubmission.surveyInformation.endDate)) {
+                                surveySubmission.status = messageConstants.common.EXPIRED
+                           }
                         }
+                        
                         surveySubmission.name = surveySubmission.surveyInformation.name;
                         surveySubmission.description = surveySubmission.surveyInformation.description;
                         surveySubmission._id = surveySubmission.surveyId;
                         delete surveySubmission.surveyId;
                         delete surveySubmission["surveyInformation"];
-                        result.data.push(surveySubmission);
+
+                        if( !surveyReportPage ) {
+
+                            if( submissionStatus === messageConstants.common.SUBMISSION_STATUS_COMPLETED ) {
+                                result.data.push(surveySubmission);
+                            } else {
+                                if ( surveySubmission.status !== messageConstants.common.EXPIRED ) {
+                                    result.data.push(surveySubmission);
+                                }
+                            }
+                        } else {
+                            result.data.push(surveySubmission);
+                        }
                     })
                     result.count = surveySubmissions[0].count ? result.count + surveySubmissions[0].count : result.count;
                 }
@@ -549,7 +571,7 @@ module.exports = class SurveySubmissionsHelper {
             if (userId == "") {
                 throw new Error(messageConstants.apiResponses.USER_ID_REQUIRED_CHECK)
             }
-            
+
             let solutionMatchQuery = {
                 "$match": {
                     "author": userId,
@@ -557,7 +579,7 @@ module.exports = class SurveySubmissionsHelper {
                     "isReusable": false,
                     "isDeleted": false
                 }
-            }
+            };
 
             if (search !== "") {
                 solutionMatchQuery["$match"]["$or"] = [
@@ -568,11 +590,11 @@ module.exports = class SurveySubmissionsHelper {
 
             if ( filter && filter !== "" ) {
                 if( filter === messageConstants.common.CREATED_BY_ME ) {
-                    matchQuery["$match"]["isAPrivateProgram"] = {
+                    solutionMatchQuery["$match"]["isAPrivateProgram"] = {
                         $ne : false
                     };
                 } else if ( filter === messageConstants.common.ASSIGN_TO_ME ) {
-                    matchQuery["$match"]["isAPrivateProgram"] = false;
+                    solutionMatchQuery["$match"]["isAPrivateProgram"] = false;
                 }
             }
 
@@ -628,7 +650,5 @@ module.exports = class SurveySubmissionsHelper {
         }
     });
 }
-
-
 
 }

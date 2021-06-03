@@ -661,14 +661,14 @@ module.exports = class Observations extends Abstract {
 
 
     /**
-     * @api {get} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber Assessments
+     * @api {get} /assessment/api/v1/observations/assessment/:observationId?entityId=:entityId&submissionNumber=submissionNumber&ecmMethod=ecmMethod Assessments
      * @apiVersion 1.0.0
      * @apiName Assessments
      * @apiGroup Observations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiParam {String} entityId Entity ID.
      * @apiParam {Int} submissionNumber Submission Number.
-     * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1
+     * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
      * @apiUse successBody
      * @apiUse errorBody
      */
@@ -748,6 +748,15 @@ module.exports = class Observations extends Abstract {
                         status:  httpStatusCode.bad_request.status, 
                         message: responseMessage 
                     });
+                }
+
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if(!solutionDocument.evidenceMethods[req.query.ecmMethod] ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.ECM_NOT_EXIST
+                        });
+                    }
                 }
                 
                 let programQueryObject = {
@@ -971,11 +980,33 @@ module.exports = class Observations extends Abstract {
                 submissionDocument.criteria = submissionDocumentCriterias;
                 submissionDocument.submissionNumber = submissionNumber;
 
+                submissionDocument["appInformation"] = {};
+  
+                if (req.headers["x-app-id"] || req.headers.appname ) {
+                    submissionDocument["appInformation"]["appName"] = 
+                    req.headers["x-app-id"] ? req.headers["x-app-id"] :
+                    req.headers.appname;
+                } 
+  
+                if (req.headers["x-app-ver"] || req.headers.appversion) {
+                    submissionDocument["appInformation"]["appVersion"] = 
+                    req.headers["x-app-ver"] ? req.headers["x-app-ver"] :
+                    req.headers.appversion;
+                }
+
                 let submissionDoc = await observationsHelper.findSubmission(
                     submissionDocument
                 );
 
                 assessment.submissionId = submissionDoc.result._id;
+
+                if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
+                    if( evidenceMethodArray[req.query.ecmMethod] ) {
+                        evidenceMethodArray = {
+                            [req.query.ecmMethod] : evidenceMethodArray[req.query.ecmMethod]
+                        };
+                    }
+                }
 
                 const parsedAssessment = await assessmentsHelper.parseQuestions(
                     Object.values(evidenceMethodArray),

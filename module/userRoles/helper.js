@@ -81,6 +81,11 @@ module.exports = class UserRolesHelper {
                                 delete userRole.entityTypes;
                             }
 
+                            if (userRole.platformRole && gen.utils.convertStringToBoolean(userRole.platformRole)) {
+                                userRole["isAPlatformRole"] = true;
+                                delete userRole.platformRole;
+                            }
+
                             let newRole = await database.models.userRoles.create(
                                 _.merge({
                                     "status" : "active",

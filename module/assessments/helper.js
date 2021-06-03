@@ -12,6 +12,8 @@ const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 let entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
+const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
+const kendraService = require(ROOT_PATH + "/generics/services/kendra");
 
 /**
     * AssessmentsHelper
@@ -90,8 +92,9 @@ module.exports = class AssessmentsHelper {
 
                         if (submissionDocEvidences[evidence.externalId].submissions) {
                             submissionDocEvidences[evidence.externalId].submissions.forEach(submission => {
+
                                 if (submission.isValid) {
-                                    submissionsObjects[evidence.externalId] = submission;
+                                    submissionsObjects[evidence.externalId] = submission;                         
                                 }
                             });
                         }
@@ -143,6 +146,8 @@ module.exports = class AssessmentsHelper {
                     });
                 });
 
+                let attachments = [];
+
                 Object.entries(questionArray).forEach(questionArrayElm => {
 
                     questionArrayElm[1]["payload"] = {
@@ -162,6 +167,17 @@ module.exports = class AssessmentsHelper {
                         delete questionArrayElm[1]["weightage"];
                     }
 
+                    if (
+                        submissionsObjects[questionArrayElm[1].evidenceMethod] &&  
+                        submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]] &&
+                        submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName &&
+                        submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName.length > 0
+                    ) {
+                        submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName.forEach(file=>{
+                            attachments.push(file.sourcePath);
+                        })
+                    }
+
                     if (questionArrayElm[1].responseType === "matrix") {
                         let instanceQuestionArray = new Array();
                         questionArrayElm[1].instanceQuestions.forEach(instanceQuestionId => {
@@ -175,6 +191,21 @@ module.exports = class AssessmentsHelper {
                                         sectionReferenceOfInstanceQuestion.splice(index, 1);
                                     }
                                 });
+                            }
+
+                            if (
+                                submissionsObjects[questionArrayElm[1].evidenceMethod] &&  
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]] &&
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value &&
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value.length > 0
+                            ) {
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value.forEach(singleValue=>{
+                                    if (singleValue[instanceQuestionId.toString()].fileName && singleValue[instanceQuestionId.toString()].fileName.length > 0) {
+                                        singleValue[instanceQuestionId.toString()].fileName.forEach(file => {
+                                            attachments.push(file.sourcePath);
+                                        })
+                                    }
+                                })
                             }
                         });
 
@@ -222,6 +253,61 @@ module.exports = class AssessmentsHelper {
                                 }
 
                             })
+                        }
+                    })
+                }
+
+                let attachmentsUrl = [];
+
+                if ( attachments.length > 0 ) {
+                    
+                    attachmentsUrl = await kendraService.downloadableUrls({
+                        filePaths: attachments
+                    })
+
+                    if (attachmentsUrl.status !== httpStatusCode.ok.status) {
+                        throw {
+                            status: httpStatusCode['bad_request'].status,
+                            message: messageConstants.apiResponses.ATTACHMENTS_URL_NOT_FOUND
+                        }
+                    }
+
+                    Object.entries(questionArray).forEach(questionArrayElm => {
+                        if (
+                            submissionsObjects[questionArrayElm[1].evidenceMethod] &&  
+                            submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]] &&
+                            submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName &&
+                            submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName.length > 0
+                        ) {
+                            submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].fileName.forEach(file => {
+                                let attachmentIndex = attachmentsUrl.result.findIndex(attachment=>attachment.filePath === file.sourcePath);
+                                if (attachmentIndex > -1) {
+                                    file["url"] = attachmentsUrl.result[attachmentIndex].url;
+                                }
+                            })
+                        }
+
+                        if (questionArrayElm[1].responseType === "matrix") {
+                            if (
+                                submissionsObjects[questionArrayElm[1].evidenceMethod] &&  
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]] &&
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value &&
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value.length > 0
+                            ) {
+                                submissionsObjects[questionArrayElm[1].evidenceMethod].answers[questionArrayElm[0]].value.forEach(singleValue=>{
+                                    questionArrayElm[1].instanceQuestions.forEach(instanceQuestion=>{
+                                        let instanceQuestionId = instanceQuestion._id.toString();
+                                        if (singleValue[instanceQuestionId].fileName && singleValue[instanceQuestionId].fileName.length > 0) {
+                                            singleValue[instanceQuestionId].fileName.forEach(file => {
+                                                let attachmentIndex = attachmentsUrl.result.findIndex(attachment=>attachment.filePath === file.sourcePath);
+                                                if (attachmentIndex > -1) {
+                                                    file["url"] = attachmentsUrl.result[attachmentIndex].url;
+                                                }
+                                            })
+                                        }
+                                    })
+                                })
+                            }
                         }
                     })
                 }
@@ -586,30 +672,13 @@ module.exports = class AssessmentsHelper {
               }
 
               let organisationAndRootOrganisation = 
-              await userService.profile(
-                  userDetails.userToken,
-                  userDetails.userId
+              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
+                userDetails.userToken,
+                userDetails.userId
               );
 
-              if (!organisationAndRootOrganisation.success) {
-                  throw {
-                      message: messageConstants.apiResponses.USER_ORGANISATION_NOT_FOUND,
-                      status: httpStatusCode.bad_request.status
-                  }
-              }
-
-              let organisation = {
-                  createdFor :
-                  organisationAndRootOrganisation.organisations.map(
-                      organisation => {
-                          return organisation.organisationId
-                      }
-                  ),
-                  rootOrganisations : [organisationAndRootOrganisation.rootOrgId]
-              }
-
-              let createdFor =  organisation.createdFor;
-              let rootOrganisations = organisation.rootOrganisations;
+              let createdFor =  organisationAndRootOrganisation.createdFor;
+              let rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
   
               let createdSolutionAndProgram = 
               await solutionsHelper.createProgramAndSolutionFromTemplate(
