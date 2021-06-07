@@ -617,12 +617,19 @@ module.exports = class Surveys extends Abstract {
 
 
     /**
-    * @api {get} /assessment/api/v1/surveys/details/:surveyId 
+    * @api {post} /assessment/api/v1/surveys/details/:(surveyId/Link)?solutionId=:solutionId Get the survey details by link or Survey Id  
     * Survey details.
-    * @apiVersion 1.0.0
+    * @apiVersion 2.0.0
     * @apiGroup Surveys
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /assessment/api/v1/surveys/details/5de8a220c210d4700813e695
+    * @apiSampleRequest /assessment/api/v1/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
+    * @apiParamExample {json}  Request-Body:
+    * {
+    *   "role" : "HM",
+        "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+        "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+        "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
+    }
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -798,38 +805,50 @@ module.exports = class Surveys extends Abstract {
     }
     }
     */
-    /**
+
+   /**
     * Survey details.
     * @method
     * @name details
     * @param  {Request} req request body.
-    * @returns {JSON} Response consists of message,status and result.
+    * @param  {req.param._id} Either surveyId or link.
+    * @param  {req.query.solutionId} solutionId (not required in the case of passing link).
+    * @returns {Object} returns survey details information.
     * Result will have the details of survey.
     */
 
-   async details(req) {
+    async details(req) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let validateSurvey = await surveysHelper.validateSurvey
-            (
-                req.params._id,
-                req.userDetails.userId
-            )
+            let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
-            if (!validateSurvey.success) {
-                return resolve({
-                    message: validateSurvey.message,
-                    result: validateSurvey.data
-                })
+            let surveyDetails = {};
+
+            if( validateSurveyId || req.query.solutionId ) {
+
+                let surveyId = req.params._id ? req.params._id : "";
+       
+                surveyDetails = await surveysHelper.detailsV2
+                (   
+                    req.body,
+                    surveyId,
+                    req.query.solutionId,
+                    req.userDetails.userId,
+                    req.userDetails.userToken
+                );
+                
+            } else {
+
+                let bodyData = req.body ? req.body : {};
+
+                surveyDetails = await surveysHelper.getDetailsByLink(
+                    req.params._id,
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
+                    bodyData
+                );
             }
-
-            let surveyDetails = await surveysHelper.details
-            (
-                req.params._id,
-                req.userDetails.userId,
-                validateSurvey.data.submissionId
-            );
 
             return resolve({
                 message: surveyDetails.message,
@@ -844,9 +863,8 @@ module.exports = class Surveys extends Abstract {
             });
         }
     });
-}
-
-
+   }
+   
     /**
     * @api {post} /assessment/api/v1/surveys/getSurvey?page=:page&limit=:limit&search=:search
     * List of surveys and targetted ones.
