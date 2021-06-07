@@ -165,6 +165,16 @@ module.exports = class UserRolesHelper {
                                 delete userRole.entityTypes;
                             }
 
+                            if (userRole.hasOwnProperty("platformRole") && userRole.platformRole !== "") {
+
+                                userRole["isAPlatformRole"] = false;
+                                if (gen.utils.convertStringToBoolean(userRole.platformRole)) {
+                                    userRole["isAPlatformRole"] = true;
+                                }
+
+                                delete userRole.platformRole;
+                            }
+
                             let updateRole = await database.models.userRoles.findOneAndUpdate(
                                 {
                                     code : userRole.code
