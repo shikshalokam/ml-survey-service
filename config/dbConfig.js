@@ -15,8 +15,12 @@ var DB = function() {
 
   let options = {useNewUrlParser: true};
 
-  if ( process.env.REPLICA_SET_NAME && process.env.REPLICA_SET_NAME !== "") {
+  if (process.env.REPLICA_SET_NAME && process.env.REPLICA_SET_NAME !== "") {
     options["replset"] = {rs_name: process.env.REPLICA_SET_NAME };
+
+    if (process.env.REPLICA_SET_READ_PREFERENCE && process.env.REPLICA_SET_READ_PREFERENCE !== "") {
+      options["replset"]["readPreference"] = process.env.readPreference;
+    }
   }
   
   var db = mongoose.createConnection(process.env.MONGODB_URL,options);
