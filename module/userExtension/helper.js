@@ -451,7 +451,7 @@ module.exports = class UserExtensionHelper {
 
                                 if (!(userPlatformRoleToUpdate >= 0)) {
                                     userPlatformRoleToUpdate = existingUser.platformRoles.length;
-                                    userPlatformRoleToUpdate[userRole.platform_role].programs = new Array;
+                                    userRoleMap[userRole.platform_role].programs = new Array;
                                     existingUser.platformRoles.push(userRoleMap[userRole.platform_role]);
                                 }
 
