@@ -1041,7 +1041,8 @@ function _surveyInformation(program,survey,solution) {
         solutionExternalId : solution.externalId,
         solutionId : solution._id,
         entityType : solution.entityType ? solution.entityType : "",
-        entityTypeId : solution.entityTypeId ? solution.entityTypeId : ""
+        entityTypeId : solution.entityTypeId ? solution.entityTypeId : "",
+        showInHomeScreen : solution.showInHomeScreen ? solution.showInHomeScreen : false
     }
 }
 
