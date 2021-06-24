@@ -829,7 +829,7 @@ module.exports = class Surveys extends Abstract {
 
                 let surveyId = req.params._id ? req.params._id : "";
        
-                surveyDetails = await surveysHelper.detailsV2
+                surveyDetails = await surveysHelper.detailsV3
                 (   
                     req.body,
                     surveyId,
