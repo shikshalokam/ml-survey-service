@@ -885,16 +885,6 @@ module.exports = class SurveysHelper {
 
                 solutionDocument = solutionDocument[0];
                 
-                if (solutionDocument.author == userId) {
-                    return resolve({
-                        success: false,
-                        message: messageConstants.apiResponses.CREATOR_CAN_NOT_SUBMIT_SURVEY,
-                        data: {
-                            isCreator : true
-                        }
-                    })
-                }
-                
                 let programDocument = [];
 
                 if (surveyDocument.programId) {
