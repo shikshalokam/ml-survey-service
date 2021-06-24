@@ -1841,6 +1841,13 @@ module.exports = class ObservationsHelper {
     return new Promise(async (resolve, reject) => {
         try {
 
+            if( observationId === "" || solutionId === "" ) {
+                return resolve({
+                    status: httpStatusCode.bad_request.status,
+                    message: messageConstants.apiResponses.OBSERVATION_SOLUTION_ID_REQUIRED
+                });
+            }
+
             if( observationId === "" ) {
 
                 let observationData = await this.observationDocuments({
