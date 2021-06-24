@@ -360,5 +360,6 @@ module.exports = {
     "SUBMISSION_NOT_ALLOWED" : "Submission not allowed",
     "SUBMISSION_ALLOWED" : "Submission is allowed",
     "INVALID_PROGRAM_OPERATION": "Invalid program operation.",
-    "ATTACHMENTS_URL_NOT_FOUND": "Not found attachment url"
+    "ATTACHMENTS_URL_NOT_FOUND": "Not found attachment url",
+    "OBSERVATION_SOLUTION_ID_REQUIRED": "Observation or solution id is required"
 }
