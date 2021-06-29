@@ -1568,16 +1568,6 @@ module.exports = class SurveysHelper {
                 ["_id"]
             )
 
-            if (solutionDocument.length > 0) {
-                return resolve({
-                    success: false,
-                    message: messageConstants.apiResponses.CREATOR_CAN_NOT_SUBMIT_SURVEY,
-                    data: {
-                        isCreator : true
-                    }
-                })
-            }
-
             if (surveyId == "") {
 
                 let surveyDocument = await this.surveyDocuments
