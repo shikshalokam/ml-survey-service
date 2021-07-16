@@ -986,7 +986,6 @@ module.exports = class ObservationSubmissionsHelper {
             })
             
             query["solutionId"] = { $in : solutionIds};
-            query["submissionNumber"] = 1;
             
             let submissions = await this.observationSubmissionsDocument
             (
@@ -1001,7 +1000,7 @@ module.exports = class ObservationSubmissionsHelper {
                 "entityType",
                 "criteriaLevelReport"
                ],
-               { createdAt: -1, _id: -1}
+               { createdAt: -1, _id: -1,completedDate: -1}
             );
 
             let submissionDocuments = _.groupBy(submissions, "solutionId");
@@ -1064,9 +1063,18 @@ module.exports = class ObservationSubmissionsHelper {
                 solutionObject.entities = [];
                
                 submissionDocuments[solution].forEach( singleSubmission => {
-                    if (entities[singleSubmission.entityId]) {
-                        solutionObject.entities.push(entities[singleSubmission.entityId]);
+                    let findEntities = solutionObject.entities.findIndex(entity => entity._id.toString() === singleSubmission.entityId.toString());
+
+                    if (findEntities < 0) {
+                        if (entities[singleSubmission.entityId]) {
+                            solutionObject.entities.push(entities[singleSubmission.entityId]);
+                        }
                     }
+
+                    if (new Date(singleSubmission.completedDate) > new Date(solutionObject.completedDate)) {
+                        solutionObject.completedDate = singleSubmission.completedDate;
+                    }
+
                     if (solutionMap[singleSubmission.solutionId]) {
                         solutionObject.programName = solutionMap[singleSubmission.solutionId]["programName"];
                         solutionObject.name = solutionMap[singleSubmission.solutionId]["name"];
