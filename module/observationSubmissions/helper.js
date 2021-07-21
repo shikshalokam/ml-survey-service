@@ -1000,7 +1000,7 @@ module.exports = class ObservationSubmissionsHelper {
                 "entityType",
                 "criteriaLevelReport"
                ],
-               { createdAt: -1, _id: -1,completedDate: -1}
+               { completedDate: -1 }
             );
 
             let submissionDocuments = _.groupBy(submissions, "solutionId");
