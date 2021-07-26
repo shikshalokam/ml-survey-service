@@ -25,7 +25,7 @@ module.exports = class SurveySubmissions extends Abstract {
 
 
   /**
-  * @api {post} /assessment/api/v1/surveySubmissions/make/{{submissionId}} Create Survey Submission
+  * @api {post} /assessment/api/v1/surveySubmissions/update/{{submissionId}} Create Survey Submission
   * @apiVersion 1.0.0
   * @apiName Create Survey Submission
   * @apiGroup Survey Submissions
@@ -200,14 +200,14 @@ module.exports = class SurveySubmissions extends Abstract {
   */
 
    /**
-   * make survey submissions.
+   * update survey submissions.
    * @method
-   * @name make
+   * @name update
    * @param {Object} req -request data.
    * @returns {JSON} - survey submissions creation.
    */
 
-  async make(req) {
+  async update(req) {
     return new Promise(async (resolve, reject) => {
 
       try {
