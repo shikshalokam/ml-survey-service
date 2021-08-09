@@ -128,6 +128,7 @@ module.exports = {
     criteriaLevelReport : {
       default : false,
       type : Boolean
-    }
+    },
+    license:Object
   }
 };
