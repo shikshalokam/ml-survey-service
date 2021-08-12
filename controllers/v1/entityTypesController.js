@@ -6,8 +6,10 @@
  */
 
  // Dependencies
+const csv = require("csvtojson");
 const entitiyTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
+const FileStream = require(ROOT_PATH + "/generics/fileStream");
 
  /**
     * EntityTypes
@@ -258,6 +260,148 @@ module.exports = class EntityTypes extends Abstract {
           message: messageConstants.apiResponses.ENTITY_TYPES_FETCHED,
           result: result
         });
+
+      } catch (error) {
+
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        });
+
+      }
+
+
+    })
+  }
+
+  /**
+  * @api {post} /assessment/api/v1/entityTypes/bulkCreate Bulk Create Entity Types
+  * @apiVersion 1.0.0
+  * @apiName Bulk Create Entity Types
+  * @apiGroup Entity Types
+  * @apiParam {File} entityTypes Mandatory entity Type file of type CSV.
+  * @apiSampleRequest /assessment/api/v1/entityTypes/bulkCreate
+  * @apiUse successBody
+  * @apiUse errorBody
+  */
+
+    /**
+   * Bulk create Entity Types.
+   * @method
+   * @name bulkCreate
+   * @param {Object} req -request data.
+   * @param {Object} req.files.entityTypes -entityTypes data.
+   * @returns {CSV} Bulk create entity Types data. 
+   */
+
+  bulkCreate(req) {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+
+        let entityTypesCSVData = await csv().fromString(req.files.entityTypes.data.toString());
+
+        if (!entityTypesCSVData || entityTypesCSVData.length < 1) {
+          throw messageConstants.apiResponses.FILE_DATA_MISSING;
+        }
+
+        let newEntityTypeData = await entitiyTypesHelper.bulkCreate(entityTypesCSVData, req.userDetails);
+
+        if (newEntityTypeData.length > 0) {
+
+          const fileName = `EntityType-Upload`;
+          let fileStream = new FileStream(fileName);
+          let input = fileStream.initStream();
+
+          (async function () {
+            await fileStream.getProcessorPromise();
+            return resolve({
+              isResponseAStream: true,
+              fileNameWithPath: fileStream.fileNameWithPath()
+            });
+          }());
+
+          await Promise.all(newEntityTypeData.map(async entityType => {
+            input.push(entityType);
+          }))
+
+          input.push(null);
+
+        } else {
+          throw messageConstants.apiResponses.SOMETHING_WENT_WRONG;
+        }
+
+      } catch (error) {
+
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        });
+
+      }
+
+
+    })
+  }
+
+  /**
+  * @api {post} /assessment/api/v1/entityTypes/bulkUpdate Bulk Update Entity Types
+  * @apiVersion 1.0.0
+  * @apiName Bulk Create Entity Types
+  * @apiGroup Entity Types
+  * @apiParam {File} entityTypes Mandatory entity Type file of type CSV.
+  * @apiSampleRequest /assessment/api/v1/entityTypes/bulkUpdate
+  * @apiUse successBody
+  * @apiUse errorBody
+  */
+
+    /**
+   * Bulk update Entity Types.
+   * @method
+   * @name bulkUpdate
+   * @param {Object} req -request data.
+   * @param {Object} req.files.entityTypes -entityTypes data.
+   * @returns {CSV} Bulk update entity Types data. 
+   */
+
+  bulkUpdate(req) {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+
+        let entityTypesCSVData = await csv().fromString(req.files.entityTypes.data.toString());
+
+        if (!entityTypesCSVData || entityTypesCSVData.length < 1) {
+          throw messageConstants.apiResponses.FILE_DATA_MISSING;
+        }
+
+        let newEntityTypeData = await entitiyTypesHelper.bulkUpdate(entityTypesCSVData, req.userDetails);
+
+        if (newEntityTypeData.length > 0) {
+
+          const fileName = `EntityType-Upload`;
+          let fileStream = new FileStream(fileName);
+          let input = fileStream.initStream();
+
+          (async function () {
+            await fileStream.getProcessorPromise();
+            return resolve({
+              isResponseAStream: true,
+              fileNameWithPath: fileStream.fileNameWithPath()
+            });
+          }());
+
+          await Promise.all(newEntityTypeData.map(async entityType => {
+            input.push(entityType);
+          }))
+
+          input.push(null);
+
+        } else {
+          throw messageConstants.apiResponses.SOMETHING_WENT_WRONG;
+        }
 
       } catch (error) {
 
