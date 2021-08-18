@@ -27,6 +27,13 @@ module.exports = function () {
     }
   });
 
+  // create report folder in public
+  let csvReportsPath = ROOT_PATH + "/public/reports" ;
+
+  if( !fs.existsSync(csvReportsPath)) {
+    fs.mkdirSync(csvReportsPath);
+  }
+
   //load base v1 controllers
   fs.readdirSync(ROOT_PATH + '/controllers/v1/').forEach(function (file) {
     checkWhetherFolderExistsOrNor(ROOT_PATH + '/controllers/v1/', file);
