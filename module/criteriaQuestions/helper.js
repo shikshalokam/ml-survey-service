@@ -173,6 +173,55 @@ module.exports = class CriteriaQuestionsHelper {
     })
   }
 
+  /**
+   * Get criteria Questions.
+   * @method
+   * @name getCriteriaQuestions
+   * @param {Array} criteriaIds - criteria ids.
+   * @param {String} evidenceId - evidence externalId.
+   * @returns {Array} Question list
+   */
+
+  static getCriteriaQuestions( 
+    criteriaIds,
+    evidenceId
+  ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let questionsArray = [];
+            let criteriaQuestionDocument = await this.list(
+                {  _id: { $in: criteriaIds },
+                  "evidences": {"$elemMatch": {code: evidenceId}}
+                },
+                [
+                    "evidences.$"
+                ],["_id"]);
+
+            if(!criteriaQuestionDocument){
+                throw new Error(messageConstants.apiResponses.CRITERIA_QUESTIONS_COULD_NOT_BE_FOUND);
+            }
+
+            criteriaQuestionDocument.forEach(eachCriteria => {
+                eachCriteria.evidences.forEach(eachEvidence => {
+                    if(eachEvidence.code == evidenceId){
+                        eachEvidence.sections.forEach(eachSection => {
+                            eachSection.questions.forEach(eachQuestion => {
+                                questionsArray.push(eachQuestion);
+                            })
+                        })
+                    }
+                })
+            })
+
+            return resolve(questionsArray);
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+  }
+
 };
 
    /**
