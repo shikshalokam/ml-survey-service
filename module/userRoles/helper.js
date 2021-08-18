@@ -177,7 +177,7 @@ module.exports = class UserRolesHelper {
 
                             let updateRole = await database.models.userRoles.findOneAndUpdate(
                                 {
-                                    code : userRole.code
+                                    _id : userRole._SYSTEM_ID
                                 },
                                 _.merge({
                                     "updatedBy": userDetails.id
