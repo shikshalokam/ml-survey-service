@@ -559,7 +559,7 @@ module.exports = class SurveySubmissionsHelper {
                         }
 
                     }))
-                    result.count = surveySubmissions[0].count ? result.count + surveySubmissions[0].count : result.count;
+                    result.count = (result.data && result.data.length > 0) ? result.data.length : result.count;
                 }
 
                 return resolve({
