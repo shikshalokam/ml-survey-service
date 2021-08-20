@@ -492,9 +492,6 @@ module.exports = class SubmissionsHelper {
 
                         if (answerArray.isAGeneralQuestionResponse) { delete answerArray.isAGeneralQuestionResponse; }
 
-                        updateObject.$push = {
-                            ["evidences." + req.body.evidence.externalId + ".submissions"]: req.body.evidence
-                        };
                         updateObject.$set = {
                             answers: _.assignIn(submissionDocument.answers, answerArray),
                             ["evidences." + req.body.evidence.externalId + ".isSubmitted"] : true,
