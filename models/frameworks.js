@@ -25,6 +25,8 @@ module.exports = {
       type : [String],
       default : []
     },
-    criteriaLevelReport : Boolean
+    criteriaLevelReport : Boolean,
+    license:Object,
+    creator:String
   }
 };
