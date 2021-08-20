@@ -1837,113 +1837,108 @@ module.exports = class ObservationsHelper {
     * @returns {Object} list of entities in observation
    */
 
-   static entities( userId,token,observationId,solutionId,bodyData) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            if( observationId === "" || solutionId === "" ) {
-                return resolve({
-                    status: httpStatusCode.bad_request.status,
-                    message: messageConstants.apiResponses.OBSERVATION_SOLUTION_ID_REQUIRED
-                });
-            }
-
-            if( observationId === "" ) {
-
-                let observationData = await this.observationDocuments({
-                    solutionId : solutionId,
-                    createdBy : userId
-                },["_id"]);
-
-                if( observationData.length > 0 ) {
-                    observationId = observationData[0]._id;
-                } else {
-
-                     let solutionData = 
-                    await kendraService.solutionDetailsBasedOnRoleAndLocation(
-                        token,
-                        bodyData,
-                        solutionId
-                    );
+    static entities( userId,token,observationId,solutionId,bodyData) {
+        return new Promise(async (resolve, reject) => {
+            try {
     
-                    if( !solutionData.success ) {
-                        throw {
-                            message : messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND
-                        }
-                    }
+                if( observationId === "" ) {
     
-                    solutionData.data["startDate"] = new Date();
-                    let endDate = new Date();
-                    endDate.setFullYear(endDate.getFullYear() + 1);
-                    solutionData.data["endDate"] = endDate;
-                    solutionData.data["status"] = messageConstants.common.PUBLISHED;
+                    let observationData = await this.observationDocuments({
+                        solutionId : solutionId,
+                        createdBy : userId
+                    },["_id"]);
     
-                    let entityTypes = Object.keys(_.omit(bodyData,["role"]));
+                    if( observationData.length > 0 ) {
+                        observationId = observationData[0]._id;
+                    } else {
     
-                    if( entityTypes.includes(solutionData.data.entityType) ) {
-
-                        let entityData = 
-                        await entitiesHelper.listByLocationIds(
-                            [bodyData[solutionData.data.entityType]]
+                         let solutionData = 
+                        await kendraService.solutionDetailsBasedOnRoleAndLocation(
+                            token,
+                            bodyData,
+                            solutionId
                         );
         
-                        if( !entityData.success ) {
-                            return resolve(entityData);
+                        if( !solutionData.success ) {
+                            throw {
+                                message : messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND
+                            }
                         }
         
-                        solutionData.data["entities"] = [entityData.data[0]._id];
-                    }
-
-                    delete solutionData.data._id;
+                        solutionData.data["startDate"] = new Date();
+                        let endDate = new Date();
+                        endDate.setFullYear(endDate.getFullYear() + 1);
+                        solutionData.data["endDate"] = endDate;
+                        solutionData.data["status"] = messageConstants.common.PUBLISHED;
+        
+                        let entityTypes = Object.keys(_.omit(bodyData,["role"]));
+        
+                        if( entityTypes.includes(solutionData.data.entityType) ) {
     
-                    let observation = await this.create(
-                        solutionId,
-                        solutionData.data,
-                        userId,
-                        token
-                    );
-    
-                    observationId = observation._id;
-                }
-            }
-
-            let entitiesList = await this.listEntities(observationId);
-
-            let observationData = await this.observationDocuments({
-                _id : observationId,
-            },["_id","solutionId"]);
+                            let entityData = 
+                            await entitiesHelper.listByLocationIds(
+                                [bodyData[solutionData.data.entityType]]
+                            );
             
-            let solutionData;
-            if(observationData[0]){
-                 solutionData = 
-                await solutionHelper.solutionDocuments({
-                    _id : observationData[0].solutionId
-                },[
-                    "allowMultipleAssessemts",
-                ]);
-            }
-
-            return resolve({
-                success : true,
-                message : messageConstants.apiResponses.OBSERVATION_ENTITIES_FETCHED,
-                data : {
-                    "allowMultipleAssessemts" : solutionData[0].allowMultipleAssessemts,
-                    _id : observationId,
-                    "entities" : entitiesList.data.entities,
-                    entityType : entitiesList.data.entityType
+                            if( !entityData.success ) {
+                                return resolve(entityData);
+                            }
+            
+                            solutionData.data["entities"] = [entityData.data[0]._id];
+                        }
+    
+                        delete solutionData.data._id;
+        
+                        let observation = await this.create(
+                            solutionId,
+                            solutionData.data,
+                            userId,
+                            token
+                        );
+        
+                        observationId = observation._id;
+                    }
                 }
-            });
-
-        } catch (error) {
-            return resolve({
-                status : error.status ? error.status : httpStatusCode['internal_server_error'].status,
-                success: false,
-                message: error.message,
-                data: []
-            });
-        }
-    })
-   }
+    
+                let entitiesList = await this.listEntities(observationId);
+    
+                let observationData = await this.observationDocuments({
+                    _id : observationId,
+                },["_id","solutionId"]);
+                
+                let solutionData;
+                if(observationData[0]){
+                     solutionData = 
+                    await solutionHelper.solutionDocuments({
+                        _id : observationData[0].solutionId
+                    },[
+                        "allowMultipleAssessemts",
+                        "license"
+                    ]);
+                }
+    
+                return resolve({
+                    success : true,
+                    message : messageConstants.apiResponses.OBSERVATION_ENTITIES_FETCHED,
+                    data : {
+                        "allowMultipleAssessemts" : solutionData[0].allowMultipleAssessemts,
+                        _id : observationId,
+                        "entities" : entitiesList.data.entities,
+                        entityType : entitiesList.data.entityType,
+                        "license" :  solutionData[0].license
+                    }
+                });
+    
+            } catch (error) {
+                return resolve({
+                    status : error.status ? error.status : httpStatusCode['internal_server_error'].status,
+                    success: false,
+                    message: error.message,
+                    data: []
+                });
+            }
+        })
+       }
 
      /**
     * List of observation entities.
