@@ -1373,14 +1373,13 @@ module.exports = class ObservationSubmissions extends Abstract {
           if( req.method === "POST" ) {
 
             if( req.body.title ) {
-              
               response = await observationSubmissionsHelper.setTitle(
                 req.params._id,
                 req.userDetails.userId,
                 req.body.title
               );
 
-            } else if( req.body.evidence ) {
+            }else if( req.body.evidence ) {
               
               let isSubmissionAllowed = await observationSubmissionsHelper.isAllowed
               (
@@ -1396,8 +1395,24 @@ module.exports = class ObservationSubmissions extends Abstract {
                 throw new Error(messageConstants.apiResponses.MULTIPLE_SUBMISSIONS_NOT_ALLOWED);
               }
               
-              response = await submissionsHelper.createEvidencesInSubmission(req, "observationSubmissions", false);
+              if(req.body.evidence.notApplicable && req.body.evidence.answers == undefined){
+
+                let formattedEvidence = await observationSubmissionsHelper.addAnswersMarkedAsNA(
+                  req.params._id,
+                  req.userDetails.userId,
+                  req.body.evidence.externalId,
+                  req.body.evidence.remarks ? req.body.evidence.remarks : ""
+                );
+
+                if(!formattedEvidence || !formattedEvidence.result.evidences){
+                  return resolve(formattedEvidence);
+                }
+
+                req.body.evidence = formattedEvidence.result.evidences;
+                
+              }
               
+              response = await submissionsHelper.createEvidencesInSubmission(req, "observationSubmissions", false);
               if (response.result.status && response.result.status === "completed") {
                 await observationSubmissionsHelper.pushCompletedObservationSubmissionForReporting(req.params._id);
               } else if(response.result.status && response.result.status === "ratingPending") {
