@@ -885,20 +885,42 @@ module.exports = class SurveysHelper {
 
                 solutionDocument = solutionDocument[0];
 
-                if (new Date() > new Date(solutionDocument.endDate)) {
-                    if (solutionDocument.status == messageConstants.common.ACTIVE_STATUS) {
-                        await solutionHelper.updateSolutionDocument
-                        (
-                            { _id : solutionDocument._id },
-                            { $set : { status: messageConstants.common.INACTIVE_STATUS } }
-                        )
-                    }
+                let endDateCheckRequired = true;
 
-                    return resolve({
-                        success: true,
-                        message: messageConstants.apiResponses.LINK_IS_EXPIRED,
-                        data: []
-                    });
+                if ( submissionId != "" ) {
+                    let submissionDocument = await surveySubmissionsHelper.surveySubmissionDocuments(
+                        {
+                            _id: submissionId
+                        },
+                        [
+                            "status"
+                        ]
+                    );
+
+                    if(submissionDocument && submissionDocument.length > 0){
+                        if ( submissionDocument[0].status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ){
+                            endDateCheckRequired = false;
+                        }
+                    }
+                }
+
+                if (endDateCheckRequired) {
+
+                    if (new Date() > new Date(solutionDocument.endDate)) {
+                        if (solutionDocument.status == messageConstants.common.ACTIVE_STATUS) {
+                            await solutionHelper.updateSolutionDocument
+                            (
+                                { _id : solutionDocument._id },
+                                { $set : { status: messageConstants.common.INACTIVE_STATUS } }
+                            )
+                        }
+
+                        return resolve({
+                            success: true,
+                            message: messageConstants.apiResponses.LINK_IS_EXPIRED,
+                            data: []
+                        });
+                    }
                 }
                 
                 let programDocument = [];
