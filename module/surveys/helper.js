@@ -915,11 +915,7 @@ module.exports = class SurveysHelper {
                             )
                         }
 
-                        return resolve({
-                            success: true,
-                            message: messageConstants.apiResponses.LINK_IS_EXPIRED,
-                            data: []
-                        });
+                        throw new Error(messageConstants.apiResponses.LINK_IS_EXPIRED)
                     }
                 }
                 
