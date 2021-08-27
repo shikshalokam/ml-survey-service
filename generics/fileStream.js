@@ -13,7 +13,7 @@ let FileStream = class FileStream {
       fs.mkdirSync("public");
     }
 
-    let csvReportsPath = "./public/reports" ;
+    let csvReportsPath = "reports" ;
 
     if( !fs.existsSync("public" + "/" + csvReportsPath)) {
       fs.mkdirSync("public" + "/" + csvReportsPath);
