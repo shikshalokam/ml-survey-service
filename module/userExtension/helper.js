@@ -506,7 +506,7 @@ module.exports = class UserExtensionHelper {
                             entityObject.role = userRole.role;
                         }
                       
-                        await this.pushUserToElasticSearch(user._doc, entityObject);
+                        // await this.pushUserToElasticSearch(user._doc, entityObject);
 
                     } catch (error) {
                         userRole.status = (error && error.message) ? error.message : error;
