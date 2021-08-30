@@ -240,14 +240,8 @@ module.exports = class UserExtensionHelper {
                         })
                     }
                 })
-
-                let userToKeycloakIdMap = {};
+                
                 let userKeycloakId = "";
-                // let userRole;
-                // let existingEntity;
-                // let existingUserRole;
-                const keycloakUserIdIsMandatoryInFile = 
-                (process.env.DISABLE_LEARNER_SERVICE_ON_OFF && process.env.DISABLE_LEARNER_SERVICE_ON_OFF == "ON") ? "true" : false;
 
                 for (
                     let csvRowNumber = 0; 
@@ -284,26 +278,10 @@ module.exports = class UserExtensionHelper {
                             continue;
                         }
 
-                        if (userToKeycloakIdMap[userRole.user]) {
-                            userKeycloakId = userToKeycloakIdMap[userRole.user];
-                        } else {
-                            if (keycloakUserIdIsMandatoryInFile) {
-                                if (!userRole["keycloak-userId"] || userRole["keycloak-userId"] == "") {
-                                    throw messageConstants.apiResponses.KEYCLOAK_USER_ID;
-                                }
-                                userKeycloakId = userRole["keycloak-userId"]
-                                userToKeycloakIdMap[userRole.user] = userRole["keycloak-userId"];
-                            } else {
-                                let keycloakUserId = await shikshalokamGenericHelper.getKeycloakUserIdByLoginId(userDetails.userToken, userRole.user);
-
-                                if (keycloakUserId && keycloakUserId.length > 0 && keycloakUserId[0].userLoginId) {
-                                    userKeycloakId = keycloakUserId[0].userLoginId;
-                                    userToKeycloakIdMap[userRole.user] = keycloakUserId[0].userLoginId;
-                                } else {
-                                    throw messageConstants.apiResponses.USER_ENTITY_ID;
-                                }
-                            }
+                        if (!userRole["keycloak-userId"] || userRole["keycloak-userId"] == "") {
+                            throw messageConstants.apiResponses.KEYCLOAK_USER_ID;
                         }
+                        userKeycloakId = userRole["keycloak-userId"]
 
                         if (userRole.entity) {
                             
