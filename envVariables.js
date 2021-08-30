@@ -85,6 +85,10 @@ let enviromentVariables = {
   "ELASTIC_SEARCH_SNIFF_ON_START" : {
     "message" : "Elastic search sniff on start",
     "optional" : false
+  },
+  "DISABLE_LEARNER_SERVICE_ON_OFF": {
+    "message" : "Disable learner service on/off",
+    "default": "ON"
   }
 }
 
