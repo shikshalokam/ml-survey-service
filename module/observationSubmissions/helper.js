@@ -1005,7 +1005,8 @@ module.exports = class ObservationSubmissionsHelper {
                 "scoringSystem",
                 "isRubricDriven",
                 "entityType",
-                "criteriaLevelReport"
+                "criteriaLevelReport",
+                "completedDate"
                ],
                { completedDate: -1 }
             );
