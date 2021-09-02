@@ -670,15 +670,6 @@ module.exports = class AssessmentsHelper {
                   solutionInformation["project"] = requestedData.project;
                   solutionInformation["referenceFrom"] = messageConstants.common.PROJECT;
               }
-
-              let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                userDetails.userToken,
-                userDetails.userId
-              );
-
-              let createdFor =  organisationAndRootOrganisation.createdFor;
-              let rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
   
               let createdSolutionAndProgram = 
               await solutionsHelper.createProgramAndSolutionFromTemplate(
@@ -686,9 +677,7 @@ module.exports = class AssessmentsHelper {
                 requestedData.program,
                 userDetails.userId,
                 solutionInformation,
-                true,
-                createdFor,
-                rootOrganisations
+                true
               );
 
               await entityAssessorsHelper.update(

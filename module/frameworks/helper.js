@@ -25,7 +25,6 @@ module.exports = class FrameworksHelper {
             language: ["English"],
             keywords: ["Framework", "Assessment"],
             concepts: [],
-            createdFor: [],
             isRubricDriven: true,
             isDeleted: false,
             parentId: null,

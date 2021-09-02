@@ -248,7 +248,6 @@ module.exports = class ObservationSubmissions extends Abstract {
               language: 0,
               keywords: 0,
               concepts: 0,
-              createdFor: 0,
               updatedAt : 0,
               createdAt : 0,
               frameworkCriteriaId : 0,

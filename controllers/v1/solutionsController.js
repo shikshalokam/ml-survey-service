@@ -814,7 +814,6 @@ module.exports = class Solutions extends Abstract {
                 "language",
                 "keywords",
                 "concepts",
-                "createdFor",
                 "evidences"
               ])
             );
@@ -1499,8 +1498,6 @@ module.exports = class Solutions extends Abstract {
                 "entities": [
                     "5f636fa2916c13367d8ff835"
                 ],
-                "createdFor": [],
-                "rootOrganisations": [],
                 "isAPrivateProgram": false,
                 "deleted": false,
                 "status": "published",
@@ -1645,10 +1642,6 @@ module.exports = class Solutions extends Abstract {
                 "Assessment"
             ],
             "concepts": [],
-            "createdFor": [
-                "0125747659358699520",
-                "0125748495625912324"
-            ],
             "isReusable": false,
             "isRubricDriven": true,
             "entityTypeId": "5d15a959e9185967a6d5e8a6",

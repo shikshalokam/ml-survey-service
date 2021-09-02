@@ -389,11 +389,6 @@ module.exports = class criteriaHelper {
               }
             ];
 
-            criteriaStructure["createdFor"] = [
-              "0125747659358699520",
-              "0125748495625912324"
-            ];
-
             criteriaStructure["evidences"] = [];
             criteriaStructure["deleted"] = false;
             criteriaStructure["owner"] = userId;
