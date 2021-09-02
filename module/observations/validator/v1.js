@@ -41,12 +41,6 @@ module.exports = (req) => {
         verifyLink : function () {
             req.checkParams('_id').exists().withMessage("required link")
         },
-        bulkCreateByUserRoleAndEntity :  function () {
-            req.checkBody('entityId').exists().withMessage("required entityId")
-            .isMongoId().withMessage("Invalid entity id");
-            req.checkBody('role').exists().withMessage("required role");
-            req.checkBody('solutionExternalId').exists().withMessage("required solutionExternalId");
-        },
         submissionStatus : function () {
             req.checkParams('_id').exists().withMessage("required observation id");
             req.checkQuery('entityId').exists().withMessage("required entity id");

@@ -39,8 +39,6 @@ module.exports = {
     },
     entityType : String,
     entities: Array,
-    createdFor: [String],
-    rootOrganisations: [String],
     isAPrivateProgram : {
       default : false,
       type : Boolean
