@@ -21,10 +21,6 @@ module.exports = {
     language: Array,
     keywords: Array,
     concepts: Array,
-    createdFor: {
-      type : Array,
-      index : true
-    },
     scoringSystem: String,
     levelToScoreMapping: Object,
     themes: Array,
@@ -90,10 +86,6 @@ module.exports = {
     isDeleted: {
         default : false,
         type : Boolean
-    },
-    rootOrganisations : {
-      type : [String],
-      default : []
     },
     link: {
       type: String,

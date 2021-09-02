@@ -91,12 +91,6 @@ module.exports = class ObservationsHelper {
                     throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
                 }
 
-                let organisationAndRootOrganisation = 
-                await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                    requestingUserAuthToken,
-                    userId
-                );
-
                 let solutionData = 
                 await solutionHelper.solutionDocuments({
                     _id : solutionId
@@ -130,9 +124,7 @@ module.exports = class ObservationsHelper {
                         },
                         userId,
                         _.omit(data,["entities"]),
-                        true,
-                        organisationAndRootOrganisation.createdFor,
-                        organisationAndRootOrganisation.rootOrganisations
+                        true
                     );
 
                 } else {
@@ -144,8 +136,7 @@ module.exports = class ObservationsHelper {
                 await this.createObservation(
                     data,
                     userId,
-                    solutionData,
-                    organisationAndRootOrganisation
+                    solutionData
                 );
 
                 return resolve(_.pick(observationData, ["_id", "name", "description"]));
@@ -164,11 +155,10 @@ module.exports = class ObservationsHelper {
      * @param {String} userId - Logged in user id.
      * @param {Object} solution - Solution detail data.
      * @param {Object} solution - Solution detail data.
-     * @param {String} organisationAndRootOrganisation - organisation and root organisation details. 
      * @returns {Object} observation creation data.
      */
 
-    static createObservation(data,userId,solution,organisationAndRootOrganisation) {
+    static createObservation(data,userId,solution) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -196,8 +186,6 @@ module.exports = class ObservationsHelper {
                         "entityType": solution.entityType,
                         "updatedBy": userId,
                         "createdBy": userId,
-                        "createdFor": organisationAndRootOrganisation.createdFor,
-                        "rootOrganisations": organisationAndRootOrganisation.rootOrganisations,
                         "isAPrivateProgram" : solution.isAPrivateProgram
                     })
                 );
@@ -214,55 +202,6 @@ module.exports = class ObservationsHelper {
                 return reject(error);
             }
         })
-    }
-
-    /**
-     * Fetch user organisation details.
-     * @method
-     * @name getUserOrganisationDetails
-     * @param {Array} userIds - Array of user ids required..
-     * @param {String} requestingUserAuthToken - Requesting user auth token. 
-     * @returns {Object} User organisation details.
-     */
-
-    static getUserOrganisationDetails(userIds = [], requestingUserAuthToken = "") {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if(requestingUserAuthToken == "") {
-                    throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
-                }
-
-                let userOrganisationDetails = {};
-
-                if(userIds.length > 0) {
-                    for (let pointerToUserIds = 0; pointerToUserIds < userIds.length; pointerToUserIds++) {
-                        
-                        const user = userIds[pointerToUserIds];
-                        let userOrganisations = 
-                        await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                            requestingUserAuthToken, 
-                            userIds[pointerToUserIds]
-                        );
-                        
-                        userOrganisationDetails[user] = userOrganisations;
-                    }
-                }
-
-                return resolve({
-                    success : true,
-                    message : "User organisation details fetched successfully.",
-                    data : userOrganisationDetails
-                });
-
-            } catch (error) {
-                return reject({
-                    success : false,
-                    message : error.message
-                });
-            }
-        })
-
     }
 
     /**
@@ -615,8 +554,6 @@ module.exports = class ObservationsHelper {
 
                     let observation = {}
 
-                    observation["createdFor"] = userOrganisations.createdFor;
-                    observation["rootOrganisations"] = userOrganisations.rootOrganisations;
                     observation["status"] = "published";
                     observation["deleted"] = false;
                     observation["solutionId"] = solution._id;
@@ -1041,12 +978,6 @@ module.exports = class ObservationsHelper {
     static createV2( templateId,userId,requestedData,token ) {
         return new Promise(async (resolve, reject) => {
             try {
-  
-              let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                token,
-                userId
-              );
 
               let solutionInformation =  {
                 name : requestedData.name,
@@ -1065,9 +996,7 @@ module.exports = class ObservationsHelper {
                 requestedData.program,
                 userId,
                 solutionInformation,
-                true,
-                organisationAndRootOrganisation.createdFor,
-                organisationAndRootOrganisation.rootOrganisations
+                true
               );
 
               let startDate = new Date();
@@ -1092,8 +1021,7 @@ module.exports = class ObservationsHelper {
               await this.createObservation(
                 observationData,
                 userId,
-                createdSolutionAndProgram,
-                organisationAndRootOrganisation
+                createdSolutionAndProgram
               );
 
               createdSolutionAndProgram["observationName"] = observation.name;
@@ -1318,13 +1246,6 @@ module.exports = class ObservationsHelper {
                     "link" : link
                 }
 
-                
-                let organisationAndRootOrganisation = 
-                await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                    requestingUserAuthToken,
-                    userId
-                );
-
                 let solution = {
                     "_id":solutionId,
                     "externalId": observationSolutionData[0].externalId,
@@ -1341,8 +1262,7 @@ module.exports = class ObservationsHelper {
                 let result = await this.createObservation(
                     dataObj,
                     userId,
-                    solution,
-                    organisationAndRootOrganisation
+                    solution
                 );
 
                 return resolve({
@@ -1355,181 +1275,6 @@ module.exports = class ObservationsHelper {
             }
         })
     }
-
-
-    /**
-      * Bulk create observations By entityId and role.
-      * @method
-      * @name bulkCreateByUserRoleAndEntity - Bulk create observations by entity and role.
-      * @param {Object} userObservationData - user observation data
-      * @param {String} userToken - logged in user token.
-      * @returns {Object}  Bulk create user observations.
-     */
-
-    static bulkCreateByUserRoleAndEntity(userObservationData, userToken) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                let userAndEntityList = await kendraService.getUsersByEntityAndRole
-                (
-                    userObservationData.entityId,
-                    userObservationData.role
-                )
-              
-                if (!userAndEntityList.success) {
-                    throw new Error(messageConstants.apiResponses.USERS_AND_ENTITIES_NOT_FOUND);
-                }
-
-                let entityIds = [];
-                let usersKeycloakIdMap = {};
-
-                await Promise.all(userAndEntityList.data.map( user => {
-                    if (!entityIds.includes(user.entityId)) {
-                        entityIds.push(user.entityId);
-                    }
-                    usersKeycloakIdMap[user.userId] = true;
-                })) 
-
-                const fileName = `Observation-Upload-Result`;
-                let fileStream = new FileStream(fileName);
-                let input = fileStream.initStream();
-
-                (async function () {
-                    await fileStream.getProcessorPromise();
-                    return resolve({
-                        isResponseAStream: true,
-                        fileNameWithPath: fileStream.fileNameWithPath()
-                    });
-                })();
-                
-                if(Object.keys(usersKeycloakIdMap).length > 0) {
-                    
-                    let userOrganisationDetails = await this.getUserOrganisationDetails(
-                        Object.keys(usersKeycloakIdMap), 
-                        userToken
-                    );
-
-                    usersKeycloakIdMap = userOrganisationDetails.data;
-                }
-
-                let entityDocument;
-
-                if (entityIds.length > 0) {
-                    
-                    let entityQuery = {
-                        _id: {
-                            $in: entityIds
-                        }
-                    };
-
-                    let entityProjection = [
-                        "entityTypeId",
-                        "entityType"
-                    ];
-
-                    entityDocument = await entitiesHelper.entityDocuments(entityQuery, entityProjection);
-                }
-
-                let entityObject = {};
-
-                if (entityDocument && Array.isArray(entityDocument) && entityDocument.length > 0) {
-                    entityDocument.forEach(eachEntityDocument => {
-                        entityObject[eachEntityDocument._id.toString()] = eachEntityDocument;
-                    })
-                }
-
-                let solutionQuery = {
-                    externalId: userObservationData.solutionExternalId,
-                    status: "active",
-                    isDeleted: false,
-                    isReusable: false,
-                    type: "observation",
-                    programId : { $exists : true }
-                };
-
-                let solutionProjection = [
-                    "externalId",
-                    "frameworkExternalId",
-                    "frameworkId",
-                    "name",
-                    "description",
-                    "type",
-                    "subType",
-                    "entityTypeId",
-                    "entityType",
-                    "programId",
-                    "programExternalId"
-                ];
-
-                let solutionDocument = await solutionsHelper.solutionDocuments(solutionQuery, solutionProjection);
-                 
-                if (!solutionDocument.length) {
-                    throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
-                }
-               
-                let solution = solutionDocument[0];
-                
-                for (let pointerToObservation = 0; pointerToObservation < userAndEntityList.data.length; pointerToObservation++) {
-
-                    let entityDocument = {};
-                    let observationHelperData;
-                    let currentData = userAndEntityList.data[pointerToObservation];
-                    let csvResult = {};
-                    let status;
-                    let userId;
-                    let userOrganisations;
-
-                    Object.keys(currentData).forEach(eachObservationData => {
-                        csvResult[eachObservationData] = currentData[eachObservationData];
-                    })
-
-                    try {
-
-                        if (currentData["userId"] && currentData["userId"] !== "") {
-                            userId = currentData["userId"];
-                        } 
-
-                        if(userId == "") {
-                            throw new Error(messageConstants.apiResponses.USER_NOT_FOUND);
-                        }
-
-                        if(!usersKeycloakIdMap[userId]  || !Array.isArray(usersKeycloakIdMap[userId].rootOrganisations) || usersKeycloakIdMap[userId].rootOrganisations.length < 1) {
-                            throw new Error(messageConstants.apiResponses.USER_ORGANISATION_DETAILS_NOT_FOUND);
-                        } else {
-                            userOrganisations = usersKeycloakIdMap[userId];
-                        }
-
-                        if (currentData.entityId && currentData.entityId != "") {
-                            if(entityObject[currentData.entityId.toString()] !== undefined) {
-                                entityDocument = entityObject[currentData.entityId.toString()];
-                            } else {
-                                throw new Error(messageConstants.apiResponses.ENTITY_NOT_FOUND);
-                            }
-                        }
-                       
-                        observationHelperData = await this.bulkCreate(
-                            userId, 
-                            solution, 
-                            entityDocument, 
-                            userOrganisations
-                        );
-                        status = observationHelperData.status;
-
-                    } catch (error) {
-                        status = error.message;
-                    }
-                    
-                    csvResult["status"] = status;
-                    input.push(csvResult);
-                }
-
-                input.push(null);
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
-
 
       /**
      * List of Observation submissions

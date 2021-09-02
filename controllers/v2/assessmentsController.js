@@ -367,8 +367,7 @@ module.exports = class Assessments {
                         resourceType: 0,
                         language: 0,
                         keywords: 0,
-                        concepts: 0,
-                        createdFor: 0
+                        concepts: 0
                     }
                 ).lean();
 

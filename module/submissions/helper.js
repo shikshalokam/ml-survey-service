@@ -1336,7 +1336,6 @@ module.exports = class SubmissionsHelper {
                     "language",
                     "keywords",
                     "concepts",
-                    "createdFor",
                     "evidences"
                 ]
             );

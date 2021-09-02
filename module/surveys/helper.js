@@ -538,12 +538,11 @@ module.exports = class SurveysHelper {
      * @method
      * @name createSurveyDocument
      * @param {String} userId =  - logged in user id.    
-     * @param {Object} solution - solution document .
-     * @param {Array} userOrganisations - User organisations  
+     * @param {Object} solution - solution document . 
      * @returns {Object} status and survey id.
      */
 
-    static createSurveyDocument(userId = "", solution = {}, userOrganisations = {}) {
+    static createSurveyDocument(userId = "", solution = {}) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -567,13 +566,6 @@ module.exports = class SurveysHelper {
                 } else {
                     
                     let survey = {}
-
-                    if (userOrganisations.createdFor) {
-                        survey["createdFor"] = userOrganisations.createdFor;
-                    }
-                    if (userOrganisations.rootOrganisations) {
-                        survey["rootOrganisations"] = userOrganisations.rootOrganisations;
-                    }
 
                     survey["status"] = messageConstants.common.PUBLISHED;
                     survey["deleted"] = false;
@@ -762,18 +754,6 @@ module.exports = class SurveysHelper {
                     surveyId = surveyDocument[0]._id;
                 }
                 else {
-
-                    let userOrgDetails = await this.getUserOrganisationDetails
-                    (
-                        [userId],
-                        token
-                    )
-                    
-                    userOrgDetails = userOrgDetails.data;
-
-                    if(!userOrgDetails[userId] || !Array.isArray(userOrgDetails[userId].rootOrganisations) || userOrgDetails[userId].rootOrganisations.length < 1) {
-                        throw new Error(messageConstants.apiResponses.ORGANISATION_DETAILS_NOT_FOUND_FOR_USER)
-                    }
 
                     let createSurveyDocument = await this.createSurveyDocument
                         (
@@ -967,8 +947,7 @@ module.exports = class SurveysHelper {
                         "resourceType",
                         "language",
                         "keywords",
-                        "concepts",
-                        "createdFor"
+                        "concepts"
                     ]
                 )
 
@@ -1129,56 +1108,6 @@ module.exports = class SurveysHelper {
                 });
             }
         })
-    }
-
-    /**
-     * Fetch user organisation details.
-     * @method
-     * @name getUserOrganisationDetails
-     * @param {Array} userIds - Array of user ids required..
-     * @param {String} requestingUserAuthToken - Requesting user auth token. 
-     * @returns {Object} User organisation details.
-     */
-
-    static getUserOrganisationDetails(userIds = [], requestingUserAuthToken = "") {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if(requestingUserAuthToken == "") {
-                    throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
-                }
-
-                let userOrganisationDetails = {};
-
-                if(userIds.length > 0) {
-                    for (let pointerToUserIds = 0; pointerToUserIds < userIds.length; pointerToUserIds++) {
-                        
-                        const user = userIds[pointerToUserIds];
-                        let userOrganisations = 
-                        await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                            requestingUserAuthToken, 
-                            userIds[pointerToUserIds]
-                        );
-                        
-                        userOrganisationDetails[user] = userOrganisations;
-                    }
-                }
-
-                return resolve({
-                    success : true,
-                    message : messageConstants.apiResponses.USER_ORGANISATION_DETAILS_FETCHED,
-                    data : userOrganisationDetails
-                });
-
-            } catch (error) {
-                return reject({
-                    success: false,
-                    message: error.message,
-                    data: false
-                });
-            }
-        })
-
     }
 
     /**
@@ -1627,23 +1556,10 @@ module.exports = class SurveysHelper {
                         throw new Error(messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND)
                     }
 
-                    let userOrgDetails = await this.getUserOrganisationDetails
-                    (
-                        [userId],
-                        token
-                    )
-
-                    userOrgDetails = userOrgDetails.data;
-
-                    if (!userOrgDetails[userId] || !Array.isArray(userOrgDetails[userId].rootOrganisations) || userOrgDetails[userId].rootOrganisations.length < 1) {
-                        throw new Error(messageConstants.apiResponses.ORGANISATION_DETAILS_NOT_FOUND_FOR_USER)
-                    }
-
                     let createSurveyDocument = await this.createSurveyDocument
                     (
                         userId,
-                        solutionData.data,
-                        userOrgDetails[userId]
+                        solutionData.data
                     )
 
                     if (!createSurveyDocument.success) {
