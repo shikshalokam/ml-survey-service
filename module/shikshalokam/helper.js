@@ -1,6 +1,5 @@
 const Request = require(GENERIC_HELPERS_PATH + '/httpRequest');
 const shikshalokamBaseHost = process.env.USER_SERVICE_URL;
-const userOrganisationHelper = require(MODULES_BASE_PATH + "/userOrganisations/helper");
 
 module.exports = class ShikshalokamHelper {
 
