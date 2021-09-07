@@ -12,10 +12,8 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
-const csv = require("csvtojson");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
-const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 
 /**
     * Observations
