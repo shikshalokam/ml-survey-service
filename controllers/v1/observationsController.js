@@ -1154,6 +1154,9 @@ module.exports = class Observations extends Abstract {
                 }
 
                 if (req.body && req.body.role) {
+
+                    console.log("--- Inside role ----");
+                    console.log("--- load user roles helper ----",userRolesHelper);
                     
                     let roleDocument = await userRolesHelper.list
                     ( { code : req.body.role },
