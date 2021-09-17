@@ -130,6 +130,7 @@ module.exports = class ObservationSubmissionsHelper {
                     );
                 }
 
+                console.log("--- logs starts here -----");
                 const kafkaMessage = await kafkaClient.pushCompletedObservationSubmissionToKafka(observationSubmissionsDocument);
 
                 if(kafkaMessage.status != "success") {
@@ -141,6 +142,8 @@ module.exports = class ObservationSubmissionsHelper {
                     };
                     console.log(errorObject);
                 }
+
+                console.log("--logs ends here---")
 
                 return resolve(kafkaMessage);
 
