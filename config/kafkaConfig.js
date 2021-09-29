@@ -23,7 +23,7 @@ var connect = function() {
       console.error.bind(console, "kafka producer creation error!")
     })
 
-    if(process.env.SUBMISSION_RATING_QUEUE_TOPIC["submissionRatingQueueTopic"] && process.env.SUBMISSION_RATING_QUEUE_TOPIC["submissionRatingQueueTopic"] != "") {
+    if(process.env.SUBMISSION_RATING_QUEUE_TOPIC && process.env.SUBMISSION_RATING_QUEUE_TOPIC != "OFF") {
 
         let consumer = new kafka.ConsumerGroup(
           {
@@ -31,7 +31,7 @@ var connect = function() {
               groupId : process.env.KAFKA_GROUP_ID,
               autoCommit : true
           },
-          process.env.SUBMISSION_RATING_QUEUE_TOPIC["submissionRatingQueueTopic"]
+          process.env.SUBMISSION_RATING_QUEUE_TOPIC
           ); 
 
         consumer.on('message', async function (message) {
