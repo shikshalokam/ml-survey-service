@@ -42,18 +42,19 @@ fs.existsSync("logs") || fs.mkdirSync("logs");
 
 app.all("*", (req, res, next) => {
   
-  console.log("-------Request log starts here------------------");
-  console.log(
-    "%s %s on %s from ",
-    req.method,
-    req.url,
-    new Date(),
-    req.headers["user-agent"]
-  );
-  console.log("Request Headers: ", req.headers);
-  console.log("Request Body: ", req.body);
-  console.log("Request Files: ", req.files);
-  console.log("-------Request log ends here------------------");
+  console.log({"Debugging ML Survey Service": true});
+  // console.log("-------Request log starts here------------------");
+  // console.log(
+  //   "%s %s on %s from ",
+  //   req.method,
+  //   req.url,
+  //   new Date(),
+  //   req.headers["user-agent"]
+  // );
+  // console.log("Request Headers: ", req.headers);
+  // console.log("Request Body: ", req.body);
+  // console.log("Request Files: ", req.files);
+  // console.log("-------Request log ends here------------------");
   next();
 });
 
