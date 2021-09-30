@@ -510,7 +510,7 @@ module.exports = class Observations extends Abstract {
                     response = 
                     await observationsHelper.removeEntityFromObservation(
                         req.params._id,
-                        req.body.data,
+                        req.query.entityId.split(','),
                         req.userDetails.id
                     ) 
                 }
