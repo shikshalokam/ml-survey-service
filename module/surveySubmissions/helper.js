@@ -511,6 +511,8 @@ module.exports = class SurveySubmissionsHelper {
                             "endDate"
                         ]);
 
+                        console.log(solutionDetail "solutionDetail")
+
                         let solutionEndDate;
                         if(solutionDetail && solutionDetail.length > 0){
                             solutionEndDate = solutionDetail[0].endDate;
