@@ -507,11 +507,11 @@ module.exports = class SurveySubmissionsHelper {
 
                         let solutionDetail = await solutionsHelper.solutionDocuments({
                             _id : surveySubmission.solutionId
-                          }, [
+                          },[
                             "endDate"
                         ]);
 
-                        console.log(solutionDetail "solutionDetail")
+                        console.log(solutionDetail, "solutionDetail")
 
                         let solutionEndDate;
                         if(solutionDetail && solutionDetail.length > 0){
