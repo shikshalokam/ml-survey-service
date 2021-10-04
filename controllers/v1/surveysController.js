@@ -784,7 +784,6 @@ module.exports = class Surveys extends Abstract {
         return new Promise(async (resolve, reject) => {
             try {
 
-                console.log(req.query.surveyReportPage,"userAssigned surveyReportPage")
                 let surveys = await surveysHelper.userAssigned(
                     req.userDetails.userId,
                     req.pageSize,
