@@ -1673,7 +1673,7 @@ module.exports = class SurveysHelper {
             let surveySolutions = {
                 success : false
             };
-            console.log(gen.utils.convertStringToBoolean(surveyReportPage),"userAssigned surveyReportPage value")
+           
             if ( surveyReportPage === "" || gen.utils.convertStringToBoolean(surveyReportPage) ) {
                 
                 surveySolutions = await surveySubmissionsHelper.surveySolutions(
@@ -1712,8 +1712,6 @@ module.exports = class SurveysHelper {
             )
             
             if( surveySubmissions.success && surveySubmissions.data.data.length > 0 ) {
-
-                console.log(surveySubmissions.data.data,"surveySubmissions.data.data")
 
                 totalCount += surveySubmissions.data.count;
                 

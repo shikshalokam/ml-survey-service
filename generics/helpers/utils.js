@@ -263,7 +263,17 @@ function convertStringToBoolean(stringData) {
   let stringToBoolean = (stringData === "TRUE" || stringData === "true");
   return stringToBoolean;
 }
+/**
+  * check the uuid is valid
+  * @function
+  * @name checkIfValidUUID
+  * @returns {String} returns boolean.  
+*/
 
+function checkIfValidUUID(value) {
+  const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+  return regexExp.test(value);
+}
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -285,5 +295,6 @@ module.exports = {
   generateUUId : generateUUId,
   md5Hash : md5Hash,
   removeDuplicatesFromArray : removeDuplicatesFromArray,
-  convertStringToBoolean : convertStringToBoolean
+  convertStringToBoolean : convertStringToBoolean,
+  checkIfValidUUID : checkIfValidUUID
 };
