@@ -11,7 +11,6 @@ const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 
-
  /**
     * EntitiesHelper
     * @class
@@ -1895,8 +1894,10 @@ static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId 
             if(eachMetaData.districtName && eachMetaData.districtName != "") {
                 eachMetaData.name += ", "+eachMetaData.districtName;
             }
-    
-            if( eachMetaData.externalId && eachMetaData.externalId !== "" ) {
+
+            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.externalId);
+
+            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
                 eachMetaData.name += ", "+eachMetaData.externalId;
             }
         })
