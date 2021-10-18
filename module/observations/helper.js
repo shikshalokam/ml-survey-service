@@ -12,7 +12,7 @@ const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSu
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfObservationSubmissionsLength = 500;
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const moment = require("moment-timezone");
 const { ObjectId } = require("mongodb");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
@@ -1068,7 +1068,7 @@ module.exports = class ObservationsHelper {
                     });
                 }
 
-                let appDetails = await kendraService.getAppDetails(appName);
+                let appDetails = await coreService.getAppDetails(appName);
                 
                 if(appDetails.result === false){
                     throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
@@ -1520,7 +1520,7 @@ module.exports = class ObservationsHelper {
             }
 
             let targetedSolutions = 
-            await kendraService.solutionBasedOnRoleAndLocation
+            await coreService.solutionBasedOnRoleAndLocation
             (
                 token,
                 bodyData,
@@ -1597,7 +1597,7 @@ module.exports = class ObservationsHelper {
                     } else {
     
                          let solutionData = 
-                        await kendraService.solutionDetailsBasedOnRoleAndLocation(
+                        await coreService.solutionDetailsBasedOnRoleAndLocation(
                             token,
                             bodyData,
                             solutionId

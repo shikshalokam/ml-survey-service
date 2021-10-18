@@ -25,7 +25,7 @@ const obj = {
         FAILED_MESSAGE: 'Kafka is not connected'
     },
     KENDRA_SERVICE: {
-        NAME: 'kendraservice.api',
+        NAME: 'coreService.api',
         FAILED_CODE: 'KENDRA_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Kendra service is not healthy'
     },
@@ -48,13 +48,13 @@ let health_check = async function(req,res) {
     let checks = [];
     let mongodbConnection = await mongodbHealthCheck.health_check();
     let kafkaConnection = await kafkaHealthCheck.health_check();
-    let kendraServiceStatus = await kendraHealthCheck.health_check();
+    let coreServiceStatus = await kendraHealthCheck.health_check();
     let elasticSearchConnection = await elasticSearchHealthCheck.health_check();
     let improvementHealthCheckStatus = await improvementHealthCheck.health_check();
 
     checks.push(checkResult("KAFKA",kafkaConnection));
     checks.push(checkResult("MONGO_DB",mongodbConnection));
-    checks.push(checkResult("KENDRA_SERVICE",kendraServiceStatus));
+    checks.push(checkResult("KENDRA_SERVICE",coreServiceStatus));
     checks.push(checkResult("IMPROVEMENT_SERVICE",improvementHealthCheckStatus));
     checks.push(checkResult("ELASTIC_SEARCH",elasticSearchConnection));
     checks.push(checkResult("ELASTIC_SEARCH",elasticSearchConnection));

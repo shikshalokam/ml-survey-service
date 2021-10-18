@@ -17,7 +17,7 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const entityAssessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const path = require("path");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 
@@ -1625,7 +1625,7 @@ module.exports = class SubmissionsHelper {
                 
                 let filePathToURLMap = {};
                 if (fileSourcePath.length > 0) {
-                    let evidenceUrls = await kendraService.getDownloadableUrl(
+                    let evidenceUrls = await coreService.getDownloadableUrl(
                         {
                             filePaths: fileSourcePath
                         }
