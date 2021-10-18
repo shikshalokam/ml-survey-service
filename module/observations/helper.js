@@ -12,15 +12,14 @@ const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSu
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfObservationSubmissionsLength = 500;
-const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const kendraService = require(ROOT_PATH + "/generics/services/kendra");
 const moment = require("moment-timezone");
 const { ObjectId } = require("mongodb");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
-const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
 /**
     * ObservationsHelper
@@ -1603,7 +1602,7 @@ module.exports = class ObservationsHelper {
                             bodyData,
                             solutionId
                         );
-        
+
                         if( !solutionData.success ) {
                             throw {
                                 message : messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND
@@ -1653,13 +1652,15 @@ module.exports = class ObservationsHelper {
                 
                 let solutionData;
                 if(observationData[0]){
-                     solutionData = 
-                    await solutionHelper.solutionDocuments({
-                        _id : observationData[0].solutionId
-                    },[
-                        "allowMultipleAssessemts",
-                        "license"
+
+                    solutionData = await solutionHelper.solutionDocuments({
+                        "_id" : observationData[0].solutionId
+
+                        },[
+                            "allowMultipleAssessemts",
+                            "license"
                     ]);
+                    
                 }
     
                 return resolve({
@@ -1683,7 +1684,7 @@ module.exports = class ObservationsHelper {
                 });
             }
         })
-       }
+    }
 
      /**
     * List of observation entities.
