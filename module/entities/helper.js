@@ -1897,7 +1897,7 @@ static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId 
 
             let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.externalId);
 
-            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === true ) {
+            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
                 eachMetaData.name += ", "+eachMetaData.externalId;
             }
         })
