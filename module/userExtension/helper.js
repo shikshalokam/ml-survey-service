@@ -10,7 +10,7 @@ const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const shikshalokamGenericHelper = require(ROOT_PATH + "/generics/helpers/shikshalokam");
-const elasticSearchData = require(ROOT_PATH + "/generics/helpers/elasticSearch");
+// const elasticSearchData = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
 /**
@@ -922,61 +922,61 @@ module.exports = class UserExtensionHelper {
    * @returns {Object} 
    */
 
-  static pushUserToElasticSearch(userData, removeUserFromEntity= {}) {
-    return new Promise(async (resolve, reject) => {
-        try {
+//   static pushUserToElasticSearch(userData, removeUserFromEntity= {}) {
+//     return new Promise(async (resolve, reject) => {
+//         try {
 
-         let userInformation = _.pick(userData,[
-                "_id",
-                "status", 
-                "isDeleted",
-                "deleted",
-                "roles",
-                "userId",
-                "externalId",
-                "updatedBy",
-                "createdBy",
-                "updatedAt",
-                "createdAt"
-            ]);
+//          let userInformation = _.pick(userData,[
+//                 "_id",
+//                 "status", 
+//                 "isDeleted",
+//                 "deleted",
+//                 "roles",
+//                 "userId",
+//                 "externalId",
+//                 "updatedBy",
+//                 "createdBy",
+//                 "updatedAt",
+//                 "createdAt"
+//             ]);
 
            
-            await elasticSearchData.createOrUpdate(
-                userData.userId,
-                process.env.ELASTICSEARCH_USER_EXTENSION_INDEX,
-                {
-                    data : userInformation
-                }
-            );
+//             await elasticSearchData.createOrUpdate(
+//                 userData.userId,
+//                 process.env.ELASTICSEARCH_USER_EXTENSION_INDEX,
+//                 {
+//                     data : userInformation
+//                 }
+//             );
 
-            if (userInformation.roles.length > 0) {
-                await entitiesHelper.updateUserRolesInEntitiesElasticSearch
-                (
-                    userInformation.roles,
-                    userInformation.userId
-                )
-            }
+//             if (userInformation.roles.length > 0) {
+//                 await entitiesHelper.updateUserRolesInEntitiesElasticSearch
+//                 (
+//                     userInformation.roles,
+//                     userInformation.userId
+//                 )
+//             }
             
-            if (Object.keys(removeUserFromEntity).length > 0) {
-                await entitiesHelper.deleteUserRoleFromEntitiesElasticSearch
-                (
-                    removeUserFromEntity.entityId,
-                    removeUserFromEntity.role,
-                    userInformation.userId
-                )
-            }
+//             if (Object.keys(removeUserFromEntity).length > 0) {
+//                 await entitiesHelper.deleteUserRoleFromEntitiesElasticSearch
+//                 (
+//                     removeUserFromEntity.entityId,
+//                     removeUserFromEntity.role,
+//                     userInformation.userId
+//                 )
+//             }
 
-            return resolve({
-                success : true
-            });
+//             return resolve({
+//                 success : true
+//             });
             
-        }
-        catch(error) {
-            return reject(error);
-        }
-    })
+//         }
+//         catch(error) {
+//             return reject(error);
+//         }
+//     })
 
-   }
+//    }
 
    /**
     * Update userExtension document.
