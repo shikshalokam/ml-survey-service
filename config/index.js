@@ -26,9 +26,9 @@ let db_connect = function() {
   * @name elasticsearch_connect
 */
 
-let elasticsearch_connect = function () {
-  global.elasticsearch = require("./db/elasticSearch")();
-};
+// let elasticsearch_connect = function () {
+//   global.elasticsearch = require("./db/elasticSearch")();
+// };
 
 /**
   * Kafka connection information.
@@ -49,6 +49,6 @@ const configuration = {
 
 db_connect();
 kafka_connect();
-elasticsearch_connect();
+// elasticsearch_connect();
 
 module.exports = configuration;
