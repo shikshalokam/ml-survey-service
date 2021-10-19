@@ -10,7 +10,7 @@ const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
 const mediaFilesHelper = require(MODULES_BASE_PATH + "/mediaFiles/helper");
 const pollSubmissionDocumentHelper = require(MODULES_BASE_PATH + "/pollSubmissions/documents");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 
 /**
     * PollsHelper
@@ -746,7 +746,7 @@ module.exports = class PollsHelper {
                 throw new Error(messageConstants.apiResponses.APP_NAME_FIELD_REQUIRED)
             }
 
-            let appDetails = await kendraService.getAppDetails(appName);
+            let appDetails = await coreService.getAppDetails(appName);
                     
             if (appDetails.result == false) {
                 throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
