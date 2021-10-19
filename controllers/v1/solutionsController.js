@@ -2278,26 +2278,6 @@ module.exports = class Solutions extends Abstract {
 
         response.result.solution = await _.pick(solutionDocument, solutionDocumentFieldList);
 
-        let submissionDocument = {
-            solutionId: solutionDocument._id,
-            solutionExternalId: solutionDocument.externalId,
-            
-            frameworkId: solutionDocument.frameworkId,
-            frameworkExternalId: solutionDocument.frameworkExternalId,
-            entityTypeId: solutionDocument.entityTypeId,
-            entityType: solutionDocument.entityType,
-            scoringSystem: solutionDocument.scoringSystem,
-            isRubricDriven: solutionDocument.isRubricDriven,
-            evidenceSubmissions: [],
-            entityProfile: {},
-            status: messageConstants.common.STARTED
-        };
-
-        if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
-            submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
-        }
-
-
         let assessment = {};
         assessment.name = solutionDocument.name;
         assessment.description = solutionDocument.description;
@@ -2391,8 +2371,6 @@ module.exports = class Solutions extends Abstract {
                 }
             });
         });
-
-        submissionDocument.evidences = submissionDocumentEvidences;
 
         let entityDocument ={
           "metaInformation" :{},
