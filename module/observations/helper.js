@@ -879,7 +879,7 @@ module.exports = class ObservationsHelper {
                 }
 
                 let filterQuery = {};
-                if( observationId & observationId != "" ) {
+                if( observationId && observationId != "" ) {
                     filterQuery._id = observationId; 
                 }
 
