@@ -363,5 +363,6 @@ module.exports = {
     "ATTACHMENTS_URL_NOT_FOUND": "Not found attachment url",
     "OBSERVATION_SOLUTION_ID_REQUIRED": "Observation or solution id is required",
     "EVIDENCE_CAN_BE_NOT_APPLICABLE_FALSE": "Cannot make evidence not applicable",
-    "EVIDENCE_ALREADY_MARKED_AS_NOT_APPLICABLE": " is already marked as not applicable"
+    "EVIDENCE_ALREADY_MARKED_AS_NOT_APPLICABLE": " is already marked as not applicable",
+    "OBSERVATION_OR_SOLUTION_CHECK" : "Required Observation Id or Solution Id "
 }

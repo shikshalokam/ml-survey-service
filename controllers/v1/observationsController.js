@@ -1767,12 +1767,12 @@ module.exports = class Observations extends Abstract {
     }
 
     /**
-* @api {get} /assessment/api/v1/observations/details/:observationId 
+* @api {get} /assessment/api/v1/observations/details/:observationId?solutionId=600ac0d1c7de076e6f9943b9
 * Observations details.
 * @apiVersion 1.0.0
 * @apiGroup Observations
 * @apiHeader {String} X-authenticated-user-token Authenticity token
-* @apiSampleRequest /assessment/api/v1/observations/details/5de8a220c210d4700813e695
+* @apiSampleRequest /assessment/api/v1/observations/details/5de8a220c210d4700813e695?solutionId=600ac0d1c7de076e6f9943b9
 * @apiUse successBody
 * @apiUse errorBody
 * @apiParamExample {json} Response:
@@ -1851,7 +1851,11 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let observationDetails = await observationsHelper.details(req.params._id);
+                let observationDetails = await observationsHelper.details(
+                    req.params._id ? req.params._id : "",
+                    req.query.solutionId ? req.query.solutionId : "",
+                    req.userDetails.userId
+                );
 
                 return resolve({
                     message: messageConstants.apiResponses.OBSERVATION_FETCHED,
