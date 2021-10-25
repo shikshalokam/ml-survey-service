@@ -879,11 +879,11 @@ module.exports = class ObservationsHelper {
                 }
 
                 let filterQuery = {};
-                if( observationId ) {
+                if( observationId & observationId != "" ) {
                     filterQuery._id = observationId; 
                 }
 
-                if( solutionId ) {
+                if( solutionId && solutionId != "" ) {
                     filterQuery.solutionId = ObjectId(solutionId);
                     filterQuery.createdBy = userId;
                 }
