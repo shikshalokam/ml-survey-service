@@ -883,7 +883,7 @@ module.exports = class ObservationsHelper {
                     filterQuery._id = observationId; 
                 }
 
-                if( solutionId && solutionId != "" ) {
+                if( solutionId && solutionId != "" && userId && userId != "" ) {
                     filterQuery.solutionId = ObjectId(solutionId);
                     filterQuery.createdBy = userId;
                 }
