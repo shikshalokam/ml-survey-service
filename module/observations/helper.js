@@ -867,13 +867,28 @@ module.exports = class ObservationsHelper {
       * @returns {details} observation details.
      */
 
-    static details(observationId) {
+    static details( observationId = "", solutionId = "", userId = "" ) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let observationDocument = await this.observationDocuments({
-                    _id:observationId
-                });
+                if ( observationId == "" && solutionId == "" ) {
+                   throw {
+                        message : messageConstants.apiResponses.OBSERVATION_OR_SOLUTION_CHECK,
+                        status : httpStatusCode["bad_request"].status
+                    } 
+                }
+
+                let filterQuery = {};
+                if( observationId && observationId != "" ) {
+                    filterQuery._id = observationId; 
+                }
+
+                if( solutionId && solutionId != "" && userId && userId != "" ) {
+                    filterQuery.solutionId = ObjectId(solutionId);
+                    filterQuery.createdBy = userId;
+                }
+
+                let observationDocument = await this.observationDocuments(filterQuery);
 
                 if(!observationDocument[0]) {
                     throw new Error(messageConstants.apiResponses.OBSERVATION_NOT_FOUND);
