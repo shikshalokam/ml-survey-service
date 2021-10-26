@@ -871,7 +871,7 @@ module.exports = class ObservationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                if ( !observationId && !solutionId ) {
+                if ( observationId == "" && solutionId == "" ) {
                    throw {
                         message : messageConstants.apiResponses.OBSERVATION_OR_SOLUTION_CHECK,
                         status : httpStatusCode["bad_request"].status
