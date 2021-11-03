@@ -19,7 +19,6 @@
   "author": "Akash Shah <akash@tunerlabs.com>",
   "license": "ISC",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.7.1",
     "body-parser": "^1.18.2",
     "bunyan": "^1.8.12",
     "cache-manager": "^2.9.0",

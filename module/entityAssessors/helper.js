@@ -9,7 +9,7 @@
 let shikshalokam = require(ROOT_PATH + "/generics/helpers/shikshalokam");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfSubmissionsLength = 500;
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
@@ -958,7 +958,7 @@ module.exports = class EntityAssessorHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let userAndEntityList = await kendraService.getUsersByEntityAndRole
+                let userAndEntityList = await coreService.getUsersByEntityAndRole
                 (
                     userAssessmentData.entityId,
                     userAssessmentData.role

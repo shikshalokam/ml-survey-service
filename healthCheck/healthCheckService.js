@@ -10,7 +10,6 @@ const { v1 : uuidv1 } = require('uuid');
 const kendraHealthCheck = require("./kendra");
 const mongodbHealthCheck = require("./mongodb");
 const kafkaHealthCheck = require("./kafka");
-const elasticSearchHealthCheck = require("./elastic-search");
 const improvementHealthCheck = require("./improvement-project");
 
 const obj = {
@@ -25,15 +24,10 @@ const obj = {
         FAILED_MESSAGE: 'Kafka is not connected'
     },
     KENDRA_SERVICE: {
-        NAME: 'kendraservice.api',
+        NAME: 'coreService.api',
         FAILED_CODE: 'KENDRA_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Kendra service is not healthy'
     },
-    ELASTIC_SEARCH : {
-        NAME: 'ElasticSearch.db',
-        FAILED_CODE: 'ELASTIC_SEARCH_HEALTH_FAILED',
-        FAILED_MESSAGE: 'Elastic search is not connected'
-    }, 
     IMPROVEMENT_SERVICE: {
         NAME: 'improvementservice.api',
         FAILED_CODE: 'IMPROVEMENT_SERVICE_HEALTH_FAILED',
@@ -48,16 +42,16 @@ let health_check = async function(req,res) {
     let checks = [];
     let mongodbConnection = await mongodbHealthCheck.health_check();
     let kafkaConnection = await kafkaHealthCheck.health_check();
-    let kendraServiceStatus = await kendraHealthCheck.health_check();
+
+    let coreServiceStatus = await kendraHealthCheck.health_check();
     let elasticSearchConnection = await elasticSearchHealthCheck.health_check();
+  
     let improvementHealthCheckStatus = await improvementHealthCheck.health_check();
 
     checks.push(checkResult("KAFKA",kafkaConnection));
     checks.push(checkResult("MONGO_DB",mongodbConnection));
-    checks.push(checkResult("KENDRA_SERVICE",kendraServiceStatus));
+    checks.push(checkResult("KENDRA_SERVICE",coreServiceStatus));
     checks.push(checkResult("IMPROVEMENT_SERVICE",improvementHealthCheckStatus));
-    checks.push(checkResult("ELASTIC_SEARCH",elasticSearchConnection));
-    checks.push(checkResult("ELASTIC_SEARCH",elasticSearchConnection));
 
     let checkServices = checks.filter( check => check.healthy === false);
 

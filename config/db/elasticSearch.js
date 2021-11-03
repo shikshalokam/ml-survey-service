@@ -7,37 +7,37 @@
 
 
 //dependencies
-const { Client : esClient } = require('@elastic/elasticsearch');
+// const { Client : esClient } = require('@elastic/elasticsearch');
 
-/**
- * Elastic search connection.
- * @function
- * @name connect
- * @return {Object} elastic search client 
- */
+// /**
+//  * Elastic search connection.
+//  * @function
+//  * @name connect
+//  * @return {Object} elastic search client 
+//  */
 
-var connect = function () {
+// var connect = function () {
 
-  const elasticSearchClient = new esClient({
-    node : process.env.ELASTICSEARCH_HOST_URL,
-    maxRetries : 5,
-    requestTimeout : 60000,
-    sniffOnStart : process.env.ELASTIC_SEARCH_SNIFF_ON_START
-  });
+//   const elasticSearchClient = new esClient({
+//     node : process.env.ELASTICSEARCH_HOST_URL,
+//     maxRetries : 5,
+//     requestTimeout : 60000,
+//     sniffOnStart : process.env.ELASTIC_SEARCH_SNIFF_ON_START
+//   });
 
-  elasticSearchClient.ping({
-  }, function (error) {
-    if (error) {
-      console.log('Elasticsearch cluster is down!');
-    } else {
-      console.log('Elasticsearch connection established.');
-    }
-  });
+//   elasticSearchClient.ping({
+//   }, function (error) {
+//     if (error) {
+//       console.log('Elasticsearch cluster is down!');
+//     } else {
+//       console.log('Elasticsearch connection established.');
+//     }
+//   });
 
-  return {
-    client : elasticSearchClient
-  };
+//   return {
+//     client : elasticSearchClient
+//   };
 
-};
+// };
 
-module.exports = connect;
+// module.exports = connect;

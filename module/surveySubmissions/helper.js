@@ -507,7 +507,7 @@ module.exports = class SurveySubmissionsHelper {
 
                         let solutionDetail = await solutionsHelper.solutionDocuments({
                             _id : surveySubmission.solutionId
-                          }, [
+                          },[
                             "endDate"
                         ]);
 

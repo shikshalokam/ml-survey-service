@@ -1,15 +1,15 @@
 /**
- * name : kendra.js
+ * name : core.js
  * author : Aman Jung Karki
  * Date : 26-June-2020
- * Description : All kendra service related information.
+ * Description : All core service related information.
  */
 
 //dependencies
 
 const request = require('request');
 const fs = require("fs");
-const kendraServiceBaseURL = process.env.ML_CORE_SERVICE_URL;
+const coreServiceBaseURL = process.env.ML_CORE_SERVICE_URL;
 
 /**
   * Get downloadable file.
@@ -21,7 +21,7 @@ const kendraServiceBaseURL = process.env.ML_CORE_SERVICE_URL;
 
 const getDownloadableUrl = function (bodyData) {
 
-    let fileDownloadUrl = kendraServiceBaseURL; 
+    let fileDownloadUrl = coreServiceBaseURL; 
     
     if ( process.env.CLOUD_STORAGE === "GC" ) {
         fileDownloadUrl = fileDownloadUrl + messageConstants.endpoints.DOWNLOADABLE_GCP_URL;
@@ -73,7 +73,7 @@ const getDownloadableUrl = function (bodyData) {
 
 const upload = function (file,filePath) {
 
-    let fileUploadUrl = kendraServiceBaseURL; 
+    let fileUploadUrl = coreServiceBaseURL; 
     let bucketName = "";
 
     if ( process.env.CLOUD_STORAGE === "GC" ) {
@@ -129,7 +129,7 @@ const upload = function (file,filePath) {
 
 const getAppDetails = function (appName) {
 
-    let getAppDetailsUrl = kendraServiceBaseURL + messageConstants.endpoints.GET_APP_DETAILS + "/" + appName;
+    let getAppDetailsUrl = coreServiceBaseURL + messageConstants.endpoints.GET_APP_DETAILS + "/" + appName;
 
     return new Promise((resolve, reject) => {
         try {
@@ -170,7 +170,7 @@ const getUsersByEntityAndRole = function (
      return new Promise(async (resolve, reject) => {
          try {
              
-             const url = kendraServiceBaseURL + messageConstants.endpoints.GET_USERS_BY_ENTITY_AND_ROLE + "/" + entityId + "?role=" + role;
+             const url = coreServiceBaseURL + messageConstants.endpoints.GET_USERS_BY_ENTITY_AND_ROLE + "/" + entityId + "?role=" + role;
             
              const options = {
                  headers : {
@@ -225,7 +225,7 @@ const solutionBasedOnRoleAndLocation = function ( token,bodyData,type,searchText
         try {
             
             const url = 
-            kendraServiceBaseURL + messageConstants.endpoints.SOLUTIONS_BASED_ON_ROLE_LOCATION+ "?type="+ type +"&search="+ searchText;
+            coreServiceBaseURL + messageConstants.endpoints.SOLUTIONS_BASED_ON_ROLE_LOCATION+ "?type="+ type +"&search="+ searchText;
 
             const options = {
                 headers : {
@@ -281,7 +281,7 @@ const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solution
         try {
             
             const url = 
-            kendraServiceBaseURL + messageConstants.endpoints.SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION + "/" + solutionId;
+            coreServiceBaseURL + messageConstants.endpoints.SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION + "/" + solutionId;
 
             const options = {
                 headers : {
@@ -332,7 +332,7 @@ const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solution
 
 const downloadableUrls = function (bodyData) {
 
-    let fileDownloadUrl = kendraServiceBaseURL + messageConstants.endpoints.DOWNLOADABLE_FILE_URL; 
+    let fileDownloadUrl = coreServiceBaseURL + messageConstants.endpoints.DOWNLOADABLE_FILE_URL; 
 
     return new Promise((resolve, reject) => {
         try {

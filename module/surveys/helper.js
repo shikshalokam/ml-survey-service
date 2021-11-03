@@ -15,7 +15,7 @@ const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const surveySolutionTemplate = "-SURVEY-TEMPLATE";
 const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
@@ -373,7 +373,7 @@ module.exports = class SurveysHelper {
                         }
                     )
      
-                    let appDetails = await kendraService.getAppDetails(appName);
+                    let appDetails = await coreService.getAppDetails(appName);
                     
                     if (appDetails.result == false) {
                         throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
@@ -1381,7 +1381,7 @@ module.exports = class SurveysHelper {
                 }
     
                 let targetedSolutions = 
-                await kendraService.solutionBasedOnRoleAndLocation
+                await coreService.solutionBasedOnRoleAndLocation
                 (
                     token,
                     bodyData,
@@ -1545,7 +1545,7 @@ module.exports = class SurveysHelper {
                     surveyId = surveyDocument[0]._id;
                 } else {
 
-                    let solutionData = await kendraService.solutionDetailsBasedOnRoleAndLocation
+                    let solutionData = await coreService.solutionDetailsBasedOnRoleAndLocation
                     (
                         token,
                         bodyData,
@@ -1673,7 +1673,7 @@ module.exports = class SurveysHelper {
             let surveySolutions = {
                 success : false
             };
-
+           
             if ( surveyReportPage === "" || gen.utils.convertStringToBoolean(surveyReportPage) ) {
                 
                 surveySolutions = await surveySubmissionsHelper.surveySolutions(
@@ -1767,7 +1767,7 @@ module.exports = class SurveysHelper {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
                 }
 
-                let appDetails = await kendraService.getAppDetails(appName);
+                let appDetails = await coreService.getAppDetails(appName);
                 
                 if(appDetails.result === false){
                     throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
