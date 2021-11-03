@@ -758,8 +758,8 @@ module.exports = class SurveysHelper {
                     let createSurveyDocument = await this.createSurveyDocument
                         (
                             userId,
-                            solutionDocument[0],
-                            userOrgDetails[userId]
+                            solutionDocument[0]
+                            // userOrgDetails[userId]
                         )
 
                     if (!createSurveyDocument.success) {
