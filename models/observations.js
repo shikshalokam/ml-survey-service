@@ -41,13 +41,17 @@ module.exports = {
     entities: Array,
     isAPrivateProgram : {
       default : false,
-      type : Boolean
+      type : Boolean,
+      index: true
     },
     link: {
       type: String,
       index: true
     },
     project : Object,
-    referenceFrom : String
+    referenceFrom : {
+      type: String,
+      index: true
+    }
   }
 };
