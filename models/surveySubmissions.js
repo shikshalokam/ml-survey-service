@@ -40,7 +40,8 @@ module.exports = {
       },
       isAPrivateProgram : {
         default : false,
-        type : Boolean
+        type : Boolean,
+        index: true
       },
       surveyInformation: Object,
       appInformation : Object,

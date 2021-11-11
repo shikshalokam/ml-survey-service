@@ -15,7 +15,10 @@ module.exports = {
       index : true
     },
     description: String,
-    author: String,
+    author: {
+      type : String,
+      index : true
+    },
     parentSolutionId: "ObjectId",
     resourceType: Array,
     language: Array,
@@ -76,7 +79,8 @@ module.exports = {
     linkUrl: String,
     isAPrivateProgram : {
       default : false,
-      type : Boolean
+      type : Boolean,
+      index: true
     },
     assessmentMetaFormKey : String,
     allowMultipleAssessemts : {
@@ -99,7 +103,10 @@ module.exports = {
       index: true
     },
     scope : {
-      entityType : String,
+      entityType : {
+        type : String,
+        index : true
+      },
       entityTypeId : "ObjectId",
       entities : {
         type : Array,
