@@ -128,6 +128,9 @@ module.exports = {
       default : false,
       type : Boolean
     },
-    license:Object
+    license:Object,
+    noOfSubmissionsRequired : {
+        type : Number
+    }
   }
 };

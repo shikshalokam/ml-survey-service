@@ -1710,14 +1710,16 @@ module.exports = class EntitiesHelper {
                         }
                     }
 
+                    let updateQuery = {
+                        "registryDetails.locationId": parsedData.locationId,
+                        "registryDetails.code": parsedData.entityExternalId ? parsedData.entityExternalId : parsedData.locationId,
+                        "registryDetails.lastUpdatedAt": new Date(),
+                        updatedBy: userId
+                    }
+
                     let entityUpdated = 
                     await database.models.entities.findOneAndUpdate(
-                        { _id : entityId }, { $set: {
-                            "registryDetails.locationId": parsedData.locationId,
-                            "registryDetails.code": parsedData.entityExternalId,
-                            "registryDetails.lastUpdatedAt": new Date(),
-                            updatedBy: userId
-                        }}, {_id : 1 }
+                        { _id : entityId }, { $set: updateQuery}, {_id : 1 }
                     );
 
                     if( !entityUpdated._id ) {
