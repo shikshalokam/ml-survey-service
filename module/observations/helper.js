@@ -112,6 +112,28 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
+                let locationAndRole = {};
+                locationAndRole = _.pick(
+                    data,
+                    ["role","state","district","school","block" ]
+                )
+
+                if( locationAndRole && Object.keys(locationAndRole).length > 0) {
+
+                    let solutionData = 
+                    await coreService.solutionDetailsBasedOnRoleAndLocation(
+                        requestingUserAuthToken,
+                        locationAndRole,
+                        solutionId
+                    );
+
+                    if( !solutionData.success ) {
+                        throw {
+                            message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
+                        }
+                    } 
+                }
+
                 if( solutionData[0].isReusable ) {
 
                     solutionData = 
