@@ -244,6 +244,12 @@ module.exports = class Observations extends Abstract {
      *          "status": String,
      *          "entities":["5beaa888af0065f0e0a10515","5beaa888af0065f0e0a10516"]
      *      }
+     *      "userRoleAndProfileInformation": {
+     *          "role" : "HM",
+     *          "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+     *          "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+     *          "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
+     *      }
      * }
      * @apiUse successBody
      * @apiUse errorBody
@@ -267,7 +273,8 @@ module.exports = class Observations extends Abstract {
                     req.body.data, 
                     req.userDetails.id, 
                     req.userDetails.userToken,
-                    req.query.programId
+                    req.query.programId,
+                    req.body.userRoleAndProfileInformation
                 );
 
                 return resolve({

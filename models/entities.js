@@ -8,7 +8,7 @@ module.exports = {
       },
       registryDetails: {
         locationId: { type: String, index: true,unique : true },
-        code: { type : String, index : true,unique : true },
+        code: { type : String, index : true, unique : true },
         name:String,
         lastUpdatedAt: Date
       },
