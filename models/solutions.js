@@ -129,7 +129,7 @@ module.exports = {
       type : Boolean
     },
     license:Object,
-    noOfSubmissionsRequired: {
+    minNoOfSubmissionsRequired: {
         type: Number,
         default: 1
     }

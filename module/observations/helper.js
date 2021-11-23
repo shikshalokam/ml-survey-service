@@ -81,7 +81,8 @@ module.exports = class ObservationsHelper {
         data, 
         userId, 
         requestingUserAuthToken = "",
-        programId = ""
+        programId = "",
+        userRoleAndProfileInformation = {}
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -112,18 +113,12 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                let locationAndRole = {};
-                locationAndRole = _.pick(
-                    data,
-                    ["role","state","district","school","block" ]
-                )
-
-                if( locationAndRole && Object.keys(locationAndRole).length > 0) {
+                if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
 
                     let solutionData = 
                     await coreService.solutionDetailsBasedOnRoleAndLocation(
                         requestingUserAuthToken,
-                        locationAndRole,
+                        userRoleAndProfileInformation,
                         solutionId
                     );
 
