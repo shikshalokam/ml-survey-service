@@ -81,7 +81,8 @@ module.exports = class ObservationsHelper {
         data, 
         userId, 
         requestingUserAuthToken = "",
-        programId = ""
+        programId = "",
+        userRoleAndProfileInformation = {}
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -110,6 +111,22 @@ module.exports = class ObservationsHelper {
                         status : httpStatusCode.bad_request.status,
                         message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
                     }
+                }
+
+                if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
+
+                    let solutionData = 
+                    await coreService.solutionDetailsBasedOnRoleAndLocation(
+                        requestingUserAuthToken,
+                        userRoleAndProfileInformation,
+                        solutionId
+                    );
+
+                    if( !solutionData.success ) {
+                        throw {
+                            message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
+                        }
+                    } 
                 }
 
                 if( solutionData[0].isReusable ) {

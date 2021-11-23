@@ -1614,10 +1614,9 @@ module.exports = class SolutionsHelper {
             "roles",
             "captureGpsLocationAtQuestionLevel",
             "enableQuestionReadOut",
-            "entities",
-            "criteriaLevelReport"
+            "entities"
         ])
-
+ 
           if( !solutionData.length > 0 ) {
             throw {
               message : messageConstants.apiResponses.SOLUTION_NOT_FOUND,
