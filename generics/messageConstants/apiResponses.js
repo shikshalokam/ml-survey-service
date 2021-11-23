@@ -364,5 +364,6 @@ module.exports = {
     "OBSERVATION_SOLUTION_ID_REQUIRED": "Observation or solution id is required",
     "EVIDENCE_CAN_BE_NOT_APPLICABLE_FALSE": "Cannot make evidence not applicable",
     "EVIDENCE_ALREADY_MARKED_AS_NOT_APPLICABLE": " is already marked as not applicable",
-    "OBSERVATION_OR_SOLUTION_CHECK" : "Required Observation Id or Solution Id "
+    "OBSERVATION_OR_SOLUTION_CHECK" : "Required Observation Id or Solution Id ",
+    "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role"
 }
