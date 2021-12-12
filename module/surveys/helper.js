@@ -819,7 +819,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation= {}) {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -1051,15 +1051,15 @@ module.exports = class SurveysHelper {
                     submissionDocument.surveyInformation.startDate = new Date();
 
                     if (Object.keys(roleInformation).length > 0 && roleInformation.role) {
-                    
-                        let roleDocument = await userRolesHelper.list
-                        ( { code : roleInformation.role },
-                          [ "_id"]
-                        )
+                        //commented for multiple role
+                        // let roleDocument = await userRolesHelper.list
+                        // ( { code : roleInformation.role },
+                        //   [ "_id"]
+                        // )
 
-                        if (roleDocument.length > 0) {
-                            roleInformation.roleId = roleDocument[0]._id; 
-                        }
+                        // if (roleDocument.length > 0) {
+                        //     roleInformation.roleId = roleDocument[0]._id; 
+                        // }
     
                         submissionDocument.userRoleInformation = roleInformation;
                     }

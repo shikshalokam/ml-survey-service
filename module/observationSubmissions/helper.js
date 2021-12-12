@@ -904,7 +904,7 @@ module.exports = class ObservationSubmissionsHelper {
                 createdBy: userId,
                 deleted: false,
                 status: messageConstants.common.SUBMISSION_STATUS_COMPLETED,
-                "userRoleInformation.role" : bodyData.role
+                "userRoleInformation.role" : { $in : [...bodyData.role.split(",")] }
             }
 
             if (pageNo == 1) {
