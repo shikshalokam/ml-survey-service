@@ -900,11 +900,19 @@ module.exports = class ObservationSubmissionsHelper {
             }
             let result = {};
             
+            // Search for user roles
+            let userRoleFilterArray = new Array;
+            bodyData.role.split(",").forEach((eachRole) => {
+                userRoleFilterArray.push(new RegExp(eachRole))
+            })
+            
             let query = {
                 createdBy: userId,
                 deleted: false,
                 status: messageConstants.common.SUBMISSION_STATUS_COMPLETED,
-                "userRoleInformation.role" : bodyData.role
+                "userRoleInformation.role" : {
+                    $in : userRoleFilterArray
+                }
             }
 
             if (pageNo == 1) {
