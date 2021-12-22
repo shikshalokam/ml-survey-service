@@ -245,7 +245,7 @@ module.exports = class Observations extends Abstract {
      *          "entities":["5beaa888af0065f0e0a10515","5beaa888af0065f0e0a10516"]
      *      }
      *      "userRoleAndProfileInformation": {
-     *          "role" : "HM",
+     *          "role" : "HM,DEO",
      *          "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
      *          "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
      *          "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -483,7 +483,7 @@ module.exports = class Observations extends Abstract {
      * @apiName Map entities to observations
      * @apiGroup Observations
      * @apiParamExample {json} Request-Body:
-     * {
+     *  {
      *	    "data": ["5beaa888af0065f0e0a10515","5beaa888af0065f0e0a10516"]
      * }
      * @apiUse successBody
@@ -776,7 +776,7 @@ module.exports = class Observations extends Abstract {
      * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
      * @apiParamExample {json} Request:
      * {
-     *  "role" : "HM",
+     *  "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -1161,15 +1161,15 @@ module.exports = class Observations extends Abstract {
                 }
 
                 if (req.body && req.body.role) {
-                    
-                    let roleDocument = await userRolesHelper.list
-                    ( { code : req.body.role },
-                      [ "_id"]
-                    )
+                    //commented for mutiple role
+                    // let roleDocument = await userRolesHelper.list
+                    // ( { code : req.body.role },
+                    //   [ "_id"]
+                    // )
 
-                    if (roleDocument[0]._id) {
-                        req.body.roleId = roleDocument[0]._id; 
-                    }
+                    // if (roleDocument[0]._id) {
+                    //     req.body.roleId = roleDocument[0]._id; 
+                    // }
 
                     submissionDocument.userRoleInformation = req.body;
                 }
@@ -1945,7 +1945,7 @@ module.exports = class Observations extends Abstract {
     * @apiSampleRequest /assessment/api/v1/observations/getObservation?page=1&limit=10&search=a
     * @apiParamExample {json} Request:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -2089,7 +2089,7 @@ module.exports = class Observations extends Abstract {
     * @apiSampleRequest /assessment/api/v1/observations/entities?solutionId=5fec29afd1d6d98686a07156
     * @apiParamExample {json} Request:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
