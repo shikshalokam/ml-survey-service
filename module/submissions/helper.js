@@ -562,7 +562,7 @@ module.exports = class SubmissionsHelper {
                         this.pushInCompleteSubmissionForReporting(updatedSubmissionDocument._id);
                     } else if (modelName == messageConstants.common.OBSERVATION_SUBMISSIONS) {
                         // Push updated submission to kafka for reporting/tracking.
-                        observationSubmissionsHelper.pushInCompleteObservationSubmissionForReporting(updatedSubmissionDocument._id);
+                        observationSubmissionsHelper.pushObservationSubmissionForReporting(updatedSubmissionDocument._id);
                     } else if (modelName == messageConstants.common.SURVEY_SUBMISSIONS) {
                         // Push updated submission to kafka for reporting/tracking.
                         surveySubmissionsHelper.pushInCompleteSurveySubmissionForReporting(updatedSubmissionDocument._id);
