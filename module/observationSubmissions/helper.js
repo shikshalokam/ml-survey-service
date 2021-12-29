@@ -14,6 +14,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
+const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 
 /**
     * ObservationSubmissionsHelper
@@ -140,8 +141,10 @@ module.exports = class ObservationSubmissionsHelper {
                     );
                 }
 
+               
+                console.log("--- logs starts here -----");
                 const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
-
+               
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
                         formData: {
@@ -151,6 +154,8 @@ module.exports = class ObservationSubmissionsHelper {
                     };
                     console.log(errorObject);
                 }
+
+                console.log("--logs ends here---")
 
                 return resolve(kafkaMessage);
 
@@ -439,7 +444,10 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.name", 
                 "evidencesStatus.externalId", 
                 "evidencesStatus.isSubmitted", 
-                "evidencesStatus.submissions"
+                "evidencesStatus.submissions",
+                "evidencesStatus.canBeNotApplicable",
+                "evidencesStatus.canBeNotAllowed",
+                "evidencesStatus.notApplicable",
             ];
 
             let result = await this.observationSubmissionsDocument
@@ -473,7 +481,10 @@ module.exports = class ObservationSubmissionsHelper {
                     let evidenceStatus = {
                         name : evidence.name,
                         code : evidence.externalId,
-                        status : messageConstants.common.SUBMISSION_STATUS_COMPLETED
+                        status : messageConstants.common.SUBMISSION_STATUS_COMPLETED,
+                        canBeNotApplicable : evidence.canBeNotApplicable,
+                        canBeNotAllowed : evidence.canBeNotAllowed,
+                        notApplicable : evidence.notApplicable
                     };
 
                     if( !evidence.isSubmitted ){ 
@@ -852,11 +863,19 @@ module.exports = class ObservationSubmissionsHelper {
             }
             let result = {};
             
+            // Search for user roles
+            let userRoleFilterArray = new Array;
+            bodyData.role.split(",").forEach((eachRole) => {
+                userRoleFilterArray.push(new RegExp(eachRole))
+            })
+            
             let query = {
                 createdBy: userId,
                 deleted: false,
                 status: messageConstants.common.SUBMISSION_STATUS_COMPLETED,
-                "userRoleInformation.role" : bodyData.role
+                "userRoleInformation.role" : {
+                    $in : userRoleFilterArray
+                }
             }
 
             if (pageNo == 1) {
@@ -960,7 +979,8 @@ module.exports = class ObservationSubmissionsHelper {
                 "scoringSystem",
                 "isRubricDriven",
                 "entityType",
-                "criteriaLevelReport"
+                "criteriaLevelReport",
+                "completedDate"
                ],
                { completedDate: -1 }
             );
@@ -1063,7 +1083,165 @@ module.exports = class ObservationSubmissionsHelper {
             })
         }
     })
-}   
+}
+
+    /**
+   * Mark Observation Submission NotApplicable.
+   * @method
+   * @name addAnswersMarkedAsNA
+   * @param {String} submissionId -observation submissions id.
+   * @param {String} userId - logged in user id.
+   * @param {Object} evidence - Body Data
+   * @returns {JSON} - message that observation submission are set as NotApplicable.
+   */
+
+    static addAnswersMarkedAsNA(submissionId,userId, evidenceId, remarks = "") {
+        return new Promise(async (resolve, reject) => {
+    
+          try {
+
+            let formattedEvidence = {};
+
+            let submissionDocument = await this.observationSubmissionsDocument
+            (
+                { "_id": submissionId,
+                  "evidencesStatus": {"$elemMatch": {externalId: evidenceId, 
+                                                    canBeNotApplicable: true}}
+                },
+                [
+                    "evidencesStatus.$",
+                    "solutionId"
+                ]
+            );
+            
+            if (!submissionDocument.length) {
+                throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
+            }
+
+            submissionDocument = submissionDocument[0];
+
+            if(submissionDocument.evidencesStatus[0].notApplicable){
+                throw new Error(evidenceId + messageConstants.apiResponses.EVIDENCE_ALREADY_MARKED_AS_NOT_APPLICABLE)
+            }
+
+            let projectionFields = [
+              "themes",
+              "evidenceMethods"
+            ];
+
+            let solutionDocument = await solutionHelper.solutionDocuments({
+                _id: submissionDocument.solutionId
+            }, projectionFields);
+
+            if(!solutionDocument.length){
+                throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
+            }
+            
+            solutionDocument = solutionDocument[0];
+            let criteriasIdArray = gen.utils.getCriteriaIds(solutionDocument.themes);
+            if(!criteriasIdArray){
+                throw new Error(messageConstants.apiResponses.CRITERIA_QUESTIONS_COULD_NOT_BE_FOUND);
+            }
+
+            let questionsArray = await criteriaQuestionHelper.getCriteriaQuestions(criteriasIdArray,evidenceId);
+
+            let answersArray = {};
+            if(questionsArray && questionsArray.length > 0){
+
+                await Promise.all(questionsArray.map( async eachQuestion => {
+                    let answer  = await this.convertToECMNAQuestionFormat(evidenceId, eachQuestion);
+                    answersArray = Object.assign(answersArray, answer);
+                }))
+            }
+
+            if(!answersArray){
+                throw new Error(messageConstants.apiResponses.CRITERIA_QUESTIONS_COULD_NOT_BE_FOUND);
+            }
+
+            formattedEvidence.evidences = {
+                externalId : evidenceId,
+                answers : answersArray,
+                startTime : Date.now(),
+                endTime : Date.now(),
+                notApplicable : true,
+                remarks : remarks
+            }
+
+            let response = {
+                success: true,
+                message: messageConstants.apiResponses.OBSERVATION_SUBMISSION_CHECK,
+                result: formattedEvidence
+            };
+    
+            return resolve(response);
+    
+          } catch (error) {
+            return reject({
+              status: error.status || httpStatusCode.internal_server_error.status,
+              message: error.message || httpStatusCode.internal_server_error.message,
+              errorObject: error
+            });
+          }
+    
+        })
+    } 
+
+    /**
+   * Convert Questions To Answer format.
+   * @method
+   * @name convertToECMNAQuestionFormat
+   * @param {Object} question - Question Data
+   * @returns {JSON} - formatted answer array.
+   */
+
+    static convertToECMNAQuestionFormat(evidenceMethod, questionData) {
+        return new Promise(async (resolve, reject) => {
+    
+          try {
+
+            if(!questionData){
+                throw new Error(messageConstants.apiResponses.CRITERIA_QUESTIONS_COULD_NOT_BE_FOUND);
+            }
+
+            let formatQuestion = {};
+            let qId = questionData._id;
+
+            formatQuestion[ qId ] = {
+                qid : qId,
+                remarks : "",
+                fileName : [],
+                notApplicable: true,
+                startTime : Date.now(),
+                endTime : Date.now(),
+                payload : {
+                    question : questionData.question,
+                    labels : [],
+                    responseType : questionData.responseType
+                },
+                criteriaId : questionData.criteriaId,
+                responseType : questionData.responseType,
+                evidenceMethod : evidenceMethod,
+                rubricLevel : questionData.rubricLevel
+            };
+
+            if(questionData.responseType != "matrix"){
+                formatQuestion[ qId ].value =  "";
+            }else{
+                formatQuestion[ qId ].value = [];
+            }
+
+            return resolve(formatQuestion);
+    
+          } catch (error) {
+            return reject({
+              status: error.status || httpStatusCode.internal_server_error.status,
+              message: error.message || httpStatusCode.internal_server_error.message,
+              errorObject: error
+            });
+          }
+    
+        })
+    } 
 
 
 };

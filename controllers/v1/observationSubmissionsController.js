@@ -40,7 +40,7 @@ module.exports = class ObservationSubmissions extends Abstract {
   * @apiSampleRequest /assessment/api/v1/observationSubmissions/create/5d2c1c57037306041ef0c7ea?entityId=5d2c1c57037306041ef0c8fa
   * @apiParamExample {json} Request:
   * {
-  *   "role" : "HM",
+  *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
       "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
       "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -248,7 +248,6 @@ module.exports = class ObservationSubmissions extends Abstract {
               language: 0,
               keywords: 0,
               concepts: 0,
-              createdFor: 0,
               updatedAt : 0,
               createdAt : 0,
               frameworkCriteriaId : 0,
@@ -1331,14 +1330,13 @@ module.exports = class ObservationSubmissions extends Abstract {
           if( req.method === "POST" ) {
 
             if( req.body.title ) {
-              
               response = await observationSubmissionsHelper.setTitle(
                 req.params._id,
                 req.userDetails.userId,
                 req.body.title
               );
 
-            } else if( req.body.evidence ) {
+            }else if( req.body.evidence ) {
               
               let isSubmissionAllowed = await observationSubmissionsHelper.isAllowed
               (
@@ -1353,13 +1351,46 @@ module.exports = class ObservationSubmissions extends Abstract {
               ) {
                 throw new Error(messageConstants.apiResponses.MULTIPLE_SUBMISSIONS_NOT_ALLOWED);
               }
+
+              if(req.body.evidence.notApplicable && req.body.evidence.answers == undefined){
+
+                let formattedEvidence = await observationSubmissionsHelper.addAnswersMarkedAsNA(
+                  req.params._id,
+                  req.userDetails.userId,
+                  req.body.evidence.externalId,
+                  req.body.evidence.remarks ? req.body.evidence.remarks : ""
+                );
+
+                if(!formattedEvidence || !formattedEvidence.result.evidences){
+                  return resolve(formattedEvidence);
+                }
+
+                req.body.evidence = formattedEvidence.result.evidences;
+                
+              }
               
-              response = await submissionsHelper.createEvidencesInSubmission(req, "observationSubmissions", false);
+              if(req.body.evidence.notApplicable && req.body.evidence.answers == undefined){
+
+                let formattedEvidence = await observationSubmissionsHelper.addAnswersMarkedAsNA(
+                  req.params._id,
+                  req.userDetails.userId,
+                  req.body.evidence.externalId,
+                  req.body.evidence.remarks ? req.body.evidence.remarks : ""
+                );
+
+                if(!formattedEvidence || !formattedEvidence.result.evidences){
+                  return resolve(formattedEvidence);
+                }
+
+                req.body.evidence = formattedEvidence.result.evidences;
+                
+              }
               
-                await observationSubmissionsHelper.pushObservationSubmissionForReporting(req.params._id);
+                response = await submissionsHelper.createEvidencesInSubmission(req, "observationSubmissions", false);
+                observationSubmissionsHelper.pushObservationSubmissionForReporting(req.params._id);
               
                 if(response.result.status && response.result.status === "ratingPending") {
-                await observationSubmissionsHelper.pushObservationSubmissionToQueueForRating(req.params._id);
+                observationSubmissionsHelper.pushObservationSubmissionToQueueForRating(req.params._id);
               }
 
               let appInformation = {};
@@ -1416,7 +1447,7 @@ module.exports = class ObservationSubmissions extends Abstract {
   * @apiSampleRequest /assessment/api/v1/observationSubmissions/solutionList
   * @apiParamExample {json} Request:
   * {
-  *   "role" : "HM",
+  *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
       "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
       "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"

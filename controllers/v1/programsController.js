@@ -675,10 +675,6 @@ module.exports = class Programs extends Abstract {
             ],
             "keywords": [],
             "concepts": [],
-            "createdFor": [
-                "0126427034137395203",
-                "0124487522476933120"
-            ],
             "imageCompression": {
                 "quality": 10
             },

@@ -32,20 +32,11 @@ module.exports = (req) => {
         update: function () {
             req.checkParams('_id').exists().withMessage("required observation id")
         },
-        details : function () {
-            req.checkParams('_id').exists().withMessage("required observation id")
-        },
         completedObservations : function () {
             req.checkQuery('fromDate').exists().withMessage("required from date");
         },
         verifyLink : function () {
             req.checkParams('_id').exists().withMessage("required link")
-        },
-        bulkCreateByUserRoleAndEntity :  function () {
-            req.checkBody('entityId').exists().withMessage("required entityId")
-            .isMongoId().withMessage("Invalid entity id");
-            req.checkBody('role').exists().withMessage("required role");
-            req.checkBody('solutionExternalId').exists().withMessage("required solutionExternalId");
         },
         submissionStatus : function () {
             req.checkParams('_id').exists().withMessage("required observation id");

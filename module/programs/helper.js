@@ -153,8 +153,6 @@ module.exports = class ProgramsHelper {
             "keywords 2"
           ],
           "concepts" : [],
-          "createdFor" : data.createdFor,
-          "rootOrganisations" : data.rootOrganisations,
           "imageCompression" : {
               "quality" : 10
           },

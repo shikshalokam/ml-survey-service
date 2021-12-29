@@ -54,18 +54,18 @@ let enviromentVariables = {
     "message" : "OFF/TOPIC_NAME",
     "optional" : false
   },
-  "ELASTICSEARCH_COMMUNICATIONS_ON_OFF" : {
-    "message" : "Enable/Disable elastic search communications",
-    "optional" : false
-  },
-  "ELASTICSEARCH_HOST_URL" : {
-    "message" : "Required elastic search host",
-    "optional" : false
-  },
-  "ELASTICSEARCH_ENTITIES_INDEX" : {
-    "message" : "Required entities index",
-    "optional" : false
-  },
+  // "ELASTICSEARCH_COMMUNICATIONS_ON_OFF" : {
+  //   "message" : "Enable/Disable elastic search communications",
+  //   "optional" : false
+  // },
+  // "ELASTICSEARCH_HOST_URL" : {
+  //   "message" : "Required elastic search host",
+  //   "optional" : false
+  // },
+  // "ELASTICSEARCH_ENTITIES_INDEX" : {
+  //   "message" : "Required entities index",
+  //   "optional" : false
+  // },
   "ML_CORE_SERVICE_URL" : {
     "message" : "Required core service url",
     "optional" : false
@@ -78,9 +78,13 @@ let enviromentVariables = {
     "message" : "Required keycloak public key path",
     "optional" : false
   },
-  "ELASTIC_SEARCH_SNIFF_ON_START" : {
-    "message" : "Elastic search sniff on start",
-    "optional" : false
+  // "ELASTIC_SEARCH_SNIFF_ON_START" : {
+  //   "message" : "Elastic search sniff on start",
+  //   "optional" : false
+  // },
+  "DISABLE_LEARNER_SERVICE_ON_OFF": {
+    "message" : "Disable learner service on/off",
+    "default": "ON"
   }
 }
 

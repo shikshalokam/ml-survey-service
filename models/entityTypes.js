@@ -8,6 +8,9 @@ module.exports = {
     types: Array,
     callResponseTypes: Array,
     isObservable: Boolean,
-    toBeMappedToParentEntities: Boolean
+    toBeMappedToParentEntities: Boolean,
+    isDeleted: Boolean,
+    createdBy: String,
+    updatedBy: String
   }
 };

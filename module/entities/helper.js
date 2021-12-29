@@ -7,10 +7,9 @@
 
 // Dependencies
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
-const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
+// const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
-
 
  /**
     * EntitiesHelper
@@ -115,7 +114,7 @@ module.exports = class EntitiesHelper {
                     throw messageConstants.apiResponses.ENTITY_INFORMATION_NOT_INSERTED;
                 }
                
-                await this.pushEntitiesToElasticSearch(entities);
+                // await this.pushEntitiesToElasticSearch(entities);
 
                 return resolve(entityData);
 
@@ -634,7 +633,7 @@ module.exports = class EntitiesHelper {
                             solutionsData[singleEntity._solutionId].newEntities.push(newEntity._id);
                         }
                         
-                        await this.pushEntitiesToElasticSearch([singleEntity["_SYSTEM_ID"]]);
+                        // await this.pushEntitiesToElasticSearch([singleEntity["_SYSTEM_ID"]]);
 
 
                         return singleEntity;
@@ -737,7 +736,7 @@ module.exports = class EntitiesHelper {
                         singleEntity["UPDATE_STATUS"] = "No information to update.";
                     }
                     
-                    await this.pushEntitiesToElasticSearch([singleEntity["_SYSTEM_ID"]]);
+                    // await this.pushEntitiesToElasticSearch([singleEntity["_SYSTEM_ID"]]);
 
                     return singleEntity;
 
@@ -805,7 +804,7 @@ module.exports = class EntitiesHelper {
                     }))
                 }
 
-                await this.pushEntitiesToElasticSearch(entities);
+                // await this.pushEntitiesToElasticSearch(entities);
 
                 this.entityMapProcessData = {};
                 
@@ -1314,119 +1313,119 @@ module.exports = class EntitiesHelper {
    * @returns {Object} 
    */
 
-    static pushEntitiesToElasticSearch(entities = []) {
-        return new Promise(async (resolve, reject) => {
-            try {
+    // static pushEntitiesToElasticSearch(entities = []) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
 
-                if (entities.length > 0) {
+    //             if (entities.length > 0) {
 
-                    let entityDocuments = await this.entityDocuments({
-                        _id: {
-                            $in: entities
-                        }
-                    }, [
-                            "_id",
-                            "metaInformation",
-                            "entityType",
-                            "entityTypeId",
-                            "updatedAt",
-                            "createdAt",
-                            "allowedRoles",
-                            "registryDetails"
-                        ]);
+    //                 let entityDocuments = await this.entityDocuments({
+    //                     _id: {
+    //                         $in: entities
+    //                     }
+    //                 }, [
+    //                         "_id",
+    //                         "metaInformation",
+    //                         "entityType",
+    //                         "entityTypeId",
+    //                         "updatedAt",
+    //                         "createdAt",
+    //                         "allowedRoles",
+    //                         "registryDetails"
+    //                     ]);
 
-                    for (let entity = 0; entity < entityDocuments.length; entity++) {
+    //                 for (let entity = 0; entity < entityDocuments.length; entity++) {
 
-                        let entityDocument = entityDocuments[entity];
+    //                     let entityDocument = entityDocuments[entity];
 
-                        let telemetryEntities = [];
+    //                     let telemetryEntities = [];
 
-                        let entityObj = {
-                            _id: entityDocument._id,
-                            entityType: entityDocument.entityType,
-                            entityTypeId: entityDocument.entityTypeId,
-                            updatedAt: entityDocument.updatedAt,
-                            createdAt: entityDocument.createdAt,
-                            registryDetails: entityDocument.registryDetails
-                        }
+    //                     let entityObj = {
+    //                         _id: entityDocument._id,
+    //                         entityType: entityDocument.entityType,
+    //                         entityTypeId: entityDocument.entityTypeId,
+    //                         updatedAt: entityDocument.updatedAt,
+    //                         createdAt: entityDocument.createdAt,
+    //                         registryDetails: entityDocument.registryDetails
+    //                     }
 
-                        if( entityDocument.allowedRoles && entityDocument.allowedRoles.length > 0 ) {
-                            entityObj["allowedRoles"] = entityDocument.allowedRoles;
-                        }
+    //                     if( entityDocument.allowedRoles && entityDocument.allowedRoles.length > 0 ) {
+    //                         entityObj["allowedRoles"] = entityDocument.allowedRoles;
+    //                     }
 
-                        for (let metaData in entityDocument.metaInformation) {
-                            entityObj[metaData] = entityDocument.metaInformation[metaData];
-                        }
+    //                     for (let metaData in entityDocument.metaInformation) {
+    //                         entityObj[metaData] = entityDocument.metaInformation[metaData];
+    //                     }
 
-                        let telemetryObj = {
-                            [`${entityObj.entityType}_name`]: entityObj.name,
-                            [`${entityObj.entityType}_id`]: entityObj._id,
-                            [`${entityObj.entityType}_externalId`]: entityObj.externalId
-                        };
+    //                     let telemetryObj = {
+    //                         [`${entityObj.entityType}_name`]: entityObj.name,
+    //                         [`${entityObj.entityType}_id`]: entityObj._id,
+    //                         [`${entityObj.entityType}_externalId`]: entityObj.externalId
+    //                     };
 
-                        let relatedEntities = await this.relatedEntities(
-                            entityObj._id,
-                            entityObj.entityTypeId,
-                            entityObj.entityType,
-                            [
-                                "metaInformation.externalId",
-                                "metaInformation.name",
-                                "entityType",
-                                "entityTypeId",
-                                "_id"
-                            ])
+    //                     let relatedEntities = await this.relatedEntities(
+    //                         entityObj._id,
+    //                         entityObj.entityTypeId,
+    //                         entityObj.entityType,
+    //                         [
+    //                             "metaInformation.externalId",
+    //                             "metaInformation.name",
+    //                             "entityType",
+    //                             "entityTypeId",
+    //                             "_id"
+    //                         ])
 
-                        if (relatedEntities.length > 0) {
+    //                     if (relatedEntities.length > 0) {
 
-                            relatedEntities = relatedEntities.map(entity => {
+    //                         relatedEntities = relatedEntities.map(entity => {
 
-                                telemetryObj[`${entity.entityType}_name`] =
-                                    entity.metaInformation.name;
+    //                             telemetryObj[`${entity.entityType}_name`] =
+    //                                 entity.metaInformation.name;
 
-                                telemetryObj[`${entity.entityType}_id`] =
-                                    entity._id;
+    //                             telemetryObj[`${entity.entityType}_id`] =
+    //                                 entity._id;
 
-                                telemetryObj[`${entity.entityType}_externalId`] =
-                                    entity.metaInformation.externalId;
+    //                             telemetryObj[`${entity.entityType}_externalId`] =
+    //                                 entity.metaInformation.externalId;
 
-                                return {
-                                    name: entity.metaInformation.name,
-                                    externalId: entity.metaInformation.externalId,
-                                    entityType: entity.entityType,
-                                    entityTypeId: entity.entityTypeId,
-                                    _id: entity._id
-                                }
-                            })
+    //                             return {
+    //                                 name: entity.metaInformation.name,
+    //                                 externalId: entity.metaInformation.externalId,
+    //                                 entityType: entity.entityType,
+    //                                 entityTypeId: entity.entityTypeId,
+    //                                 _id: entity._id
+    //                             }
+    //                         })
 
-                            entityObj["relatedEntities"] = relatedEntities;
-                        }
+    //                         entityObj["relatedEntities"] = relatedEntities;
+    //                     }
 
-                        telemetryEntities.push(telemetryObj);
+    //                     telemetryEntities.push(telemetryObj);
 
-                        entityObj["telemetry_entities"] = telemetryEntities;
+    //                     entityObj["telemetry_entities"] = telemetryEntities;
 
-                        await elasticSearch.createOrUpdate(
-                            entityObj._id,
-                            process.env.ELASTICSEARCH_ENTITIES_INDEX,
-                            {
-                                data: entityObj
-                            }
-                        );
+    //                     await elasticSearch.createOrUpdate(
+    //                         entityObj._id,
+    //                         process.env.ELASTICSEARCH_ENTITIES_INDEX,
+    //                         {
+    //                             data: entityObj
+    //                         }
+    //                     );
 
-                    }
+    //                 }
 
-                }
+    //             }
 
-                return resolve({
-                    success: true
-                });
+    //             return resolve({
+    //                 success: true
+    //             });
 
-            }
-            catch (error) {
-                return reject(error);
-            }
-        })
-    }
+    //         }
+    //         catch (error) {
+    //             return reject(error);
+    //         }
+    //     })
+    // }
 
 
     /**
@@ -1437,67 +1436,67 @@ module.exports = class EntitiesHelper {
  * @name userId - user id
  * @returns {Object} 
  */
-    static updateUserRolesInEntitiesElasticSearch(userRoles = [], userId = "") {
-        return new Promise(async (resolve, reject) => {
-            try {
+//     static updateUserRolesInEntitiesElasticSearch(userRoles = [], userId = "") {
+//         return new Promise(async (resolve, reject) => {
+//             try {
             
-            await Promise.all(userRoles.map( async role => {
-                await Promise.all(role.entities.map(async entity => {
+//             await Promise.all(userRoles.map( async role => {
+//                 await Promise.all(role.entities.map(async entity => {
 
-                    let entityDocument = await elasticSearch.get
-                    (
-                        entity,
-                        process.env.ELASTICSEARCH_ENTITIES_INDEX
-                    )
+//                     let entityDocument = await elasticSearch.get
+//                     (
+//                         entity,
+//                         process.env.ELASTICSEARCH_ENTITIES_INDEX
+//                     )
                    
-                    if (entityDocument.statusCode == httpStatusCode.ok.status) {
+//                     if (entityDocument.statusCode == httpStatusCode.ok.status) {
 
-                        entityDocument = entityDocument.body["_source"].data;
+//                         entityDocument = entityDocument.body["_source"].data;
                         
-                        if (!entityDocument.roles) {
-                            entityDocument.roles = {};
-                        }
+//                         if (!entityDocument.roles) {
+//                             entityDocument.roles = {};
+//                         }
                         
-                        if (entityDocument.roles[role.code]) {
-                            if (!entityDocument.roles[role.code].includes(userId)) {
-                                entityDocument.roles[role.code].push(userId);
+//                         if (entityDocument.roles[role.code]) {
+//                             if (!entityDocument.roles[role.code].includes(userId)) {
+//                                 entityDocument.roles[role.code].push(userId);
 
-                                await elasticSearch.createOrUpdate
-                                (
-                                    entity,
-                                    process.env.ELASTICSEARCH_ENTITIES_INDEX,
-                                    {
-                                        data: entityDocument
-                                    }
-                                )
-                            }
-                        }
-                        else {
-                            entityDocument.roles[role.code] = [userId];
+//                                 await elasticSearch.createOrUpdate
+//                                 (
+//                                     entity,
+//                                     process.env.ELASTICSEARCH_ENTITIES_INDEX,
+//                                     {
+//                                         data: entityDocument
+//                                     }
+//                                 )
+//                             }
+//                         }
+//                         else {
+//                             entityDocument.roles[role.code] = [userId];
 
-                            await elasticSearch.createOrUpdate
-                            (
-                                entity,
-                                process.env.ELASTICSEARCH_ENTITIES_INDEX,
-                                {
-                                    data: entityDocument
-                                }
-                            )
-                        }
-                    }
-                }))
-            }))
+//                             await elasticSearch.createOrUpdate
+//                             (
+//                                 entity,
+//                                 process.env.ELASTICSEARCH_ENTITIES_INDEX,
+//                                 {
+//                                     data: entityDocument
+//                                 }
+//                             )
+//                         }
+//                     }
+//                 }))
+//             }))
 
-            return resolve({
-                success: true
-            });
+//             return resolve({
+//                 success: true
+//             });
 
-        }
-        catch (error) {
-            return reject(error);
-        }
-    })
-}
+//         }
+//         catch (error) {
+//             return reject(error);
+//         }
+//     })
+// }
 
 
  /**
@@ -1508,49 +1507,49 @@ module.exports = class EntitiesHelper {
  * @name role - role of user
  * @returns {Object} 
  */
-static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId = "") {
-    return new Promise(async (resolve, reject) => {
-        try {
+// static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId = "") {
+//     return new Promise(async (resolve, reject) => {
+//         try {
        
-        let entityDocument = await elasticSearch.get
-        (
-            entityId,
-            process.env.ELASTICSEARCH_ENTITIES_INDEX
-        )
+//         let entityDocument = await elasticSearch.get
+//         (
+//             entityId,
+//             process.env.ELASTICSEARCH_ENTITIES_INDEX
+//         )
 
-        if (entityDocument.statusCode == httpStatusCode.ok.status) {
+//         if (entityDocument.statusCode == httpStatusCode.ok.status) {
 
-            entityDocument = entityDocument.body["_source"].data;
+//             entityDocument = entityDocument.body["_source"].data;
 
-            if (entityDocument.roles && entityDocument.roles[role]) {
+//             if (entityDocument.roles && entityDocument.roles[role]) {
 
-                let index = entityDocument.roles[role].indexOf(userId);
-                if (index > -1) {
-                    entityDocument.roles[role].splice(index, 1);
+//                 let index = entityDocument.roles[role].indexOf(userId);
+//                 if (index > -1) {
+//                     entityDocument.roles[role].splice(index, 1);
 
-                    await elasticSearch.createOrUpdate
-                    (
-                        entityId,
-                        process.env.ELASTICSEARCH_ENTITIES_INDEX,
-                        {
-                            data: entityDocument
-                        }
-                    )
-                }
+//                     await elasticSearch.createOrUpdate
+//                     (
+//                         entityId,
+//                         process.env.ELASTICSEARCH_ENTITIES_INDEX,
+//                         {
+//                             data: entityDocument
+//                         }
+//                     )
+//                 }
                
-            }
-        }
+//             }
+//         }
         
-        return resolve({
-            success: true
-        });
+//         return resolve({
+//             success: true
+//         });
 
-    }
-    catch (error) {
-        return reject(error);
-    }
-  })
-}
+//     }
+//     catch (error) {
+//         return reject(error);
+//     }
+//   })
+// }
 
  /**
    * Upload registry via csv.
@@ -1711,14 +1710,16 @@ static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId 
                         }
                     }
 
+                    let updateQuery = {
+                        "registryDetails.locationId": parsedData.locationId,
+                        "registryDetails.code": parsedData.entityExternalId ? parsedData.entityExternalId : parsedData.locationId,
+                        "registryDetails.lastUpdatedAt": new Date(),
+                        updatedBy: userId
+                    }
+
                     let entityUpdated = 
                     await database.models.entities.findOneAndUpdate(
-                        { _id : entityId }, { $set: {
-                            "registryDetails.locationId": parsedData.locationId,
-                            "registryDetails.code": parsedData.entityExternalId,
-                            "registryDetails.lastUpdatedAt": new Date(),
-                            updatedBy: userId
-                        }}, {_id : 1 }
+                        { _id : entityId }, { $set: updateQuery}, {_id : 1 }
                     );
 
                     if( !entityUpdated._id ) {
@@ -1731,7 +1732,7 @@ static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId 
 
                     singleCsvData["_SYSTEM_ID"] = entityUpdated._id;
                     singleCsvData["STATUS"] = messageConstants.common.SUCCESS;
-                    this.pushEntitiesToElasticSearch([entityUpdated._id]);
+                    // this.pushEntitiesToElasticSearch([entityUpdated._id]);
                     input.push(singleCsvData);
                 }
 
@@ -1895,8 +1896,10 @@ static deleteUserRoleFromEntitiesElasticSearch(entityId = "", role = "", userId 
             if(eachMetaData.districtName && eachMetaData.districtName != "") {
                 eachMetaData.name += ", "+eachMetaData.districtName;
             }
-    
-            if( eachMetaData.externalId && eachMetaData.externalId !== "" ) {
+
+            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.externalId);
+
+            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
                 eachMetaData.name += ", "+eachMetaData.externalId;
             }
         })

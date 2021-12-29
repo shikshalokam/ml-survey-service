@@ -18,9 +18,12 @@ const pushObservationSubmissionToKafka = function (message) {
             messages: JSON.stringify(message)
           }])
 
+          console.log("data is",kafkaPushStatus)
+
           return resolve(kafkaPushStatus)
 
       } catch (error) {
+          console.log("error is",error)
           return reject(error);
       }
   })

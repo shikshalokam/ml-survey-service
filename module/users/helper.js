@@ -657,12 +657,6 @@ module.exports = class UserHelper {
             let userPrivateProgram = "";
             let dateFormat = gen.utils.epochTime();
 
-            const organisationAndRootOrganisation = 
-            await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                userToken,
-                userId
-            );
-
             if( data.programId && data.programId !== "" ) {
 
                 userPrivateProgram =  await programsHelper.list(
@@ -698,9 +692,6 @@ module.exports = class UserHelper {
                     userId : userId
                 }
 
-                programData.createdFor =  organisationAndRootOrganisation.createdFor;
-                programData.rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
-
                 userPrivateProgram = 
                 await programsHelper.create(
                     programData
@@ -725,9 +716,6 @@ module.exports = class UserHelper {
             solutionData.entities = 
             solutionData.entities && solutionData.entities.length > 0 ? 
             solutionData.entities : [];
-            
-            solutionData.createdFor =  organisationAndRootOrganisation.createdFor;
-            solutionData.rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
 
             const solution = await solutionsHelper.create(solutionData);
 

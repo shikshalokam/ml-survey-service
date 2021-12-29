@@ -10,7 +10,6 @@ module.exports = {
     language: Array,
     keywords: Array,
     concepts: Array,
-    createdFor: Array,
     scoringSystem: String,
     levelToScoreMapping: Object,
     themes: Array,
@@ -21,10 +20,8 @@ module.exports = {
     createdBy: String,
     entityTypeId: "ObjectId",
     entityType: String,
-    rootOrganisations : {
-      type : [String],
-      default : []
-    },
-    criteriaLevelReport : Boolean
+    criteriaLevelReport : Boolean,
+    license:Object,
+    creator:String
   }
 };

@@ -15,7 +15,7 @@ const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const surveySolutionTemplate = "-SURVEY-TEMPLATE";
 const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
@@ -373,7 +373,7 @@ module.exports = class SurveysHelper {
                         }
                     )
      
-                    let appDetails = await kendraService.getAppDetails(appName);
+                    let appDetails = await coreService.getAppDetails(appName);
                     
                     if (appDetails.result == false) {
                         throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);
@@ -538,12 +538,11 @@ module.exports = class SurveysHelper {
      * @method
      * @name createSurveyDocument
      * @param {String} userId =  - logged in user id.    
-     * @param {Object} solution - solution document .
-     * @param {Array} userOrganisations - User organisations  
+     * @param {Object} solution - solution document . 
      * @returns {Object} status and survey id.
      */
 
-    static createSurveyDocument(userId = "", solution = {}, userOrganisations = {}) {
+    static createSurveyDocument(userId = "", solution = {}) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -567,13 +566,6 @@ module.exports = class SurveysHelper {
                 } else {
                     
                     let survey = {}
-
-                    if (userOrganisations.createdFor) {
-                        survey["createdFor"] = userOrganisations.createdFor;
-                    }
-                    if (userOrganisations.rootOrganisations) {
-                        survey["rootOrganisations"] = userOrganisations.rootOrganisations;
-                    }
 
                     survey["status"] = messageConstants.common.PUBLISHED;
                     survey["deleted"] = false;
@@ -763,23 +755,11 @@ module.exports = class SurveysHelper {
                 }
                 else {
 
-                    let userOrgDetails = await this.getUserOrganisationDetails
-                    (
-                        [userId],
-                        token
-                    )
-                    
-                    userOrgDetails = userOrgDetails.data;
-
-                    if(!userOrgDetails[userId] || !Array.isArray(userOrgDetails[userId].rootOrganisations) || userOrgDetails[userId].rootOrganisations.length < 1) {
-                        throw new Error(messageConstants.apiResponses.ORGANISATION_DETAILS_NOT_FOUND_FOR_USER)
-                    }
-
                     let createSurveyDocument = await this.createSurveyDocument
                         (
                             userId,
-                            solutionDocument[0],
-                            userOrgDetails[userId]
+                            solutionDocument[0]
+                            // userOrgDetails[userId]
                         )
 
                     if (!createSurveyDocument.success) {
@@ -839,7 +819,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation= {}) {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -884,6 +864,40 @@ module.exports = class SurveysHelper {
                 }
 
                 solutionDocument = solutionDocument[0];
+
+                let endDateCheckRequired = true;
+
+                if ( submissionId != "" ) {
+                    let submissionDocument = await surveySubmissionsHelper.surveySubmissionDocuments(
+                        {
+                            _id: submissionId
+                        },
+                        [
+                            "status"
+                        ]
+                    );
+
+                    if(submissionDocument && submissionDocument.length > 0){
+                        if ( submissionDocument[0].status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ){
+                            endDateCheckRequired = false;
+                        }
+                    }
+                }
+
+                if (endDateCheckRequired) {
+
+                    if (new Date() > new Date(solutionDocument.endDate)) {
+                        if (solutionDocument.status == messageConstants.common.ACTIVE_STATUS) {
+                            await solutionHelper.updateSolutionDocument
+                            (
+                                { _id : solutionDocument._id },
+                                { $set : { status: messageConstants.common.INACTIVE_STATUS } }
+                            )
+                        }
+
+                        throw new Error(messageConstants.apiResponses.LINK_IS_EXPIRED)
+                    }
+                }
                 
                 let programDocument = [];
 
@@ -933,8 +947,7 @@ module.exports = class SurveysHelper {
                         "resourceType",
                         "language",
                         "keywords",
-                        "concepts",
-                        "createdFor"
+                        "concepts"
                     ]
                 )
 
@@ -1038,15 +1051,15 @@ module.exports = class SurveysHelper {
                     submissionDocument.surveyInformation.startDate = new Date();
 
                     if (Object.keys(roleInformation).length > 0 && roleInformation.role) {
-                    
-                        let roleDocument = await userRolesHelper.list
-                        ( { code : roleInformation.role },
-                          [ "_id"]
-                        )
+                        //commented for multiple role
+                        // let roleDocument = await userRolesHelper.list
+                        // ( { code : roleInformation.role },
+                        //   [ "_id"]
+                        // )
 
-                        if (roleDocument.length > 0) {
-                            roleInformation.roleId = roleDocument[0]._id; 
-                        }
+                        // if (roleDocument.length > 0) {
+                        //     roleInformation.roleId = roleDocument[0]._id; 
+                        // }
     
                         submissionDocument.userRoleInformation = roleInformation;
                     }
@@ -1098,56 +1111,6 @@ module.exports = class SurveysHelper {
     }
 
     /**
-     * Fetch user organisation details.
-     * @method
-     * @name getUserOrganisationDetails
-     * @param {Array} userIds - Array of user ids required..
-     * @param {String} requestingUserAuthToken - Requesting user auth token. 
-     * @returns {Object} User organisation details.
-     */
-
-    static getUserOrganisationDetails(userIds = [], requestingUserAuthToken = "") {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if(requestingUserAuthToken == "") {
-                    throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
-                }
-
-                let userOrganisationDetails = {};
-
-                if(userIds.length > 0) {
-                    for (let pointerToUserIds = 0; pointerToUserIds < userIds.length; pointerToUserIds++) {
-                        
-                        const user = userIds[pointerToUserIds];
-                        let userOrganisations = 
-                        await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                            requestingUserAuthToken, 
-                            userIds[pointerToUserIds]
-                        );
-                        
-                        userOrganisationDetails[user] = userOrganisations;
-                    }
-                }
-
-                return resolve({
-                    success : true,
-                    message : messageConstants.apiResponses.USER_ORGANISATION_DETAILS_FETCHED,
-                    data : userOrganisationDetails
-                });
-
-            } catch (error) {
-                return reject({
-                    success: false,
-                    message: error.message,
-                    data: false
-                });
-            }
-        })
-
-    }
-
-    /**
       *  Helper function for list of fields to be selected from solution document.
       * @method
       * @name solutionDocumentProjectionFieldsForDetailsAPI
@@ -1169,7 +1132,8 @@ module.exports = class SurveysHelper {
                 "sections",
                 "captureGpsLocationAtQuestionLevel",
                 "enableQuestionReadOut",
-                "author"
+                "author",
+                "endDate"
               ])
         })
     }
@@ -1417,7 +1381,7 @@ module.exports = class SurveysHelper {
                 }
     
                 let targetedSolutions = 
-                await kendraService.solutionBasedOnRoleAndLocation
+                await coreService.solutionBasedOnRoleAndLocation
                 (
                     token,
                     bodyData,
@@ -1581,7 +1545,7 @@ module.exports = class SurveysHelper {
                     surveyId = surveyDocument[0]._id;
                 } else {
 
-                    let solutionData = await kendraService.solutionDetailsBasedOnRoleAndLocation
+                    let solutionData = await coreService.solutionDetailsBasedOnRoleAndLocation
                     (
                         token,
                         bodyData,
@@ -1592,23 +1556,10 @@ module.exports = class SurveysHelper {
                         throw new Error(messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND)
                     }
 
-                    let userOrgDetails = await this.getUserOrganisationDetails
-                    (
-                        [userId],
-                        token
-                    )
-
-                    userOrgDetails = userOrgDetails.data;
-
-                    if (!userOrgDetails[userId] || !Array.isArray(userOrgDetails[userId].rootOrganisations) || userOrgDetails[userId].rootOrganisations.length < 1) {
-                        throw new Error(messageConstants.apiResponses.ORGANISATION_DETAILS_NOT_FOUND_FOR_USER)
-                    }
-
                     let createSurveyDocument = await this.createSurveyDocument
                     (
                         userId,
-                        solutionData.data,
-                        userOrgDetails[userId]
+                        solutionData.data
                     )
 
                     if (!createSurveyDocument.success) {
@@ -1722,7 +1673,7 @@ module.exports = class SurveysHelper {
             let surveySolutions = {
                 success : false
             };
-
+           
             if ( surveyReportPage === "" || gen.utils.convertStringToBoolean(surveyReportPage) ) {
                 
                 surveySolutions = await surveySubmissionsHelper.surveySolutions(
@@ -1816,7 +1767,7 @@ module.exports = class SurveysHelper {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
                 }
 
-                let appDetails = await kendraService.getAppDetails(appName);
+                let appDetails = await coreService.getAppDetails(appName);
                 
                 if(appDetails.result === false){
                     throw new Error(messageConstants.apiResponses.APP_NOT_FOUND);

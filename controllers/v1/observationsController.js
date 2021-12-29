@@ -12,10 +12,8 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
-const csv = require("csvtojson");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
-const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 
 /**
     * Observations
@@ -246,6 +244,12 @@ module.exports = class Observations extends Abstract {
      *          "status": String,
      *          "entities":["5beaa888af0065f0e0a10515","5beaa888af0065f0e0a10516"]
      *      }
+     *      "userRoleAndProfileInformation": {
+     *          "role" : "HM,DEO",
+     *          "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
+     *          "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+     *          "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
+     *      }
      * }
      * @apiUse successBody
      * @apiUse errorBody
@@ -269,7 +273,8 @@ module.exports = class Observations extends Abstract {
                     req.body.data, 
                     req.userDetails.id, 
                     req.userDetails.userToken,
-                    req.query.programId
+                    req.query.programId,
+                    req.body.userRoleAndProfileInformation
                 );
 
                 return resolve({
@@ -478,7 +483,7 @@ module.exports = class Observations extends Abstract {
      * @apiName Map entities to observations
      * @apiGroup Observations
      * @apiParamExample {json} Request-Body:
-     * {
+     *  {
      *	    "data": ["5beaa888af0065f0e0a10515","5beaa888af0065f0e0a10516"]
      * }
      * @apiUse successBody
@@ -512,7 +517,7 @@ module.exports = class Observations extends Abstract {
                     response = 
                     await observationsHelper.removeEntityFromObservation(
                         req.params._id,
-                        req.body.data,
+                        req.body.data ? req.body.data : (req.query.entityId ? req.query.entityId.split(',') : []),
                         req.userDetails.id
                     ) 
                 }
@@ -771,7 +776,7 @@ module.exports = class Observations extends Abstract {
      * @apiSampleRequest /assessment/api/v1/observations/assessment/5d286eace3cee10152de9efa?entityId=5d286b05eb569501488516c4&submissionNumber=1&ecmMethod=OB
      * @apiParamExample {json} Request:
      * {
-     *  "role" : "HM",
+     *  "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -1156,15 +1161,15 @@ module.exports = class Observations extends Abstract {
                 }
 
                 if (req.body && req.body.role) {
-                    
-                    let roleDocument = await userRolesHelper.list
-                    ( { code : req.body.role },
-                      [ "_id"]
-                    )
+                    //commented for mutiple role
+                    // let roleDocument = await userRolesHelper.list
+                    // ( { code : req.body.role },
+                    //   [ "_id"]
+                    // )
 
-                    if (roleDocument[0]._id) {
-                        req.body.roleId = roleDocument[0]._id; 
-                    }
+                    // if (roleDocument[0]._id) {
+                    //     req.body.roleId = roleDocument[0]._id; 
+                    // }
 
                     submissionDocument.userRoleInformation = req.body;
                 }
@@ -1198,8 +1203,7 @@ module.exports = class Observations extends Abstract {
                         resourceType: 0,
                         language: 0,
                         keywords: 0,
-                        concepts: 0,
-                        createdFor: 0
+                        concepts: 0
                     }
                 ).lean();
 
@@ -1532,232 +1536,6 @@ module.exports = class Observations extends Abstract {
         });
     }
 
-
-    /**
-     * @api {post} /assessment/api/v1/observations/bulkCreate Bulk Create Observations CSV
-     * @apiVersion 1.0.0
-     * @apiName Bulk Create Observations CSV
-     * @apiGroup Observations
-     * @apiParam {File} observation  Mandatory observation file of type CSV.
-     * @apiUse successBody
-     * @apiUse errorBody
-     */
-
-    /**
-    * Upload bulk observations via csv.
-    * @method
-    * @name bulkCreate
-    * @param {Object} req -request Data.
-    * @param {CSV} req.files.observation -Observations csv data . 
-    * @returns {CSV} - Same uploaded csv with extra field status indicating the particular
-    * column is uploaded or not. 
-    */
-
-    async bulkCreate(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                if (!req.files || !req.files.observation) {
-                    let responseMessage = httpStatusCode.bad_request.message;
-                    return resolve({ 
-                        status: httpStatusCode.bad_request.status, 
-                        message: responseMessage 
-                    });
-                }
-
-                const fileName = `Observation-Upload-Result`;
-                let fileStream = new FileStream(fileName);
-                let input = fileStream.initStream();
-
-                (async function () {
-                    await fileStream.getProcessorPromise();
-                    return resolve({
-                        isResponseAStream: true,
-                        fileNameWithPath: fileStream.fileNameWithPath()
-                    });
-                })();
-
-                let observationData = 
-                await csv().fromString(req.files.observation.data.toString());
-
-                let users = [];
-                let usersKeycloakIdMap = {};
-                let solutionExternalIds = [];
-                let entityIds = [];
-
-                observationData.forEach(eachObservationData => {
-                    if (!eachObservationData["keycloak-userId"] && eachObservationData.user && !users.includes(eachObservationData.user)) {
-                        users.push(eachObservationData.user);
-                    } else if (eachObservationData["keycloak-userId"] && eachObservationData["keycloak-userId"] != "") {
-                        usersKeycloakIdMap[eachObservationData["keycloak-userId"]] = true;
-                    }
-                    solutionExternalIds.push(eachObservationData.solutionExternalId);
-                    if(eachObservationData.entityId && eachObservationData.entityId != "") {
-                        entityIds.push(ObjectId(eachObservationData.entityId));
-                    }
-                })
-
-                let userIdByExternalId;
-
-                if (users.length > 0) {
-                    userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.userDetails.userToken, users);
-                    if(Object.keys(userIdByExternalId).length > 0) {
-                        Object.values(userIdByExternalId).forEach(userDetails => {
-                            usersKeycloakIdMap[userDetails] = true;
-                        })
-                    }
-                }
-
-                if(Object.keys(usersKeycloakIdMap).length > 0) {
-                    
-                    let userOrganisationDetails = await observationsHelper.getUserOrganisationDetails(
-                        Object.keys(usersKeycloakIdMap), 
-                        req.userDetails.userToken
-                    );
-
-                    usersKeycloakIdMap = userOrganisationDetails.data;
-                }
-
-                let entityDocument;
-
-                if (entityIds.length > 0) {
-                    
-                    let entityQuery = {
-                        _id: {
-                            $in: entityIds
-                        }
-                    };
-
-                    let entityProjection = [
-                        "entityTypeId",
-                        "entityType"
-                    ];
-
-                    entityDocument = await entitiesHelper.entityDocuments(entityQuery, entityProjection);
-                }
-
-                let entityObject = {};
-
-                if (entityDocument && Array.isArray(entityDocument) && entityDocument.length > 0) {
-                    entityDocument.forEach(eachEntityDocument => {
-                        entityObject[eachEntityDocument._id.toString()] = eachEntityDocument;
-                    })
-                }
-
-                let solutionQuery = {
-                    externalId: {
-                        $in: solutionExternalIds
-                    },
-                    status: "active",
-                    isDeleted: false,
-                    isReusable: false,
-                    type: "observation",
-                    programId : { $exists : true }
-                };
-
-                let solutionProjection = [
-                    "externalId",
-                    "frameworkExternalId",
-                    "frameworkId",
-                    "name",
-                    "description",
-                    "type",
-                    "subType",
-                    "entityTypeId",
-                    "entityType",
-                    "programId",
-                    "programExternalId"
-                ];
-
-                let solutionDocument = await solutionsHelper.solutionDocuments(solutionQuery, solutionProjection);
-
-                let solutionObject = {};
-
-                if (solutionDocument.length > 0) {
-                    solutionDocument.forEach(eachSolutionDocument => {
-                        solutionObject[eachSolutionDocument.externalId] = eachSolutionDocument;
-                    })
-                }
-
-                for (let pointerToObservation = 0; pointerToObservation < observationData.length; pointerToObservation++) {
-                    
-                    let solution;
-                    let entityDocument = {};
-                    let observationHelperData;
-                    let currentData = observationData[pointerToObservation];
-                    let csvResult = {};
-                    let status;
-                    let userId;
-                    let userOrganisations;
-
-                    Object.keys(currentData).forEach(eachObservationData => {
-                        csvResult[eachObservationData] = currentData[eachObservationData];
-                    })
-
-                    try {
-
-                        if (currentData["keycloak-userId"] && currentData["keycloak-userId"] !== "") {
-                            userId = currentData["keycloak-userId"];
-                        } else {
-
-                            if (userIdByExternalId[currentData.user] === "") {
-                                throw new Error("Keycloak id for user is not present");
-                            }
-
-                            userId = userIdByExternalId[currentData.user];
-                        }
-
-                        if(userId == "") {
-                            throw new Error(messageConstants.apiResponses.USER_NOT_FOUND);
-                        }
-
-                        if(!usersKeycloakIdMap[userId]  || !Array.isArray(usersKeycloakIdMap[userId].rootOrganisations) || usersKeycloakIdMap[userId].rootOrganisations.length < 1) {
-                            throw new Error(messageConstants.apiResponses.USER_ORGANISATION_DETAILS_NOT_FOUND);
-                        } else {
-                            userOrganisations = usersKeycloakIdMap[userId];
-                        }
-
-                        if (solutionObject[currentData.solutionExternalId] !== undefined) {
-                            solution = solutionObject[currentData.solutionExternalId];
-                        } else {
-                            throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
-                        }
-
-                        if (currentData.entityId && currentData.entityId != "") {
-                            if(entityObject[currentData.entityId.toString()] !== undefined) {
-                                entityDocument = entityObject[currentData.entityId.toString()];
-                            } else {
-                                throw new Error(messageConstants.apiResponses.ENTITY_NOT_FOUND);
-                            }
-                        }
-
-                        observationHelperData = await observationsHelper.bulkCreate(
-                            userId, 
-                            solution, 
-                            entityDocument, 
-                            userOrganisations
-                        );
-                        status = observationHelperData.status;
-
-                    } catch (error) {
-                        status = error.message;
-                    }
-                    
-                    csvResult["status"] = status;
-                    input.push(csvResult);
-                }
-
-                input.push(null);
-            } catch (error) {
-                return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        });
-    }
-
     /**
     * @api {post} /assessment/api/v1/observations/update/:observationId Update Observation Details
     * @apiVersion 1.0.0
@@ -1996,12 +1774,12 @@ module.exports = class Observations extends Abstract {
     }
 
     /**
-* @api {get} /assessment/api/v1/observations/details/:observationId 
+* @api {get} /assessment/api/v1/observations/details/:observationId?solutionId=600ac0d1c7de076e6f9943b9
 * Observations details.
 * @apiVersion 1.0.0
 * @apiGroup Observations
 * @apiHeader {String} X-authenticated-user-token Authenticity token
-* @apiSampleRequest /assessment/api/v1/observations/details/5de8a220c210d4700813e695
+* @apiSampleRequest /assessment/api/v1/observations/details/5de8a220c210d4700813e695?solutionId=600ac0d1c7de076e6f9943b9
 * @apiUse successBody
 * @apiUse errorBody
 * @apiParamExample {json} Response:
@@ -2080,7 +1858,11 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let observationDetails = await observationsHelper.details(req.params._id);
+                let observationDetails = await observationsHelper.details(
+                    req.params._id ? req.params._id : "",
+                    req.query.solutionId ? req.query.solutionId : "",
+                    req.userDetails.userId
+                );
 
                 return resolve({
                     message: messageConstants.apiResponses.OBSERVATION_FETCHED,
@@ -2096,55 +1878,6 @@ module.exports = class Observations extends Abstract {
             }
         });
     } 
-
-
-      /**
-    * @api {post} /assessment/api/v1/observations/bulkCreateByUserRoleAndEntity 
-    * Bulk create observations by entity and role.
-    * @apiVersion 1.0.0
-    * @apiGroup Observations
-    * @apiSampleRequest /assessment/api/v1/observations/bulkCreateByUserRoleAndEntity
-    * @apiParamExample {json} Request:
-    * {
-    *  "entityId": "5f2449eb626a540f40817ef5",
-    *  "role": "CRP",
-    *  "solutionExternalId": "TAF-solution"
-     }
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
-
-    /**
-      * Bulk create observations by entity and role.
-      * @method
-      * @name bulkCreateByUserRoleAndEntity
-      * @param {Object} req - request data.
-      * @param {String} req.body.entityId - entityId 
-      * @param {String} req.body.role - role 
-      * @param {String} req.body.solutionExternalId - solution external id
-      * @returns {CSV} Assigned observations to user.
-     */
-
-    async bulkCreateByUserRoleAndEntity(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                let observations = await observationsHelper.bulkCreateByUserRoleAndEntity(
-                    req.body,
-                    req.userDetails.userToken
-                );
-
-                return resolve(observations);
-
-            } catch (error) {
-                return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
 
         /**
   * @api {get} /assessment/api/v1/observations/submissionStatus/:observationId?entityId=:entityId
@@ -2212,7 +1945,7 @@ module.exports = class Observations extends Abstract {
     * @apiSampleRequest /assessment/api/v1/observations/getObservation?page=1&limit=10&search=a
     * @apiParamExample {json} Request:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -2356,7 +2089,7 @@ module.exports = class Observations extends Abstract {
     * @apiSampleRequest /assessment/api/v1/observations/entities?solutionId=5fec29afd1d6d98686a07156
     * @apiParamExample {json} Request:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"

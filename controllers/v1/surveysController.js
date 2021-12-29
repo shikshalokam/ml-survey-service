@@ -198,194 +198,6 @@ module.exports = class Surveys extends Abstract {
 }
 
 
-    /**
-     * @api {post} /assessment/api/v1/surveys/bulkCreate Bulk Create surveys CSV
-     * @apiVersion 1.0.0
-     * @apiName Bulk Create Surveys CSV
-     * @apiGroup Surveys
-     * @apiParam {File} survey  Mandatory survey file of type CSV.
-     * @apiUse successBody
-     * @apiUse errorBody
-     */
-
-    /**
-    * Upload bulk surveys via csv.
-    * @method
-    * @name bulkCreate
-    * @param {Object} req -request Data.
-    * @param {CSV} req.files.survey -Surveys csv data . 
-    * @returns {CSV} - Same uploaded csv with extra field status indicating the particular
-    * column is uploaded or not. 
-    */
-
-   async bulkCreate(req) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            
-            if (!req.files || !req.files.survey) {
-                let responseMessage = httpStatusCode.bad_request.message;
-                return resolve({ 
-                    status: httpStatusCode.bad_request.status, 
-                    message: responseMessage 
-                });
-            }
-
-            const fileName = `Survey-Upload-Result`;
-            let fileStream = new FileStream(fileName);
-            let input = fileStream.initStream();
-
-            (async function () {
-                await fileStream.getProcessorPromise();
-                return resolve({
-                    isResponseAStream: true,
-                    fileNameWithPath: fileStream.fileNameWithPath()
-                });
-            })();
-
-            let surveyData = 
-            await csv().fromString(req.files.survey.data.toString());
-
-            let users = [];
-            let usersKeycloakIdMap = {};
-            let solutionExternalIds = [];
-
-            surveyData.forEach(eachSurveyData => {
-                if (!eachSurveyData["keycloak-userId"] && eachSurveyData.user && !users.includes(eachSurveyData.user)) {
-                    users.push(eachSurveyData.user);
-                } else if (eachSurveyData["keycloak-userId"] && eachSurveyData["keycloak-userId"] != "") {
-                    usersKeycloakIdMap[eachSurveyData["keycloak-userId"]] = true;
-                }
-                solutionExternalIds.push(eachSurveyData.solutionExternalId);
-            })
-           
-            let userIdByExternalId;
-
-            if (users.length > 0) {
-                userIdByExternalId = await assessorsHelper.getInternalUserIdByExternalId(req.userDetails.userToken, users);
-                if(Object.keys(userIdByExternalId).length > 0) {
-                    Object.values(userIdByExternalId).forEach(userDetails => {
-                        usersKeycloakIdMap[userDetails] = true;
-                    })
-                }
-            }
-
-            if(Object.keys(usersKeycloakIdMap).length > 0) {
-                
-                let userOrganisationDetails = await surveysHelper.getUserOrganisationDetails(
-                    Object.keys(usersKeycloakIdMap), 
-                    req.userDetails.userToken
-                );
-
-                usersKeycloakIdMap = userOrganisationDetails.data;
-            }
-            
-            let solutionQuery = {
-                externalId: {
-                    $in: solutionExternalIds
-                },
-                status: messageConstants.common.ACTIVE_STATUS,
-                isDeleted: false,
-                type: messageConstants.common.SURVEY,
-                isReusable: false
-            };
-
-            let solutionProjection = [
-                "externalId",
-                "name",
-                "description",
-                "type",
-                "programId",
-                "programExternalId",
-                "endDate",
-                "isAPrivateProgram"
-            ];
-
-            let solutionDocument = await solutionsHelper.solutionDocuments
-            (
-                solutionQuery,
-                solutionProjection
-            );
-
-            if (!solutionDocument.length) {
-                throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
-            }
-
-            let solutionObject = {};
-
-            if (solutionDocument.length > 0) {
-                solutionDocument.forEach(eachSolutionDocument => {
-                    solutionObject[eachSolutionDocument.externalId] = eachSolutionDocument;
-                })
-            }
-             
-            for (let pointerToSurvey = 0; pointerToSurvey < surveyData.length; pointerToSurvey++) {
-                
-                let solution;
-                let surveyHelperData;
-                let currentData = surveyData[pointerToSurvey];
-                let csvResult = {};
-                let status;
-                let userId;
-                let userOrganisations;
-
-                Object.keys(currentData).forEach(eachSurveyData => {
-                    csvResult[eachSurveyData] = currentData[eachSurveyData];
-                })
-                 
-                try {
-
-                    if (currentData["keycloak-userId"] && currentData["keycloak-userId"] !== "") {
-                        userId = currentData["keycloak-userId"];
-                    } else {
-
-                        if (userIdByExternalId[currentData.user] === "") {
-                            throw new Error("Keycloak id for user is not present");
-                        }
-
-                        userId = userIdByExternalId[currentData.user];
-                    }
-
-                    if(!usersKeycloakIdMap[userId]  || !Array.isArray(usersKeycloakIdMap[userId].rootOrganisations) || usersKeycloakIdMap[userId].rootOrganisations.length < 1) {
-                        throw new Error(messageConstants.apiResponses.USER_ORGANISATION_DETAILS_NOT_FOUND);
-                    } else {
-                        userOrganisations = usersKeycloakIdMap[userId];
-                    }
-
-                    if (solutionObject[currentData.solutionExternalId] !== undefined) {
-                        solution = solutionObject[currentData.solutionExternalId];
-                    } else {
-                        throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
-                    }
-
-                    surveyHelperData = await surveysHelper.bulkCreate(
-                        userId, 
-                        solution, 
-                        userOrganisations
-                    );
-
-                    status = surveyHelperData.status;
-
-                } catch (error) {
-                    status = error.message;
-                }
-                
-                csvResult["status"] = status;
-                input.push(csvResult);
-            }
-
-            input.push(null);
-
-        } catch (error) {
-            return resolve({
-                success: false,
-                message: error.message,
-                data: false
-            });
-        }
-    });
-}
-
-
      /**
      * @api {post} /assessment/api/v1/surveys/getDetailsByLink/:link Get the survey details by link
      * @apiVersion 1.0.0
@@ -395,7 +207,7 @@ module.exports = class Surveys extends Abstract {
      * @apiSampleRequest /assessment/api/v1/surveys/getDetailsByLink/392f95246771664a81335f1be7d109f3
      * @apiParamExample {json} Request:
      * {
-     *  "role" : "HM",
+     *  "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -625,7 +437,7 @@ module.exports = class Surveys extends Abstract {
     * @apiSampleRequest /assessment/api/v1/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
     * @apiParamExample {json}  Request-Body:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -873,7 +685,7 @@ module.exports = class Surveys extends Abstract {
     * @apiSampleRequest /assessment/api/v1/surveys/getSurvey?page=1&limit=10
     * @apiParamExample {json}  Request-Body:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"

@@ -17,7 +17,7 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const entityAssessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 const path = require("path");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH + "/surveySubmissions/helper");
 
@@ -492,15 +492,13 @@ module.exports = class SubmissionsHelper {
 
                         if (answerArray.isAGeneralQuestionResponse) { delete answerArray.isAGeneralQuestionResponse; }
 
-                        updateObject.$push = {
-                            ["evidences." + req.body.evidence.externalId + ".submissions"]: req.body.evidence
-                        };
                         updateObject.$set = {
                             answers: _.assignIn(submissionDocument.answers, answerArray),
                             ["evidences." + req.body.evidence.externalId + ".isSubmitted"] : true,
                             ["evidences." + req.body.evidence.externalId + ".notApplicable"]: req.body.evidence.notApplicable,
                             ["evidences." + req.body.evidence.externalId + ".startTime"]: req.body.evidence.startTime,
                             ["evidences." + req.body.evidence.externalId + ".endTime"]: req.body.evidence.endTime,
+                            ["evidences." + req.body.evidence.externalId + ".remarks"]: req.body.evidence.remarks,
                             ["evidences." + req.body.evidence.externalId + ".hasConflicts"]: false,
                             status: (submissionDocument.status === "started"  || submissionDocument.status === "draft") ? "inprogress" : submissionDocument.status
                         };
@@ -518,6 +516,7 @@ module.exports = class SubmissionsHelper {
                         evidencesStatusToBeChanged['notApplicable'] = req.body.evidence.notApplicable;
                         evidencesStatusToBeChanged['startTime'] = req.body.evidence.startTime;
                         evidencesStatusToBeChanged['endTime'] = req.body.evidence.endTime;
+                        evidencesStatusToBeChanged['remarks'] = req.body.evidence.remarks;
                         evidencesStatusToBeChanged['hasConflicts'] = false;
                         evidencesStatusToBeChanged['submissions'].push(_.omit(req.body.evidence, ["answers","status"]));
 
@@ -536,6 +535,7 @@ module.exports = class SubmissionsHelper {
                         }
 
                         updateObject["$set"]["evidencesStatus"] = submissionDocument.evidencesStatus;
+                        updateObject["$set"]["evidences." + req.body.evidence.externalId + ".remarks"] = req.body.evidence.remarks;
 
                     } else {
 
@@ -1336,7 +1336,6 @@ module.exports = class SubmissionsHelper {
                     "language",
                     "keywords",
                     "concepts",
-                    "createdFor",
                     "evidences"
                 ]
             );
@@ -1626,7 +1625,7 @@ module.exports = class SubmissionsHelper {
                 
                 let filePathToURLMap = {};
                 if (fileSourcePath.length > 0) {
-                    let evidenceUrls = await kendraService.getDownloadableUrl(
+                    let evidenceUrls = await coreService.getDownloadableUrl(
                         {
                             filePaths: fileSourcePath
                         }

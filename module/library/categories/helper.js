@@ -6,7 +6,7 @@
  */
 
 // Dependencies 
-let kendraService = require(ROOT_PATH + "/generics/services/kendra");
+let coreService = require(ROOT_PATH + "/generics/services/core");
 let sessionHelpers = require(ROOT_PATH+"/generics/helpers/sessions");
 
 /**
@@ -153,7 +153,7 @@ module.exports = class libraryCategoriesHelper {
                     return category.icon
                 });
 
-                let result = await kendraService.getDownloadableUrl(
+                let result = await coreService.getDownloadableUrl(
                     {
                         filePaths : libraryCategoriesIcon
                     }

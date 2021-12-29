@@ -29,8 +29,6 @@ module.exports = {
       startDate: Date,
       endDate: Date,
       status: String,
-      createdFor: [String],
-      rootOrganisations: [String],
       isDeleted: {
         type: Boolean,
         default: false

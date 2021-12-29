@@ -815,22 +815,6 @@ module.exports = class SolutionsHelper {
               matchQuery["$match"]["subType"] = type;
             }
 
-            if( 
-              process.env.USE_USER_ORGANISATION_ID_FILTER && 
-              process.env.USE_USER_ORGANISATION_ID_FILTER === "ON" 
-            ) {
-
-              let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getUserOrganisation(
-                token,
-                userId
-              );
-
-              matchQuery["$match"]["createdFor"] = {
-                $in : organisationAndRootOrganisation.createdFor
-              }
-            }
-
             matchQuery["$match"]["$or"] = [
               { 
                 "name": new RegExp(searchText, 'i') 
@@ -927,9 +911,7 @@ module.exports = class SolutionsHelper {
       program,
       userId,
       solutionData,
-      isAPrivateProgram = false,
-      createdFor = [],
-      rootOrganisations = []
+      isAPrivateProgram = false
   ) {
       return new Promise(async (resolve, reject) => {
           try {
@@ -948,9 +930,7 @@ module.exports = class SolutionsHelper {
                   description : solutionData.description,
                   name : program.name ? program.name : solutionData.name,
                   userId : userId,
-                  isAPrivateProgram : isAPrivateProgram,
-                  createdFor : createdFor,
-                  rootOrganisations : rootOrganisations
+                  isAPrivateProgram : isAPrivateProgram
                 });
                 
                 program._id = programData._id;
@@ -961,9 +941,7 @@ module.exports = class SolutionsHelper {
                 templateId,
                 program._id.toString(),
                 userId,
-                solutionData,
-                createdFor,
-                rootOrganisations
+                solutionData
               );
 
               return resolve(
@@ -1005,9 +983,7 @@ module.exports = class SolutionsHelper {
       solutionId,
       programId,
       userId,
-      data,
-      createdFor = "",
-      rootOrganisations = "" 
+      data
     ) {
       return new Promise(async (resolve, reject) => {
         try {
@@ -1143,14 +1119,6 @@ module.exports = class SolutionsHelper {
           if( data.project ) {
             newSolutionDocument["project"] = data.project;
             newSolutionDocument["referenceFrom"] = messageConstants.common.PROJECT;
-          }
-
-          if( createdFor !== "" ) {
-            newSolutionDocument.createdFor = createdFor;
-          } 
-
-          if ( rootOrganisations !== "" ) {
-            newSolutionDocument.rootOrganisations = rootOrganisations;
           }
   
           let duplicateSolutionDocument = 
@@ -1646,10 +1614,9 @@ module.exports = class SolutionsHelper {
             "roles",
             "captureGpsLocationAtQuestionLevel",
             "enableQuestionReadOut",
-            "entities",
-            "criteriaLevelReport"
+            "entities"
         ])
-
+ 
           if( !solutionData.length > 0 ) {
             throw {
               message : messageConstants.apiResponses.SOLUTION_NOT_FOUND,

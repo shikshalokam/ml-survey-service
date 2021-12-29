@@ -13,7 +13,7 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionsHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 let entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
-const kendraService = require(ROOT_PATH + "/generics/services/kendra");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 
 /**
     * AssessmentsHelper
@@ -261,7 +261,7 @@ module.exports = class AssessmentsHelper {
 
                 if ( attachments.length > 0 ) {
                     
-                    attachmentsUrl = await kendraService.downloadableUrls({
+                    attachmentsUrl = await coreService.downloadableUrls({
                         filePaths: attachments
                     })
 
@@ -670,15 +670,6 @@ module.exports = class AssessmentsHelper {
                   solutionInformation["project"] = requestedData.project;
                   solutionInformation["referenceFrom"] = messageConstants.common.PROJECT;
               }
-
-              let organisationAndRootOrganisation = 
-              await shikshalokamHelper.getOrganisationsAndRootOrganisations(
-                userDetails.userToken,
-                userDetails.userId
-              );
-
-              let createdFor =  organisationAndRootOrganisation.createdFor;
-              let rootOrganisations = organisationAndRootOrganisation.rootOrganisations;
   
               let createdSolutionAndProgram = 
               await solutionsHelper.createProgramAndSolutionFromTemplate(
@@ -686,9 +677,7 @@ module.exports = class AssessmentsHelper {
                 requestedData.program,
                 userDetails.userId,
                 solutionInformation,
-                true,
-                createdFor,
-                rootOrganisations
+                true
               );
 
               await entityAssessorsHelper.update(

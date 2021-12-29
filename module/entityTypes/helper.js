@@ -112,4 +112,203 @@ module.exports = class EntityTypesHelper {
 
     }
 
+     /**
+   * Upload entity types via csv.
+   * @method
+   * @name bulkCreate
+   * @param {Array} entityTypesCSVData
+   * @param {Object} userDetails -logged in user data.
+   * @param {String} userDetails.id -logged in user id.   
+   * @returns {Object} consists of SYSTEM_ID
+   */
+
+    static bulkCreate(entityTypesCSVData,userDetails) {
+
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                const entityTypesUploadedData = await Promise.all(
+                    entityTypesCSVData.map(async entityType => {
+
+                        try {
+
+                            entityType = gen.utils.valueParser(entityType);
+                            entityType.regsitryDetails = {};
+                            let removedKeys = []
+                            Object.keys(entityType).forEach(function(eachKey){
+                                if(eachKey.startsWith('registry-')){
+                                    let newKey = eachKey.replace('registry-', '');
+                                    entityType.regsitryDetails[newKey] = entityType[eachKey];
+                                    removedKeys.push(entityType[eachKey]);
+                                }
+                            })
+
+                            if(entityType.profileFields){
+                                entityType.profileFields = entityType.profileFields.split(",") || [];
+                            }
+
+                            if(entityType.immediateChildrenEntityType != ""){
+                                let entityTypeImmediateChildren = entityType.immediateChildrenEntityType.split(",");
+                                entityTypeImmediateChildren = _.uniq(entityTypeImmediateChildren);
+
+                                entityType.immediateChildrenEntityType = new Array;
+                                entityTypeImmediateChildren.forEach(immediateChildren => {
+                                    entityType.immediateChildrenEntityType.push(immediateChildren);
+                                })
+                            }
+
+                            if (entityType.isObservable) {
+                                entityType.isObservable = gen.utils.convertStringToBoolean(entityType.isObservable);
+                            }
+                            if (entityType.toBeMappedToParentEntities) {
+                                entityType.toBeMappedToParentEntities = gen.utils.convertStringToBoolean(entityType.toBeMappedToParentEntities);
+                            }
+
+                            if(removedKeys && removedKeys.length > 0){
+                                for (var key in entityType) {
+                                    for( var removedKey in removedKeys){
+                                        if (entityType.hasOwnProperty(removedKey)) {
+                                            delete entityType[removedKey];
+                                        } 
+                                    }
+
+                                }
+                            }                          
+
+                            let newEntityType = await database.models.entityTypes.create(
+                                _.merge({
+                                    "isDeleted" : false,
+                                    "updatedBy": userDetails.id,
+                                    "createdBy": userDetails.id
+                                },entityType)
+                            );
+
+                            delete entityType.regsitryDetails;
+
+                            if (newEntityType._id) {
+                                entityType["_SYSTEM_ID"] = newEntityType._id; 
+                                entityType.status = "Success";
+                            } else {
+                                entityType["_SYSTEM_ID"] = "";
+                                entityType.status = "Failed";
+                            }
+
+                        } catch (error) {
+                            entityType["_SYSTEM_ID"] = "";
+                            entityType.status = (error && error.message) ? error.message : error;
+                        }
+
+                        return entityType;
+                    })
+                )
+
+                return resolve(entityTypesUploadedData);
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
+    }
+
+    /**
+   * Upload entity types via csv.
+   * @method
+   * @name bulkUpdate
+   * @param {Array} entityTypesCSVData
+   * @param {Object} userDetails -logged in user data.
+   * @param {String} userDetails.id -logged in user id.   
+   * @returns {Object} consists of SYSTEM_ID
+   */
+
+    static bulkUpdate(entityTypesCSVData,userDetails) {
+
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                const entityTypesUploadedData = await Promise.all(
+                    entityTypesCSVData.map(async entityType => {
+
+                        try {
+
+                            entityType = gen.utils.valueParser(entityType);
+                            entityType.regsitryDetails = {};
+                            let removedKeys = []
+                            Object.keys(entityType).forEach(function(eachKey){
+                                if(eachKey.startsWith('registry-')){
+                                    let newKey = eachKey.replace('registry-', '');
+                                    entityType.regsitryDetails[newKey] = entityType[eachKey];
+                                    removedKeys.push(entityType[eachKey]);
+                                }
+                            })
+
+                            if(entityType.profileFields){
+                                entityType.profileFields = entityType.profileFields.split(",") || [];
+                            }
+
+                            if(entityType.immediateChildrenEntityType != ""){
+                                let entityTypeImmediateChildren = entityType.immediateChildrenEntityType.split(",");
+                                entityTypeImmediateChildren = _.uniq(entityTypeImmediateChildren);
+
+                                entityType.immediateChildrenEntityType = new Array;
+                                entityTypeImmediateChildren.forEach(immediateChildren => {
+                                    entityType.immediateChildrenEntityType.push(immediateChildren);
+                                })
+                            }
+
+                            if (entityType.isObservable) {
+                                entityType.isObservable = gen.utils.convertStringToBoolean(entityType.isObservable);
+                            }
+                            if (entityType.toBeMappedToParentEntities) {
+                                entityType.toBeMappedToParentEntities = gen.utils.convertStringToBoolean(entityType.toBeMappedToParentEntities);
+                            }
+
+                            if(removedKeys && removedKeys.length > 0){
+                                for (var key in entityType) {
+                                    for( var removedKey in removedKeys){
+                                        if (entityType.hasOwnProperty(removedKey)) {
+                                            delete entityType[removedKey];
+                                        } 
+                                    }
+
+                                }
+                            }                          
+
+                            let updateEntityType  = await database.models.entityTypes.findOneAndUpdate(
+                                {
+                                    _id : ObjectId(entityType._SYSTEM_ID)
+                                },
+                                _.merge({
+                                    "updatedBy": userDetails.id
+                                },entityType)
+                            );
+
+                            delete entityType.regsitryDetails;
+
+                            if (updateEntityType._id) {
+                                entityType["_SYSTEM_ID"] = updateEntityType._id; 
+                                entityType.status = "Success";
+                            } else {
+                                entityType["_SYSTEM_ID"] = "";
+                                entityType.status = "Failed";
+                            }
+
+                        } catch (error) {
+                            entityType["_SYSTEM_ID"] = "";
+                            entityType.status = (error && error.message) ? error.message : error;
+                        }
+
+                        return entityType;
+                    })
+                )
+
+                return resolve(entityTypesUploadedData);
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
+    }
+
 };
