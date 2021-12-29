@@ -20,11 +20,7 @@ module.exports = (req) => {
             req.checkBody('title').exists().notEmpty().withMessage("required observation submission title")
         },
 
-        pushCompletedObservationSubmissionForReporting: function () {
-            req.checkParams('_id').exists().withMessage("required submission id")
-        },
-
-        pushIncompleteObservationSubmissionForReporting: function () {
+        pushObservationSubmissionForReporting: function () {
             req.checkParams('_id').exists().withMessage("required submission id")
         },
 

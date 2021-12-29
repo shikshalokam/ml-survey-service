@@ -42,11 +42,7 @@ let enviromentVariables = {
     "message" : "OFF/TOPIC_NAME",
     "optional" : false
   },
-  "COMPLETED_OBSERVATION_SUBMISSION_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
-  },
-  "INCOMPLETE_OBSERVATION_SUBMISSION_TOPIC" : {
+  "OBSERVATION_SUBMISSION_TOPIC" : {
     "message" : "OFF/TOPIC_NAME",
     "optional" : false
   },

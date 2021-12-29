@@ -442,7 +442,7 @@ module.exports = class ObservationsHelper {
                     }
 
                     // Push new observation submission to kafka for reporting/tracking.
-                    observationSubmissionsHelper.pushInCompleteObservationSubmissionForReporting(submissionDocument._id);
+                    observationSubmissionsHelper.pushObservationSubmissionForReporting(submissionDocument._id);
                 }
 
                 return resolve({

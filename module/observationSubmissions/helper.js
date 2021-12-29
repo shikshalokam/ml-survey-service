@@ -15,6 +15,7 @@ const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
 /**
     * ObservationSubmissionsHelper
@@ -92,15 +93,15 @@ module.exports = class ObservationSubmissionsHelper {
     });
 }
 
-      /**
-   * Push completed observation submission in kafka for reporting.
+    /**
+   * Push observation submission in kafka for reporting.
    * @method
-   * @name pushCompletedObservationSubmissionForReporting
+   * @name pushObservationSubmissionForReporting
    * @param {String} observationSubmissionId - observation submission id.
    * @returns {JSON} - message that observation submission is pushed to kafka.
    */
 
-    static pushCompletedObservationSubmissionForReporting(observationSubmissionId) {
+    static pushObservationSubmissionForReporting(observationSubmissionId) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -114,14 +115,38 @@ module.exports = class ObservationSubmissionsHelper {
 
                 let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
                     _id: observationSubmissionId,
-                    status: "completed"
                 }).lean();
 
+               
                 if (!observationSubmissionsDocument) {
-                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE;
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
                 }
 
-                if( observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
+                let solutionDocument = await solutionHelper.solutionDocuments({
+                    _id: observationSubmissionsDocument.solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                observationSubmissionsDocument['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: observationSubmissionsDocument.programId,
+                    },
+                    ["name","description"],
+                );
+    
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                observationSubmissionsDocument['programInfo'] = programDocument[0];
+
+                if(observationSubmissionsDocument.status == "completed" && observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     
                     await this.pushSubmissionToImprovementService(
                         _.pick(
@@ -130,9 +155,10 @@ module.exports = class ObservationSubmissionsHelper {
                     );
                 }
 
+               
                 console.log("--- logs starts here -----");
-                const kafkaMessage = await kafkaClient.pushCompletedObservationSubmissionToKafka(observationSubmissionsDocument);
-
+                const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
+               
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
                         formData: {
@@ -153,55 +179,6 @@ module.exports = class ObservationSubmissionsHelper {
         })
     }
 
-    /**
-   * Push incomplete observation submission for reporting.
-   * @method
-   * @name pushInCompleteObservationSubmissionForReporting
-   * @param {String} observationSubmissionId - observation submission id.
-   * @returns {JSON} consists of kafka message whether it is pushed for reporting
-   * or not.
-   */
-
-    static pushInCompleteObservationSubmissionForReporting(observationSubmissionId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if (observationSubmissionId == "") {
-                    throw "No observation submission id found";
-                }
-
-                if(typeof observationSubmissionId == "string") {
-                    observationSubmissionId = ObjectId(observationSubmissionId);
-                }
-
-                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
-                    _id: observationSubmissionId,
-                    status: {$ne : "completed"}
-                }).lean();
-
-                if (!observationSubmissionsDocument) {
-                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE;
-                }
-            
-                const kafkaMessage = await kafkaClient.pushInCompleteObservationSubmissionToKafka(observationSubmissionsDocument);
-
-                if(kafkaMessage.status != "success") {
-                    let errorObject = {
-                        formData: {
-                            observationSubmissionId:observationSubmissionsDocument._id.toString(),
-                            message:kafkaMessage.message
-                        }
-                    };
-                    console.log(errorObject);
-                }
-
-                return resolve(kafkaMessage);
-
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
 
      /**
    * Push observation submission to queue for rating.
@@ -273,16 +250,17 @@ module.exports = class ObservationSubmissionsHelper {
                     throw new Error(messageConstants.apiResponses.OBSERVATION_SUBMISSSION_NOT_FOUND);
                 }
 
-                let solutionDocument = await database.models.solutions.findOne({
+               
+                let solutionDocument = await solutionHelper.solutionDocuments({
                     externalId: submissionDocument.solutionExternalId,
-                    type : "observation",
-                    // scoringSystem : "pointsBasedScoring"
-                }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1, sendSubmissionRatingEmailsTo : 1}).lean();
-
-                if (!solutionDocument) {
+                    type : "observation"
+                }, [ "themes","levelToScoreMapping","scoringSystem","flattenedThemes","sendSubmissionRatingEmailsTo"]);
+    
+                if (!solutionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
                 }
-
+                solutionDocument = solutionDocument[0];
+              
                 if(solutionDocument.sendSubmissionRatingEmailsTo && solutionDocument.sendSubmissionRatingEmailsTo != "") {
                     emailRecipients = solutionDocument.sendSubmissionRatingEmailsTo;
                 }
@@ -375,7 +353,7 @@ module.exports = class ObservationSubmissionsHelper {
                             completedDate: new Date()
                         }
                     );
-                    await this.pushCompletedObservationSubmissionForReporting(submissionId);
+                    await this.pushObservationSubmissionForReporting(submissionId);
                     emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 } else {
@@ -431,7 +409,7 @@ module.exports = class ObservationSubmissionsHelper {
                     }
                 );
                 
-                await this.pushCompletedObservationSubmissionForReporting(submissionId);
+                await this.pushObservationSubmissionForReporting(submissionId);
                 
                 emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
                 return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
