@@ -15,6 +15,7 @@ const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
 /**
     * ObservationSubmissionsHelper
@@ -121,16 +122,29 @@ module.exports = class ObservationSubmissionsHelper {
                     throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
                 }
 
-                const solutionDocument = await database.models.solutions.findOne({
-                    _id: observationSubmissionsDocument.solutionId,
-                }, { name: 1, scoringSystem : 1, description : 1, questionSequenceByEcm : 1 }).lean();
+                let solutionDocument = await solutionHelper.solutionDocuments({
+                    _id: observationSubmissionsDocument.solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
                 observationSubmissionsDocument['solutionInfo'] = solutionDocument;
 
-                const programDocument = await database.models.programs.findOne({
-                    _id: observationSubmissionsDocument.programId,
-                }, { name: 1, description : 1}).lean();
-
-                observationSubmissionsDocument['programInfo'] = programDocument;
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: observationSubmissionsDocument.programId,
+                    },
+                    ["name","description"],
+                );
+    
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                observationSubmissionsDocument['programInfo'] = programDocument[0];
 
                 if(observationSubmissionsDocument.status == "completed" && observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     
@@ -236,16 +250,17 @@ module.exports = class ObservationSubmissionsHelper {
                     throw new Error(messageConstants.apiResponses.OBSERVATION_SUBMISSSION_NOT_FOUND);
                 }
 
-                let solutionDocument = await database.models.solutions.findOne({
+               
+                let solutionDocument = await solutionHelper.solutionDocuments({
                     externalId: submissionDocument.solutionExternalId,
-                    type : "observation",
-                    // scoringSystem : "pointsBasedScoring"
-                }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1, sendSubmissionRatingEmailsTo : 1}).lean();
-
-                if (!solutionDocument) {
+                    type : "observation"
+                }, [ "themes","levelToScoreMapping","scoringSystem","flattenedThemes","sendSubmissionRatingEmailsTo"]);
+    
+                if (!solutionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
                 }
-
+                solutionDocument = solutionDocument[0];
+              
                 if(solutionDocument.sendSubmissionRatingEmailsTo && solutionDocument.sendSubmissionRatingEmailsTo != "") {
                     emailRecipients = solutionDocument.sendSubmissionRatingEmailsTo;
                 }
