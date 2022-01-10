@@ -111,8 +111,6 @@ module.exports = async function (req, res, next) {
     }
   }
 
-  console.log("performInternalAccessTokenCheck",performInternalAccessTokenCheck);
-
 //api need both internal access token and x-authenticated-user-token
   const internalAccessAndTokenApiPaths = ["entityAssessors/create"];
   let performInternalAccessTokenAndTokenCheck = false;
