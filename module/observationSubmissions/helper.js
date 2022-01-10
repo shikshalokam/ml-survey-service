@@ -1259,6 +1259,64 @@ module.exports = class ObservationSubmissionsHelper {
     } 
 
 
+   /**
+   * Get observation submission details
+   * @method
+   * @name details
+   * @param {String} observationSubmissionId - observation submission id.
+   * @returns {JSON} - observation submission details
+   */
+
+    static details(observationSubmissionId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
+                    _id: observationSubmissionId,
+                }).lean();
+
+                if (!observationSubmissionsDocument) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                let solutionDocument = await solutionHelper.solutionDocuments({
+                    _id: observationSubmissionsDocument.solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                observationSubmissionsDocument['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: observationSubmissionsDocument.programId,
+                    },
+                    ["name","description"],
+                );
+    
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                observationSubmissionsDocument['programInfo'] = programDocument[0];
+
+                return resolve({ 
+                    data:observationSubmissionsDocument,
+                    success: true,
+                    message: messageConstants.apiResponses.OBSERVATION_SUBMISSION_FOUND,
+                });
+
+            } catch (error) {
+                console.log("error",error);
+                return reject(error);
+            }
+        })
+    }
+
+
 };
 
 

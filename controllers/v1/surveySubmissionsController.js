@@ -447,4 +447,42 @@ module.exports = class SurveySubmissions extends Abstract {
     })
   }
 
+  /**
+  * @api {get} /assessment/api/v1/surveySubmissions/details/:surveySubmissionId Get Survey Submission details
+  * @apiVersion 1.0.0
+  * @apiName Get Survey Submission details
+  * @apiGroup Observation Submissions
+  * @apiUse successBody
+  * @apiUse errorBody
+  */
+
+  /**
+   * Get survey submission details.
+   * @method
+   * @name details
+   * @param {Object} req -request data. 
+   * @param {String} req.params._id -survey submissions id.
+   * @returns {JSON} - survey submission details
+   */
+
+   async details(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let submissionDetails = await surveySubmissionsHelper.details(req.params._id);
+
+        return resolve({
+          result:submissionDetails.data,
+          message: submissionDetails.message
+        });
+
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+        });
+      }
+    })
+  }
+
 }

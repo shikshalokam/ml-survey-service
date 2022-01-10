@@ -111,6 +111,8 @@ module.exports = async function (req, res, next) {
     }
   }
 
+  console.log("performInternalAccessTokenCheck",performInternalAccessTokenCheck);
+
 //api need both internal access token and x-authenticated-user-token
   const internalAccessAndTokenApiPaths = ["entityAssessors/create"];
   let performInternalAccessTokenAndTokenCheck = false;
@@ -128,7 +130,12 @@ module.exports = async function (req, res, next) {
   }
 
 //api need either x-authenticated-user-token or internal access token
- const insternalAccessTokenOrTokenPaths = ["userExtension/getProfile/","entities/relatedEntities/"];
+ const insternalAccessTokenOrTokenPaths = [
+      "userExtension/getProfile/",
+      "entities/relatedEntities/",
+     "observationSubmissions/details",
+     "surveySubmissions/details"
+];
  let performInternalAccessTokenOrTokenCheck = false;
   await Promise.all(insternalAccessTokenOrTokenPaths.map(async function (path) {
     if (req.path.includes(path)) {
