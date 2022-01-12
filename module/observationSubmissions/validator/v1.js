@@ -40,11 +40,7 @@ module.exports = (req) => {
         },
         solutionList: function () {
             req.checkBody('role').exists().withMessage("request body required");
-        },
-        details: function () {
-            req.checkParams('_id').exists().withMessage("required submission id")
-            .isMongoId().withMessage("Invalid submission id");
-        },
+        }
     }
 
     if (observationSubmissionValidator[req.params.method]) observationSubmissionValidator[req.params.method]();

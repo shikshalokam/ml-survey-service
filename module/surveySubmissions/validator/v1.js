@@ -13,10 +13,6 @@ module.exports = (req) => {
         getStatus: function () {
             req.checkParams('_id').exists().withMessage("required survey submission id")
             .isMongoId().withMessage("Invalid survey submission id");
-        },
-        details: function () {
-            req.checkParams('_id').exists().withMessage("required survey submission id")
-            .isMongoId().withMessage("Invalid survey submission id");
         }
     }
 
