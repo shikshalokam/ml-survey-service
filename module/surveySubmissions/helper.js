@@ -8,6 +8,7 @@
 // Dependencies
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
 /**
     * SurveySubmissionsHelper
@@ -677,5 +678,63 @@ module.exports = class SurveySubmissionsHelper {
         }
     });
 }
+
+
+   /**
+   * Get survey submission details
+   * @method
+   * @name details
+   * @param {String} submissionId - survey submissionId
+   * @returns {JSON} - survey submission details
+   */
+
+    static details(submissionId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let surveySubmissionsDocument = await this.surveySubmissionDocuments
+                ({
+                    _id: submissionId
+                })
+    
+                if (!surveySubmissionsDocument.length) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                let solutionDocument = await solutionsHelper.solutionDocuments({
+                    _id: surveySubmissionsDocument[0].solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: surveySubmissionsDocument[0].programId,
+                    },
+                    ["name","description"],
+                );
+    
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
+
+                return resolve(surveySubmissionsDocument[0]);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
+            }
+        })
+    }
 
 }

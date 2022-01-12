@@ -71,6 +71,22 @@ module.exports = async function (req, res, next) {
     delete req.headers[e];
   });
 
+
+    // Allow search endpoints for non-logged in users.
+    let guestAccess = false;
+    let guestAccessPaths = ["/dataPipeline/"];
+    await Promise.all(guestAccessPaths.map(async function (path) {
+      if (req.path.includes(path)) {
+        guestAccess = true;
+      }
+    }));
+    
+    if(guestAccess==true) {
+      next();
+      return;
+    }
+
+
   let paths = [
     "reports", 
     "pendingAssessments", 
@@ -82,7 +98,7 @@ module.exports = async function (req, res, next) {
     "/programs/listByIds",
     "frameworks/delete/",
     "questions/delete/",
-    "observationSubmissions/disable/"
+    "observationSubmissions/disable/",
   ]
 
   var token = req.headers["x-authenticated-user-token"];
@@ -128,7 +144,10 @@ module.exports = async function (req, res, next) {
   }
 
 //api need either x-authenticated-user-token or internal access token
- const insternalAccessTokenOrTokenPaths = ["userExtension/getProfile/","entities/relatedEntities/"];
+ const insternalAccessTokenOrTokenPaths = [
+      "userExtension/getProfile/",
+      "entities/relatedEntities/"
+];
  let performInternalAccessTokenOrTokenCheck = false;
   await Promise.all(insternalAccessTokenOrTokenPaths.map(async function (path) {
     if (req.path.includes(path)) {
