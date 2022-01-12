@@ -1526,43 +1526,5 @@ module.exports = class ObservationSubmissions extends Abstract {
     })
   }
 
-      /**
-  * @api {get} /assessment/api/v1/observationSubmissions/details/:observationSubmissionId Get Observation Submission details
-  * @apiVersion 1.0.0
-  * @apiName Get Observation Submission details
-  * @apiGroup Observation Submissions
-  * @apiUse successBody
-  * @apiUse errorBody
-  */
-
-  /**
-   * Get observation submission details.
-   * @method
-   * @name details
-   * @param {Object} req -request data. 
-   * @param {String} req.params._id -observation submissions id.
-   * @returns {JSON} - obseration submission details
-   */
-
-   async details(req) {
-    return new Promise(async (resolve, reject) => {
-      try {
-
-        let submissionDetails = await observationSubmissionsHelper.details(req.params._id);
-
-        return resolve({
-          result:submissionDetails.data,
-          message: submissionDetails.message
-        });
-
-      } catch (error) {
-        return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
-        });
-      }
-    })
-  }
-
 };
 

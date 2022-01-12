@@ -113,38 +113,7 @@ module.exports = class ObservationSubmissionsHelper {
                     observationSubmissionId = ObjectId(observationSubmissionId);
                 }
 
-                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
-                    _id: observationSubmissionId,
-                }).lean();
-
-               
-                if (!observationSubmissionsDocument) {
-                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
-                }
-
-                let solutionDocument = await solutionHelper.solutionDocuments({
-                    _id: observationSubmissionsDocument.solutionId
-                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
-    
-                if(!solutionDocument.length){
-                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
-                }
-                
-                solutionDocument = solutionDocument[0];
-                observationSubmissionsDocument['solutionInfo'] = solutionDocument;
-
-                let programDocument = 
-                await programsHelper.list(
-                    {
-                        _id: observationSubmissionsDocument.programId,
-                    },
-                    ["name","description"],
-                );
-    
-                if( !programDocument[0] ) {
-                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
-                }
-                observationSubmissionsDocument['programInfo'] = programDocument[0];
+                const observationSubmissionsDocument = await this.details(observationSubmissionId);
 
                 if(observationSubmissionsDocument.status == "completed" && observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     
@@ -174,7 +143,12 @@ module.exports = class ObservationSubmissionsHelper {
                 return resolve(kafkaMessage);
 
             } catch (error) {
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error.message,
+                    data: {}
+                    
+                });
             }
         })
     }
@@ -638,7 +612,7 @@ module.exports = class ObservationSubmissionsHelper {
         catch (error) {
             return resolve({
                 success: false,
-                message: error.message,
+                message: error,
                 data: false
             })
         }
@@ -1303,15 +1277,14 @@ module.exports = class ObservationSubmissionsHelper {
                 }
                 observationSubmissionsDocument['programInfo'] = programDocument[0];
 
-                return resolve({ 
-                    data:observationSubmissionsDocument,
-                    success: true,
-                    message: messageConstants.apiResponses.OBSERVATION_SUBMISSION_FOUND,
-                });
+                return resolve(observationSubmissionsDocument);
 
             } catch (error) {
-                console.log("error",error);
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
             }
         })
     }

@@ -725,15 +725,14 @@ module.exports = class SurveySubmissionsHelper {
                 }
                 surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
 
-                return resolve({ 
-                    data:surveySubmissionsDocument[0],
-                    success: true,
-                    message: messageConstants.apiResponses.SURVEY_SUBMISSION_FOUND,
-                });
+                return resolve(surveySubmissionsDocument[0]);
 
             } catch (error) {
-                console.log("error",error);
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
             }
         })
     }
