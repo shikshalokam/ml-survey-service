@@ -1153,8 +1153,7 @@ module.exports = class Observations extends Abstract {
                     createdBy: observationDocument.createdBy,
                     evidenceSubmissions: [],
                     entityProfile: {},
-                    status: "started",
-                    userRoleInformation:observationDocument.userRoleInformation
+                    status: "started"
                 };
 
                 if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
@@ -1172,9 +1171,13 @@ module.exports = class Observations extends Abstract {
                     //     req.body.roleId = roleDocument[0]._id; 
                     // }
 
-                    //submissionDocument.userRoleInformation = req.body;
+                    
                 //}
-
+                if( observationDocument.userRoleInformation ){
+                    submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
+                } else if( req.body && req.body.role && !observationDocument.userRoleInformation ){
+                    submissionDocument.userRoleInformation = req.body;
+                }
                 if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
                     submissionDocument["project"] = solutionDocument.project;
