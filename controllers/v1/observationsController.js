@@ -1153,14 +1153,15 @@ module.exports = class Observations extends Abstract {
                     createdBy: observationDocument.createdBy,
                     evidenceSubmissions: [],
                     entityProfile: {},
-                    status: "started"
+                    status: "started",
+                    userRoleInformation:observationDocument.userRoleInformation
                 };
 
                 if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
                     submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
                 }
-
-                if (req.body && req.body.role) {
+                
+                //if (req.body && req.body.role) {
                     //commented for mutiple role
                     // let roleDocument = await userRolesHelper.list
                     // ( { code : req.body.role },
@@ -1171,8 +1172,8 @@ module.exports = class Observations extends Abstract {
                     //     req.body.roleId = roleDocument[0]._id; 
                     // }
 
-                    submissionDocument.userRoleInformation = req.body;
-                }
+                    //submissionDocument.userRoleInformation = req.body;
+                //}
 
                 if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;

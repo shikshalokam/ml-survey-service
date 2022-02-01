@@ -97,7 +97,6 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
-
         let observationDocument = await observationsHelper.observationDocuments({
           _id: req.params._id,
           createdBy: req.userDetails.userId,
@@ -190,6 +189,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         lastSubmissionNumber = lastSubmissionForObservationEntity.result + 1;
+        
 
         let submissionDocument = {
           entityId: entityDocument._id,
@@ -213,16 +213,15 @@ module.exports = class ObservationSubmissions extends Abstract {
           entityProfile: {},
           status: "started",
           scoringSystem: solutionDocument.scoringSystem,
-          isRubricDriven: solutionDocument.isRubricDriven
+          isRubricDriven: solutionDocument.isRubricDriven,
+          userRoleInformation:observationDocument.userRoleInformation
       };
 
       if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
         submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
       }
        
-      if (req.body && req.body.role) {
-        submissionDocument.userRoleInformation = req.body;
-      }
+     
 
       if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
         submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
