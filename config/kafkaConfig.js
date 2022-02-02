@@ -39,6 +39,7 @@ var connect = function() {
         consumer.on('message', async function (message) {
 
             console.log("-------Kafka log starts here------------------");
+            console.log("Topic Name: ",  process.env.SUBMISSION_RATING_QUEUE_TOPIC);
             console.log("Message: ", JSON.stringify(message));
             console.log("-------Kafka log ends here------------------");
 
