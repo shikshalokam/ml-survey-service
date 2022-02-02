@@ -38,7 +38,7 @@ var connect = function() {
           
           console.log("-------Kafka log starts here------------------");
           console.log("Topic Name: ", process.env.SUBMISSION_RATING_QUEUE_TOPIC);
-          console.log("Message: ", JSON.stringify(message));
+          console.log(JSON.stringify(message));
           console.log("-------Kafka log ends here------------------");
 
           submissionRatingQueueConsumer.messageReceived(message)
