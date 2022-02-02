@@ -18,8 +18,6 @@ const pushObservationSubmissionToKafka = function (message) {
             messages: JSON.stringify(message)
           }])
 
-          console.log("data is",kafkaPushStatus)
-
           return resolve(kafkaPushStatus)
 
       } catch (error) {
@@ -174,7 +172,7 @@ const pushMessageToKafka = function(payload) {
 
     console.log("-------Kafka log starts here------------------");
     console.log("Topic Name: ", payload[0].topic);
-    console.log("Message: ", JSON.stringify(payload));
+    console.log(JSON.stringify(payload));
     console.log("-------Kafka log ends here------------------");
 
     kafkaClient.kafkaProducer.send(payload, (err, data) => {
