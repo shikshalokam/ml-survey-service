@@ -213,14 +213,17 @@ module.exports = class ObservationSubmissions extends Abstract {
           entityProfile: {},
           status: "started",
           scoringSystem: solutionDocument.scoringSystem,
-          isRubricDriven: solutionDocument.isRubricDriven,
-          userRoleInformation:observationDocument.userRoleInformation
+          isRubricDriven: solutionDocument.isRubricDriven
       };
 
       if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
         submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
       }
-       
+      if( observationDocument.userRoleInformation ){
+          submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
+      } else if( req.body && req.body.role && !observationDocument.userRoleInformation ){
+          submissionDocument.userRoleInformation = req.body;
+      } 
      
 
       if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
