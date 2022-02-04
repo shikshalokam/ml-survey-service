@@ -23,6 +23,8 @@ var connect = function() {
       console.error.bind(console, "kafka producer creation error!")
     })
 
+   
+
     if(process.env.SUBMISSION_RATING_QUEUE_TOPIC && process.env.SUBMISSION_RATING_QUEUE_TOPIC != "OFF") {
 
         let consumer = new kafka.ConsumerGroup(
@@ -35,6 +37,12 @@ var connect = function() {
           ); 
 
         consumer.on('message', async function (message) {
+
+            console.log("-------Kafka log starts here------------------");
+            console.log("Topic Name: ",  process.env.SUBMISSION_RATING_QUEUE_TOPIC);
+            console.log("Message: ", JSON.stringify(message));
+            console.log("-------Kafka log ends here------------------");
+
           submissionRatingQueueConsumer.messageReceived(message)
         });
 
