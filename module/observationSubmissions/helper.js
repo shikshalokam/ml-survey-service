@@ -330,7 +330,7 @@ module.exports = class ObservationSubmissionsHelper {
                 console.log("Resulting Array : ",resultingArray.result.runUpdateQuery);
             
                 if(resultingArray.result.runUpdateQuery) {
-                    console.log("Submission Id : ",rsubmissionId);
+                    console.log("Submission Id : ",submissionId);
 
                     await database.models.observationSubmissions.updateOne(
                         {
@@ -345,10 +345,10 @@ module.exports = class ObservationSubmissionsHelper {
                     await this.pushObservationSubmissionForReporting(submissionId);
                     console.log("-------------------------After calling pushObservationSubmissionForReporting------------");
                     console.log("--------------------------OBS WITH RUBRIC ISSUE DEGUG END rateSubmissionById()-------------------");
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 } else {
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 }
 
@@ -357,7 +357,7 @@ module.exports = class ObservationSubmissionsHelper {
             } catch (error) {
                 console.log("rateSubmissionById() catch block",JSON.stringify(error));
 
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
@@ -405,11 +405,11 @@ module.exports = class ObservationSubmissionsHelper {
                 
                 await this.pushObservationSubmissionForReporting(submissionId);
                 
-                emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
+                // emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
                 return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
 
             } catch (error) {
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
