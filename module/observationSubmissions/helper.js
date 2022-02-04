@@ -130,7 +130,7 @@ module.exports = class ObservationSubmissionsHelper {
 
                 console.log("BEFORE CALLING pushObservationSubmissionToKafka method ");
                 const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
-                console.log("AFTER CALLING pushObservationSubmissionToKafka method ");
+                console.log("AFTER CALLING pushObservationSubmissionToKafka method ",kafkaMessage);
 
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
