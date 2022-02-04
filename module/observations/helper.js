@@ -178,7 +178,6 @@ module.exports = class ObservationsHelper {
     static createObservation(data,userId,solution,userRoleInformation="") {
         return new Promise(async (resolve, reject) => {
             try {
-                userRoleInformation ? userRoleInformation : "";
                 if (data.entities) {
                     let entitiesToAdd = 
                     await entitiesHelper.validateEntities(data.entities, solution.entityTypeId);
@@ -204,7 +203,7 @@ module.exports = class ObservationsHelper {
                         "updatedBy": userId,
                         "createdBy": userId,
                         "isAPrivateProgram" : solution.isAPrivateProgram,
-                        "userRoleInformation" : userRoleInformation
+                        "userRoleInformation" : userRoleInformation ? userRoleInformation : ""
                     })
                 );
 
