@@ -52,6 +52,7 @@ module.exports = {
     referenceFrom : {
       type: String,
       index: true
-    }
+    },
+    userRoleInformation : Object
   }
 };

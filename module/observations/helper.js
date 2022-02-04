@@ -52,11 +52,10 @@ module.exports = class ObservationsHelper {
                         projectionObject[element] = 1;
                     });
                 }
-
                 let observationDocuments = await database.models.observations
                     .find(queryObject, projectionObject)
                     .lean();
-
+    
                 return resolve(observationDocuments);
             } catch (error) {
                 return reject(error);
@@ -152,7 +151,8 @@ module.exports = class ObservationsHelper {
                 await this.createObservation(
                     data,
                     userId,
-                    solutionData
+                    solutionData,
+                    userRoleAndProfileInformation
                 );
 
                 return resolve(_.pick(observationData, ["_id", "name", "description"]));
@@ -171,13 +171,13 @@ module.exports = class ObservationsHelper {
      * @param {String} userId - Logged in user id.
      * @param {Object} solution - Solution detail data.
      * @param {Object} solution - Solution detail data.
+     * @param {Object} userRoleInformation - user role and profile details.
      * @returns {Object} observation creation data.
      */
 
-    static createObservation(data,userId,solution) {
+    static createObservation(data,userId,solution,userRoleInformation="") {
         return new Promise(async (resolve, reject) => {
             try {
-
                 if (data.entities) {
                     let entitiesToAdd = 
                     await entitiesHelper.validateEntities(data.entities, solution.entityTypeId);
@@ -202,7 +202,8 @@ module.exports = class ObservationsHelper {
                         "entityType": solution.entityType,
                         "updatedBy": userId,
                         "createdBy": userId,
-                        "isAPrivateProgram" : solution.isAPrivateProgram
+                        "isAPrivateProgram" : solution.isAPrivateProgram,
+                        "userRoleInformation" : userRoleInformation ? userRoleInformation : ""
                     })
                 );
 
