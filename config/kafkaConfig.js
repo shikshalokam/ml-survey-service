@@ -36,10 +36,10 @@ var connect = function() {
 
         consumer.on('message', async function (message) {
           
-          console.log("-------Kafka consumner log starts here------------------");
+          console.log("-------Kafka consumer log starts here------------------");
           console.log("Topic Name: ", process.env.SUBMISSION_RATING_QUEUE_TOPIC);
           console.log(JSON.stringify(message));
-          console.log("-------Kafka consumner log ends here------------------");
+          console.log("-------Kafka consumer log ends here------------------");
 
            submissionRatingQueueConsumer.messageReceived(message)
         });
