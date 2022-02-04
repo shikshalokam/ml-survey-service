@@ -123,11 +123,15 @@ module.exports = class ObservationSubmissionsHelper {
                         )
                     );
                 }
+                console.log("--------------------------OBS WITH RUBRIC ISSUE DEGUG START pushObservationSubmissionForReporting()-------------------");
 
-               
+                console.log("STATUS : ",observationSubmissionsDocument.status);
+                console.log("OBS SUBMISSION ID : ",observationSubmissionId);
 
+                console.log("BEFORE CALLING pushObservationSubmissionToKafka method ");
                 const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
-               
+                console.log("AFTER CALLING pushObservationSubmissionToKafka method ");
+
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
                         formData: {
@@ -137,10 +141,12 @@ module.exports = class ObservationSubmissionsHelper {
                     };
                     console.log(errorObject);
                 }
-
+                console.log("--------------------------OBS WITH RUBRIC ISSUE DEGUG END pushObservationSubmissionForReporting()-------------------");
                 return resolve(kafkaMessage);
 
             } catch (error) {
+
+                console.log("pushObservationSubmissionForReporting() catch block",error);
                 return reject({
                     success: false,
                     message: error.message,
@@ -319,8 +325,13 @@ module.exports = class ObservationSubmissionsHelper {
                 }
 
                 let resultingArray = await scoringHelper.rateEntities([submissionDocument], "singleRateApi");
-
+                 
+                console.log("--------------------------OBS WITH RUBRIC ISSUE DEGUG START rateSubmissionById()-------------------");
+                console.log("Resulting Array : ",resultingArray.result.runUpdateQuery);
+            
                 if(resultingArray.result.runUpdateQuery) {
+                    console.log("Submission Id : ",rsubmissionId);
+
                     await database.models.observationSubmissions.updateOne(
                         {
                             _id: ObjectId(submissionId)
@@ -330,7 +341,10 @@ module.exports = class ObservationSubmissionsHelper {
                             completedDate: new Date()
                         }
                     );
+                    console.log("-------------------------Before calling pushObservationSubmissionForReporting------------");
                     await this.pushObservationSubmissionForReporting(submissionId);
+                    console.log("-------------------------After calling pushObservationSubmissionForReporting------------");
+                    console.log("--------------------------OBS WITH RUBRIC ISSUE DEGUG END rateSubmissionById()-------------------");
                     emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 } else {
@@ -338,7 +352,10 @@ module.exports = class ObservationSubmissionsHelper {
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 }
 
+                
+
             } catch (error) {
+                console.log("rateSubmissionById() catch block",error);
 
                 emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
