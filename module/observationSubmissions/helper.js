@@ -130,7 +130,7 @@ module.exports = class ObservationSubmissionsHelper {
 
                 console.log("BEFORE CALLING pushObservationSubmissionToKafka method ");
                 const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
-                console.log("AFTER CALLING pushObservationSubmissionToKafka method ",kafkaMessage);
+                console.log("AFTER CALLING pushObservationSubmissionToKafka method ",JSON.stringify(kafkaMessage));
 
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
@@ -146,7 +146,7 @@ module.exports = class ObservationSubmissionsHelper {
 
             } catch (error) {
 
-                console.log("pushObservationSubmissionForReporting() catch block",error);
+                console.log("pushObservationSubmissionForReporting() catch block",JSON.stringify(error));
                 return reject({
                     success: false,
                     message: error.message,
@@ -355,7 +355,7 @@ module.exports = class ObservationSubmissionsHelper {
                 
 
             } catch (error) {
-                console.log("rateSubmissionById() catch block",error);
+                console.log("rateSubmissionById() catch block",JSON.stringify(error));
 
                 emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
