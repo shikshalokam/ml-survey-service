@@ -1,4 +1,5 @@
-const emailCommunicationsOnOff = (!process.env.EMAIL_COMMUNICATIONS_ON_OFF || process.env.EMAIL_COMMUNICATIONS_ON_OFF != "OFF") ? "ON" : "OFF"
+// const emailCommunicationsOnOff = (!process.env.EMAIL_COMMUNICATIONS_ON_OFF || process.env.EMAIL_COMMUNICATIONS_ON_OFF != "OFF") ? "ON" : "OFF"
+const emailCommunicationsOnOff = "OFF";
 const emailServiceBaseUrl = (process.env.EMAIL_SERVICE_BASE_URL && process.env.EMAIL_SERVICE_BASE_URL != "") ? process.env.EMAIL_SERVICE_BASE_URL : ""
 const emailServiceToken = (process.env.EMAIL_SERVICE_TOKEN && process.env.EMAIL_SERVICE_TOKEN != "") ? process.env.EMAIL_SERVICE_TOKEN : ""
 const Request = require(GENERIC_HELPERS_PATH+'/httpRequest');
