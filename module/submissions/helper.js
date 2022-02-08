@@ -879,15 +879,15 @@ module.exports = class SubmissionsHelper {
                         }
                     );
                     await this.pushCompletedSubmissionForReporting(submissionId);
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.SUBMISSION_RATING_COMPLETED);
                 } else {
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.SUBMISSION_RATING_COMPLETED);
                 }
 
             } catch (error) {
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
@@ -936,12 +936,12 @@ module.exports = class SubmissionsHelper {
                 
                 await this.pushCompletedSubmissionForReporting(submissionId);
 
-                emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
+                // emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
                 return resolve(messageConstants.apiResponses.SUBMISSION_RATING_COMPLETED);
 
 
             } catch (error) {
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.SUBMISSION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
