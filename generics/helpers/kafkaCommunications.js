@@ -172,10 +172,10 @@ const pushMessageToKafka = function(payload) {
       throw reject("Kafka configuration is not done")
     }
 
-    console.log("-------Kafka log starts here------------------");
+    console.log("-------Kafka producer log starts here------------------");
     console.log("Topic Name: ",  payload[0].topic);
     console.log("Message: ", JSON.stringify(payload));
-    console.log("-------Kafka log ends here------------------");
+    console.log("-------Kafka producer log ends here------------------");
 
 
     kafkaClient.kafkaProducer.send(payload, (err, data) => {
