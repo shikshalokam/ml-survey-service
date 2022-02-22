@@ -1064,6 +1064,20 @@ module.exports = class SolutionsHelper {
           }
           
           updateThemes(newSolutionDocument.themes);
+          // Replace criteria ids in flattend themes key
+          if ( newSolutionDocument["flattenedThemes"] && Array.isArray( newSolutionDocument["flattenedThemes"]) && newSolutionDocument["flattenedThemes"].length>0) {
+            for (let pointerToFlattenedThemesArray = 0; pointerToFlattenedThemesArray < newSolutionDocument["flattenedThemes"].length; pointerToFlattenedThemesArray++) {
+              let theme = newSolutionDocument["flattenedThemes"][pointerToFlattenedThemesArray];
+              if(theme.criteria && Array.isArray(theme.criteria) && theme.criteria.length >0) {
+                for (let pointerToThemeCriteriaArray = 0; pointerToThemeCriteriaArray < theme.criteria.length; pointerToThemeCriteriaArray++) {
+                  let criteria = theme.criteria[pointerToThemeCriteriaArray];
+                  if(criteriaIdMap[criteria.criteriaId.toString()]) {
+                    newSolutionDocument["flattenedThemes"][pointerToFlattenedThemesArray].criteria[pointerToThemeCriteriaArray].criteriaId = criteriaIdMap[criteria.criteriaId.toString()];
+                  }
+                }
+              }
+            }
+          }
 
           let startDate = new Date();
           let endDate = new Date();
