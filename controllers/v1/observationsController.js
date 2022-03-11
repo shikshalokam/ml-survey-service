@@ -634,9 +634,21 @@ module.exports = class Observations extends Abstract {
 
                     let entityType = entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP+"."+result.entityType;
 
-                    let entitiesData = await entitiesHelper.entityDocuments({
-                        _id:req.query.parentEntityId
-                      }, [
+                    let queryObject = {
+                        _id : req.query.parentEntityId
+                    };
+                
+                    if ( req.searchText && req.searchText != "" ) {
+
+                        queryObject["$or"] = [
+                            { "metaInformation.name": new RegExp(req.searchText, 'i') },
+                            { "metaInformation.externalId": new RegExp("^" + req.searchText, 'm') },
+                            { "metaInformation.addressLine1": new RegExp(req.searchText, 'i') },
+                            { "metaInformation.addressLine2": new RegExp(req.searchText, 'i') }
+                        ];
+                    }
+                    
+                    let entitiesData = await entitiesHelper.entityDocuments(queryObject, [
                         entityType,
                         "entityType",
                         "metaInformation.name",
