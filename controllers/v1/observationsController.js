@@ -1177,13 +1177,13 @@ module.exports = class Observations extends Abstract {
                     submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
                 } else if( req.body && req.body.role && !observationDocument.userRoleInformation ){
                     submissionDocument.userRoleInformation = req.body;
-                    let updateObservation = await database.models.observations.findOneAndUpdate(
-                        {
-                            _id: req.params._id
-                        },
-                        {
-                            userRoleInformation : req.body
-                        });
+                    let updateObservation = await observationsHelper.updateObservationDocument
+                        (
+                          { _id: req.params._id },
+                          {
+                              $set: { userRoleInformation : req.body }
+                          }
+                        )
                 }
 
                 if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
