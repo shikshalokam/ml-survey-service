@@ -203,7 +203,7 @@ module.exports = class ObservationsHelper {
                         "updatedBy": userId,
                         "createdBy": userId,
                         "isAPrivateProgram" : solution.isAPrivateProgram,
-                        "userRoleInformation" : userRoleInformation ? userRoleInformation : ""
+                        "userRoleInformation" : userRoleInformation ? userRoleInformation : {}
                     })
                 );
 
@@ -1624,12 +1624,12 @@ module.exports = class ObservationsHelper {
                         solutionId : solutionId,
                         createdBy : userId
                     },["_id"]);
-    
+                        
                     if( observationData.length > 0 ) {
                         observationId = observationData[0]._id;
                     } else {
     
-                         let solutionData = 
+                        let solutionData = 
                         await coreService.solutionDetailsBasedOnRoleAndLocation(
                             token,
                             bodyData,
@@ -1670,7 +1670,9 @@ module.exports = class ObservationsHelper {
                             solutionId,
                             solutionData.data,
                             userId,
-                            token
+                            token,
+                            "",
+                            bodyData
                         );
         
                         observationId = observation._id;
