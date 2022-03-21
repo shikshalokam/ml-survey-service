@@ -20,7 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-
+const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
 /**
     * ObservationsHelper
     * @class
@@ -89,7 +89,7 @@ module.exports = class ObservationsHelper {
                 if( requestingUserAuthToken == "" ) {
                     throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
                 }
-
+                //eG code entityTypeId removed from projection.
                 let solutionData = 
                 await solutionHelper.solutionDocuments({
                     _id : solutionId
@@ -101,9 +101,9 @@ module.exports = class ObservationsHelper {
                     "frameworkId",
                     "frameworkExternalId",
                     "entityType",
-                    "entityTypeId",
                     "isAPrivateProgram"
                 ]);
+                
 
                 if( !solutionData.length > 0 ) {
                     throw {
@@ -178,12 +178,13 @@ module.exports = class ObservationsHelper {
     static createObservation(data,userId,solution,userRoleInformation="") {
         return new Promise(async (resolve, reject) => {
             try {
+    
                 if (data.entities) {
                     let entitiesToAdd = 
-                    await entitiesHelper.validateEntities(data.entities, solution.entityTypeId);
+                    await entitiesHelper.validateEntities(data.entities, solution.entityType);
                     data.entities = entitiesToAdd.entityIds;
                 }
-
+                
                 if( data.project ) {
                     data.project._id = ObjectId(data.project._id);
                     data.referenceFrom = messageConstants.common.PROJECT;
@@ -198,7 +199,6 @@ module.exports = class ObservationsHelper {
                         "programExternalId" : solution.programExternalId,
                         "frameworkId": solution.frameworkId,
                         "frameworkExternalId": solution.frameworkExternalId,
-                        "entityTypeId": solution.entityTypeId,
                         "entityType": solution.entityType,
                         "updatedBy": userId,
                         "createdBy": userId,
@@ -474,7 +474,7 @@ module.exports = class ObservationsHelper {
         return new Promise(async (resolve, reject) => {
 
             try {
-
+                
                 if(observationId == "" || entityId == "") {
                     throw new Error(messageConstants.apiResponses.INVALID_OBSERVATION_ENTITY_ID);
                 }
@@ -483,9 +483,6 @@ module.exports = class ObservationsHelper {
                     observationId = ObjectId(observationId);
                 }
 
-                if(typeof entityId == "string") {
-                    entityId = ObjectId(entityId);
-                }
 
                 let submissionDocument = await database.models.observationSubmissions.find(
                     {
@@ -501,7 +498,6 @@ module.exports = class ObservationsHelper {
                     message: messageConstants.apiResponses.SUBMISSION_NUMBER_FETCHED,
                     result: (submissionDocument[0] && submissionDocument[0].submissionNumber) ? submissionDocument[0].submissionNumber : 0 
                 });
-
 
             } catch (error) {
                 return reject(error);
@@ -657,7 +653,7 @@ module.exports = class ObservationsHelper {
                             message: `Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`
                         }
                     }
-                    console.log(errorObject)
+                    
                     throw new Error(`Failed to push entity notification for observation ${observationData._id.toString()} in the solution ${observationData.solutionName}`);
                 }
 
@@ -1617,14 +1613,14 @@ module.exports = class ObservationsHelper {
     static entities( userId,token,observationId,solutionId,bodyData) {
         return new Promise(async (resolve, reject) => {
             try {
-    
+
                 if( observationId === "" ) {
-    
+                    
                     let observationData = await this.observationDocuments({
                         solutionId : solutionId,
                         createdBy : userId
                     },["_id"]);
-    
+                    
                     if( observationData.length > 0 ) {
                         observationId = observationData[0]._id;
                     } else {
@@ -1635,7 +1631,7 @@ module.exports = class ObservationsHelper {
                             bodyData,
                             solutionId
                         );
-
+                        
                         if( !solutionData.success ) {
                             throw {
                                 message : messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND
@@ -1678,7 +1674,7 @@ module.exports = class ObservationsHelper {
                 }
     
                 let entitiesList = await this.listEntities(observationId);
-    
+                
                 let observationData = await this.observationDocuments({
                     _id : observationId,
                 },["_id","solutionId"]);
@@ -1730,11 +1726,11 @@ module.exports = class ObservationsHelper {
   static listEntities( observationId ) {
     return new Promise(async (resolve, reject) => {
         try {
-            
+
             let observationDocument = await this.observationDocuments({
                 _id : observationId
             },["entities","entityType"]);
-
+            
             if(!observationDocument[0]) {
                 throw {
                     message : messageConstants.apiResponses.OBSERVATION_NOT_FOUND
@@ -1745,15 +1741,19 @@ module.exports = class ObservationsHelper {
 
             if( observationDocument[0].entities && observationDocument[0].entities.length > 0 ) {
                 
-                let entitiesData = await entitiesHelper.entityDocuments({
-                    _id : { $in : observationDocument[0].entities }
-                },["metaInformation.externalId","metaInformation.name"]);
-
+                //set request body for learners API
+                let filterData = {
+                    "id" : observationDocument[0].entities
+                };
+                let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+                let entitiesData = entitiesDocument.data.response;
+                
                 if( !entitiesData.length > 0 ) {
                     throw {
-                        message : messageConstants.apiResponses.ENTITIES_NOT_FOUND
-                    }
+                        message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                    }               
                 }
+                
 
                 for ( 
                     let pointerToEntities = 0; 
@@ -1762,17 +1762,17 @@ module.exports = class ObservationsHelper {
                 ) {
                     
                     let currentEntities = entitiesData[pointerToEntities];
-
+                    
                     let observationSubmissions = 
                     await observationSubmissionsHelper.observationSubmissionsDocument({
                         observationId : observationId,
                         entityId : currentEntities._id
                     });
-
+                    
                     let entity = {
-                        _id : currentEntities._id,
-                        externalId : currentEntities.metaInformation.externalId,
-                        name : currentEntities.metaInformation.name,
+                        _id : currentEntities.id,
+                        externalId : currentEntities.code,
+                        name : currentEntities.name,
                         submissionsCount : observationSubmissions.length > 0 ? observationSubmissions.length : 0
                     };
 
@@ -1792,7 +1792,6 @@ module.exports = class ObservationsHelper {
                     entityType : observationDocument[0].entityType
                 }
             });
-
         } catch (error) {
             return resolve({
                 success : false,
@@ -1827,9 +1826,9 @@ module.exports = class ObservationsHelper {
                         createdBy: userId,
                         status: { $ne: "inactive" }
                     },
-                    ["entityTypeId","status"]
+                    ["entityType","status"]
                 );
-
+                
                 if (observationDocument[0].status != messageConstants.common.PUBLISHED) {
                     return resolve({
                         status: httpStatusCode.bad_request.status,
@@ -1841,9 +1840,9 @@ module.exports = class ObservationsHelper {
                 let entitiesToAdd = 
                 await entitiesHelper.validateEntities(
                     requestedData, 
-                    observationDocument[0].entityTypeId
+                    observationDocument[0].entityType
                 );
-
+                
                 if (entitiesToAdd.entityIds.length > 0) {
                     await database.models.observations.updateOne(
                         {
@@ -1863,7 +1862,6 @@ module.exports = class ObservationsHelper {
                 return resolve({
                     message: responseMessage
                 });
-
 
             } catch (error) {
                 return reject({
@@ -1901,16 +1899,14 @@ module.exports = class ObservationsHelper {
                     },
                     {
                         $pull: {
-                            entities: { $in: gen.utils.arrayIdsTobjectIds(requestedData) }
+                            entities: { $in: requestedData }
                         }
                     }
                 );
 
                 return resolve({
                     message: messageConstants.apiResponses.ENTITY_REMOVED
-                })
-
-
+                });
             } catch (error) {
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,

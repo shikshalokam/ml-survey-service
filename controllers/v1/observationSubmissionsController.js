@@ -15,6 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
+const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
 
 /**
     * ObservationSubmissions
@@ -88,7 +89,7 @@ module.exports = class ObservationSubmissions extends Abstract {
    * @name create
    * @param {Object} req -request data.
    * @param {String} req.params._id -observation solution id.
-   * @param {String} req.query.entityId -entity id.
+   * @param {String} req.query.entityId -location id.
    * @param {String} req.userDetails.userId - logged in user id.
    * @returns {JSON} - observation submissions creation.
    */
@@ -97,13 +98,14 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
+        
         let observationDocument = await observationsHelper.observationDocuments({
           _id: req.params._id,
           createdBy: req.userDetails.userId,
           status: {$ne:"inactive"},
-          entities: ObjectId(req.query.entityId)
+          entities: req.query.entityId
         });
-
+        
         if (!observationDocument[0]) {
           return resolve({ 
             status: httpStatusCode.bad_request.status, 
@@ -113,29 +115,53 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         observationDocument = observationDocument[0];
 
-        let entityDocument = await entitiesHelper.entityDocuments({
-          _id: req.query.entityId,
-          entityType: observationDocument.entityType
-        }, [
-          "metaInformation",
-          "entityTypeId",
-          "entityType",
-          "registryDetails"
-        ]);
+        let entityResult = [];
+        let filterData = {
+            "id" : req.query.entityId
+        };
 
-        if (!entityDocument[0]) {
-          return resolve({ 
-            status: httpStatusCode.bad_request.status, 
-            message: messageConstants.apiResponses.ENTITY_NOT_FOUND
-          });
+        let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+        
+        if ( !entitiesDocument.data.response > 0 ) {
+            let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+            return resolve({ 
+                status: httpStatusCode.bad_request.status, 
+                message: responseMessage 
+            });
         }
         
-        entityDocument = entityDocument[0];
+        let entities = entitiesDocument.data.response;
+        entities.map(entity => {
+            if( entity.type == observationDocument.entityType ) {
+                entityResult.push(entity);
+            }
+        });  
+
+        if ( !entityResult.length > 0 ) {
+          let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+          return resolve({ 
+              status: httpStatusCode.bad_request.status, 
+              message: responseMessage 
+          });
+        }
+
+        
+        let entityDocument = {
+            id : entityResult[0].id,
+            registryDetails : {
+                locationId : entityResult[0].id,
+                code : entityResult[0].code
+            },
+            entityType : entityResult[0].type,
+            metaInformation : {
+                name : entityResult[0].name,
+                entityExternalId : entityResult[0].code
+            }
+        };
 
         if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
           entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
         }
-
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
           status: "active",
@@ -145,7 +171,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           "frameworkId",
           "frameworkExternalId",
           "evidenceMethods",
-          "entityTypeId",
           "entityType",
           "programId",
           "programExternalId",
@@ -165,19 +190,20 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         solutionDocument = solutionDocument[0];
+        
+        //need to check usage og entityProfileForm, why it is fetched. if needed create new logic
+        // let entityProfileForm = await database.models.entityTypes.findOne(
+        //     solutionDocument.entityTypeId,
+        //     {
+        //         profileForm: 1
+        //     }
+        // ).lean();
 
-        let entityProfileForm = await database.models.entityTypes.findOne(
-            solutionDocument.entityTypeId,
-            {
-                profileForm: 1
-            }
-        ).lean();
-
-        if (!entityProfileForm) {
-          return resolve({ 
-            status: httpStatusCode.bad_request.status,
-             message: messageConstants.apiResponses.ENTITY_PROFILE_FORM_NOT_FOUND });
-        }
+        // if (!entityProfileForm) {
+        //   return resolve({ 
+        //     status: httpStatusCode.bad_request.status,
+        //      message: messageConstants.apiResponses.ENTITY_PROFILE_FORM_NOT_FOUND });
+        // }
 
         let lastSubmissionNumber = 0;
 
@@ -192,7 +218,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         
 
         let submissionDocument = {
-          entityId: entityDocument._id,
+          entityId: entityDocument.id,
           entityExternalId: (entityDocument.metaInformation.externalId) ? entityDocument.metaInformation.externalId : "",
           entityInformation: entityDocument.metaInformation,
           solutionId: solutionDocument._id,
@@ -202,7 +228,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           isAPrivateProgram : solutionDocument.isAPrivateProgram,
           frameworkId: solutionDocument.frameworkId,
           frameworkExternalId: solutionDocument.frameworkExternalId,
-          entityTypeId: solutionDocument.entityTypeId,
           entityType: solutionDocument.entityType,
           observationId: observationDocument._id,
           observationInformation: {
@@ -323,8 +348,8 @@ module.exports = class ObservationSubmissions extends Abstract {
       return resolve({
           message: responseMessage,
           result: observations
-      });
-
+        });
+      
       } catch (error) {
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,
@@ -772,7 +797,7 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
   /**
-  * @api {get} /assessment/api/v1/observationSubmissions/rate/:entityExternalId?solutionId=:solutionExternalId&createdBy=:keycloakUserId&submissionNumber=:submissionInstanceNumber Rate a Single Entity of Observation
+  * @api {get} /assessment/api/v1/observationSubmissions/rate/:entitycode?solutionId=:solutionExternalId&createdBy=:keycloakUserId&submissionNumber=:submissionInstanceNumber Rate a Single Entity of Observation
   * @apiVersion 1.0.0
   * @apiName Rate a Single Entity of Observation
   * @apiGroup Observation Submissions
@@ -806,7 +831,7 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let createdBy = req.query.createdBy;
         let solutionId = req.query.solutionId;
-        let entityId = req.params._id;
+        let code = req.params._id;
         let submissionNumber = (req.query.submissionNumber) ? parseInt(req.query.submissionNumber) : 1;
 
         if (!createdBy) {
@@ -817,11 +842,11 @@ module.exports = class ObservationSubmissions extends Abstract {
           throw messageConstants.apiResponses.SOLUTION_ID_NOT_FOUND;
         }
 
-        if (!entityId) {
+        if (!code) {
           throw messageConstants.apiResponses.ENTITY_ID_NOT_FOUND;
         }
 
-
+        
         let solutionDocument = await database.models.solutions.findOne({
           externalId: solutionId,
           type : "observation",
@@ -837,7 +862,7 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let queryObject = {
           "createdBy": createdBy,
-          "entityExternalId": entityId,
+          "entityExternalId": code,
           "solutionExternalId": solutionId,
           "submissionNumber" : (submissionNumber) ? submissionNumber : 1
         }
@@ -846,7 +871,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           queryObject,
           { "answers": 1, "criteria": 1, "evidencesStatus": 1, "entityInformation": 1, "entityProfile": 1, "solutionExternalId": 1 , "scoringSystem" : 1}
         ).lean();
-
+         
         if (!submissionDocument._id) {
           throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND
         }

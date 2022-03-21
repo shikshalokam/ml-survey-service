@@ -54,5 +54,9 @@ module.exports = {
     CREATED_BY_ME : "createdByMe",
     ALL_ROLES : "all",
     VERSION_3 : "v3",
-    DRAFT : "draft"
+    DRAFT : "draft",
+    OK : "OK",
+    SUNBIRD_SERVER_TIMEOUT : 5000,
+    TIMEOUT_ERROR : "Server timeout error",
+    SUNBIRD_RESPONSE_DATA_LIMIT : 10000
 }

@@ -27,8 +27,8 @@ module.exports = (req) => {
         list: function () {
             req.checkParams('_id').exists().withMessage("required observation id")
             .isMongoId().withMessage("Invalid observation id");
-            req.checkQuery('entityId').exists().withMessage("required entity id")
-            .isMongoId().withMessage("Invalid entity id");
+            req.checkQuery('entityId').exists().withMessage("required entity id");
+            
         },
 
         status: function () {

@@ -14,6 +14,7 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
+const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
 
 /**
     * Observations
@@ -589,7 +590,6 @@ module.exports = class Observations extends Abstract {
                 let result;
 
                 let projection = [];
-
                 if ( req.query.observationId ) {
                     let findObject = {};
                     findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_OBJECT_ID] = req.query.observationId;
@@ -615,11 +615,10 @@ module.exports = class Observations extends Abstract {
                         entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE_ID, 
                         entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE
                     );
-
+    
                     let solutionDocument = await solutionsHelper.solutionDocuments(findQuery, projection);
                     result = _.merge(solutionDocument[0]);
                 }
-
                 let userAllowedEntities = new Array;
 
                 // try {
@@ -631,101 +630,111 @@ module.exports = class Observations extends Abstract {
                 let messageData = messageConstants.apiResponses.ENTITY_FETCHED;
 
                 if( !(userAllowedEntities.length > 0) && req.query.parentEntityId ) {
-
+                    
                     let entityType = entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP+"."+result.entityType;
+                    
+                    let filterData = {
+                        "id" : req.query.parentEntityId
+                    };
 
-                    let entitiesData = await entitiesHelper.entityDocuments({
-                        _id:req.query.parentEntityId
-                      }, [
-                        entityType,
-                        "entityType",
-                        "metaInformation.name",
-                        "metaInformation.addressLine1",
-                        "metaInformation.addressLine2",
-                        "metaInformation.externalId",
-                        "metaInformation.districtName"
-                      ]);
+                    let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
-                    if( entitiesData.length > 0 && entitiesData[0].groups && entitiesData[0].groups[result.entityType]  ) {
-                        userAllowedEntities = 
-                        entitiesData[0][entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP][result.entityType];
-                    } else {
-
-                        response.result = [];
-                        if( entitiesData[0] && entitiesData[0].entityType === result.entityType ) {
-
-                            if( entitiesData[0].metaInformation ) {
-                                
-                                if( entitiesData[0].metaInformation.name ) {
-                                    entitiesData[0]["name"] = entitiesData[0].metaInformation.name;
-                                }
-
-                                if( entitiesData[0].metaInformation.externalId ) {
-                                    entitiesData[0]["externalId"] = entitiesData[0].metaInformation.externalId;
-                                }
-
-                                if( entitiesData[0].metaInformation.addressLine1 ) {
-                                    entitiesData[0]["addressLine1"] = entitiesData[0].metaInformation.addressLine1;
-                                }
-
-                                if( entitiesData[0].metaInformation.addressLine2 ) {
-                                    entitiesData[0]["addressLine2"] = entitiesData[0].metaInformation.addressLine2;
-                                }
-
-                                if( entitiesData[0].metaInformation.districtName ) {
-                                    entitiesData[0]["districtName"] = entitiesData[0].metaInformation.districtName;
-                                }
-
-                                entitiesData[0] = _.pick(
-                                    entitiesData[0],
-                                    ["_id","name","externalId","addressLine1","addressLine2","districtName"]
-                                )
-                            }
-
-                            let data = 
-                            await entitiesHelper.observationSearchEntitiesResponse(
-                                entitiesData,
-                                result.entities
-                            );
-
-                            response["message"] = messageData;
-
-                            response.result.push({
-                                "count" : 1,
-                                "data" : data
-                            });
-
-                        } else {
-                            response["message"] = 
-                            messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                            
-                            response.result.push({
-                                "count":0,
-                                "data" : []
-                            });
-                        }  
-
-                        return resolve(response);
+                    if ( !entitiesDocument.data.response > 0 ) {
+                        response["message"] = 
+                        messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                        
+                        response.result.push({
+                            "count":0,
+                            "data" : []
+                        });
                     }
+                    let entitiesData = entitiesDocument.data.response;
+                    
+                    if( entitiesData && entitiesData[0].type === result.entityType ) {
+                        response.result = [];
+                        
+                        let data = 
+                        await entitiesHelper.observationSearchEntitiesResponse(
+                            entitiesData,
+                            result.entities
+                        );
+
+                        response["message"] = messageData;
+
+                        response.result.push({
+                            "data" : data,
+                            "count" : 1
+                        });
+
+                    } else {
+                        response.result = [];
+                        let subEntitiesMatchingType = [];
+                        let parentId = [];
+                        parentId.push(req.query.parentEntityId );
+                        let subEntities = await subEntitiesWithMatchingType( parentId,result.entityType,subEntitiesMatchingType )
+               
+                        if( !subEntities.length > 0 ) {
+                            return resolve(subEntities) 
+                        }
+                        
+                        
+                        let searchText= req.searchText;
+                        if( searchText !== "" ){
+                            let matchEntities = [];
+                            subEntities.map( entityData => {
+                                if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
+                                    matchEntities.push(entityData)
+                                }
+                            });
+                            subEntities = [];
+                            subEntities = matchEntities;
+                        }
+        
+                        let totalcount = subEntities.length;
+                        if (subEntities.length > 0) {
+                            let startIndex = req.pageSize * (req.pageNo - 1);
+                            let endIndex = startIndex + req.pageSize;
+                            subEntities = subEntities.slice(startIndex, endIndex);
+                        }
+                    
+                        let data = 
+                            await entitiesHelper.observationSearchEntitiesResponse(
+                                subEntities,
+                                result.entities
+                        )
+                        
+
+                        response["message"] = messageData;
+
+                        response.result.push({
+                            "data" : data,
+                            "count" : totalcount
+                        });
+                        
+                    }
+                    return resolve(response)
+
+                    
+                    
                 }
+            //++++++++important- check with Akash --- removed because db doesn't contain data.And learners api response data can't be queried even if data exist in DB
+                // let userAclInformation = await userExtensionHelper.userAccessControlList(
+                //     userId
+                // );
 
-                let userAclInformation = await userExtensionHelper.userAccessControlList(
-                    userId
-                );
-
-                let tags = [];
+                // let tags = [];
                 
-                if( 
-                    userAclInformation.success && 
-                    Object.keys(userAclInformation.acl).length > 0 
-                ) {
-                    Object.values(userAclInformation.acl).forEach(acl=>{
-                        tags = tags.concat(acl);
-                    })
-                }
+                // if( 
+                //     userAclInformation.success && 
+                //     Object.keys(userAclInformation.acl).length > 0 
+                // ) {
+                //     Object.values(userAclInformation.acl).forEach(acl=>{
+                //         tags = tags.concat(acl);
+                //     })
+                // }
 
                 let entityDocuments = await entitiesHelper.search(
-                    result.entityTypeId, 
+                    result.entityType, 
                     req.searchText, 
                     req.pageSize, 
                     req.pageNo, 
@@ -733,25 +742,27 @@ module.exports = class Observations extends Abstract {
                     userAllowedEntities && userAllowedEntities.length > 0 ? 
                     userAllowedEntities : 
                     false,
-                    tags
+                    
                 );
-
+            
+                if ( !(entityDocuments[0].count) ) {
+                    entityDocuments.count = 0;
+                    messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                }
+                
                 let data = 
                 await entitiesHelper.observationSearchEntitiesResponse(
                     entityDocuments[0].data,
                     result.entities
                 )
-
+                
                 entityDocuments[0].data = data;
-
-                if ( !(entityDocuments[0].count) ) {
-                    entityDocuments[0].count = 0;
-                    messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                }
+                
                 response.result = entityDocuments;
                 response["message"] = messageData;
 
                 return resolve(response);
+
 
             } catch (error) {
                 return reject({
@@ -982,11 +993,12 @@ module.exports = class Observations extends Abstract {
                     result: {}
                 };
 
+                //eG change
                 let observationDocument = await database.models.observations.findOne({ 
                     _id: req.params._id, 
                      createdBy: req.userDetails.userId,
                      status: {$ne:"inactive"}, 
-                     entities: ObjectId(req.query.entityId) }).lean();
+                     entities: req.query.entityId }).lean();
 
                 if (!observationDocument) {
                     return resolve({ 
@@ -994,30 +1006,54 @@ module.exports = class Observations extends Abstract {
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-               
-                let entityQueryObject = { _id: req.query.entityId, entityType: observationDocument.entityType };
-                let entityDocument = await database.models.entities.findOne(
-                    entityQueryObject,
-                    {
-                        metaInformation: 1,
-                        entityTypeId: 1,
-                        entityType: 1,
-                        registryDetails: 1
-                    }
-                ).lean();
+               //eG code
+                let entityResult = [];
+                let filterData = {
+                    "id" : req.query.entityId
+                };
 
-                if (!entityDocument) {
+                let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+
+                if ( !entitiesDocument.data.response > 0 ) {
                     let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
                         message: responseMessage 
                     });
                 }
+                let entities = entitiesDocument.data.response;
+                entities.map(entity => {
+                    if( entity.type == observationDocument.entityType ) {
+                        entityResult.push(entity);
+                    }
+                });  
+
+                if ( !entityResult.length > 0 ) {
+                    let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                    return resolve({ 
+                        status: httpStatusCode.bad_request.status, 
+                        message: responseMessage 
+                    });
+                }
+                
+                let entityDocument = {
+                    id : entityResult[0].id,
+                    registryDetails : {
+                        locationId : entityResult[0].id,
+                        code : entityResult[0].code
+                    },
+                    entityType : entityResult[0].type,
+                    metaInformation : {
+                        name : entityResult[0].name,
+                        entityExternalId : entityResult[0].code
+                    }
+                };
+               
 
                 if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
                     entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
                 }
-
+                
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
 
                 let solutionQueryObject = {
@@ -1116,8 +1152,7 @@ module.exports = class Observations extends Abstract {
                 // })
 
                 response.result.entityProfile = {
-                    _id: entityDocument._id,
-                    entityTypeId: entityDocument.entityTypeId,
+                    _id: entityDocument.id,
                     entityType: entityDocument.entityType,
                     // form: form
                 };
@@ -1129,7 +1164,7 @@ module.exports = class Observations extends Abstract {
                 response.result.program = programDocument[0];
 
                 let submissionDocument = {
-                    entityId: entityDocument._id,
+                    entityId: entityDocument.id,
                     entityExternalId: (entityDocument.metaInformation.externalId) ? entityDocument.metaInformation.externalId : "",
                     entityInformation: entityDocument.metaInformation,
                     solutionId: solutionDocument._id,
@@ -2151,4 +2186,49 @@ module.exports = class Observations extends Abstract {
         })
     }
 
+
 }
+
+// /**
+//   * get subEntities of matching type by recursion.
+//   * @method
+//   * @name subEntitiesWithMatchingType
+//   * @returns {Array} - Sub entities matching the type .
+//   */
+
+async function subEntitiesWithMatchingType( parentIds,entityType,matchingData ){
+    if( !parentIds.length > 0 ){
+      return matchingData;
+    }
+
+    let bodyData={
+        "parentId" : parentIds
+    };
+    
+    let entityDetails = await sunbirdService.learnerLocationSearch(bodyData);
+
+    if( !entityDetails.data.response.length > 0 && !matchingData.length > 0 ) {
+      return matchingData;
+    }
+    
+    let entityData = entityDetails.data.response;  
+    let mismatchEntities = [];
+
+    entityData.map(entity => {
+      if( entity.type == entityType ) {
+        matchingData.push(entity)
+      } else {
+        mismatchEntities.push(entity.id)
+      }
+    });
+
+    if( mismatchEntities.length > 0 ){
+      await subEntitiesWithMatchingType(mismatchEntities,entityType,matchingData)
+    } 
+    let uniqueEntities = [];
+    matchingData.map( data => {
+      if (uniqueEntities.includes(data) === false) uniqueEntities.push(data);
+    });
+    return uniqueEntities; 
+   }
+   

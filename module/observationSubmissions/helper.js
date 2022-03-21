@@ -81,7 +81,6 @@ module.exports = class ObservationSubmissionsHelper {
                     projection
                 ).lean();
             }   
-            
             return resolve(submissionDocuments);
         } catch (error) {
             return reject({
@@ -404,18 +403,18 @@ module.exports = class ObservationSubmissionsHelper {
     * List observation submissions
     * @method
     * @name list
-    * @param {String} - entityId
+    * @param {String} - entityLocationId
     * @param {String} - solutionId
     * @param {String} - observationId
     * @returns {Object} - list of submissions
     */
 
-   static list(entityId,observationId) {
+   static list(entityLocationId,observationId) {
     return new Promise(async (resolve, reject) => {
         try {
             
             let queryObject = {
-                entityId: entityId,
+                entityId: entityLocationId,
                 observationId: observationId
             };
 
@@ -443,7 +442,7 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.canBeNotAllowed",
                 "evidencesStatus.notApplicable",
             ];
-
+            
             let result = await this.observationSubmissionsDocument
             (
                  queryObject,
@@ -452,7 +451,7 @@ module.exports = class ObservationSubmissionsHelper {
                      "createdAt" : -1 
                 }
             );
-
+            
             if( !result.length > 0 ) {
                 return resolve({
                     status : httpStatusCode.ok.status,
