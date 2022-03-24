@@ -1825,12 +1825,14 @@ module.exports = class EntitiesHelper {
             };
 
             let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-            let entities = entitiesDocument.data.response;
-            if( !entities.length > 0 ) {
+            if ( !entitiesDocument.success && !entitiesDocument.data.response.length > 0 ) {
                 throw {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 }               
             }
+
+            let entities = entitiesDocument.data.response;
+            
             //formating response
             entities.map(entityData => {
                 let data = {};
