@@ -41,11 +41,11 @@ const learnerLocationSearch = function ( filterData ) {
 
         request.post(url,options,kendraCallback);
 
-        function kendraCallback(err, data) {
+        let result = {
+            success : true
+        };
 
-            let result = {
-                success : true
-            };
+        function kendraCallback(err, data) {
 
             if (err) {
                 result.success = false;
@@ -53,7 +53,7 @@ const learnerLocationSearch = function ( filterData ) {
                   
                 let response = data.body;
                   
-                if( response.responseCode === messageConstants.common.OK) {
+                if ( response.responseCode === messageConstants.common.OK ) {
                     result["data"] = response.result;
                 } else {
                       result.success = false;
@@ -62,10 +62,11 @@ const learnerLocationSearch = function ( filterData ) {
             return resolve(result);
         }
 
-        setTimeout(function () {
-           return reject (messageConstants.common.TIMEOUT_ERROR)
-        }, messageConstants.common.SUNBIRD_SERVER_TIMEOUT);
-
+        setTimeout( function () {
+            return reject (result = {
+                success : false
+             });
+         }, messageConstants.common.SUNBIRD_SERVER_TIMEOUT);
 
       } catch (error) {
           return reject(error);
