@@ -117,34 +117,20 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let entityResult = [];
         let filterData = {
-            "id" : req.query.entityId
+            "id" : req.query.entityId,
+            "type" : observationDocument.entityType
         };
 
         let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
         
-        if ( !entitiesDocument.data.response > 0 ) {
+        if ( !entitiesDocument.success || !entitiesDocument.data.response.length > 0 ) {
             let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
             return resolve({ 
                 status: httpStatusCode.bad_request.status, 
                 message: responseMessage 
             });
         }
-        
-        let entities = entitiesDocument.data.response;
-        entities.map(entity => {
-            if( entity.type == observationDocument.entityType ) {
-                entityResult.push(entity);
-            }
-        });  
-
-        if ( !entityResult.length > 0 ) {
-          let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
-          return resolve({ 
-              status: httpStatusCode.bad_request.status, 
-              message: responseMessage 
-          });
-        }
-
+        entityResult.push(entitiesDocument.data.response);
         
         let entityDocument = {
             id : entityResult[0].id,
@@ -191,7 +177,7 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         solutionDocument = solutionDocument[0];
         
-        //need to check usage og entityProfileForm, why it is fetched. if needed create new logic
+        //need to check usage of entityProfileForm, why it is fetched. if needed create new logic
         // let entityProfileForm = await database.models.entityTypes.findOne(
         //     solutionDocument.entityTypeId,
         //     {

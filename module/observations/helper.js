@@ -1855,7 +1855,7 @@ module.exports = class ObservationsHelper {
                 }
 
 
-                if (entitiesToAdd.entityIds.length != requestedData.length) {
+                if ( entitiesToAdd.entityIds.length != requestedData.length ) {
                     responseMessage = messageConstants.apiResponses.ENTITIES_NOT_UPDATE;
                 }
 
