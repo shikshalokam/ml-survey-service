@@ -1637,15 +1637,15 @@ module.exports = class ObservationsHelper {
                                 message : messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND
                             }
                         }
-        
+                        
                         solutionData.data["startDate"] = new Date();
                         let endDate = new Date();
                         endDate.setFullYear(endDate.getFullYear() + 1);
                         solutionData.data["endDate"] = endDate;
                         solutionData.data["status"] = messageConstants.common.PUBLISHED;
-        
+                        
                         let entityTypes = Object.keys(_.omit(bodyData,["role"]));
-        
+                        
                         if( entityTypes.includes(solutionData.data.entityType) ) {
     
                             let entityData = 
@@ -1736,7 +1736,7 @@ module.exports = class ObservationsHelper {
                     message : messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                 };
             }
-
+            
             let entities = [];
 
             if( observationDocument[0].entities && observationDocument[0].entities.length > 0 ) {
@@ -1746,15 +1746,15 @@ module.exports = class ObservationsHelper {
                     "id" : observationDocument[0].entities
                 };
                 let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-                let entitiesData = entitiesDocument.data.response;
-                
-                if( !entitiesData.length > 0 ) {
+
+                if(!entitiesDocument.success || !entitiesDocument.data.response.length > 0 ) {
                     throw {
                         message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                     }               
                 }
-                
 
+                let entitiesData = entitiesDocument.data.response;
+            
                 for ( 
                     let pointerToEntities = 0; 
                     pointerToEntities < entitiesData.length;
