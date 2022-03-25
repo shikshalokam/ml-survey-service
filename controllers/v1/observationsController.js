@@ -1014,7 +1014,7 @@ module.exports = class Observations extends Abstract {
 
                 let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
-                if ( !entitiesDocument.data.response > 0 ) {
+                if ( !entitiesDocument.success || !entitiesDocument.data.response > 0 ) {
                     let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 

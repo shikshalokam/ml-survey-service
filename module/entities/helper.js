@@ -986,6 +986,7 @@ module.exports = class EntitiesHelper {
                  "id" : entityIds
              };
              let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+
              let entities = entitiesDocument.data.response;
              
              if( entities.length > 0 ) {
