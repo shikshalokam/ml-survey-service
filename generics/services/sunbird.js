@@ -10,6 +10,8 @@
 
 const request = require('request');
 const sunbirdBaseUrl = process.env.SUNBIRD_SERVICE_URL;
+const dataLimit = process.env.SUNBIRD_RESPONSE_DATA_LIMIT ? parseInt(process.env.SUNBIRD_RESPONSE_DATA_LIMIT) : 10000;
+const timeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIRD_SERVER_TIMEOUT) : 5000;
 
 /**
   * 
@@ -23,11 +25,11 @@ const sunbirdBaseUrl = process.env.SUNBIRD_SERVICE_URL;
 const learnerLocationSearch = function ( filterData ) {
   return new Promise(async (resolve, reject) => {
       try {
+        
         let bodyData={};
         bodyData["request"] = {};
         bodyData["request"]["filters"] = filterData;
-        bodyData["request"]["limit"] = messageConstants.common.SUNBIRD_RESPONSE_DATA_LIMIT;
-    
+        bodyData["request"]["limit"] = dataLimit;
 
         const url = 
         sunbirdBaseUrl + messageConstants.endpoints.GET_LOCATION_DATA;
@@ -39,13 +41,13 @@ const learnerLocationSearch = function ( filterData ) {
             json : bodyData
         };
 
-        request.post(url,options,kendraCallback);
+        request.post(url,options,locationSearchCallback);
 
         let result = {
             success : true
         };
 
-        function kendraCallback(err, data) {
+        function locationSearchCallback(err, data) {
 
             if (err) {
                 result.success = false;
@@ -66,7 +68,7 @@ const learnerLocationSearch = function ( filterData ) {
             return reject (result = {
                 success : false
              });
-         }, messageConstants.common.SUNBIRD_SERVER_TIMEOUT);
+         }, timeout);
 
       } catch (error) {
           return reject(error);

@@ -17,6 +17,5 @@ module.exports = {
     SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION : "/v1/solutions/detailsBasedOnRoleAndLocation",
     GET_PROJECT_TEMPLATE_LISTS : "/v1/project/templates/listByIds",
     DOWNLOADABLE_FILE_URL: "/v1/cloud-services/files/getDownloadableUrl",
-    USER_READ : "/user/v1/read",
-    GET_LOCATION_DATA : "/api/data/v1/location/search",
+    GET_LOCATION_DATA : "/api/data/v1/location/search"
 }

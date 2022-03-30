@@ -639,7 +639,7 @@ module.exports = class Observations extends Abstract {
 
                     let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
-                    if ( !entitiesDocument.data.response > 0 ) {
+                    if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
                         response["message"] = 
                         messageConstants.apiResponses.ENTITY_NOT_FOUND;
                         
@@ -659,7 +659,7 @@ module.exports = class Observations extends Abstract {
                             result.entities
                         );
 
-                        response["message"] = messageData;
+                        response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
 
                         response.result.push({
                             "data" : data,
@@ -704,7 +704,7 @@ module.exports = class Observations extends Abstract {
                         )
                         
 
-                        response["message"] = messageData;
+                        response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
 
                         response.result.push({
                             "data" : data,
@@ -993,12 +993,11 @@ module.exports = class Observations extends Abstract {
                     result: {}
                 };
 
-                //eG change
-                let observationDocument = await database.models.observations.findOne({ 
-                    _id: req.params._id, 
-                     createdBy: req.userDetails.userId,
-                     status: {$ne:"inactive"}, 
-                     entities: req.query.entityId }).lean();
+                let observationDocument = await observationsHelper.findObservation(
+                    req.params._id, 
+                    req.userDetails.userId, 
+                    req.query.entityId
+                )
 
                 if (!observationDocument) {
                     return resolve({ 
@@ -1006,53 +1005,28 @@ module.exports = class Observations extends Abstract {
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-               //eG code
-                let entityResult = [];
+              
                 let filterData = {
-                    "id" : req.query.entityId
+                    "id" : req.query.entityId,
+                    "type" : observationDocument.entityType
                 };
 
                 let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
-                if ( !entitiesDocument.success || !entitiesDocument.data.response > 0 ) {
-                    let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
-                        message: responseMessage 
+                        message: messageConstants.apiResponses.ENTITY_NOT_FOUND 
                     });
                 }
                 let entities = entitiesDocument.data.response;
-                entities.map(entity => {
-                    if( entity.type == observationDocument.entityType ) {
-                        entityResult.push(entity);
-                    }
-                });  
-
-                if ( !entityResult.length > 0 ) {
-                    let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                    return resolve({ 
-                        status: httpStatusCode.bad_request.status, 
-                        message: responseMessage 
-                    });
-                }
                 
-                let entityDocument = {
-                    id : entityResult[0].id,
-                    registryDetails : {
-                        locationId : entityResult[0].id,
-                        code : entityResult[0].code
-                    },
-                    entityType : entityResult[0].type,
-                    metaInformation : {
-                        name : entityResult[0].name,
-                        entityExternalId : entityResult[0].code
-                    }
-                };
-               
+                let entityData = await entitiesHelper.extractDataFromLocationResult(entities);
+                
+                let entityDocument = entityData[0];
+                
+                entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
 
-                if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
-                    entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
-                }
                 
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
 
@@ -1069,10 +1043,9 @@ module.exports = class Observations extends Abstract {
                 ).lean();
 
                 if (!solutionDocument) {
-                    let responseMessage = messageConstants.apiResponses.SOLUTION_NOT_FOUND;
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
-                        message: responseMessage 
+                        message: messageConstants.apiResponses.SOLUTION_NOT_FOUND 
                     });
                 }
 
@@ -1152,7 +1125,7 @@ module.exports = class Observations extends Abstract {
                 // })
 
                 response.result.entityProfile = {
-                    _id: entityDocument.id,
+                    _id: entityDocument._id,
                     entityType: entityDocument.entityType,
                     // form: form
                 };
@@ -2207,7 +2180,7 @@ async function subEntitiesWithMatchingType( parentIds,entityType,matchingData ){
     
     let entityDetails = await sunbirdService.learnerLocationSearch(bodyData);
 
-    if( !entityDetails.data.response.length > 0 && !matchingData.length > 0 ) {
+    if( ( !entityDetails.success || !entityDetails.data || !entityDetails.data.response.length > 0 ) && !matchingData.length > 0 ) {
       return matchingData;
     }
     

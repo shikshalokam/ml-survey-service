@@ -112,10 +112,9 @@ module.exports = class ObservationSubmissions extends Abstract {
             message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
            });
         }
-
+        
         observationDocument = observationDocument[0];
 
-        let entityResult = [];
         let filterData = {
             "id" : req.query.entityId,
             "type" : observationDocument.entityType
@@ -123,31 +122,19 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
         
-        if ( !entitiesDocument.success || !entitiesDocument.data.response.length > 0 ) {
-            let responseMessage = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+        if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
             return resolve({ 
                 status: httpStatusCode.bad_request.status, 
-                message: responseMessage 
+                message: messageConstants.apiResponses.ENTITY_NOT_FOUND
             });
         }
-        entityResult.push(entitiesDocument.data.response);
         
-        let entityDocument = {
-            id : entityResult[0].id,
-            registryDetails : {
-                locationId : entityResult[0].id,
-                code : entityResult[0].code
-            },
-            entityType : entityResult[0].type,
-            metaInformation : {
-                name : entityResult[0].name,
-                entityExternalId : entityResult[0].code
-            }
-        };
-
-        if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
-          entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
-        }
+        let entityResult = entitiesDocument.data.response;
+        let entityData = await entitiesHelper.extractDataFromLocationResult(entityResult);
+        let entityDocument = entityData[0]
+        
+        entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
+        
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
           status: "active",
@@ -313,9 +300,9 @@ module.exports = class ObservationSubmissions extends Abstract {
         req.headers["x-app-ver"] ? req.headers["x-app-ver"] :
         req.headers.appversion;
       }
-
+      
       let newObservationSubmissionDocument = await database.models.observationSubmissions.create(submissionDocument);
-
+      
       if( newObservationSubmissionDocument.referenceFrom === messageConstants.common.PROJECT ) {
         await observationSubmissionsHelper.pushSubmissionToImprovementService(
           _.pick(newObservationSubmissionDocument,["project","status","_id"])
@@ -323,11 +310,14 @@ module.exports = class ObservationSubmissions extends Abstract {
       }
       
       // Push new observation submission to kafka for reporting/tracking.
+      
       observationSubmissionsHelper.pushObservationSubmissionForReporting(newObservationSubmissionDocument._id);
-
+      
+      
       let observations = new Array;
-
+      
       observations = await observationsHelper.listV2(req.userDetails.userId);
+      
       
       let responseMessage = messageConstants.apiResponses.OBSERVATION_SUBMISSION_CREATED;
 
@@ -783,7 +773,7 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
   /**
-  * @api {get} /assessment/api/v1/observationSubmissions/rate/:entitycode?solutionId=:solutionExternalId&createdBy=:keycloakUserId&submissionNumber=:submissionInstanceNumber Rate a Single Entity of Observation
+  * @api {get} /assessment/api/v1/observationSubmissions/rate/:entityExternalId?solutionId=:solutionExternalId&createdBy=:keycloakUserId&submissionNumber=:submissionInstanceNumber Rate a Single Entity of Observation
   * @apiVersion 1.0.0
   * @apiName Rate a Single Entity of Observation
   * @apiGroup Observation Submissions

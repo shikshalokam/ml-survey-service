@@ -12,6 +12,7 @@ const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
 
+
  /**
     * EntitiesHelper
     * @class
@@ -934,31 +935,31 @@ module.exports = class EntitiesHelper {
                 
                 let entitiesData = await sunbirdService.learnerLocationSearch( bodyData );
                 
-                if( !entitiesData.data.response.length > 0 ) {
+                if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
                     return resolve(entitiesData.data.response) 
                 }
          
-                let immediateLocation = entitiesData.data.response;
+                let immediateEntities = entitiesData.data.response;
                 
                 if( searchText !== "" ){
                     let matchEntities = [];
-                    immediateLocation.map( entityData => {
+                    immediateEntities.map( entityData => {
                         if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
                             matchEntities.push(entityData)
                         }
                     });
-                    immediateLocation = [];
-                    immediateLocation = matchEntities;
+                    immediateEntities = [];
+                    immediateEntities = matchEntities;
                 }
 
-                let totalcount = immediateLocation.length;
-                if (immediateLocation.length > 0) {
+                let totalcount = immediateEntities.length;
+                if (immediateEntities.length > 0) {
                     let startIndex = pageSize * (pageNo - 1);
                     let endIndex = startIndex + pageSize;
-                    immediateLocation = immediateLocation.slice(startIndex, endIndex);
+                    immediateEntities = immediateEntities.slice(startIndex, endIndex);
                 }
                 entityDocuments.push({
-                    data : immediateLocation,
+                    data : immediateEntities,
                     count : totalcount
                 })
                 return resolve(entityDocuments);
@@ -981,9 +982,10 @@ module.exports = class EntitiesHelper {
     return new Promise(async (resolve, reject) => {
         try {
              //set request body for learners API
-             let ids = []
+             let validEntityIds = []
              let filterData={
-                 "id" : entityIds
+                 "id" : entityIds,
+                 "type" : entityType
              };
              let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
@@ -991,14 +993,12 @@ module.exports = class EntitiesHelper {
              
              if( entities.length > 0 ) {
                 entities.map(entity => {
-                    if( entity.type == entityType ) {
-                        ids.push(entity.id);
-                    }
+                    validEntityIds.push(entity.id);
                 });              
              }
              
             return resolve({
-                entityIds: ids
+                entityIds: validEntityIds
             });
 
 
@@ -1818,15 +1818,14 @@ module.exports = class EntitiesHelper {
   static listByLocationIds(locationIds) {
     return new Promise(async (resolve, reject) => {
         try {
-            
             let entityResult = [];
             //set request body for learners api
             let filterData = {
                 "id" : locationIds
             };
-
+           
             let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-            if ( !entitiesDocument.success || !entitiesDocument.data.response.length > 0 ) {
+            if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
                 throw {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 }               
@@ -1835,22 +1834,12 @@ module.exports = class EntitiesHelper {
             let entities = entitiesDocument.data.response;
             
             //formating response
-            entities.map(entityData => {
-                let data = {};
-                data._id = entityData.id;
-                data.entityType = entityData.type;
-                data.metaInformation = {};
-                data.metaInformation.name = entityData.name;
-                data.metaInformation.externalId = entityData.code
-                data.registryDetails = {};
-                data.registryDetails.locationId = entityData.id;
-                data.registryDetails.code = entityData.code;
-                entityResult.push(data);
-            });
+            let entityDetails = await this.extractDataFromLocationResult(entities);
+            
             return resolve({
                 success : true,
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
-                data : entityResult
+                data : entityDetails
             });
         } catch(error) {
             return resolve({
@@ -1897,6 +1886,42 @@ module.exports = class EntitiesHelper {
     return entities;
 
   }
+
+  /**
+    * Format entity data from sunbird.
+    * @method
+    * @name extractDataFromLocationResult
+    * @param {Array} entitityDetails - entity data.
+    * @returns {JSON} - formated entity details 
+    */
+
+   static extractDataFromLocationResult(entitityDetails) {
+
+    return new Promise(async (resolve, reject) => {
+
+        try {
+            let entityDocument = [];
+            entitityDetails.map(entityData => {
+                let data = {};
+                data._id = entityData.id;
+                data.entityType = entityData.type;
+                data.metaInformation = {};
+                data.metaInformation.name = entityData.name;
+                data.metaInformation.externalId = entityData.code
+                data.registryDetails = {};
+                data.registryDetails.locationId = entityData.id;
+                data.registryDetails.code = entityData.code;
+                entityDocument.push(data);
+            });
+
+            return resolve(entityDocument);
+        } catch (error) {
+            return reject(error);
+        }
+
+    });
+
+}
 
 };
 
