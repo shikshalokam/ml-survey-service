@@ -403,18 +403,18 @@ module.exports = class ObservationSubmissionsHelper {
     * List observation submissions
     * @method
     * @name list
-    * @param {String} - entityLocationId
+    * @param {String} - entityId
     * @param {String} - solutionId
     * @param {String} - observationId
     * @returns {Object} - list of submissions
     */
 
-   static list(entityLocationId,observationId) {
+   static list(entityId,observationId) {
     return new Promise(async (resolve, reject) => {
         try {
             
             let queryObject = {
-                entityId: entityLocationId,
+                entityId: entityId,
                 observationId: observationId
             };
 
