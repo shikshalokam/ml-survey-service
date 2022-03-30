@@ -1870,6 +1870,9 @@ module.exports = class EntitiesHelper {
         entities.forEach(eachMetaData => {
             let data = {};
             eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData._id)) ? true : false;
+            if( eachMetaData.type == messageConstants.common.SCHOOL && eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
+                eachMetaData.name += ", "+eachMetaData.code;
+            }
             data._id = eachMetaData.id;
             data.name = eachMetaData.name;
             data.externalId = eachMetaData.code;
