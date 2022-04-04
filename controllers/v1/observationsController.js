@@ -581,7 +581,6 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
-
                 let response = {
                     result: {}
                 };
@@ -590,35 +589,37 @@ module.exports = class Observations extends Abstract {
                 let result;
 
                 let projection = [];
+
+
                 if ( req.query.observationId ) {
-                    let findObject = {};
-                    findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_OBJECT_ID] = req.query.observationId;
-                    findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_CREATED_BY] = userId;
+                    let findObject = {
+                        "_id" : req.query.observationId,
+                        "createdBy" : userId
+                    };
 
                     projection.push(
-                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE_ID, 
-                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITIES, 
-                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE
+                        "entities",
+                        "entityType"
                     );
 
                     let observationDocument = 
                     await observationsHelper.observationDocuments(findObject, projection);
                     result = observationDocument[0];
+                    
                 }
 
                 if ( req.query.solutionId ) {
                     let findQuery = {
                         _id: ObjectId(req.query.solutionId)
                     };
-
                     projection.push(
-                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE_ID, 
-                        entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_TYPE
+                        "entityType"
                     );
-    
+
                     let solutionDocument = await solutionsHelper.solutionDocuments(findQuery, projection);
                     result = _.merge(solutionDocument[0]);
                 }
+               
                 let userAllowedEntities = new Array;
 
                 // try {
@@ -630,23 +631,20 @@ module.exports = class Observations extends Abstract {
                 let messageData = messageConstants.apiResponses.ENTITY_FETCHED;
 
                 if( !(userAllowedEntities.length > 0) && req.query.parentEntityId ) {
-                    
-                    let entityType = entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_GROUP+"."+result.entityType;
-                    
-                    let filterData = {
+                   let filterData = {
                         "id" : req.query.parentEntityId
                     };
 
                     let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
                     if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
-                        response["message"] = 
-                        messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                        
-                        response.result.push({
-                            "count":0,
-                            "data" : []
-                        });
+                        return resolve({
+                            "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
+                            "result" : {
+                                "count":0,
+                                "data" : []
+                            }
+                        })
                     }
                     let entitiesData = entitiesDocument.data.response;
                     
@@ -665,59 +663,130 @@ module.exports = class Observations extends Abstract {
                             "data" : data,
                             "count" : 1
                         });
+                        return resolve(response);
 
                     } else {
-                        response.result = [];
-                        let subEntitiesMatchingType = [];
-                        let parentId = [];
-                        parentId.push(req.query.parentEntityId );
-                        let subEntities = await subEntitiesWithMatchingType( parentId,result.entityType,subEntitiesMatchingType )
-               
-                        if( !subEntities.length > 0 ) {
-                            return resolve(subEntities) 
-                        }
-                        
-                        
-                        let searchText= req.searchText;
-                        if( searchText !== "" ){
-                            let matchEntities = [];
-                            subEntities.map( entityData => {
-                                if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
-                                    matchEntities.push(entityData)
-                                }
+
+                        if( result.entityType == messageConstants.common.SCHOOL ) {
+                            
+                            response.result = [];
+                            let filterData = {
+                                "orgLocation.id" : req.query.parentEntityId 
+                            }
+                            let subentitiesCode = await sunbirdService.orgSchoolSearch(
+                                filterData,
+                                req.pageSize,
+                                req.pageNo,
+                                req.searchText
+                            );
+                            
+                            if( !subentitiesCode.success ||
+                                !subentitiesCode.data ||
+                                !subentitiesCode.data.response ||
+                                !subentitiesCode.data.response.content ||
+                                !subentitiesCode.data.response.content.length > 0 ) {
+                                return resolve({
+                                    "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
+                                    "result" : {
+                                        "count":0,
+                                        "data" : []
+                                    }
+                                })
+                            }
+                            let schoolDetails = subentitiesCode.data.response.content;
+                            //get code from all data
+                            let schoolCodes = [];
+                            schoolDetails.map(schoolData=> {
+                                schoolCodes.push(schoolData.externalId);
                             });
-                            subEntities = [];
-                            subEntities = matchEntities;
-                        }
+                            
         
-                        let totalcount = subEntities.length;
-                        if (subEntities.length > 0) {
-                            let startIndex = req.pageSize * (req.pageNo - 1);
-                            let endIndex = startIndex + req.pageSize;
-                            subEntities = subEntities.slice(startIndex, endIndex);
-                        }
-                    
-                        let data = 
-                            await entitiesHelper.observationSearchEntitiesResponse(
-                                subEntities,
+                            let bodyData={
+                                "code" : schoolCodes
+                            };
+                            
+                        
+                            let entitiesData = await sunbirdService.learnerLocationSearch( bodyData );
+                        
+                            if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
+                                return resolve({
+                                    "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
+                                    "result" : {
+                                        "count":0,
+                                        "data" : []
+                                    }
+                                })
+                            }
+                            
+
+                            let data = 
+                                await entitiesHelper.observationSearchEntitiesResponse(
+                                entitiesData.data.response,
                                 result.entities
-                        )
-                        
+                            );
 
-                        response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
+                            response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
 
-                        response.result.push({
-                            "data" : data,
-                            "count" : totalcount
-                        });
+                            response.result.push({
+                                "data" : data,
+                                "count" : subentitiesCode.data.response.count
+                            });
+                            return resolve(response);
+                        } else {
+                            response.result = [];
+                            let subEntitiesMatchingType = [];
+                            let parentId = [];
+                            parentId.push(req.query.parentEntityId );
+                            let subEntities = await subEntitiesWithMatchingType( parentId,result.entityType,subEntitiesMatchingType )
+                   
+                            if( !subEntities.length > 0 ) {
+                                return resolve({
+                                    "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
+                                    "result" : {
+                                        "count":0,
+                                        "data" : []
+                                    }
+                                })
+                            }
+                            
+                            
+                            let searchText= req.searchText;
+                            if( searchText !== "" ){
+                                let matchEntities = [];
+                                subEntities.map( entityData => {
+                                    if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
+                                        matchEntities.push(entityData)
+                                    }
+                                });
+                                subEntities = [];
+                                subEntities = matchEntities;
+                            }
+            
+                            let totalcount = subEntities.length;
+                            if (subEntities.length > 0) {
+                                let startIndex = req.pageSize * (req.pageNo - 1);
+                                let endIndex = startIndex + req.pageSize;
+                                subEntities = subEntities.slice(startIndex, endIndex);
+                            }
                         
+                            let data = 
+                                await entitiesHelper.observationSearchEntitiesResponse(
+                                    subEntities,
+                                    result.entities
+                            )
+                            
+    
+                            response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
+    
+                            response.result.push({
+                                "data" : data,
+                                "count" : totalcount
+                            });
+                        }       
                     }
-                    return resolve(response)
-
-                    
                     
                 }
-            //++++++++important- check with Akash --- removed because db doesn't contain data.And learners api response data can't be queried even if data exist in DB
+                //document not present, confirm with Akash
                 // let userAclInformation = await userExtensionHelper.userAccessControlList(
                 //     userId
                 // );
@@ -734,7 +803,7 @@ module.exports = class Observations extends Abstract {
                 // }
 
                 let entityDocuments = await entitiesHelper.search(
-                    result.entityType, 
+                    result.entityTypeId, 
                     req.searchText, 
                     req.pageSize, 
                     req.pageNo, 
@@ -742,29 +811,27 @@ module.exports = class Observations extends Abstract {
                     userAllowedEntities && userAllowedEntities.length > 0 ? 
                     userAllowedEntities : 
                     false,
-                    
                 );
-            
-                if ( !(entityDocuments[0].count) ) {
-                    entityDocuments.count = 0;
-                    messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                }
-                
+
                 let data = 
                 await entitiesHelper.observationSearchEntitiesResponse(
                     entityDocuments[0].data,
                     result.entities
                 )
-                
+
                 entityDocuments[0].data = data;
-                
+
+                if ( !(entityDocuments[0].count) ) {
+                    entityDocuments[0].count = 0;
+                    messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                }
                 response.result = entityDocuments;
                 response["message"] = messageData;
 
                 return resolve(response);
 
-
             } catch (error) {
+                
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,
                     message: error.message || httpStatusCode.internal_server_error.message,

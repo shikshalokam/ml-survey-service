@@ -932,32 +932,21 @@ module.exports = class EntitiesHelper {
                 let bodyData={
                     "type" : entityType
                 };
+
+                if ( entityIds ){
+                    bodyData={
+                        "id" : entityIds
+                    };
+                }
                 
-                let entitiesData = await sunbirdService.learnerLocationSearch( bodyData );
+                let entitiesData = await sunbirdService.learnerLocationSearch( bodyData, pageSize, pageNo, searchText );
                 
                 if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
                     return resolve(entitiesData.data.response) 
                 }
-         
+                let totalcount = entitiesData.data.count;
                 let immediateEntities = entitiesData.data.response;
                 
-                if( searchText !== "" ){
-                    let matchEntities = [];
-                    immediateEntities.map( entityData => {
-                        if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
-                            matchEntities.push(entityData)
-                        }
-                    });
-                    immediateEntities = [];
-                    immediateEntities = matchEntities;
-                }
-
-                let totalcount = immediateEntities.length;
-                if (immediateEntities.length > 0) {
-                    let startIndex = pageSize * (pageNo - 1);
-                    let endIndex = startIndex + pageSize;
-                    immediateEntities = immediateEntities.slice(startIndex, endIndex);
-                }
                 entityDocuments.push({
                     data : immediateEntities,
                     count : totalcount
@@ -1860,16 +1849,18 @@ module.exports = class EntitiesHelper {
    */
 
   static observationSearchEntitiesResponse(entities,observationEntityIds) {
+   
     let formatedData = [];
     let observationEntities = [];
     if ( observationEntityIds && observationEntityIds.length > 0 ) {
-        observationEntities = observationEntityIds.map(entity => entity);
+        observationEntities = observationEntityIds.map(entity => entity.toString());
     }
     
+
     if( entities.length > 0 ) {
         entities.forEach(eachMetaData => {
             let data = {};
-            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData._id)) ? true : false;
+            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData.id)) ? true : false;
             let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.code);
             if( eachMetaData.type == messageConstants.common.SCHOOL && eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
                 eachMetaData.name += ", "+eachMetaData.code;
@@ -1885,8 +1876,6 @@ module.exports = class EntitiesHelper {
     }
     entities = [];
     entities = formatedData;
-    
-
     return entities;
 
   }

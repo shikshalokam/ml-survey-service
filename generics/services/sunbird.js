@@ -22,14 +22,28 @@ const timeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIR
   * @returns {Promise} returns a promise.
 */
 
-const learnerLocationSearch = function ( filterData ) {
+const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "" ) {
   return new Promise(async (resolve, reject) => {
       try {
-        
-        let bodyData={};
+
+        let bodyData = {};
         bodyData["request"] = {};
         bodyData["request"]["filters"] = filterData;
-        bodyData["request"]["limit"] = dataLimit;
+
+        if ( pageSize !== "" ) {
+            bodyData["request"]["limit"] = pageSize;
+        } else {
+            bodyData["request"]["limit"] = dataLimit;
+        }
+
+        if ( pageNo !== "" ) {
+            let offsetValue = pageSize * ( pageNo - 1 ); 
+            bodyData["request"]["offset"] = offsetValue;
+        }
+
+        if ( searchKey !== "" ) {
+            bodyData["request"]["query"] = searchKey
+        }
 
         const url = 
         sunbirdBaseUrl + messageConstants.endpoints.GET_LOCATION_DATA;
@@ -76,7 +90,83 @@ const learnerLocationSearch = function ( filterData ) {
   })
 }
 
+/**
+  * 
+  * @function
+  * @name orgSchoolSearch
+  * @param {String} bearerToken - autherization token.
+  * @param {object} bodyData -  location id
+  * @returns {Promise} returns a promise.
+*/
+const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "" ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+            let bodyData = {};
+            bodyData["request"] = {};
+            bodyData["request"]["filters"] = filterData;
+
+            if ( pageSize !== "" ) {
+                bodyData["request"]["limit"] = pageSize;
+            } 
+    
+            if ( pageNo !== "" ) {
+                let offsetValue = pageSize * ( pageNo - 1 ); 
+                bodyData["request"]["offset"] = offsetValue;
+            }
+    
+            if ( searchKey !== "" ) {
+                bodyData["request"]["query"] = searchKey
+            }
+            
+            
+            
+            const url = 
+            sunbirdBaseUrl + messageConstants.endpoints.GET_SCHOOL_DATA;
+            const options = {
+                headers : {
+                    "Authorization" : process.env.SUNBIRD_SERVICE_AUTHERIZATION,
+                    "content-type": "application/json"
+                },
+                json : bodyData
+            };
+  
+            request.post(url,options,sunbirdCallback);
+            let result = {
+                success : true
+            };
+  
+            function sunbirdCallback(err, data) {
+  
+                
+  
+                if (err) {
+                    result.success = false;
+                } else {
+                    
+                    let response = data.body;
+                    
+                    if( response.responseCode === messageConstants.common.OK) {
+                        result["data"] = response.result;
+                    } else {
+                        result.success = false;
+                    }
+                }
+                return resolve(result);
+            }
+            setTimeout(function () {
+                return reject (result = {
+                    success : false
+                 });
+             }, timeout);
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
 module.exports = {
-  learnerLocationSearch : learnerLocationSearch
+  learnerLocationSearch : learnerLocationSearch,
+  orgSchoolSearch : orgSchoolSearch
 };
