@@ -1,8 +1,14 @@
 module.exports = {
     name: "surveys",
     schema: {
-      name: String,
-      description: String,
+      name: {
+        type: String,
+        index: true
+      },
+      description: {
+        type: String,
+        index: true
+      },
       createdBy: {
         type: String,
         index: true,
