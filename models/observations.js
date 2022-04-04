@@ -1,8 +1,14 @@
 module.exports = {
   name: "observations",
   schema: {
-    name: String,
-    description: String,
+    name: {
+      type : String,
+      index : true
+    },
+    description: {
+      type : String,
+      index : true
+    },
     createdBy: {
       type : String,
       index : true
@@ -53,6 +59,10 @@ module.exports = {
       type: String,
       index: true
     },
-    userRoleInformation : Object
+    userRoleInformation : Object,
+    deleted : {
+      type : Boolean,
+      index: true
+    }
   }
 };
