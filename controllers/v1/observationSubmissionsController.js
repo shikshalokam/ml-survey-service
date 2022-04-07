@@ -15,6 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationSubmissions
@@ -97,13 +98,14 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
+        
         let observationDocument = await observationsHelper.observationDocuments({
           _id: req.params._id,
           createdBy: req.userDetails.userId,
           status: {$ne:"inactive"},
           entities: ObjectId(req.query.entityId)
         });
-
+        
         if (!observationDocument[0]) {
           return resolve({ 
             status: httpStatusCode.bad_request.status, 
@@ -221,17 +223,34 @@ module.exports = class ObservationSubmissions extends Abstract {
       }
       if( observationDocument.userRoleInformation && Object.keys(observationDocument.userRoleInformation).length > 0 ){
           submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
-      } else if( req.body && req.body.role && !observationDocument.userRoleInformation ){
-          submissionDocument.userRoleInformation = req.body;
+      } else if( !observationDocument.userRoleInformation ){
+        let userRoleAndProfileInformation = {};
+        let userProfile = await sunbirdUserProfile.profile( req.userDetails.userToken, req.userDetails.userId );
+        
+        if (!userProfile.success || 
+            !userProfile.data ||
+            !userProfile.data.response
+        ) {
+            userRoleAndProfileInformation = {};
+            if ( req.body && req.body.role ) {
+              userRoleAndProfileInformation = req.body;
+            }
+        } else {
+            let userProfileDoc = userProfile.data.response;
+            let userProfileDetails = await observationsHelper.formatProfileData( userProfileDoc );
+            userRoleAndProfileInformation = userProfileDetails;
+        } 
+            
+          submissionDocument.userRoleInformation = userRoleAndProfileInformation;
           let updateObservation = await observationsHelper.updateObservationDocument
               (
                   { _id: req.params._id },
                   {
-                      $set: { userRoleInformation : req.body }
+                      $set: { userRoleInformation : userRoleAndProfileInformation }
                   }
               )
       } 
-     
+ 
 
       if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
         submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;

@@ -638,7 +638,7 @@ module.exports = class Surveys extends Abstract {
             let surveyDetails = {};
 
             if( validateSurveyId || req.query.solutionId ) {
-
+                
                 let surveyId = req.params._id ? req.params._id : "";
        
                 surveyDetails = await surveysHelper.detailsV3
@@ -653,7 +653,6 @@ module.exports = class Surveys extends Abstract {
             } else {
 
                 let bodyData = req.body ? req.body : {};
-
                 surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,
                     req.userDetails.userId,

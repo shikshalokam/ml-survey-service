@@ -20,7 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
 /**
     * ObservationsHelper
     * @class
@@ -81,7 +81,8 @@ module.exports = class ObservationsHelper {
         userId, 
         requestingUserAuthToken = "",
         programId = "",
-        userRoleAndProfileInformation = {}
+        userRoleAndProfileInformation = {},
+        token
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -110,6 +111,19 @@ module.exports = class ObservationsHelper {
                         status : httpStatusCode.bad_request.status,
                         message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
                     }
+                }
+
+                let userProfile = await sunbirdUserProfile.profile(token, userId);
+            
+                if (!userProfile.success || 
+                    !userProfile.data ||
+                    !userProfile.data.response
+                ) {
+                    userRoleAndProfileInformation = userRoleAndProfileInformation;
+                } else {
+                    let userProfileDoc = userProfile.data.response;
+                    let userProfileDetails = await this.formatProfileData( userProfileDoc );
+                    userRoleAndProfileInformation = userProfileDetails
                 }
 
                 if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
@@ -162,6 +176,8 @@ module.exports = class ObservationsHelper {
             }
         })
     }
+
+    
 
     /**
      * Create observation.
@@ -1969,6 +1985,40 @@ module.exports = class ObservationsHelper {
                     data: false
                 });
             }
+        });
+    }
+    /**
+     * @method
+     * @name formatProfileData
+     * @param {Object} profileDoc - user profile informations.
+     * @return {Object} profileData - formated user profile data.
+     */
+
+    static formatProfileData( profileDoc ) {
+        return new Promise(async (resolve, reject) => {
+            try{
+                
+                const profileData = {};
+                  for (const location of profileDoc["userLocations"]) {
+                    profileData[location.type] = location.id;
+                  }
+                  for (const org of profileDoc["organisations"]) {
+                    if (org.isSchool) {
+                        profileData["school"] = org.externalId;
+                    }
+                  }
+                  const roles = [];
+                  for (const userRole of profileDoc['profileUserTypes']) {
+                   userRole.subType ? roles.push(userRole.subType.toUpperCase()) : roles.push(userRole.type.toUpperCase());
+                  }
+                  profileData['role'] = roles.toString();
+                
+                  return resolve(profileData);
+
+            } catch(error) {
+                return reject(error)
+            }
+
         });
     }
 

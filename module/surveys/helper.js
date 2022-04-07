@@ -20,6 +20,8 @@ const surveySolutionTemplate = "-SURVEY-TEMPLATE";
 const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
+const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper");
 
 /**
     * SurveysHelper
@@ -778,12 +780,14 @@ module.exports = class SurveysHelper {
     
                 if (!validateSurvey.success) {
                     return resolve(validateSurvey);
+                    
                 }
                 
                 let surveyDetails = await this.details
                 (
                     surveyId,
                     userId,
+                    token,
                     validateSurvey.data.submissionId,
                     roleInformation
                 )
@@ -819,10 +823,10 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}) {
+    static details(surveyId = "", userId= "", token = "", submissionId = "", roleInformation = {}) {
         return new Promise(async (resolve, reject) => {
             try {
-
+    
                 if (surveyId == "") {
                     throw new Error(messageConstants.apiResponses.SURVEY_ID_REQUIRED)
                 }
@@ -1033,6 +1037,7 @@ module.exports = class SurveysHelper {
                     submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
 
                 } else {
+                    
                     let submissionDocument = {
                         solutionId: solutionDocument._id,
                         solutionExternalId: solutionDocument.externalId,
@@ -1050,20 +1055,34 @@ module.exports = class SurveysHelper {
                     };
                     submissionDocument.surveyInformation.startDate = new Date();
 
-                    if (Object.keys(roleInformation).length > 0 && roleInformation.role) {
-                        //commented for multiple role
-                        // let roleDocument = await userRolesHelper.list
-                        // ( { code : roleInformation.role },
-                        //   [ "_id"]
-                        // )
 
-                        // if (roleDocument.length > 0) {
-                        //     roleInformation.roleId = roleDocument[0]._id; 
-                        // }
-    
-                        submissionDocument.userRoleInformation = roleInformation;
-                    }
+                    
+                    let userProfile = await sunbirdUserProfile.profile( token, userId );
+                    
+                    if (!userProfile.success || 
+                        !userProfile.data ||
+                        !userProfile.data.response
+                    ) {
+                        userRoleAndProfileInformation = {};
+                        if ( Object.keys(roleInformation).length > 0 && roleInformation.role ) {
+                            //commented for multiple role
+                            // let roleDocument = await userRolesHelper.list
+                            // ( { code : roleInformation.role },
+                            //   [ "_id"]
+                            // )
 
+                            // if (roleDocument.length > 0) {
+                            //     roleInformation.roleId = roleDocument[0]._id; 
+                            // }
+                            submissionDocument.userRoleInformation = roleInformation;
+                        }
+                    } else {
+                        let userProfileDoc = userProfile.data.response;
+                        let userProfileDetails = await observationsHelper.formatProfileData( userProfileDoc );
+                        submissionDocument.userRoleInformation = userProfileDetails
+                    }                    
+                    
+                    
                     if (programDocument.length > 0) {
                         submissionDocument.programId = programDocument[0]._id;
                         submissionDocument.programExternalId = programDocument[0].externalId;
