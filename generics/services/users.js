@@ -7,7 +7,7 @@
 
 //dependencies
 const request = require('request');
-const userServiceUrl = process.env.LEARNER_SERVICE_URL;
+const userServiceUrl = process.env.USER_SERVICE_URL;
 const serverTimeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIRD_SERVER_TIMEOUT) : 5000;
 
 const profile = function ( token,userId = "" ) {
@@ -38,7 +38,7 @@ const profile = function ( token,userId = "" ) {
                 } else {
                     
                     let response = JSON.parse(data.body);
-                    if( response.responseCode === messageConstants.common.OK ) {
+                    if( response.responseCode === httpStatusCode['ok'].code ) {
                         result["data"] = response.result;
                     } else {
                         result.success = false;

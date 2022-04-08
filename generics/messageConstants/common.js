@@ -55,5 +55,4 @@ module.exports = {
     ALL_ROLES : "all",
     VERSION_3 : "v3",
     DRAFT : "draft",
-    OK : "OK"
 }

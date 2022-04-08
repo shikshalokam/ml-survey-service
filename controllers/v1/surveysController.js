@@ -651,7 +651,6 @@ module.exports = class Surveys extends Abstract {
                 );
                 
             } else {
-
                 let bodyData = req.body ? req.body : {};
                 surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,

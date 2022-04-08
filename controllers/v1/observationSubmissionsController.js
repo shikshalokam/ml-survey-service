@@ -114,7 +114,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         observationDocument = observationDocument[0];
-
+        
         let entityDocument = await entitiesHelper.entityDocuments({
           _id: req.query.entityId,
           entityType: observationDocument.entityType
@@ -223,32 +223,29 @@ module.exports = class ObservationSubmissions extends Abstract {
       }
       if( observationDocument.userRoleInformation && Object.keys(observationDocument.userRoleInformation).length > 0 ){
           submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
-      } else if( !observationDocument.userRoleInformation ){
+      } else {
         let userRoleAndProfileInformation = {};
         let userProfile = await sunbirdUserProfile.profile( req.userDetails.userToken, req.userDetails.userId );
         
-        if (!userProfile.success || 
-            !userProfile.data ||
-            !userProfile.data.response
+        if ( userProfile.success || 
+             userProfile.data ||
+             userProfile.data.response
         ) {
-            userRoleAndProfileInformation = {};
-            if ( req.body && req.body.role ) {
-              userRoleAndProfileInformation = req.body;
-            }
-        } else {
-            let userProfileDoc = userProfile.data.response;
-            let userProfileDetails = await observationsHelper.formatProfileData( userProfileDoc );
-            userRoleAndProfileInformation = userProfileDetails;
+          let userProfileData = userProfile.data.response;
+          let userProfileDetails = await gen.utils.formatProfileData( userProfileData );
+          userRoleAndProfileInformation = userProfileDetails;
+        } else if ( req.body && req.body.role ){
+          userRoleAndProfileInformation = req.body;
         } 
             
-          submissionDocument.userRoleInformation = userRoleAndProfileInformation;
-          let updateObservation = await observationsHelper.updateObservationDocument
-              (
-                  { _id: req.params._id },
-                  {
-                      $set: { userRoleInformation : userRoleAndProfileInformation }
-                  }
-              )
+        submissionDocument.userRoleInformation = userRoleAndProfileInformation;
+        let updateObservation = await observationsHelper.updateObservationDocument
+            (
+              { _id: req.params._id },
+              {
+                $set: { userRoleInformation : userRoleAndProfileInformation }
+              }
+            )
       } 
  
 

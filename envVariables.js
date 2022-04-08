@@ -86,10 +86,6 @@ let enviromentVariables = {
     "message" : "Disable learner service on/off",
     "default": "ON"
   },
-  "LEARNER_SERVICE_URL" : {
-    "message" : "Required Learner-service url",
-    "optional" : false
-  }
 }
 
 let success = true;

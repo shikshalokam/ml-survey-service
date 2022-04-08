@@ -82,7 +82,6 @@ module.exports = class ObservationsHelper {
         requestingUserAuthToken = "",
         programId = "",
         userRoleAndProfileInformation = {},
-        token
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -113,17 +112,17 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                let userProfile = await sunbirdUserProfile.profile(token, userId);
+                let userProfile = await sunbirdUserProfile.profile(requestingUserAuthToken, userId);
             
-                if (!userProfile.success || 
-                    !userProfile.data ||
-                    !userProfile.data.response
+                if ( userProfile.success || 
+                     userProfile.data ||
+                     userProfile.data.response
                 ) {
-                    userRoleAndProfileInformation = userRoleAndProfileInformation;
+                    let userProfileData = userProfile.data.response;
+                    let userProfileDetails = await gen.utils.formatProfileData( userProfileData );
+                    userRoleAndProfileInformation = userProfileDetails;
                 } else {
-                    let userProfileDoc = userProfile.data.response;
-                    let userProfileDetails = await this.formatProfileData( userProfileDoc );
-                    userRoleAndProfileInformation = userProfileDetails
+                    userRoleAndProfileInformation = userRoleAndProfileInformation;
                 }
 
                 if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
@@ -1987,39 +1986,5 @@ module.exports = class ObservationsHelper {
             }
         });
     }
-    /**
-     * @method
-     * @name formatProfileData
-     * @param {Object} profileDoc - user profile informations.
-     * @return {Object} profileData - formated user profile data.
-     */
-
-    static formatProfileData( profileDoc ) {
-        return new Promise(async (resolve, reject) => {
-            try{
-                
-                const profileData = {};
-                  for (const location of profileDoc["userLocations"]) {
-                    profileData[location.type] = location.id;
-                  }
-                  for (const org of profileDoc["organisations"]) {
-                    if (org.isSchool) {
-                        profileData["school"] = org.externalId;
-                    }
-                  }
-                  const roles = [];
-                  for (const userRole of profileDoc['profileUserTypes']) {
-                   userRole.subType ? roles.push(userRole.subType.toUpperCase()) : roles.push(userRole.type.toUpperCase());
-                  }
-                  profileData['role'] = roles.toString();
-                
-                  return resolve(profileData);
-
-            } catch(error) {
-                return reject(error)
-            }
-
-        });
-    }
-
+    
 };
