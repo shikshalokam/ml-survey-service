@@ -114,8 +114,8 @@ module.exports = class ObservationsHelper {
 
                 let userProfile = await sunbirdUserProfile.profile(requestingUserAuthToken, userId);
             
-                if ( userProfile.success || 
-                     userProfile.data ||
+                if ( userProfile.success && 
+                     userProfile.data &&
                      userProfile.data.response
                 ) {
                     let userProfileData = userProfile.data.response;

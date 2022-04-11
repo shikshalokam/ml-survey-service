@@ -1059,8 +1059,8 @@ module.exports = class SurveysHelper {
                     
                     let userProfile = await sunbirdUserProfile.profile( userToken, userId );
                     
-                    if ( userProfile.success || 
-                         userProfile.data ||
+                    if ( userProfile.success && 
+                         userProfile.data &&
                          userProfile.data.response
                     ) {
                         let userProfileData = userProfile.data.response;

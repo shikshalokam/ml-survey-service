@@ -227,8 +227,8 @@ module.exports = class ObservationSubmissions extends Abstract {
         let userRoleAndProfileInformation = {};
         let userProfile = await sunbirdUserProfile.profile( req.userDetails.userToken, req.userDetails.userId );
         
-        if ( userProfile.success || 
-             userProfile.data ||
+        if ( userProfile.success && 
+             userProfile.data &&
              userProfile.data.response
         ) {
           let userProfileData = userProfile.data.response;
