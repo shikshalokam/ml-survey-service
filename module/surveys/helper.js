@@ -787,9 +787,9 @@ module.exports = class SurveysHelper {
                 (
                     surveyId,
                     userId,
-                    userToken,
                     validateSurvey.data.submissionId,
-                    roleInformation
+                    roleInformation,
+                    userToken
                 )
 
                 if (!surveyDetails.success) {
@@ -824,7 +824,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", userToken = "", submissionId = "", roleInformation = {}) {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {},userToken = "") {
         return new Promise(async (resolve, reject) => {
             try {
                 if (surveyId == "") {

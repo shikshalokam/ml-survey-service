@@ -221,6 +221,7 @@ module.exports = class ObservationSubmissions extends Abstract {
       if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
         submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];
       }
+      
       if( observationDocument.userRoleInformation && Object.keys(observationDocument.userRoleInformation).length > 0 ){
           submissionDocument.userRoleInformation = observationDocument.userRoleInformation;
       } else {

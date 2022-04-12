@@ -81,7 +81,7 @@ module.exports = class ObservationsHelper {
         userId, 
         requestingUserAuthToken = "",
         programId = "",
-        userRoleAndProfileInformation = {},
+        userRoleAndProfileInformation = {}
     ) {
         return new Promise(async (resolve, reject) => {
             try {
