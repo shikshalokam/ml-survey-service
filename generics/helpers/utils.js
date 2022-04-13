@@ -274,6 +274,42 @@ function checkIfValidUUID(value) {
   const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
   return regexExp.test(value);
 }
+
+/**
+     * @method
+     * @name formatProfileData
+     * @param {Object} profileDoc - user profile informations.
+     * @return {Object} profileData - formated user profile data.
+     */
+
+ function formatProfileData( profileDoc ) {
+  return new Promise(async (resolve, reject) => {
+      try{
+          
+          const profileData = {};
+            for (const location of profileDoc["userLocations"]) {
+              profileData[location.type] = location.id;
+            }
+            for (const org of profileDoc["organisations"]) {
+              if (org.isSchool) {
+                  profileData["school"] = org.externalId;
+              }
+            }
+            const roles = [];
+            for (const userRole of profileDoc['profileUserTypes']) {
+             userRole.subType ? roles.push(userRole.subType.toUpperCase()) : roles.push(userRole.type.toUpperCase());
+            }
+            profileData['role'] = roles.toString();
+          
+            return resolve(profileData);
+
+      } catch(error) {
+          return reject(error)
+      }
+
+  });
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -296,5 +332,6 @@ module.exports = {
   md5Hash : md5Hash,
   removeDuplicatesFromArray : removeDuplicatesFromArray,
   convertStringToBoolean : convertStringToBoolean,
-  checkIfValidUUID : checkIfValidUUID
+  checkIfValidUUID : checkIfValidUUID,
+  formatProfileData : formatProfileData
 };

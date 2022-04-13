@@ -20,7 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
 /**
     * ObservationsHelper
     * @class
@@ -112,6 +112,19 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
+                let userProfile = await sunbirdUserProfile.profile(requestingUserAuthToken, userId);
+            
+                if ( userProfile.success && 
+                     userProfile.data &&
+                     userProfile.data.response
+                ) {
+                    let userProfileData = userProfile.data.response;
+                    let userProfileDetails = await gen.utils.formatProfileData( userProfileData );
+                    userRoleAndProfileInformation = userProfileDetails;
+                } else {
+                    userRoleAndProfileInformation = userRoleAndProfileInformation;
+                }
+
                 if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
 
                     let solutionData = 
@@ -162,6 +175,8 @@ module.exports = class ObservationsHelper {
             }
         })
     }
+
+    
 
     /**
      * Create observation.
@@ -1971,5 +1986,5 @@ module.exports = class ObservationsHelper {
             }
         });
     }
-
+    
 };

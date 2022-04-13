@@ -267,7 +267,6 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
-
                 let result = await observationsHelper.create(
                     req.query.solutionId, 
                     req.body.data, 

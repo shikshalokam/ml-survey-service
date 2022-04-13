@@ -17,7 +17,8 @@ module.exports = {
   },
   'ok': {
     status: 200,
-    message: "Success"
+    message: "Success",
+    code : "OK"
   },
   'created': {
     status: 201,
