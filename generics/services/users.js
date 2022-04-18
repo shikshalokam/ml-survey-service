@@ -62,4 +62,3 @@ const profile = function ( token,userId = "" ) {
 module.exports = {
     profile : profile
 }
-//https://staging.sunbirded.org/api/user/v5/read/
