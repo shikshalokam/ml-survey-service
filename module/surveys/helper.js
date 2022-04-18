@@ -20,6 +20,7 @@ const surveySolutionTemplate = "-SURVEY-TEMPLATE";
 const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * SurveysHelper
@@ -785,7 +786,8 @@ module.exports = class SurveysHelper {
                     surveyId,
                     userId,
                     validateSurvey.data.submissionId,
-                    roleInformation
+                    roleInformation,
+                    token
                 )
 
                 if (!surveyDetails.success) {
@@ -816,13 +818,14 @@ module.exports = class SurveysHelper {
       * @name details
       * @param  {String} surveyId - survey id.
       * @param {String} userId - userId
+      * @param {String} userToken - userToken.
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}) {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="") {
         return new Promise(async (resolve, reject) => {
             try {
-
+                
                 if (surveyId == "") {
                     throw new Error(messageConstants.apiResponses.SURVEY_ID_REQUIRED)
                 }
@@ -1050,6 +1053,17 @@ module.exports = class SurveysHelper {
                     };
                     submissionDocument.surveyInformation.startDate = new Date();
 
+                    //Fetch user profile information by calling sunbird's user read api.
+                    let userProfileData = {};
+                    let userProfile = await sunbirdUserProfile.profile(userToken, userId);
+                    if ( userProfile.success && 
+                        userProfile.data &&
+                        userProfile.data.response
+                    ) {
+                        userProfileData = userProfile.data.response;
+                    } 
+                    submissionDocument.userProfile = userProfileData;
+                    
                     if (Object.keys(roleInformation).length > 0 && roleInformation.role) {
                         //commented for multiple role
                         // let roleDocument = await userRolesHelper.list
@@ -1072,7 +1086,7 @@ module.exports = class SurveysHelper {
                     let submissionDoc = await database.models.surveySubmissions.create(
                         submissionDocument
                     );
-
+                    
                     if (submissionDoc._id) {
                         assessment.submissionId = submissionDoc._id;
                     }
@@ -1473,7 +1487,8 @@ module.exports = class SurveysHelper {
                 surveyData.data,
                 userId,
                 validateSurvey.data.submissionId,
-                bodyData
+                bodyData,
+                token
             );
 
             if (!surveyDetails.success) {
@@ -1609,7 +1624,7 @@ module.exports = class SurveysHelper {
                 userId,
                 token
             );
-
+                
             if( !surveyData.success ) {
                 return resolve(surveyData);
             }
@@ -1630,7 +1645,8 @@ module.exports = class SurveysHelper {
                 surveyData.data,
                 userId,
                 validateSurvey.data.submissionId,
-                bodyData
+                bodyData,
+                token
             )
 
             if (!surveyDetails.success) {

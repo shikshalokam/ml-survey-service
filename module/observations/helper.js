@@ -20,6 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
+const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationsHelper
@@ -112,6 +113,17 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
+                //Fetch user profile information by calling sunbird's user read api.
+                let userProfileData = {};
+                let userProfile = await sunbirdUserProfile.profile(requestingUserAuthToken, userId);
+            
+                if ( userProfile.success && 
+                     userProfile.data &&
+                     userProfile.data.response
+                ) {
+                    userProfileData = userProfile.data.response;
+                } 
+                
                 if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
 
                     let solutionData = 
@@ -152,7 +164,8 @@ module.exports = class ObservationsHelper {
                     data,
                     userId,
                     solutionData,
-                    userRoleAndProfileInformation
+                    userRoleAndProfileInformation,
+                    userProfileData
                 );
 
                 return resolve(_.pick(observationData, ["_id", "name", "description"]));
@@ -172,10 +185,11 @@ module.exports = class ObservationsHelper {
      * @param {Object} solution - Solution detail data.
      * @param {Object} solution - Solution detail data.
      * @param {Object} userRoleInformation - user role and profile details.
+     * @param {Object} userProfileInformation - user profile information.
      * @returns {Object} observation creation data.
      */
 
-    static createObservation(data,userId,solution,userRoleInformation="") {
+    static createObservation(data,userId,solution,userRoleInformation="",userProfileInformation = {}) {
         return new Promise(async (resolve, reject) => {
             try {
                 if (data.entities) {
@@ -203,7 +217,8 @@ module.exports = class ObservationsHelper {
                         "updatedBy": userId,
                         "createdBy": userId,
                         "isAPrivateProgram" : solution.isAPrivateProgram,
-                        "userRoleInformation" : userRoleInformation ? userRoleInformation : {}
+                        "userRoleInformation" : userRoleInformation ? userRoleInformation : {},
+                        "userProfile" : userProfileInformation ? userProfileInformation : {}
                     })
                 );
 
