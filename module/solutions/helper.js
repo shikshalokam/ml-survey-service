@@ -1970,6 +1970,85 @@ module.exports = class SolutionsHelper {
         return reject(error);
       }
     });
+  }
+
+  /**
+  * Update User District and Organisation In Solutions For Reporting.
+  * @method
+  * @name addReportInformationInSolution 
+  * @param {String} solutionId - solution id.
+  * @param {Object} userProfile - user profile details
+  * @returns {Object} Solution information.
+*/
+
+  static addReportInformationInSolution(solutionId,userProfile) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            //check solution & userProfile is exist
+            if ( solutionId && Object.keys(userProfile).length > 0 ) {
+                let district = [];
+                let organisation = [];
+
+                //get the districts from the userProfile
+                for (const location of userProfile["userLocations"]) {
+                    if ( location.type == messageConstants.common.DISTRICT ) {
+                        let distData = {}
+                        distData["locationId"] = location.id;
+                        distData["name"] = location.name;
+                        district.push(distData);
+                    }
+                }
+
+                //get the organisations from the userProfile
+                for (const org of userProfile["organisations"]) {
+                    let orgData = {};
+                    orgData.orgName = org.orgName;
+                    orgData.organisationId = org.organisationId;
+                    organisation.push(orgData);
+                }
+
+                //checking solution is exist
+                let solutionDocument = await this.solutionDocuments({
+                    _id: solutionId
+                },
+                ["_id"]);
+                
+                if( !solutionDocument.length > 0 ) {
+                    throw {
+                        message : CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+                        status : HTTP_STATUS_CODE['bad_request'].status
+                    }
+                }
+
+                let updateQuery = {};
+                updateQuery["$addToSet"] = {};
+                updateQuery["$addToSet"]["reportInformation.organisations"] = { $each : organisation};
+                updateQuery["$addToSet"]["reportInformation.districts"] = { $each : district};
+
+                //add user district and organisation in solution
+                await this.updateSolutionDocument
+                (
+                    { _id : solutionId },
+                    updateQuery
+                )
+            }else{
+              throw new Error(messageConstants.apiResponses.SOLUTION_ID_AND_USERPROFILE_REQUIRED);
+            }
+            
+            return resolve({
+                success: true,
+                data: []
+            });
+            
+        } catch (error) {
+            return resolve({
+              success : false,
+              message : error.message,
+              data: []
+            });
+        }
+    });
   }  
 
 };
