@@ -8,7 +8,6 @@
 //dependencies
 const request = require('request');
 const userServiceUrl = process.env.USER_SERVICE_URL;
-const serverTimeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIRD_SERVER_TIMEOUT) : 5000;
 
 const profile = function ( token,userId = "" ) {
     return new Promise(async (resolve, reject) => {
@@ -51,7 +50,7 @@ const profile = function ( token,userId = "" ) {
                 return reject (result = {
                     success : false
                  });
-             }, serverTimeout);
+             }, messageConstants.common.SERVER_TIME_OUT);
 
         } catch (error) {
             return reject(error);

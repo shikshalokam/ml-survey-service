@@ -15,7 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
-const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
+
 
 /**
     * ObservationSubmissions
@@ -215,30 +215,10 @@ module.exports = class ObservationSubmissions extends Abstract {
           entityProfile: {},
           status: "started",
           scoringSystem: solutionDocument.scoringSystem,
-          isRubricDriven: solutionDocument.isRubricDriven
+          isRubricDriven: solutionDocument.isRubricDriven, 
+          userProfile : observationDocument.userProfile 
       };
 
-      //Fetch user profile information by calling sunbird's user read api.
-      let userProfileData = {};
-      let userProfile = await sunbirdUserProfile.profile(req.userDetails.userToken, req.userDetails.userId);
-      if ( userProfile.success && 
-           userProfile.data &&
-           userProfile.data.response
-      ) {
-          userProfileData = userProfile.data.response;
-          if ( !observationDocument.userProfile || !Object.keys(observationDocument.userProfile).length > 0 ) {
-            let updateObservation = await observationsHelper.updateObservationDocument
-            (
-                { _id: req.params._id },
-                {
-                    $set: { userProfile : userProfileData }
-                }
-            )
-          }
-      } else if ( !Object.keys(userProfileData).length > 0 && observationDocument.userProfile && Object.keys(observationDocument.userProfile).length > 0 ) {
-          userProfileData = observationDocument.userProfile;
-      }
-      submissionDocument.userProfile = userProfileData;
 
       if( solutionDocument.hasOwnProperty("criteriaLevelReport") ) {
         submissionDocument["criteriaLevelReport"] = solutionDocument["criteriaLevelReport"];

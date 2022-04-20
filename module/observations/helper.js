@@ -20,7 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationsHelper
@@ -116,7 +116,7 @@ module.exports = class ObservationsHelper {
                 //Fetch user profile information by calling sunbird's user read api.
                 let addReportInfoToSolution = false;
                 let userProfileData = {};
-                let userProfile = await sunbirdUserProfile.profile(requestingUserAuthToken, userId);
+                let userProfile = await userProfileService.profile(requestingUserAuthToken, userId);
 
                 if ( userProfile.success && 
                      userProfile.data &&

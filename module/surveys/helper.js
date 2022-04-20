@@ -20,7 +20,7 @@ const surveySolutionTemplate = "-SURVEY-TEMPLATE";
 const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
-const sunbirdUserProfile = require(ROOT_PATH + "/generics/services/users");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * SurveysHelper
@@ -1055,7 +1055,7 @@ module.exports = class SurveysHelper {
 
                     //Fetch user profile information by calling sunbird's user read api.
                     let userProfileData = {};
-                    let userProfile = await sunbirdUserProfile.profile(userToken, userId);
+                    let userProfile = await userProfileService.profile(userToken, userId);
                     if ( userProfile.success && 
                         userProfile.data &&
                         userProfile.data.response
