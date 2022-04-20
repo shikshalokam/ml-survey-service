@@ -47,7 +47,7 @@ const profile = function ( token,userId = "" ) {
                 return resolve(result);
             }
             setTimeout(function () {
-                return reject (result = {
+                return resolve (result = {
                     success : false
                  });
              }, messageConstants.common.SERVER_TIME_OUT);
