@@ -1986,7 +1986,12 @@ module.exports = class SolutionsHelper {
         try {
 
             //check solution & userProfile is exist
-            if ( solutionId && Object.keys(userProfile).length > 0 ) {
+            if ( 
+                solutionId && userProfile && 
+                userProfile["userLocations"] && 
+                userProfile["organisations"]
+            ) {
+
                 let district = [];
                 let organisation = [];
 
@@ -2023,22 +2028,28 @@ module.exports = class SolutionsHelper {
 
                 let updateQuery = {};
                 updateQuery["$addToSet"] = {};
-                updateQuery["$addToSet"]["reportInformation.organisations"] = { $each : organisation};
-                updateQuery["$addToSet"]["reportInformation.districts"] = { $each : district};
 
+                if ( organisation.length > 0 ) {
+                    updateQuery["$addToSet"]["reportInformation.organisations"] = { $each : organisation};
+                }
+
+                if ( district.length > 0 ) {
+                    updateQuery["$addToSet"]["reportInformation.districts"] = { $each : district};
+                }
+                
                 //add user district and organisation in solution
                 await this.updateSolutionDocument
                 (
                     { _id : solutionId },
                     updateQuery
                 )
-            }else{
+            } else {
               throw new Error(messageConstants.apiResponses.SOLUTION_ID_AND_USERPROFILE_REQUIRED);
             }
             
             return resolve({
-                success: true,
-                data: []
+                success: true
+                message: messageConstants.apiResponses.UPDATED_DOCUMENT_SUCCESSFULLY
             });
             
         } catch (error) {
