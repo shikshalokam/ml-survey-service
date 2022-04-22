@@ -88,6 +88,7 @@ module.exports = {
     referenceFrom : String,
     appInformation : Object,
     userRoleInformation : Object,
-    criteriaLevelReport : Boolean
+    criteriaLevelReport : Boolean,
+    userProfile : Object
   }
 };

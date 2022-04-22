@@ -48,7 +48,8 @@ module.exports = {
         description: { type: String, index: true }
       },
       appInformation : Object,
-      userRoleInformation : Object
+      userRoleInformation : Object,
+      userProfile : Object
     }
   };
 

@@ -60,6 +60,7 @@ module.exports = {
       index: true
     },
     userRoleInformation : Object,
+    userProfile : Object,
     deleted : {
       type : Boolean,
       index: true
