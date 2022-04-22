@@ -367,5 +367,6 @@ module.exports = {
     "OBSERVATION_OR_SOLUTION_CHECK" : "Required Observation Id or Solution Id ",
     "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role",
     "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
-    "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully"
+    "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
+    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile"
 }

@@ -53,6 +53,7 @@ module.exports = {
       type: String,
       index: true
     },
-    userRoleInformation : Object
+    userRoleInformation : Object,
+    userProfile : Object
   }
 };
