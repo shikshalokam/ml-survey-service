@@ -2007,10 +2007,12 @@ module.exports = class SolutionsHelper {
 
                 //get the organisations from the userProfile
                 for (const org of userProfile["organisations"]) {
-                    let orgData = {};
-                    orgData.orgName = org.orgName;
-                    orgData.organisationId = org.organisationId;
-                    organisation.push(orgData);
+                    if ( !org.isSchool ) {
+                        let orgData = {};
+                        orgData.orgName = org.orgName;
+                        orgData.organisationId = org.organisationId;
+                        organisation.push(orgData);
+                    }
                 }
 
                 let updateQuery = {};
