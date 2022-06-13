@@ -43,5 +43,11 @@ module.exports = {
         default : false,
         type : Boolean
       }
-    }
+    },
+    runIndex: [
+      {
+          "name" :{ createdBy: 1, solutionId: 1 },
+          "indexType" : { unique: true, partialFilterExpression: { solutionId: { $exists: true }}}
+      }
+    ]
   };
