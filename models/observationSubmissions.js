@@ -90,5 +90,11 @@ module.exports = {
     userRoleInformation : Object,
     criteriaLevelReport : Boolean,
     userProfile : Object
-  }
+  },
+  compoundIndex: [
+    {
+      "name" :{ createdBy: 1, observationId: 1, submissionNumber:1 },
+      "indexType" : { unique: true }
+    }
+  ]
 };

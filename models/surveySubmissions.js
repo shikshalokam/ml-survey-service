@@ -50,6 +50,12 @@ module.exports = {
       appInformation : Object,
       userRoleInformation : Object,
       userProfile : Object
-    }
+    },
+    compoundIndex: [
+      {
+        "name" :{ createdBy: 1, surveyId: 1 },
+        "indexType" : { unique: true }
+      }
+    ]
   };
 
