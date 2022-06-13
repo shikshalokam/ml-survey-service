@@ -2,8 +2,8 @@ let Abstract = class Abstract {
   constructor(schema) {
     this.model = database.createModel(schema);
     this.schema = schema.name;
-    if ( schema.runIndex && schema.runIndex.length > 0 ) {
-      database.runCompoundIndex(schema.name,schema.runIndex);
+    if ( schema.compoundIndex && schema.compoundIndex.length > 0 ) {
+      database.runCompoundIndex(schema.name,schema.compoundIndex);
     }
 
     this.httpStatus = {

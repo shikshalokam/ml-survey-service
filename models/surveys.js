@@ -44,7 +44,7 @@ module.exports = {
         type : Boolean
       }
     },
-    runIndex: [
+    compoundIndex: [
       {
           "name" :{ createdBy: 1, solutionId: 1 },
           "indexType" : { unique: true, partialFilterExpression: { solutionId: { $exists: true }}}
