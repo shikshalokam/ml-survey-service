@@ -93,7 +93,7 @@ module.exports = {
   },
   compoundIndex: [
     {
-      "name" :{ entityId: 1, observationId: 1, submissionNumber:1 },
+      "name" :{ observationId: 1, entityId: 1, submissionNumber:1 },
       "indexType" : { unique: true }
     }
   ]
