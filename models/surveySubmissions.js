@@ -4,7 +4,8 @@ module.exports = {
       surveyId: {
         type: "ObjectId",
         index: true,
-        required: true
+        required: true,
+        unique: true
       },
       createdBy: {
         type: String,
@@ -50,12 +51,6 @@ module.exports = {
       appInformation : Object,
       userRoleInformation : Object,
       userProfile : Object
-    },
-    compoundIndex: [
-      {
-        "name" :{ createdBy: 1, surveyId: 1 },
-        "indexType" : { unique: true }
-      }
-    ]
+    }
   };
 
