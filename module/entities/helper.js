@@ -928,6 +928,7 @@ module.exports = class EntitiesHelper {
     ) {
         return new Promise(async (resolve, reject) => {
             try {
+                
                 let entityDocuments = [];
                 let bodyData={
                     "type" : entityType

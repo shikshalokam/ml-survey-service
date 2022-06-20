@@ -673,11 +673,14 @@ module.exports = class Observations extends Abstract {
                             let filterData = {
                                 "orgLocation.id" : req.query.parentEntityId 
                             }
+                            //data key that api fetch
+                            let fields = ["externalId"];
                             let subentitiesCode = await sunbirdService.orgSchoolSearch(
                                 filterData,
                                 req.pageSize,
                                 req.pageNo,
-                                req.searchText
+                                req.searchText,
+                                fields
                             );
                             
                             if( !subentitiesCode.success ||
@@ -694,6 +697,7 @@ module.exports = class Observations extends Abstract {
                                 })
                             }
                             let schoolDetails = subentitiesCode.data.response.content;
+                           
                             //get code from all data
                             let schoolCodes = [];
                             schoolDetails.map(schoolData=> {
