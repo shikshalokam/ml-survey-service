@@ -1,8 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({path: "./../../.env"});
 
 const CONFIG = {
-  HOST: process.env.HOST,
-  PORT: process.env.PORT,
   DB: {
     DB_HOST: process.env.MONGODB_URL,
     DB_NAME: process.env.DB_NAME,
@@ -35,21 +33,21 @@ const CONFIG = {
     config: {
       dev: {
         query: {
-          username: process.env.dev_username,
-          password: process.env.dev_password,
-          grant_type: process.env.dev_grant_type,
-          client_id: process.env.dev_client_id,
-          client_secret: process.env.dev_client_secret,
+          username: process.env.username,
+          password: process.env.password,
+          grant_type: process.env.grant_type,
+          client_id: process.env.client_id,
+          client_secret: process.env.client_secret,
         },
         authorization: process.env.DEV_AUTHORIZATION,
       },
       dock: {
         query: {
-          username: process.env.dev_username,
-          password: process.env.dev_password,
-          grant_type: process.env.dev_grant_type,
-          client_id: process.env.dev_client_id,
-          client_secret: process.env.dev_client_secret,
+          username: process.env.username,
+          password: process.env.password,
+          grant_type: process.env.grant_type,
+          client_id: process.env.client_id,
+          client_secret: process.env.client_secret,
         },
         nominate_user: process.env.nominate_user,
         authorization: process.env.DOCK_AUTHORIZATION,
