@@ -1,15 +1,17 @@
+const { pick, findIndex, get, compact, find, omit } = require("lodash");
 const {
-  pick,
-  findIndex,
-  get,
-  compact,
-} = require("lodash");
-const { publishQuestionSet, updateQuestionSetHierarchy } = require("../../api-list/question");
+  publishQuestionSet,
+  updateQuestionSetHierarchy,
+  readQuestionSetHierarchy,
+} = require("../../api-list/question");
 const { CONFIG } = require("../../constant/config");
 const { updateById } = require("../../db");
 
 const updateHierarchyChildren = (hierarchy, migratedId, index) => {
-  if (!hierarchy.criterias[index].questions.includes(migratedId)) {
+  if (
+    migratedId &&
+    !hierarchy.criterias[index].questions.includes(migratedId)
+  ) {
     hierarchy.criterias[index].questions.push(migratedId);
   }
   return hierarchy;
@@ -105,26 +107,39 @@ const updateHierarchyTemplate = async (hierarchy, solution, programId) => {
     for (let i = 0; i < hierarchy.criterias.length; i++) {
       const criterias = hierarchy.criterias[i];
       hierarchy.criterias[i].migratedId = result[criterias.name];
-      await updateById(CONFIG.DB.TABLES.criteriaQuestions, criterias.criDbId, {
-        migratedId: result[criterias.name],
-      });
     }
   }
 
   if (!hierarchy.isBranchingUpdated) {
-    const branchinghierarchy = branchingQuestionSetHierarchy(hierarchy);
+    const branchinghierarchy = await branchingQuestionSetHierarchy(hierarchy);
     console.log("branchinghierarchy", JSON.stringify(branchinghierarchy));
 
-    const result = await updateQuestionSetHierarchy(branchinghierarchy);
-    await updateById(CONFIG.DB.TABLES.solutions, questionsetId, {
-      isBranchingUpdated: true,
-      sourcingProgramId: programId,
-    });
+    const result = await updateQuestionSetHierarchy(branchinghierarchy).catch(
+      (err) => {
+        console.log(
+          "Error while updating the questionset branching",
+          err.response.data
+        );
+      }
+    );
+    if (result) {
+      await updateById(CONFIG.DB.TABLES.solutions, questionsetId, {
+        isBranchingUpdated: true,
+        sourcingProgramId: programId,
+      });
+      await publishQuestionSet(hierarchy.questionset);
+    }
   }
-  await publishQuestionSet(hierarchy.questionset);
 };
 
-const branchingQuestionSetHierarchy = (hierarchy) => {
+const branchingQuestionSetHierarchy = async (hierarchy) => {
+  let questionSetHierarchy = {};
+  if (hierarchy.questionset && hierarchy.isHierarchyUpdated) {
+      questionSetHierarchy = await readQuestionSetHierarchy(
+      hierarchy.questionset
+    );
+  }
+
   const updateHierarchyData = {
     request: {
       data: {
@@ -140,6 +155,14 @@ const branchingQuestionSetHierarchy = (hierarchy) => {
   };
   for (let i = 0; i < hierarchy.criterias.length; i++) {
     const criteria = hierarchy.criterias[i];
+    const hierarchyData = find(questionSetHierarchy.children, {
+      name: criteria?.name,
+    });
+    criteria.migratedId =
+      hierarchy.questionset && hierarchy.isHierarchyUpdated
+        ? hierarchyData?.identifier
+        : criteria.migratedId;
+
     const metadata = pick(criteria, [
       "code",
       "name",
@@ -179,85 +202,3 @@ module.exports = {
   getPrecondition
 };
 
-
-
-// const updateBranchingObject = (data, question, childId) => {
-//   const { parentId } = data;
-//   const matrixId = get(data, "matrix") ? data?.matrix?._id.toString() : "";
-
-//   if (
-//     !data.hierarchy.criterias[data.index].branchingLogic[
-//       parentId
-//     ].target.includes(question?.migratedId)
-//   ) {
-//     data.hierarchy.criterias[data.index].branchingLogic[parentId].target.push(
-//       question?.migratedId
-//     );
-//   }
-
-//   const ids = data.hierarchy.criterias[data.index].branchingLogic[
-//     parentId
-//   ].target.filter((ele) => ele !== childId && ele !== matrixId);
-
-//   data.hierarchy.criterias[data.index].branchingLogic[parentId].target =
-//     compact(ids);
-
-//   delete data.hierarchy.criterias[data.index].branchingLogic[childId];
-//   delete data.hierarchy.criterias[data.index].branchingLogic[matrixId];
-
-//   const visible = question?.visibleIf ? question?.visibleIf[0] : {};
-//   if (question?.migratedId) {
-//     data.hierarchy.criterias[data.index].branchingLogic[question?.migratedId] =
-//       {
-//         target: [],
-//         preCondition: {
-//           and: [
-//             {
-//               [getOperator(visible)]: [
-//                 {
-//                   var: `${parentId}.response1.value`,
-//                   type: "responseDeclaration",
-//                 },
-//                 `${findIndex(data?.parent?.options, {
-//                   value: visible.value,
-//                 })}`,
-//               ],
-//             },
-//           ],
-//         },
-//         source: [parentId],
-//       };
-//   }
-
-//   return data;
-// };
-
-// const updateChildBranching = (data, question, children) => {
-//   const { parentId } = data;
-
-//   for (let i = 0; i < children.length; i++) {
-//     const childId = children[i].toString();
-
-//     if (childId !== question._id.toString()) {
-//       if (
-//         !data.hierarchy.criterias[data.index].branchingLogic[
-//           parentId
-//         ].target.includes(childId)
-//       ) {
-//         data.hierarchy.criterias[data.index].branchingLogic[
-//           parentId
-//         ].target.push(childId);
-//       }
-
-//       data.hierarchy.criterias[data.index].branchingLogic[childId] = {
-//         target: [],
-//         preCondition: {},
-//         source: [],
-//       };
-//     } else {
-//       data = { ...updateBranchingObject(data, question) };
-//     }
-//   }
-
-//   return data;
-// };

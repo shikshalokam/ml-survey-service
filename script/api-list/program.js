@@ -82,10 +82,8 @@ const createProgram = async (templateData) => {
     data: data,
   };
 
-  const res = await axios(config).catch((err) => {
-    console.log("Error while creating the Program", err.response.data);
-  });
-  return res.data.result.program_id;
+  const res = await axios(config)
+  return res?.data?.result?.program_id;
 };
 
 const updateProgram = async (templateData) => {
@@ -121,6 +119,9 @@ const publishProgram = async (templateData) => {
     headers: await getHeaders(false, "dock"),
     data: data,
   };
+
+  console.log("publish program config", data)
+
   const res = await axios(config).catch((err) => {
     console.log("Error while publishProgram",  err.response.data);
   });

@@ -19,7 +19,6 @@ const readUser = async (userId) => {
 };
 
 const searchUser = async (userId) => {
-  console.log("mongooooo", CONFIG)
   const url = CONFIG.SUNBIRD.HOST.dev + CONFIG.SUNBIRD.APIS.search_user;
   const config = {
     method: "post",

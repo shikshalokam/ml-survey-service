@@ -18,10 +18,9 @@ const createQuestionSet = async (templateData) => {
     headers: await getHeaders(true, "dock"),
     data: data,
   };
-  const res = await axios(config).catch((err) => {
-    console.log("Error while creating Questionset", err.response.data);
-  });
-  return res.data.result.identifier;
+  const res = await axios(config);
+
+  return res?.data?.result?.identifier;
 };
 
 const updateQuestionSetHierarchy = async (templateData) => {
@@ -34,10 +33,8 @@ const updateQuestionSetHierarchy = async (templateData) => {
     data: templateData,
   };
 
-  const res = await axios(config).catch((err) => {
-    console.log("Error while updating the questionset", err.response.data);
-  });
-  return res.data.result.identifiers;
+  const res = await axios(config);
+  return res?.data?.result?.identifiers;
 };
 
 const publishQuestionSet = async (questionsetId) => {
@@ -56,6 +53,26 @@ const publishQuestionSet = async (questionsetId) => {
   const res = await axios(config).catch((err) => {
     console.log("Error while publishing the questionset", err.response.data);
   });
+};
+
+const readQuestionSetHierarchy = async (questionSetId) => {
+  const url =
+    CONFIG.SUNBIRD.HOST.dock +
+    CONFIG.SUNBIRD.APIS.read_questionset +
+    questionSetId +
+    "?mode=edit";
+
+  const config = {
+    method: "get",
+    url: url,
+    headers: await getHeaders(true, "dock"),
+    // data: templateData,
+  };
+
+  const res = await axios(config);
+  // console.log("ressss", res?.data?.result?.questionSet);
+  return res?.data?.result?.questionSet;
+
 };
 
 // Questions
@@ -102,9 +119,10 @@ const publishQuestion = async (questionId) => {
 };
 
 module.exports = {
-    createQuestionSet,
-    updateQuestionSetHierarchy,
-    publishQuestionSet,
-    createQuestions,
-    publishQuestion
+  createQuestionSet,
+  updateQuestionSetHierarchy,
+  publishQuestionSet,
+  createQuestions,
+  publishQuestion,
+  readQuestionSetHierarchy,
 };

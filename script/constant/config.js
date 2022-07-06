@@ -22,6 +22,7 @@ const CONFIG = {
       create_questionset: "api/questionset/v1/create",
       update_hierarchy: "api/questionset/v1/hierarchy/update",
       publish_questionset: "api/questionset/v1/publish",
+      read_questionset: "api/questionset/v1/hierarchy/",
       create_question: "api/question/v1/create",
       publish_question: "api/question/v1/publish",
       create_program: "api/program/v1/create",

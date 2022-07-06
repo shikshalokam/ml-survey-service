@@ -21,16 +21,34 @@ const { createProgramTemplate } = require("./gProgram");
 const getQuestionSetTemplates = async (solutions) => {
   const data = Promise.all(
     solutions.map(async (solution) => {
-
-      let programId = solution.sourcingProgramId;
-      programId = await createProgramTemplate(solution, programId);
       console.log();
-      console.log("------------------------------------------------------------------");
+      console.log(
+        "---------------------------solution---------------------------------------"
+      );
+      console.log();
+      let programId = solution.sourcingProgramId;
+      programId = await createProgramTemplate(solution, programId).catch(
+        (err) => {
+          console.log("Error while creating the Program", err.response.data);
+        }
+      );
+      console.log();
+      console.log(
+        "-----------------------------program-------------------------------------"
+      );
       console.log();
       console.log("ProgramId", programId);
+      
+      if (!programId) {
+        console.log("programId empty", programId)
+        return;
+      }
+      console.log("programId Present", programId)
+      console.log();
       return getQuestionSetTemplate(solution, programId);
     })
   );
+  
   return data;
 };
 
@@ -49,8 +67,14 @@ const getQuestionSetTemplate = async (solution, programId) => {
   let questionSetMigratedId = solution.migratedId;
 
   if (!questionSetMigratedId) {
-    questionSetMigratedId = await createQuestionSet(templateData);
-
+    questionSetMigratedId = await createQuestionSet(templateData).catch(
+      (err) => {
+        console.log("Error while creating Questionset", err.response.data);
+      }
+    );
+    if (!questionSetMigratedId) {
+      return;
+    }
     await updateById(CONFIG.DB.TABLES.solutions, questionsetid, {
       migratedId: questionSetMigratedId,
       sourcingProgramId: programId,
@@ -65,6 +89,7 @@ const getQuestionSetTemplate = async (solution, programId) => {
       questionset: questionSetMigratedId,
     };
   }
+
   if (solution.themes) {
     for (let i = 0; i < solution.themes.length; i++) {
       const theme = solution.themes[i];
@@ -348,7 +373,7 @@ const IfNoChildrenAndVisibleIfAndInnerChildren = async (
     hierarchy.criterias[index].questions.push(migratedId);
     if (
       isChildrenPresent(parentQuestion) &&
-      isVisibleIfPresent(parentQuestion)
+      !isVisibleIfPresent(parentQuestion)
     ) {
       return await IfChildrenAndNoVisibleIf(
         parentQuestion,

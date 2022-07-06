@@ -16,9 +16,9 @@ const migrateData = async () => {
     console.log("Environment: " + process.env.APPLICATION_ENV );
 
     const db = await createDBInstance();
-    const id = "5f35044f19377eecddb06922";
+    // const id = "5f34ec17585244939f89f90d";
     const data = await findAll("solutions", {
-      _id: ObjectId(id),
+      // _id: ObjectId(id),
       programId: { $exists: true },
       type: {$in: ["observation", "survey"]}
     });
