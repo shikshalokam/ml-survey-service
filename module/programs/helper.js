@@ -7,7 +7,8 @@
 
 // Dependencies 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
-
+const kpServiceUrl = process.env.KP_SERVICE_URL
+const request = require('request');
 /**
     * ProgramsHelper
     * @class
@@ -437,5 +438,275 @@ module.exports = class ProgramsHelper {
       }
     })
   }
+
+     /**
+   * 
+   * @method
+   * @name mapObservation
+   * @param {String} programId - Program Id.
+   * @param {Array} entities - entities.
+   * @returns {JSON} - Removed entities data.
+   */
+
+      static mapObservation(programId, questionSetId, copyReq) {
+        return new Promise(async (resolve, reject) => {
+          try {
+            let status;
+            console.log("programId", programId, copyReq, questionSetId)
+            let programData = await database.models.programs.findOne({ _id: programId }).lean();
+            if (!programData) {
+              return resolve({
+                message: messageConstants.apiResponses.PROGRAM_NOT_FOUND,
+                status: httpStatusCode.bad_request.status,
+              });
+            }
+            console.log(" database.model",  programData)
+            const copyQuestionSetUrl = kpServiceUrl + messageConstants.endpoints.COPY_QUESTION_SET + "/" + questionSetId;
+            const headers = {
+              "content-type": "application/json",
+              "Authorization": "Bearer " + process.env.Authorization_KEY
+            }
+            const options = {
+              headers,
+              json: true,
+              json: { request: { questionset: copyReq } }
+            };
+            let copiedQuestionsetId;
+    
+            function copyQuestionSetCallback(err, data) {
+              console.log("response from copy set", data.body, copyReq)
+              if (err || data.statusCode != 200) {
+                return resolve({
+                  message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+                  status: httpStatusCode.bad_request.status,
+                })
+              } else if (data.statusCode == 200) {
+                let response = data.body
+                copiedQuestionsetId = response.result.node_id[questionSetId]
+                let url = kpServiceUrl + messageConstants.endpoints.READ_QUESTION_SET + "/" + copiedQuestionsetId + "?mode=edit";
+                request.get(url, { headers: headers }, readQuestionSetCallBack)
+              }
+              // return resolve(data.body);
+            }
+            var readQuestionSetRes = {};
+            function readQuestionSetCallBack(err, data) {
+              console.log("read copied question set", data.body)
+              if (err || data.statusCode != 200) {
+                return resolve({
+                  message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+                  status: httpStatusCode.bad_request.status,
+                })
+              } else if (data.statusCode == 200) {
+                let readRes = JSON.parse(data.body)
+                readQuestionSetRes = readRes.result.questionSet
+                let childerNodes = {
+                  [readQuestionSetRes.identifier]: {
+                    metadata: {
+                      visibility: "Private"
+                    }
+                  }
+                }
+                // readQuestionSetRes.childNodes.forEach(child =>{
+                //     childerNodes[child] = {
+                //       metadata: {
+                //         visibility: "Private",
+                //       },
+                //       "objectType": "Question"
+                //     }
+                // })
+                let req = {
+                  request: {
+                    data: {
+                      nodesModified: childerNodes,
+                      hierarchy: {
+                        [readQuestionSetRes.identifier]: {
+                          name: readQuestionSetRes.name,
+                          children: readQuestionSetRes.childNodes,
+                          root: true
+                        }
+                      }
+                    }
+                  }
+                }
+                console.log("ERR_UPDATE_QS_HIERARCHY", JSON.stringify(req))
+                let updateUrl = kpServiceUrl + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
+                request.patch(updateUrl, { headers: headers, json: true, json: req }, updateQuestionSetHierarchyCallBack)
+              }
+            }
+    
+            function updateQuestionSetHierarchyCallBack(err, data) {
+              console.log("update question set", data.body)
+              if (err || data.statusCode != 200) {
+                return resolve({
+                  message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+                  status: httpStatusCode.bad_request.status,
+                })
+              } else {
+                if (data.statusCode == 200) {
+                  let publishUrl = `${kpServiceUrl}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${copiedQuestionsetId}`;
+                  request.post(publishUrl, { headers: headers }, publishQuestionSetCallBack)
+                }
+              }
+            }
+            async function publishQuestionSetCallBack(err, data) {
+              console.log("publish question set", data.body)
+              if (err || data.statusCode != 200) {
+                const errmsg = JSON.parse(data.body)
+                console.log("publish question set",errmsg)
+                return resolve({
+                  message: errmsg.errmsg || messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+                  status: httpStatusCode.bad_request.status,
+                })
+              } else if (data.statusCode == 200) {
+                let solution = {}
+                solution["programId"] = programId;
+                solution["entityType"] = readQuestionSetRes.entityType;
+                solution["createdBy"] = readQuestionSetRes.createdBy;
+                solution["name"] = readQuestionSetRes.name;
+                solution["description"] = readQuestionSetRes.description;
+                solution["migratedId"] = copiedQuestionsetId;
+                solution["externalId"]  = programData[0].externalId;
+                solution["type"] = readQuestionSetRes.primaryCategory;
+                solution["subType"] = readQuestionSetRes.entityType;
+                let solutionDocument
+                try {
+                  console.log("solutionDocument", solutionDocument)
+                  solutionDocument = await database.models.solutions.create(
+                    solution
+                  );
+                }  catch (error) {
+                  return resolve({
+                    success: false,
+                    status: error.status ?
+                      error.status : httpStatusCode['internal_server_error'].status,
+                    message: error.message
+                  })
+                }
+                console.log("solutionDocument",solutionDocument)
+                solutionDocument._id ? status = `${solutionDocument._id} created` : status = `${solutionDocument._id} could not be created`;
+                if(status) {
+                  await database.models.programs.updateOne({ _id: programId }, { $addToSet: { components: solutionDocument._id } });
+                  return resolve({
+                    status: httpStatusCode.ok.status,
+                    result: {
+                      [questionSetId]: copiedQuestionsetId,
+                      [copiedQuestionsetId]: solutionDocument._id
+                    },
+                    message: "mapped solution to program successfully"
+                  })
+                }
+
+              }
+            }
+            request.post(copyQuestionSetUrl, options, copyQuestionSetCallback)    
+          } catch (error) {
+            return resolve({
+              success: false,
+              status: error.status ?
+                error.status : httpStatusCode['internal_server_error'].status,
+              message: error.message
+            })
+          }
+        })
+      } 
+
+
+     /**
+   * 
+   * @method
+   * @name mapObservation
+   * @param {String} programId - Program Id.
+   * @param {Array} entities - entities.
+   * @returns {JSON} - Removed entities data.
+   */
+
+  static mapUpdateObservation(solutionId, updateReq) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        console.log("solutionId", solutionId)
+        let solutionDocument = await database.models.solutions.findOne({
+          _id: solutionId,
+        }).lean()
+        console.log("solutionDocument", solutionDocument)
+        if (!solutionDocument) {
+          return resolve({
+            message: messageConstants.apiResponses.SOLUTION_NOT_FOUND,
+            status: httpStatusCode.bad_request.status,
+          });
+        }
+        const headers = {
+          "content-type": "application/json",
+          "Authorization": "Bearer " + process.env.Authorization_KEY
+        }
+        let updateUrl = kpServiceUrl + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + solutionDocument.migratedId;
+        const options = {
+          headers,
+          json: true,
+          json: { request: { questionset: updateReq } }
+        };
+
+        function updateQuestionSetCallBack(err, data) {
+          console.log("update question set", data.body)
+          if (err || data.statusCode != 200) {
+            return resolve({
+              message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+              status: httpStatusCode.bad_request.status,
+            })
+          } else {
+            if (data.statusCode == 200) {
+              let publishUrl = `${kpServiceUrl}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${solutionDocument.migratedId}`;
+              request.post(publishUrl, { headers: headers }, publishQuestionSetCallBack)
+            }
+          }
+        }
+        async function publishQuestionSetCallBack(err, data) {
+          console.log("publish question set", data.body)
+          if (err || data.statusCode != 200) {
+            return resolve({
+              message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
+              status: httpStatusCode.bad_request.status,
+            })
+          } else if (data.statusCode == 200) {
+            let updateQuery = {};
+            updateQuery["$set"] = {};
+            if (updateReq.name) {
+              updateQuery["$set"]["name"] = updateReq.name;
+            }
+            if (updateReq.description) {
+              updateQuery["$set"]["description"] = updateReq.description;
+            }
+            if (updateReq.startDate) {
+              updateQuery["$set"]["startDate"] = updateReq.startDate;
+            }
+            if (updateReq.startDate) {
+              updateQuery["$set"]["endDate"] = updateReq.endDate;
+            }
+            if (updateReq.status) {
+              updateQuery["$set"]["status"] = updateReq.status;
+            }
+            let updatedSolutionDoc = await database.models.solutions.updateOne(
+              {
+                _id: solutionId,
+              },
+              updateQuery
+            ).lean();
+            console.log("updatedSolutionDoc", updatedSolutionDoc)
+            return resolve({
+              message: messageConstants.apiResponses.OBSERVATION_UPDATED,
+            });
+
+          }
+        }
+        request.patch(updateUrl, options, updateQuestionSetCallBack)
+      } catch (error) {
+        return resolve({
+          success: false,
+          status: error.status ?
+            error.status : httpStatusCode['internal_server_error'].status,
+          message: error.message
+        })
+      }
+    })
+  } 
 
 };

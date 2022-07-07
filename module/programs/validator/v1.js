@@ -21,7 +21,20 @@ module.exports = (req) => {
         addSolutions : function () {
             req.checkParams('_id').exists().withMessage("required program id");
             req.checkBody("solutionIds").exists().withMessage("required solutions ids");
-        }
+        },
+        mapObservation : function () {
+            req.checkBody("programId").exists().withMessage("required program id");
+            req.checkBody("questionsetId").exists().withMessage("required questionset Id");
+            req.checkBody("createdFor").exists().withMessage("required createdFor");
+        },
+        updateMapObservation: function () {
+            req.checkQuery("solutionId").exists().withMessage("required solutionId id");
+            req.checkBody("name").exists().withMessage("required name");
+            req.checkBody("description").exists().withMessage("required description");
+            req.checkBody("startDate").exists().withMessage("required startDate");
+            req.checkBody("endDate").exists().withMessage("required startDate");
+            req.checkBody("status").exists().withMessage("required status");
+        },
 
     }
 

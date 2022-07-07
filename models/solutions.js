@@ -64,6 +64,7 @@ module.exports = {
     registry: Array,
     frameworkId: "ObjectId",
     frameworkExternalId: String,
+    migratedId:String,
     parentSolutionId: "ObjectId",
     noOfRatingLevels: Number,
     isRubricDriven: { type : Boolean, default: false },
@@ -134,5 +135,5 @@ module.exports = {
         default: 1
     },
     reportInformation : Object
-  }
+  },
 };
