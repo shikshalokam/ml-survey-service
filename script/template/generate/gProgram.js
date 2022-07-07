@@ -47,6 +47,7 @@ const createProgramTemplate = async (solution, program_id) => {
     slug: "sunbird",
     status: "Draft",
     program_id: "",
+    rolemapping: [],
     config: {
       defaultContributeOrgReview: false,
       roles: [
@@ -77,7 +78,7 @@ const createProgramTemplate = async (solution, program_id) => {
   }
 
   if (!solution.isSrcProgramUpdated) {
-    await updateProgramTemplate(programId, solution);
+    const update_res = await updateProgramTemplate(programId, solution);
     query = {
       ...query,
       isSrcProgramUpdated: true,
@@ -175,7 +176,7 @@ const updateProgramTemplate = async (program_id, solution) => {
     program_id: program_id,
   };
 
-  await updateProgram(template);
+  return await updateProgram(template);
 };
 
 const publishProgramTemplate = async (program_id) => {
@@ -184,7 +185,7 @@ const publishProgramTemplate = async (program_id) => {
     program_id: program_id,
   };
 
-  const res = await publishProgram(template);
+  return await publishProgram(template);
 };
 
 module.exports = {
