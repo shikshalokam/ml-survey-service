@@ -10,6 +10,7 @@ const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 
+
 /**
     * SurveySubmissionsHelper
     * @class
@@ -52,7 +53,7 @@ module.exports = class SurveySubmissionsHelper {
                 projection[field] = 0;
               })
             }
-
+           
             let surveySubmissionDocuments;
 
             if ( sortedData !== "all" ) {
@@ -71,7 +72,6 @@ module.exports = class SurveySubmissionsHelper {
                     projection
                 ).lean();
             }   
-
             return resolve(surveySubmissionDocuments);
             
         } catch (error) {
@@ -105,24 +105,18 @@ module.exports = class SurveySubmissionsHelper {
                 surveySubmissionId = ObjectId(surveySubmissionId);
             }
 
-            let surveySubmissionsDocument = await this.surveySubmissionDocuments
-            (
-                {
-                _id: surveySubmissionId,
-                status: messageConstants.common.SUBMISSION_STATUS_COMPLETED
-                }
-            )
-
+            let surveySubmissionsDocument = await this.details( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
+            
             if (!surveySubmissionsDocument) {
                 throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE);
             }
 
-            const kafkaMessage = await kafkaClient.pushCompletedSurveySubmissionToKafka(surveySubmissionsDocument[0]);
+            const kafkaMessage = await kafkaClient.pushCompletedSurveySubmissionToKafka(surveySubmissionsDocument);
 
             if(kafkaMessage.status != "success") {
                 let errorObject = {
                     formData: {
-                        surveySubmissionId:surveySubmissionsDocument[0]._id.toString(),
+                        surveySubmissionId:surveySubmissionsDocument._id.toString(),
                         message:kafkaMessage.message
                     }
                 };
@@ -685,17 +679,22 @@ module.exports = class SurveySubmissionsHelper {
    * @method
    * @name details
    * @param {String} submissionId - survey submissionId
+   *  @param {String} status - survey submission status.
    * @returns {JSON} - survey submission details
    */
 
-    static details(submissionId) {
+    static details(submissionId, status = "") {
         return new Promise(async (resolve, reject) => {
             try {
-
-                let surveySubmissionsDocument = await this.surveySubmissionDocuments
-                ({
+                let queryObject = {
                     _id: submissionId
-                })
+                }
+
+                if ( status != "" ) {
+                    queryObject.status = status;
+                }
+
+                let surveySubmissionsDocument = await this.surveySubmissionDocuments( queryObject );
     
                 if (!surveySubmissionsDocument.length) {
                     throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
@@ -712,18 +711,22 @@ module.exports = class SurveySubmissionsHelper {
                 solutionDocument = solutionDocument[0];
                 surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
 
-                let programDocument = 
-                await programsHelper.list(
-                    {
-                        _id: surveySubmissionsDocument[0].programId,
-                    },
-                    ["name","description"],
-                );
-    
-                if( !programDocument[0] ) {
-                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                if ( surveySubmissionsDocument[0] && surveySubmissionsDocument[0].programId && surveySubmissionsDocument[0].programId != "" ) {
+
+                    let programDocument = 
+                    await programsHelper.list(
+                        {
+                            _id: surveySubmissionsDocument[0].programId,
+                        },
+                        ["name","description"],
+                    );
+        
+                    if( !programDocument[0] ) {
+                        throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                    }
+                    surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
+
                 }
-                surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
 
                 return resolve(surveySubmissionsDocument[0]);
 
@@ -736,5 +739,4 @@ module.exports = class SurveySubmissionsHelper {
             }
         })
     }
-
 }
