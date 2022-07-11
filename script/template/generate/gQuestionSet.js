@@ -4,6 +4,7 @@ const { createQuestionSet } = require("../../api-list/question");
 
 const { CONFIG } = require("../../constant/config");
 const { findAll, updateById } = require("../../db");
+const logger = require("../../logger");
 const {
   updateHierarchyChildren,
   getPrecondition,
@@ -18,19 +19,20 @@ const {
 } = require("../helpers/questionsetHelper");
 const { createProgramTemplate } = require("./gProgram");
 
-const getQuestionSetTemplates = async (solutions) => {
+const getQuestionSetTemplates = async (solutions, migratedCount) => {
   const data = Promise.all(
     solutions.map(async (solution) => {
+      let programId = solution.sourcingProgramId;
       console.log();
       console.log(
-        "---------------------------solution---------------------------------------"
+        "-----------------------sourcingProgramId----------------------",
+        programId
       );
       console.log();
-      let programId = solution.sourcingProgramId;
-      programId = await createProgramTemplate(solution, programId).catch(
-        (err) => {
-          console.log("Error while creating the Program", err.response.data);
-        }
+      programId = await createProgramTemplate(
+        solution,
+        programId,
+        migratedCount
       );
       console.log();
       console.log(
@@ -38,21 +40,18 @@ const getQuestionSetTemplates = async (solutions) => {
       );
       console.log();
       console.log("ProgramId", programId);
-      
+
       if (!programId) {
-        console.log("programId empty", programId)
         return;
       }
-      console.log("programId Present", programId)
-      console.log();
-      return getQuestionSetTemplate(solution, programId);
+
+      return getQuestionSetTemplate(solution, programId, migratedCount);
     })
   );
-  
   return data;
 };
 
-const getQuestionSetTemplate = async (solution, programId) => {
+const getQuestionSetTemplate = async (solution, programId, migratedCount) => {
   let templateData = setQuestionSetTemplate(solution, programId);
 
   const questionsetid = solution._id.toString();
@@ -60,7 +59,14 @@ const getQuestionSetTemplate = async (solution, programId) => {
   let hierarchy = {
     questionsetDbId: questionsetid,
     isHierarchyUpdated: solution.isHierarchyUpdated || false,
+    isBranchingUpdated: solution.isBranchingUpdated || false,
+    isPublished: solution.isPublished || false,
     sourcingProgramId: programId,
+    isSrcProgramUpdated: solution.isSrcProgramUpdated || false,
+    isSrcProgramPublished: solution.isSrcProgramPublished || false,
+    isNominated: solution.isNominated || false,
+    isContributorAdded: solution.isContributorAdded || false,
+    isContributorAccepted: solution.isContributorAccepted || false,
     criterias: [],
   };
 
@@ -69,21 +75,33 @@ const getQuestionSetTemplate = async (solution, programId) => {
   if (!questionSetMigratedId) {
     questionSetMigratedId = await createQuestionSet(templateData).catch(
       (err) => {
-        console.log("Error while creating Questionset", err.response.data);
+        console.log(`Error while creating Questionset for solution_id: ${questionsetid} Error:`,err?.response?.data)
+        logger.error(`Error while creating Questionset for solution_id: ${questionsetid} Error:
+        ${JSON.stringify(err?.response?.data)}`);
+
+        migratedCount.failed.questionSet.migrated.count++;
+        if (!migratedCount.failed.questionSet.migrated.ids.includes(id)) {
+          migratedCount.failed.questionSet.migrated.ids.push(id);
+        }
       }
     );
     if (!questionSetMigratedId) {
       return;
     }
+
     await updateById(CONFIG.DB.TABLES.solutions, questionsetid, {
       migratedId: questionSetMigratedId,
-      sourcingProgramId: programId,
     });
+
+    migratedCount.success.questionSet.current.migrated++;
+
     hierarchy = {
       ...hierarchy,
       questionset: questionSetMigratedId,
     };
   } else {
+    migratedCount.success.questionSet.existing.migrated++;
+
     hierarchy = {
       ...hierarchy,
       questionset: questionSetMigratedId,
@@ -116,6 +134,8 @@ const getQuestionSetTemplate = async (solution, programId) => {
         );
         console.log();
 
+        logger.info(`CriResult name:${criResult[0].name} criteria questions = ${questions.length}`)
+
         hierarchy.criterias.push({
           questions: [],
         });
@@ -126,16 +146,15 @@ const getQuestionSetTemplate = async (solution, programId) => {
           criResult[0],
           solution.type,
           criteriaId,
-          (criteriaMigratedId = criResult[0].migratedId || "")
+          (criteriaMigratedId = criResult[0].migratedId || ""),
+          migratedCount
         );
         hierarchy = questionTemplates.hierarchy;
       }
     }
   }
-  console.log();
-  console.log("hierarchyStructure", JSON.stringify(hierarchy));
-  console.log();
-  await updateHierarchyTemplate(hierarchy, solution, programId);
+
+  await updateHierarchyTemplate(hierarchy, solution, programId, migratedCount);
   return hierarchy;
 };
 
@@ -146,7 +165,8 @@ const getQuestionTemplate = async (
   criteria,
   type,
   criteriaId,
-  criteriaMigratedId
+  criteriaMigratedId,
+  migratedCount
 ) => {
   hierarchy.criterias[index] = {
     migratedId: criteriaMigratedId,
@@ -164,7 +184,12 @@ const getQuestionTemplate = async (
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
     const questionId = question._id.toString();
-    const templates = await getChildren(questionId, hierarchy, index);
+    const templates = await getChildren(
+      questionId,
+      hierarchy,
+      index,
+      migratedCount
+    );
   }
 
   hierarchy.criterias[index].questions = uniq(
@@ -174,11 +199,13 @@ const getQuestionTemplate = async (
   return { questions, hierarchy };
 };
 
-const getChildren = async (questionId, hierarchy, index) => {
+const getChildren = async (questionId, hierarchy, index, migratedCount) => {
   const question = await getQuestionFromDB(questionId);
-  const migratedId = await createQuestionTemplate(question);
+  const migratedId = await createQuestionTemplate(question, migratedCount);
   const parentId = migratedId;
   hierarchy = updateHierarchyChildren(hierarchy, migratedId, index);
+
+  logger.info(`getChildren of questionId: ${questionId} and questiontype: ${question?.responseType}`)
 
   if (question.responseType !== "matrix") {
     if (!isChildrenPresent(question) && !isVisibleIfPresent(question)) {
@@ -191,7 +218,8 @@ const getChildren = async (questionId, hierarchy, index) => {
         question,
         hierarchy,
         index,
-        parentId
+        parentId,
+        migratedCount
       );
     }
 
@@ -199,7 +227,8 @@ const getChildren = async (questionId, hierarchy, index) => {
       return await IfNoChildrenAndVisibleIfAndInnerChildren(
         question,
         hierarchy,
-        index
+        index,
+        migratedCount
       );
     }
   } else if (question.responseType === "matrix") {
@@ -224,7 +253,10 @@ const getChildren = async (questionId, hierarchy, index) => {
       matrixParentQuestion = await getQuestionFromDB(matrixParentId);
       matrixParentIdMigratedId = matrixParentQuestion?.migratedId || "";
       if (!matrixParentIdMigratedId) {
-        matrixParentIdMigratedId = await createQuestionTemplate(question);
+        matrixParentIdMigratedId = await createQuestionTemplate(
+          question,
+          migratedCount
+        );
       }
       hierarchy = updateHierarchyChildren(
         hierarchy,
@@ -236,7 +268,10 @@ const getChildren = async (questionId, hierarchy, index) => {
     for (let i = 0; i < instanceQuestions.length; i++) {
       const instanceQuestionId = instanceQuestions[i];
       const insQuestion = await getQuestionFromDB(instanceQuestionId);
-      const insMigratedId = await createQuestionTemplate(insQuestion);
+      const insMigratedId = await createQuestionTemplate(
+        insQuestion,
+        migratedCount
+      );
 
       hierarchy = updateHierarchyChildren(hierarchy, insMigratedId, index);
 
@@ -293,7 +328,8 @@ const IfChildrenAndNoVisibleIf = async (
   question,
   hierarchy,
   index,
-  parentId
+  parentId,
+  migratedCount
 ) => {
   let branching = {
     [parentId]: {
@@ -308,8 +344,10 @@ const IfChildrenAndNoVisibleIf = async (
     for (let i = 0; i < children.length; i++) {
       const childId = children[i].toString();
       const childQuestion = await getQuestionFromDB(childId);
-      const migratedId = await createQuestionTemplate(childQuestion);
-      // hierarchy.criterias[index].questions.push(migratedId);
+      const migratedId = await createQuestionTemplate(
+        childQuestion,
+        migratedCount
+      );
       hierarchy = updateHierarchyChildren(hierarchy, migratedId, index);
 
       if (migratedId) {
@@ -323,7 +361,8 @@ const IfChildrenAndNoVisibleIf = async (
         const childBranching = await IfNoChildrenAndVisibleIf(
           question,
           parentId,
-          childQuestion
+          childQuestion,
+          migratedCount
         );
 
         branching = {
@@ -338,14 +377,19 @@ const IfChildrenAndNoVisibleIf = async (
   return hierarchy;
 };
 
-const IfNoChildrenAndVisibleIf = async (parentQuestion, parentId, question) => {
+const IfNoChildrenAndVisibleIf = async (
+  parentQuestion,
+  parentId,
+  question,
+  migratedCount
+) => {
   const visibleIf = question.visibleIf || [];
   let childBranching = {};
   for (let i = 0; i < visibleIf.length; i++) {
     const visible = visibleIf[i];
     const childId = question._id.toString();
     const chiQuestion = await getQuestionFromDB(childId);
-    const migratedId = await createQuestionTemplate(chiQuestion);
+    const migratedId = await createQuestionTemplate(chiQuestion, migratedCount);
     if (migratedId) {
       childBranching = {
         [migratedId]: {
@@ -362,14 +406,18 @@ const IfNoChildrenAndVisibleIf = async (parentQuestion, parentId, question) => {
 const IfNoChildrenAndVisibleIfAndInnerChildren = async (
   question,
   hierarchy,
-  index
+  index,
+  migratedCount
 ) => {
   const visibleIf = question.visibleIf || [];
   for (let i = 0; i < visibleIf.length; i++) {
     const visible = visibleIf[i];
     const parentId = visible._id.toString();
     const parentQuestion = await getQuestionFromDB(parentId);
-    const migratedId = await createQuestionTemplate(parentQuestion);
+    const migratedId = await createQuestionTemplate(
+      parentQuestion,
+      migratedCount
+    );
     hierarchy.criterias[index].questions.push(migratedId);
     if (
       isChildrenPresent(parentQuestion) &&
@@ -379,7 +427,8 @@ const IfNoChildrenAndVisibleIfAndInnerChildren = async (
         parentQuestion,
         hierarchy,
         index,
-        migratedId
+        migratedId,
+        migratedCount
       );
     }
   }

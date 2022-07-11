@@ -6,6 +6,8 @@ const {
 } = require("../../api-list/question");
 const { CONFIG } = require("../../constant/config");
 const { updateById } = require("../../db");
+const logger = require("../../logger");
+const { updateQuestionSetFailedCount } = require("./questionsetHelper");
 
 const updateHierarchyChildren = (hierarchy, migratedId, index) => {
   if (
@@ -16,7 +18,6 @@ const updateHierarchyChildren = (hierarchy, migratedId, index) => {
   }
   return hierarchy;
 };
-
 
 const getOperator = (visibleIf) => {
   const operator =
@@ -44,11 +45,15 @@ const getPrecondition = (visible, parentId, parentQuestion) => {
         ],
       },
     ],
-  }
-}
+  };
+};
 
-
-const updateHierarchyTemplate = async (hierarchy, solution, programId) => {
+const updateHierarchyTemplate = async (
+  hierarchy,
+  solution,
+  programId,
+  migratedCount
+) => {
   const updateHierarchyData = {
     request: {
       data: {
@@ -95,19 +100,42 @@ const updateHierarchyTemplate = async (hierarchy, solution, programId) => {
   console.log("updateHierarchydata", JSON.stringify(updateHierarchyData));
   console.log();
   const questionsetId = hierarchy.questionsetDbId;
-
+  let query = {};
   if (!hierarchy.isHierarchyUpdated) {
-    const result = await updateQuestionSetHierarchy(updateHierarchyData);
+    const result = await updateQuestionSetHierarchy(updateHierarchyData).catch(
+      (err) => {
+        logger.error(`Error while updating the questionset for solution_id: ${questionsetId} Error:
+      ${JSON.stringify(err.response.data)}`);
+      
+        migratedCount.failed.questionSet.hierarchy.count++;
+        if (
+          !migratedCount.failed.questionSet.hierarchy.ids.includes(
+            hierarchy?.questionset
+          )
+        ) {
+          migratedCount.failed.questionSet.hierarchy.ids.push(
+            hierarchy?.questionset
+          );
+        }
+        // updateQuestionSetFailedCount(migratedCount, "hierarchy", questionsetId);
+      }
+    );
 
-    await updateById(CONFIG.DB.TABLES.solutions, questionsetId, {
+    if (!result) {
+      await updateSolutionsDb(query, questionsetId, migratedCount);
+      return;
+    }
+    query = {
+      ...query,
       isHierarchyUpdated: true,
-      isBranchingUpdated: false,
-      sourcingProgramId: programId,
-    });
+    };
+
     for (let i = 0; i < hierarchy.criterias.length; i++) {
       const criterias = hierarchy.criterias[i];
       hierarchy.criterias[i].migratedId = result[criterias.name];
     }
+  } else {
+    migratedCount.success.questionSet.existing.hierarchy++;
   }
 
   if (!hierarchy.isBranchingUpdated) {
@@ -116,26 +144,71 @@ const updateHierarchyTemplate = async (hierarchy, solution, programId) => {
 
     const result = await updateQuestionSetHierarchy(branchinghierarchy).catch(
       (err) => {
-        console.log(
-          "Error while updating the questionset branching",
-          err.response.data
-        );
+        logger.error(`Error while updating the questionset branching for solution_id: ${questionsetId} Error:
+      ${JSON.stringify(err.response.data)}`);
+        migratedCount.failed.questionSet.branching.count++;
+
+        if (
+          !migratedCount.failed.questionSet.branching.ids.includes(
+            hierarchy?.questionset
+          )
+        ) {
+          migratedCount.failed.questionSet.branching.ids.push(
+            hierarchy?.questionset
+          );
+        }
+        // updateQuestionSetFailedCount(migratedCount, "branching", questionsetId);
       }
     );
-    if (result) {
-      await updateById(CONFIG.DB.TABLES.solutions, questionsetId, {
-        isBranchingUpdated: true,
-        sourcingProgramId: programId,
-      });
-      await publishQuestionSet(hierarchy.questionset);
+    if (!result) {
+      await updateSolutionsDb(query, questionsetId, migratedCount);
+      return;
     }
+    query = {
+      ...query,
+      isBranchingUpdated: true,
+    };
+  } else {
+    migratedCount.success.questionSet.existing.branching++;
   }
+
+  if (!hierarchy.isPublished) {
+    const res = await publishQuestionSet(hierarchy.questionset).catch((err) => {
+      logger.error(`Error while publishing the questionset for solution_id: ${questionsetId} === ${
+        hierarchy?.questionset
+      } Error:
+      ${JSON.stringify(err.response.data)}`);
+      migratedCount.failed.questionSet.published.count++;
+
+      if (
+        !migratedCount.failed.questionSet.published.ids.includes(
+          hierarchy?.questionset
+        )
+      ) {
+        migratedCount.failed.questionSet.published.ids.push(
+          hierarchy?.questionset
+        );
+      }
+      // updateQuestionSetFailedCount(migratedCount, "published", hierarchy?.questionset);
+    });
+    if (!res) {
+      await updateSolutionsDb(query, questionsetId, migratedCount);
+      return;
+    }
+    query = {
+      ...query,
+      isPublished: true,
+    };
+  } else if (hierarchy.isPublished) {
+    migratedCount.success.questionSet.existing.published++;
+  }
+  const res = await updateSolutionsDb(query, questionsetId, migratedCount);
 };
 
 const branchingQuestionSetHierarchy = async (hierarchy) => {
   let questionSetHierarchy = {};
   if (hierarchy.questionset && hierarchy.isHierarchyUpdated) {
-      questionSetHierarchy = await readQuestionSetHierarchy(
+    questionSetHierarchy = await readQuestionSetHierarchy(
       hierarchy.questionset
     );
   }
@@ -162,36 +235,59 @@ const branchingQuestionSetHierarchy = async (hierarchy) => {
       hierarchy.questionset && hierarchy.isHierarchyUpdated
         ? hierarchyData?.identifier
         : criteria.migratedId;
+    if (criteria?.migratedId) {
+      const metadata = pick(criteria, [
+        "code",
+        "name",
+        "description",
+        "mimeType",
+        "primaryCategory",
+        "allowMultipleInstances",
+        "instances",
+      ]);
+      updateHierarchyData.request.data.nodesModified[criteria.migratedId] = {
+        metadata: {
+          ...metadata,
+          allowBranching: "Yes",
+          branchingLogic: get(criteria, "branchingLogic") || {},
+        },
+        objectType: "QuestionSet",
+        root: false,
+        isNew: false,
+      };
+      updateHierarchyData.request.data.hierarchy[
+        hierarchy.questionset
+      ].children.push(criteria.migratedId);
 
-    const metadata = pick(criteria, [
-      "code",
-      "name",
-      "description",
-      "mimeType",
-      "primaryCategory",
-      "allowMultipleInstances",
-      "instances",
-    ]);
-    updateHierarchyData.request.data.nodesModified[criteria.migratedId] = {
-      metadata: {
-        ...metadata,
-        allowBranching: "Yes",
-        branchingLogic: get(criteria, "branchingLogic") || {},
-      },
-      objectType: "QuestionSet",
-      root: false,
-      isNew: false,
-    };
-    updateHierarchyData.request.data.hierarchy[
-      hierarchy.questionset
-    ].children.push(criteria.migratedId);
-
-    updateHierarchyData.request.data.hierarchy[criteria.migratedId] = {
-      children: compact(criteria.questions),
-      root: false,
-    };
+      updateHierarchyData.request.data.hierarchy[criteria.migratedId] = {
+        children: compact(criteria.questions),
+        root: false,
+      };
+    }
   }
   return updateHierarchyData;
+};
+
+const updateSolutionsDb = async (query, questionsetId, migratedCount) => {
+  const res = await updateById(
+    CONFIG.DB.TABLES.solutions,
+    questionsetId,
+    query
+  ).catch((err) => {
+    logger.error(
+      `Error while updating questionset in solutions collection: ${solution?._id}`
+    );
+  });
+
+  if (query.hasOwnProperty("isHierarchyUpdated")) {
+    migratedCount.success.questionSet.current.hierarchy++;
+  }
+  if (query.hasOwnProperty("isBranchingUpdated")) {
+    migratedCount.success.questionSet.current.branching++;
+  }
+  if (query.hasOwnProperty("isPublished")) {
+    migratedCount.success.questionSet.current.published++;
+  }
 };
 
 module.exports = {
@@ -199,6 +295,5 @@ module.exports = {
   updateHierarchyTemplate,
   branchingQuestionSetHierarchy,
   getOperator,
-  getPrecondition
+  getPrecondition,
 };
-

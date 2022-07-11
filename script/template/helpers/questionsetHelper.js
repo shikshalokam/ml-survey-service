@@ -3,11 +3,18 @@ const { ObjectId } = require("mongodb");
 const { createQuestions, publishQuestion } = require("../../api-list/question");
 const { CONFIG } = require("../../constant/config");
 const { updateById, findAll } = require("../../db");
+const logger = require("../../logger");
 const {
   questionSetTemplate,
   questionSetTemplateStatic,
 } = require("../config/questionSet");
-const { getDateTemplate, getSliderTemplate, getMSMCQTemplate, getMCQTemplate, getTextTemplate } = require("../generate/gQuestion");
+const {
+  getDateTemplate,
+  getSliderTemplate,
+  getMSMCQTemplate,
+  getMCQTemplate,
+  getTextTemplate,
+} = require("../generate/gQuestion");
 
 const setQuestionSetTemplate = (solution, programId) => {
   let templateData = {};
@@ -34,7 +41,7 @@ const setQuestionSetTemplate = (solution, programId) => {
   return templateData;
 };
 
-const createQuestionTemplate = async (question) => {
+const createQuestionTemplate = async (question, migratedCount) => {
   const type = question.responseType;
   let migratedId = question.migratedId;
   let query = {};
@@ -58,7 +65,7 @@ const createQuestionTemplate = async (question) => {
     }
 
     if (!isEmpty(questionToMigrate)) {
-      migratedId = await createQuestions(questionToMigrate);
+      migratedId = await createQuestions(questionToMigrate, question._id);
       query = {
         ...query,
         migratedId,
@@ -66,8 +73,27 @@ const createQuestionTemplate = async (question) => {
     }
   }
 
-  if (!question.isPublished && migratedId) {
-    await publishQuestion(migratedId);
+  if (!!migratedId && !question.isPublished) {
+    const res = await publishQuestion(migratedId).catch((err) => {
+      migratedCount.failed.question.count++;
+      if (!migratedCount.failed.question.ids.includes(migratedId)) {
+        migratedCount.failed.question.ids.push(migratedId);
+      }
+      console.log(`Error while publishing the question for questionid: ${migratedId} questionId: ${question?._id} Error:
+      ${err.response.data}`);
+      logger.error(`Error while publishing the question for migratedId: ${migratedId} Error:
+      ${JSON.stringify(err.response.data)}`);
+    });
+
+    console.log("createQuestion Template publish response",res , "migratedId", migratedId, "questionId", question?._id)
+    logger.info(`createQuestion Template publish response: ${res} , "migratedId" ${migratedId} questionId, ${question?._id}`);
+
+    if (!res) {
+      return migratedId;
+    }
+
+    console.log("createQuestion Template published", migratedId)
+  logger.info(`createQuestion Template published: ${migratedId}`);
     query = {
       ...query,
       isPublished: true,
@@ -94,15 +120,15 @@ const getQuestionFromDB = async (questionId) => {
 };
 
 const isVisibleIfPresent = (question) => {
-  return  !isEmpty(get(question, 'visibleIf'));
+  return !isEmpty(get(question, "visibleIf"));
 };
 
 const isChildrenPresent = (question) => {
-  return !isEmpty(get(question, 'children'))
+  return !isEmpty(get(question, "children"));
 };
 
 const isInstanceQuestionsPresent = (question) => {
-  return !isEmpty(get(question, 'instanceQuestions'))
+  return !isEmpty(get(question, "instanceQuestions"));
 };
 
 module.exports = {

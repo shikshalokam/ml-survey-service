@@ -2,9 +2,63 @@ const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
 const { getHeaders } = require("./headers");
 
+
+
+const createProgram = async (templateData) => {
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
+  const config = {
+    method: "post",
+    url: url,
+    headers: await getHeaders(false, "vdn"),
+    data: data,
+  };
+
+  const res = await axios(config);
+  return res?.data?.result?.program_id;
+};
+
+const updateProgram = async (templateData) => {
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
+  const config = {
+    method: "post",
+    url: url,
+    headers: await getHeaders(false, "vdn"),
+    data: data,
+  };
+  const res = await axios(config);
+  return res.data;
+};
+
+const publishProgram = async (templateData) => {
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.publish_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
+  const config = {
+    method: "post",
+    url: url,
+    headers: await getHeaders(false, "vdn"),
+    data: data,
+  };
+
+  const res = await axios(config);
+  return res.data;
+};
 const nominateProgram = async (program_id, author) => {
   const url =
-    CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.add_program_nomination;
+    CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.add_program_nomination;
   const data = {
     request: {
       program_id: program_id,
@@ -20,7 +74,7 @@ const nominateProgram = async (program_id, author) => {
           name: "Survey",
           identifier: "obj-cat:survey_questionset_all",
           targetObjectType: "QuestionSet",
-        }
+        },
       ],
       content_types: [],
       organisation_id: "937dd865-b256-4c1a-9830-a9b5b89f0913",
@@ -30,101 +84,31 @@ const nominateProgram = async (program_id, author) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: data,
   };
 
-
-  const res = await axios(config).catch((err) => {
-    console.log("Error while nominating Program", err.response.data);
-  });
+  const res = await axios(config);
   return res.data;
 };
 
 const updateContributorToProgram = async (reqData) => {
-
   const url =
-    CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.update_program_nomination;
+    CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_program_nomination;
   const data = {
     request: {
-      ...reqData
+      ...reqData,
     },
   };
 
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: data,
   };
 
-
-  const res = await axios(config).catch((err) => {
-    console.log(
-      "Error while updating contributor to the Program",
-      err.response.data
-    );
-  });
-  return res.data;
-};
-
-const createProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.create_program;
-  const data = {
-    request: {
-      ...templateData,
-    },
-  };
-  const config = {
-    method: "post",
-    url: url,
-    headers: await getHeaders(false, "dock"),
-    data: data,
-  };
-
-  const res = await axios(config)
-  return res?.data?.result?.program_id;
-};
-
-const updateProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.update_program;
-  const data = {
-    request: {
-      ...templateData,
-    },
-  };
-  const config = {
-    method: "post",
-    url: url,
-    headers: await getHeaders(false, "dock"),
-    data: data,
-  };
-  const res = await axios(config).catch((err) => {
-    console.log("Error while updateProgram",  err.response.data);
-  });
-
-  return res.data;
-};
-
-const publishProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.publish_program;
-  const data = {
-    request: {
-      ...templateData,
-    },
-  };
-  const config = {
-    method: "post",
-    url: url,
-    headers: await getHeaders(false, "dock"),
-    data: data,
-  };
-
-  console.log("publish program config", data)
-
-  const res = await axios(config).catch((err) => {
-    console.log("Error while publishProgram",  err.response.data);
-  });
+  const res = await axios(config);
   return res.data;
 };
 

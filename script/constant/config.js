@@ -1,4 +1,4 @@
-require("dotenv").config({path: "./../../.env"});
+require("dotenv").config();
 
 const CONFIG = {
   DB: {
@@ -12,8 +12,8 @@ const CONFIG = {
   },
   SUNBIRD: {
     HOST: {
-      dev: "https://dev.sunbirded.org/",
-      dock: "https://dock.sunbirded.org/",
+      sunbird: process.env.SUNBIRD_HOST,
+      vdn: process.env.VDN_HOST
     },
     APIS: {
       token: "auth/realms/sunbird/protocol/openid-connect/token",
@@ -32,26 +32,25 @@ const CONFIG = {
       publish_program: "api/program/v1/publish",
     },
     config: {
-      dev: {
+      sunbird: {
         query: {
-          username: process.env.username,
-          password: process.env.password,
-          grant_type: process.env.grant_type,
-          client_id: process.env.client_id,
-          client_secret: process.env.client_secret,
+          username: process.env.SUNBIRD_USER,
+          password: process.env.SUNBIRD_PWD,
+          grant_type: process.env.SUNBIRD_GRANT,
+          client_id: process.env.SUNBIRD_CLIENT,
+          client_secret: process.env.SUNBIRD_CLIENT_SECRET,
         },
-        authorization: process.env.DEV_AUTHORIZATION,
+        authorization: process.env.SUNBIRD_AUTHORIZATION,
       },
-      dock: {
+      vdn: {
         query: {
-          username: process.env.username,
-          password: process.env.password,
-          grant_type: process.env.grant_type,
-          client_id: process.env.client_id,
-          client_secret: process.env.client_secret,
+          username: process.env.SUNBIRD_USER,
+          password: process.env.SUNBIRD_PWD,
+          grant_type: process.env.SUNBIRD_GRANT,
+          client_id: process.env.SUNBIRD_CLIENT,
+          client_secret: process.env.SUNBIRD_CLIENT_SECRET,
         },
-        nominate_user: process.env.nominate_user,
-        authorization: process.env.DOCK_AUTHORIZATION,
+        authorization: process.env.VDN_AUTHORIZATION,
       },
     },
   },

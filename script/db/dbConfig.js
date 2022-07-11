@@ -1,30 +1,20 @@
 const { CONFIG } = require("../constant/config");
 
 const mongoose = require("mongoose");
+const logger = require("../logger");
 
 
 const connect = async () => {
   try {
-    // const db = await mongoose.createConnection(
-    //   // CONFIG.DB.DB_HOST
-    //   CONFIG.DB.DB_HOST,
-    //   {
-    //     useNewUrlParser: true,
-    //   }
-    // );
-
     const Conn = mongoose.createConnection();
-
     // connect to database
+    console.log("MONGODB_URL", CONFIG.DB.DB_HOST)
     this.database = await Conn.openUri(CONFIG.DB.DB_HOST);
-    // Conn.on("error", console.error.bind(console, "connection error:"));
-    // Conn.once("open", function () {
-    //   console.log("Connected to DB");
-    // });
-    // this.database = db;
-    // .db(CONFIG.DB.DB_NAME);
+    Conn.on("error", console.error.bind(console, "connection error:"));
   } catch (err) {
     console.log("Error While connecting to DB", err);
+    logger.error(`Error While connecting to DB`, err);
+    process.exit();
   }
 };
 

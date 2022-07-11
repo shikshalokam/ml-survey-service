@@ -1,12 +1,12 @@
 const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
+const logger = require("../logger");
 const { getHeaders } = require("./headers");
-
 
 // Questionset
 
 const createQuestionSet = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.create_questionset;
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_questionset;
   const data = {
     request: {
       questionset: { ...templateData },
@@ -15,7 +15,7 @@ const createQuestionSet = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: data,
   };
   const res = await axios(config);
@@ -24,12 +24,12 @@ const createQuestionSet = async (templateData) => {
 };
 
 const updateQuestionSetHierarchy = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.update_hierarchy;
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_hierarchy;
 
   const config = {
     method: "patch",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: templateData,
   };
 
@@ -39,25 +39,24 @@ const updateQuestionSetHierarchy = async (templateData) => {
 
 const publishQuestionSet = async (questionsetId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.dock +
+    CONFIG.SUNBIRD.HOST.vdn +
     CONFIG.SUNBIRD.APIS.publish_questionset +
     "/" +
     questionsetId;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: {},
   };
 
-  const res = await axios(config).catch((err) => {
-    console.log("Error while publishing the questionset", err.response.data);
-  });
+  const res = await axios(config);
+  return res?.data?.result?.identifier;
 };
 
 const readQuestionSetHierarchy = async (questionSetId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.dock +
+    CONFIG.SUNBIRD.HOST.vdn +
     CONFIG.SUNBIRD.APIS.read_questionset +
     questionSetId +
     "?mode=edit";
@@ -65,19 +64,16 @@ const readQuestionSetHierarchy = async (questionSetId) => {
   const config = {
     method: "get",
     url: url,
-    headers: await getHeaders(true, "dock"),
-    // data: templateData,
+    headers: await getHeaders(true, "vdn"),
   };
 
   const res = await axios(config);
-  // console.log("ressss", res?.data?.result?.questionSet);
   return res?.data?.result?.questionSet;
-
 };
 
 // Questions
-const createQuestions = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.create_question;
+const createQuestions = async (templateData, questionId) => {
+  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_question;
   const data = {
     request: {
       question: { ...templateData },
@@ -86,36 +82,31 @@ const createQuestions = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
+    headers: await getHeaders(true, "vdn"),
     data: data,
   };
   const res = await axios(config).catch((err) => {
-    console.log("Error while creating the question", err.response.data);
+    console.log(`Error while creating the question for questionid: ${questionId} Error:`,err?.response?.data)
+    logger.error(`Error while creating the question for questionid: ${questionId} Error:
+    ${JSON.stringify(err.response.data)}`);
   });
-  return res.data.result.identifier;
+  return res?.data?.result?.identifier;
 };
 
 const publishQuestion = async (questionId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.dock +
+    CONFIG.SUNBIRD.HOST.vdn +
     CONFIG.SUNBIRD.APIS.publish_question +
     "/" +
     questionId;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "dock"),
-    data: {},
+    headers: await getHeaders(true, "vdn")
   };
 
-  const res = await axios(config).catch((err) => {
-    console.log(
-      "Error while publishing the question",
-      questionId,
-      err.response.data
-    );
-  });
-  return res.data.result.identifier;
+  const res = await axios(config)
+  return res?.data?.result?.identifier;
 };
 
 module.exports = {

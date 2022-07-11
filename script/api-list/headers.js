@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
 const querystring = require("querystring");
 const jwt = require("jsonwebtoken");
+const logger = require("../logger");
 
 const genToken = async (url, body, type) => {
   const isValid = await validateToken(type);
@@ -12,19 +13,19 @@ const genToken = async (url, body, type) => {
 
   if (!isValid) {
     const res = await axios.post(url, body, headers).catch((err) => {
-      console.log("Error while generateToken", err.response.data);
+      logger.error(`Error while generateToken Error: ${JSON.stringify(err?.response?.data)}`)
       return err;
     });
     return res ? res.data.access_token : "";
   } else {
-    const token = type === "dev" ? this.dev_token : this.dock_token;
+    const token = type === "sunbird" ? this.sunbird_token : this.vdn_token;
 
     return token;
   }
 };
 
 const validateToken = (type) => {
-  const token = type === "dev" ? this.dev_token : this.dock_token;
+  const token = type === "sunbird" ? this.sunbird_token : this.vdn_token;
 
   try {
     jwt.verify(token, "shhhhh");
@@ -39,16 +40,16 @@ const generateToken = async (type) => {
   let body = {};
 
   switch (type) {
-    case "dev":
-      url = CONFIG.SUNBIRD.HOST.dev + CONFIG.SUNBIRD.APIS.token;
-      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.dev.query });
-      this.dev_token = await genToken(url, body, "dev");
-      return this.dev_token;
-    case "dock":
-      url = CONFIG.SUNBIRD.HOST.dock + CONFIG.SUNBIRD.APIS.token;
-      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.dock.query });
-      this.dock_token = await genToken(url, body, "dock");
-      return this.dock_token;
+    case "sunbird":
+      url = CONFIG.SUNBIRD.HOST.sunbird + CONFIG.SUNBIRD.APIS.token;
+      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.sunbird.query });
+      this.sunbird_token = await genToken(url, body, "sunbird");
+      return this.sunbird_token;
+    case "vdn":
+      url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.token;
+      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.vdn.query });
+      this.vdn_token = await genToken(url, body, "vdn");
+      return this.vdn_token;
   }
 };
 
@@ -56,23 +57,23 @@ const getHeaders = async (isTokenReq, type) => {
   let headers = {};
 
   switch (type) {
-    case "dev":
+    case "sunbird":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.SUNBIRD.config.dev.authorization,
+        Authorization: CONFIG.SUNBIRD.config.sunbird.authorization,
       };
       if (isTokenReq) {
-        headers["x-authenticated-user-token"] = await generateToken("dev");
+        headers["x-authenticated-user-token"] = await generateToken("sunbird");
       }
       break;
 
-    case "dock":
+    case "vdn":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.SUNBIRD.config.dock.authorization,
+        Authorization: CONFIG.SUNBIRD.config.vdn.authorization,
       };
       if (isTokenReq) {
-        headers["x-authenticated-user-token"] = await generateToken("dock");
+        headers["x-authenticated-user-token"] = await generateToken("vdn");
       }
       break;
   }
