@@ -768,7 +768,7 @@ module.exports = class SurveySubmissionsHelper {
                 solutionDocument = solutionDocument[0];
                 surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
 
-                if ( surveySubmissionsDocument[0] && surveySubmissionsDocument[0].programId && surveySubmissionsDocument[0].programId != "" ) {
+                if ( surveySubmissionsDocument[0].programId && surveySubmissionsDocument[0].programId != "" ) {
 
                     let programDocument = 
                     await programsHelper.list(
