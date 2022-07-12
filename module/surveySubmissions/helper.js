@@ -105,7 +105,7 @@ module.exports = class SurveySubmissionsHelper {
                 surveySubmissionId = ObjectId(surveySubmissionId);
             }
 
-            let surveySubmissionsDocument = await this.details( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
+            let surveySubmissionsDocument = await this.surveySubmissionDetails( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
             
             if ( !surveySubmissionsDocument || Object.keys(surveySubmissionsDocument).length === 0 ) {
                 throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE);
@@ -673,17 +673,74 @@ module.exports = class SurveySubmissionsHelper {
     });
 }
 
+    /**
+     * Get survey submission details
+     * @method
+     * @name details
+     * @param {String} submissionId - survey submissionId
+     * @returns {JSON} - survey submission details
+     */
+
+    static details(submissionId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let surveySubmissionsDocument = await this.surveySubmissionDocuments
+                ({
+                    _id: submissionId
+                })
+
+                if (!surveySubmissionsDocument.length) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                let solutionDocument = await solutionsHelper.solutionDocuments({
+                    _id: surveySubmissionsDocument[0].solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: surveySubmissionsDocument[0].programId,
+                    },
+                    ["name","description"],
+                );
+
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
+
+                return resolve(surveySubmissionsDocument[0]);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
+            }
+        })
+    }
+
 
    /**
    * Get survey submission details
    * @method
-   * @name details
+   * @name surveySubmissionDetails
    * @param {String} submissionId - survey submissionId
    *  @param {String} status - survey submission status.
    * @returns {JSON} - survey submission details
    */
 
-    static details(submissionId, status = "") {
+    static surveySubmissionDetails(submissionId, status = "") {
         return new Promise(async (resolve, reject) => {
             try {
                 let queryObject = {
