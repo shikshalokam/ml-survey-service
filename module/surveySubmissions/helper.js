@@ -107,8 +107,8 @@ module.exports = class SurveySubmissionsHelper {
 
             let surveySubmissionsDocument = await this.details( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
             
-            if (!surveySubmissionsDocument) {
-                throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE);
+            if ( !surveySubmissionsDocument || Object.keys(surveySubmissionsDocument).length === 0 ) {
+                throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE);
             }
 
             const kafkaMessage = await kafkaClient.pushCompletedSurveySubmissionToKafka(surveySubmissionsDocument);
