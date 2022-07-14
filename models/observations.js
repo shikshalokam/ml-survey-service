@@ -65,5 +65,11 @@ module.exports = {
       type : Boolean,
       index: true
     }
-  }
+  },
+  compoundIndex: [
+    {
+        "name" :{ createdBy: 1, solutionId: 1 },
+        "indexType" : { unique: true }
+    }
+  ]
 };
