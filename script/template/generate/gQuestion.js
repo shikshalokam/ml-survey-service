@@ -101,7 +101,7 @@ const getSliderTemplate = (question) => {
 
 const getOptions = (options) => {
   options.map((values, index) => {
-    values.value = index;
+    values.value = `${values?.value}`;
     values.label = `${values.label}`;
   });
   return options;
