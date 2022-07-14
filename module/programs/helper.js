@@ -7,7 +7,7 @@
 
 // Dependencies 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
-const kpServiceUrl = process.env.KP_SERVICE_URL
+const kpServiceUrl = process.env.DOCK_URL
 const request = require('request');
 /**
     * ProgramsHelper
@@ -464,7 +464,7 @@ module.exports = class ProgramsHelper {
             const copyQuestionSetUrl = kpServiceUrl + messageConstants.endpoints.COPY_QUESTION_SET + "/" + questionSetId;
             const headers = {
               "content-type": "application/json",
-              "Authorization": "Bearer " + process.env.Authorization_KEY
+              "Authorization": "Bearer " + process.env.DOCK_AUTHORIZATION_KEY
             }
             const options = {
               headers,
@@ -636,7 +636,7 @@ module.exports = class ProgramsHelper {
         }
         const headers = {
           "content-type": "application/json",
-          "Authorization": "Bearer " + process.env.Authorization_KEY
+          "Authorization": "Bearer " + process.env.DOCK_AUTHORIZATION_KEY
         }
         let updateUrl = kpServiceUrl + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + solutionDocument.migratedId;
         const options = {
