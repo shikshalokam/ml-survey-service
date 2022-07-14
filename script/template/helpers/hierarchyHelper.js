@@ -37,7 +37,7 @@ const getPrecondition = (visible, parentId, parentQuestion) => {
         [getOperator(visible)]: [
           {
             var: `${parentId}.response1.value`,
-            type: "responseDeclaration",
+            type: "interactions",
           },
           findIndex(parentQuestion.options, {
             value: visible.value,
