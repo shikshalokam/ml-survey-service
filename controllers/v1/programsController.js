@@ -802,7 +802,7 @@ module.exports = class Programs extends Abstract {
         let programUpdated = await programsHelper.mapObservation(
           req.body.programId,req.body.questionsetId,{
             createdFor: req.body.createdFor, 
-            createdBy:  "4e397c42-495e-4fdb-8558-f98176230916" ||  req.userDetails.userId,
+            createdBy:  req.userDetails.userId,
             name: req.body.name
           }
         );
@@ -856,44 +856,6 @@ module.exports = class Programs extends Abstract {
         );
     
         return resolve(programUpdated);
-        // // use 
-        //   let updateQuery = {};
-        //   updateQuery["$set"] = {};
-
-        //   if (req.body.name) {
-        //       updateQuery["$set"]["name"] = req.body.name;
-        //   }
-        //   if (req.body.description) {
-        //       updateQuery["$set"]["description"] = req.body.description;
-        //   }
-        //   if (req.body.startDate) {
-        //     updateQuery["$set"]["startDate"] = req.body.startDate;
-        //   }
-        //   if (req.body.startDate) {
-        //     updateQuery["$set"]["endDate"] = req.body.endDate;
-        //   }
-        //   if (req.body.status) {
-        //     updateQuery["$set"]["status"] = req.body.status;
-        //   }
-
-        //   let observationDocument = await database.models.solutions.findOneAndUpdate(
-        //       {
-        //           _id: req.params._id,
-        //       },
-        //       updateQuery
-        //   ).lean();
-
-        //   if (!observationDocument) {
-        //     return resolve({
-        //       status: httpStatusCode.not_found.status,
-        //       message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
-        //   });
-        //   }
-
-        //   return resolve({
-        //       message: messageConstants.apiResponses.OBSERVATION_UPDATED,
-        //   });
-
       } catch (error) {
           return reject({
               status: error.status || httpStatusCode.internal_server_error.status,
