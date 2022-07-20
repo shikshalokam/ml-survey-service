@@ -973,7 +973,7 @@ module.exports = class EntitiesHelper {
         try {
              //set request body for learners API
              let validEntityIds = []
-             let filterData={
+             let filterData = {
                  "id" : entityIds,
                  "type" : entityType
              };
