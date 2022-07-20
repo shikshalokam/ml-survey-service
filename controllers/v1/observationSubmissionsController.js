@@ -317,7 +317,6 @@ module.exports = class ObservationSubmissions extends Abstract {
       
       observations = await observationsHelper.listV2(req.userDetails.userId);
       
-      
       let responseMessage = messageConstants.apiResponses.OBSERVATION_SUBMISSION_CREATED;
 
       return resolve({
