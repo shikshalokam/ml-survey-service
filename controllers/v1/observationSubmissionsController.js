@@ -313,7 +313,6 @@ module.exports = class ObservationSubmissions extends Abstract {
       
       observationSubmissionsHelper.pushObservationSubmissionForReporting(newObservationSubmissionDocument._id);
       
-      
       let observations = new Array;
       
       observations = await observationsHelper.listV2(req.userDetails.userId);
