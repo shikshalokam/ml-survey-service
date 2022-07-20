@@ -754,7 +754,7 @@ module.exports = class Observations extends Abstract {
                             }
                             
                             
-                            let searchText= req.searchText;
+                            let searchText= req.searchText ? req.searchText : "";
                             if( searchText !== "" ){
                                 let matchEntities = [];
                                 subEntities.map( entityData => {
@@ -766,8 +766,8 @@ module.exports = class Observations extends Abstract {
                                 subEntities = matchEntities;
                             }
             
-                            let totalcount = subEntities.length;
-                            if (subEntities.length > 0) {
+                            let totalCount = subEntities.length;
+                            if (totalCount > 0) {
                                 let startIndex = req.pageSize * (req.pageNo - 1);
                                 let endIndex = startIndex + req.pageSize;
                                 subEntities = subEntities.slice(startIndex, endIndex);
@@ -784,7 +784,7 @@ module.exports = class Observations extends Abstract {
     
                             response.result.push({
                                 "data" : data,
-                                "count" : totalcount
+                                "count" : totalCount
                             });
                         }       
                     }
