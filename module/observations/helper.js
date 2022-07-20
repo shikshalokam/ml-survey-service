@@ -1754,7 +1754,7 @@ module.exports = class ObservationsHelper {
                 };
                 let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
 
-                if(!entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
+                if(!entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
                     throw {
                         message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                     }               

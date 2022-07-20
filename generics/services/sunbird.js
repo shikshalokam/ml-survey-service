@@ -17,7 +17,7 @@ const timeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIR
   * 
   * @function
   * @name learnerLocationSearch
-  * @param {String} bearerToken - autherization token.
+  * @param {String} bearerToken - authorization token.
   * @param {object} filterData -  bodydata .
   * @returns {Promise} returns a promise.
 */
@@ -49,7 +49,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
         sunbirdBaseUrl + messageConstants.endpoints.GET_LOCATION_DATA;
         const options = {
             headers : {
-                "Authorization" : process.env.SUNBIRD_SERVICE_AUTHERIZATION,
+                "Authorization" : process.env.SUNBIRD_SERVICE_AUTHORIZATION,
                 "content-type": "application/json"
             },
             json : bodyData
@@ -78,7 +78,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
         }
 
         setTimeout( function () {
-            return reject (result = {
+            return resolve (result = {
                 success : false
              });
          }, timeout);
@@ -93,7 +93,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
   * 
   * @function
   * @name orgSchoolSearch
-  * @param {String} bearerToken - autherization token.
+  * @param {String} bearerToken - authorization token.
   * @param {object} bodyData -  location id
   * @returns {Promise} returns a promise.
 */
@@ -130,7 +130,7 @@ const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searc
             sunbirdBaseUrl + messageConstants.endpoints.GET_SCHOOL_DATA;
             const options = {
                 headers : {
-                    "Authorization" : process.env.SUNBIRD_SERVICE_AUTHERIZATION,
+                    "Authorization" : process.env.SUNBIRD_SERVICE_AUTHORIZATION,
                     "content-type": "application/json"
                 },
                 json : bodyData

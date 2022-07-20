@@ -1802,20 +1802,19 @@ module.exports = class EntitiesHelper {
    * @method
    * @name listByLocationIds
    * @param {Object} locationIds - locationIds
-   * @returns {Object} entity Dclocument
+   * @returns {Object} entity Document
    */
 
   static listByLocationIds(locationIds) {
     return new Promise(async (resolve, reject) => {
         try {
-            let entityResult = [];
             //set request body for learners api
             let filterData = {
                 "id" : locationIds
             };
            
             let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-            if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response.length > 0 ) {
+            if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
                 throw {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 }               
@@ -1841,7 +1840,7 @@ module.exports = class EntitiesHelper {
   }
 
    /**
-   * Observation entiites search response data.
+   * Observation entities search response data.
    * @method
    * @name observationSearchEntitiesResponse
    * @param {Array} entities - entities data.

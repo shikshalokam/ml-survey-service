@@ -442,7 +442,6 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.canBeNotAllowed",
                 "evidencesStatus.notApplicable",
             ];
-            
             let result = await this.observationSubmissionsDocument
             (
                  queryObject,
