@@ -2233,12 +2233,12 @@ module.exports = class Observations extends Abstract {
 
 }
 
-// /**
-//   * get subEntities of matching type by recursion.
-//   * @method
-//   * @name subEntitiesWithMatchingType
-//   * @returns {Array} - Sub entities matching the type .
-//   */
+/**
+  * get subEntities of matching type by recursion.
+  * @method
+  * @name subEntitiesWithMatchingType
+  * @returns {Array} - Sub entities matching the type .
+*/
 
 async function subEntitiesWithMatchingType( parentIds,entityType,matchingData ){
     if( !parentIds.length > 0 ){
