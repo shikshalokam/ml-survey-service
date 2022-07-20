@@ -675,7 +675,7 @@ module.exports = class Observations extends Abstract {
                             }
                             //data key that api fetch
                             let fields = ["externalId"];
-                            let subentitiesCode = await sunbirdService.orgSchoolSearch(
+                            let subEntitiesCode = await sunbirdService.orgSchoolSearch(
                                 filterData,
                                 req.pageSize,
                                 req.pageNo,
@@ -683,11 +683,11 @@ module.exports = class Observations extends Abstract {
                                 fields
                             );
                             
-                            if( !subentitiesCode.success ||
-                                !subentitiesCode.data ||
-                                !subentitiesCode.data.response ||
-                                !subentitiesCode.data.response.content ||
-                                !subentitiesCode.data.response.content.length > 0 ) {
+                            if( !subEntitiesCode.success ||
+                                !subEntitiesCode.data ||
+                                !subEntitiesCode.data.response ||
+                                !subEntitiesCode.data.response.content ||
+                                !subEntitiesCode.data.response.content.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                                     "result" : {
@@ -696,7 +696,7 @@ module.exports = class Observations extends Abstract {
                                     }
                                 })
                             }
-                            let schoolDetails = subentitiesCode.data.response.content;
+                            let schoolDetails = subEntitiesCode.data.response.content;
                            
                             //get code from all data
                             let schoolCodes = [];
@@ -733,7 +733,7 @@ module.exports = class Observations extends Abstract {
 
                             response.result.push({
                                 "data" : data,
-                                "count" : subentitiesCode.data.response.count
+                                "count" : subEntitiesCode.data.response.count
                             });
                             return resolve(response);
                         } else {
