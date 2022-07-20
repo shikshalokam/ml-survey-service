@@ -160,7 +160,7 @@ const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searc
                 return resolve(result);
             }
             setTimeout(function () {
-                return reject (result = {
+                return resolve (result = {
                     success : false
                  });
              }, timeout);
