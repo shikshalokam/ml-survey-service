@@ -15,7 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
-const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
+const sunbirdService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationSubmissions

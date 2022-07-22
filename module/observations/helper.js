@@ -20,7 +20,7 @@ const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
+const sunbirdService = require(ROOT_PATH + "/generics/services/users");
 /**
     * ObservationsHelper
     * @class
@@ -40,7 +40,7 @@ module.exports = class ObservationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let queryObject = {};
-
+                
                 if (findQuery != "all") {
                     queryObject = _.merge(queryObject, findQuery)
                 }
@@ -1925,38 +1925,5 @@ module.exports = class ObservationsHelper {
         });
 
     }
-
-    /**
-     * find observation . 
-     * @method
-     * @name findObservation
-     * @param {ObjectId} observationId - observation id.
-     * @param {string} userId - user id.
-     * @param {String} entityId - entity id.
-     */
-
-     static findObservation( observationId, userId, entityId ) {
-
-        return new Promise(async (resolve, reject) => {
-
-            try {
-
-                let observationDocument = await database.models.observations.findOne({ 
-                    _id: observationId, 
-                     createdBy: userId,
-                     status: {$ne:"inactive"}, 
-                     entities: entityId }).lean();
-
-                return resolve(observationDocument);
-
-
-            } catch (error) {
-                return reject(error);
-            }
-
-        })
-
-    }
-
 
 };

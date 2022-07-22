@@ -14,7 +14,7 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
-const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
+const sunbirdService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * Observations
@@ -709,10 +709,9 @@ module.exports = class Observations extends Abstract {
                                 "code" : schoolCodes
                             };
                             
-                        
                             let entitiesData = await sunbirdService.learnerLocationSearch( bodyData );
                         
-                            if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
+                            if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response || !entitiesData.data.response.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                                     "result" : {
@@ -1064,26 +1063,28 @@ module.exports = class Observations extends Abstract {
                     result: {}
                 };
 
-                let observationDocument = await observationsHelper.findObservation(
-                    req.params._id, 
-                    req.userDetails.userId, 
-                    req.query.entityId
-                )
-
+                let queryObject = {
+                    _id: req.params._id, 
+                    createdBy: req.userDetails.userId,
+                    status: {$ne:"inactive"}, 
+                    entities: req.query.entityId
+                }
+                let observationDocument = await observationsHelper.observationDocuments( queryObject )
+                observationDocument = observationDocument[0]
                 if (!observationDocument) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-              
+                
                 let filterData = {
                     "id" : req.query.entityId,
                     "type" : observationDocument.entityType
                 };
 
                 let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-
+                
                 if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
@@ -1091,7 +1092,7 @@ module.exports = class Observations extends Abstract {
                     });
                 }
                 let entities = entitiesDocument.data.response;
-                
+
                 let entityData = await entitiesHelper.extractDataFromLocationResult(entities);
                 
                 let entityDocument = entityData[0];

@@ -85,10 +85,6 @@ let enviromentVariables = {
   "DISABLE_LEARNER_SERVICE_ON_OFF": {
     "message" : "Disable learner service on/off",
     "default": "ON"
-  },
-  "SUNBIRD_SERVICE_URL" : {
-    "message" : "Required sunbird service url",
-    "optional" : false
   }
 }
 

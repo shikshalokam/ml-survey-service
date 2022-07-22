@@ -10,7 +10,7 @@ const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 // const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
-const sunbirdService = require(ROOT_PATH + "/generics/services/sunbird");
+const sunbirdService = require(ROOT_PATH + "/generics/services/users");
 
 
  /**

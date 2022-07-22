@@ -18,6 +18,6 @@ module.exports = {
     GET_PROJECT_TEMPLATE_LISTS : "/v1/project/templates/listByIds",
     DOWNLOADABLE_FILE_URL: "/v1/cloud-services/files/getDownloadableUrl",
     USER_READ : "/user/v1/read",
-    GET_LOCATION_DATA : "/api/data/v1/location/search",
-    GET_SCHOOL_DATA : "/api/org/v1/search"
+    GET_LOCATION_DATA : "/v1/location/search",
+    GET_SCHOOL_DATA : "/v1/org/search"
 }
