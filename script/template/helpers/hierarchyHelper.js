@@ -1,4 +1,12 @@
-const { pick, findIndex, get, compact, find, omit } = require("lodash");
+const {
+  pick,
+  findIndex,
+  get,
+  compact,
+  find,
+  omit,
+  isArray,
+} = require("lodash");
 const {
   publishQuestionSet,
   updateQuestionSetHierarchy,
@@ -7,7 +15,6 @@ const {
 const { CONFIG } = require("../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
-const { updateQuestionSetFailedCount } = require("./questionsetHelper");
 
 const updateHierarchyChildren = (hierarchy, migratedId, index) => {
   if (
@@ -31,6 +38,8 @@ const getOperator = (visibleIf) => {
 };
 
 const getPrecondition = (visible, parentId, parentQuestion) => {
+  logger.debug(`getPrecondition: parentId = ${parentId}; visible: ${visible}`);
+
   return {
     and: [
       {
@@ -40,7 +49,7 @@ const getPrecondition = (visible, parentId, parentQuestion) => {
             type: "interactions",
           },
           findIndex(parentQuestion.options, {
-            value: visible.value,
+            value: isArray(visible?.value) ? visible?.value[0] : visible?.value,
           }),
         ],
       },
@@ -54,6 +63,9 @@ const updateHierarchyTemplate = async (
   programId,
   migratedCount
 ) => {
+  logger.debug(
+    `updateHierarchyTemplate: programId = ${programId}; solution: ${solution?._id}`
+  );
   const updateHierarchyData = {
     request: {
       data: {
@@ -99,6 +111,13 @@ const updateHierarchyTemplate = async (
 
   console.log("updateHierarchydata", JSON.stringify(updateHierarchyData));
   console.log();
+
+  logger.info(
+    `updateHierarchyTemplate: Hierarchydata = ${JSON.stringify(
+      updateHierarchyData
+    )}`
+  );
+
   const questionsetId = hierarchy.questionsetDbId;
   let query = {};
   if (!hierarchy.isHierarchyUpdated) {
@@ -106,18 +125,17 @@ const updateHierarchyTemplate = async (
       (err) => {
         logger.error(`Error while updating the questionset for solution_id: ${questionsetId} Error:
       ${JSON.stringify(err.response.data)}`);
-      
-        migratedCount.failed.questionSet.hierarchy.count++;
+
         if (
           !migratedCount.failed.questionSet.hierarchy.ids.includes(
             hierarchy?.questionset
           )
         ) {
+          migratedCount.failed.questionSet.hierarchy.count++;
           migratedCount.failed.questionSet.hierarchy.ids.push(
             hierarchy?.questionset
           );
         }
-        // updateQuestionSetFailedCount(migratedCount, "hierarchy", questionsetId);
       }
     );
 
@@ -146,18 +164,17 @@ const updateHierarchyTemplate = async (
       (err) => {
         logger.error(`Error while updating the questionset branching for solution_id: ${questionsetId} Error:
       ${JSON.stringify(err.response.data)}`);
-        migratedCount.failed.questionSet.branching.count++;
 
         if (
           !migratedCount.failed.questionSet.branching.ids.includes(
             hierarchy?.questionset
           )
         ) {
+          migratedCount.failed.questionSet.branching.count++;
           migratedCount.failed.questionSet.branching.ids.push(
             hierarchy?.questionset
           );
         }
-        // updateQuestionSetFailedCount(migratedCount, "branching", questionsetId);
       }
     );
     if (!result) {
@@ -178,18 +195,18 @@ const updateHierarchyTemplate = async (
         hierarchy?.questionset
       } Error:
       ${JSON.stringify(err.response.data)}`);
-      migratedCount.failed.questionSet.published.count++;
 
       if (
         !migratedCount.failed.questionSet.published.ids.includes(
           hierarchy?.questionset
         )
       ) {
+        migratedCount.failed.questionSet.published.count++;
+
         migratedCount.failed.questionSet.published.ids.push(
           hierarchy?.questionset
         );
       }
-      // updateQuestionSetFailedCount(migratedCount, "published", hierarchy?.questionset);
     });
     if (!res) {
       await updateSolutionsDb(query, questionsetId, migratedCount);

@@ -7,7 +7,7 @@ const questionTemplate = {
     interactionTypes: "responseType",
     showRemarks: "showRemarks",
     instructions: {
-      en: [null],
+      default: "tip",
     },
     body: "question",
     editorState: {
@@ -28,6 +28,9 @@ const questionTemplate = {
       },
     },
     hints: "hint",
+    evidence: {
+      mimeType: "file.type",
+    },
   },
   slider: {
     name: "Migrated Question-Slider Type",
@@ -37,7 +40,7 @@ const questionTemplate = {
     interactionTypes: "responseType",
     showRemarks: "showRemarks",
     instructions: {
-      en: [null],
+      default: "tip",
     },
     body: "question",
     editorState: {
@@ -146,7 +149,7 @@ const questionTemplate = {
       question: "question",
     },
     instructions: {
-      en: [null],
+      default: "tip",
     },
     evidence: {
       mimeType: "file.type",
@@ -224,6 +227,9 @@ const questionTemplate = {
       default: "tip",
     },
     hints: "hint",
+    evidence: {
+      mimeType: "file.type",
+    },
   },
   text: {
     name: "Migrated Question",
@@ -234,7 +240,7 @@ const questionTemplate = {
     showRemarks: "showRemarks",
     body: "question",
     instructions: {
-      en: [null],
+      default: "tip",
     },
     editorState: {
       question: "question",
@@ -261,17 +267,19 @@ const questionTemplate = {
       },
     },
     hints: "hint",
+    evidence: {
+      mimeType: "file.type",
+    },
   },
   
 };
 
 const questionStatic = {
-  date: ["name", "mimeType", "instructions", "responseDeclaration"],
-  slider: ["name", "mimeType", "instructions", "responseDeclaration"],
+  date: ["name", "mimeType", "responseDeclaration"],
+  slider: ["name", "mimeType", "responseDeclaration"],
   multiselect: [
     "name",
     "mimeType",
-    "instructions",
     "primaryCategory",
     "interactionTypes",
     "responseDeclaration",
@@ -286,11 +294,9 @@ const questionStatic = {
   text: [
     "name",
     "mimeType",
-    "instructions",
     "primaryCategory",
     "interactionTypes",
     "responseDeclaration",
-    "instructions"
   ]
 };
 
