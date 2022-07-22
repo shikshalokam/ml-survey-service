@@ -44,6 +44,12 @@ const getDateTemplate = (question) => {
           autoCapture: question["autoCapture"],
         },
       };
+    } else if (keyL === "evidence") {
+      template[key] = question["file"]
+        ? { ...question["file"], mimeType: question["file"]["type"] }
+        : { mimeType: [] };
+    } else if (keyL === "instructions") {
+      template[key] = { default: question["tip"] };
     } else if (keyL === 'showremarks') {
       template[key] = question[questionTemplate.date[key]] === true ? 'Yes' : 'No';
     }
@@ -88,9 +94,11 @@ const getSliderTemplate = (question) => {
       };
     } else if (keyL === "evidence") {
       template[key] = question["file"]
-        ? { mimeType: question["file"]["type"] }
+        ? {...question["file"], mimeType: question["file"]["type"] }
         : { mimeType: [] };
-    }else if (keyL === 'showremarks') {
+    } else if (keyL === "instructions") {
+      template[key] = { default: question["tip"] };
+    } else if (keyL === 'showremarks') {
       template[key] = question[questionTemplate.date[key]] === true ? 'Yes' : 'No';
     } else {
       template[key] = question[questionTemplate.slider[key]] || "";
@@ -101,6 +109,7 @@ const getSliderTemplate = (question) => {
 
 const getOptions = (options) => {
   options.map((values, index) => {
+
     values.value = `${values?.value}`;
     values.label = `${values.label}`;
   });
@@ -149,9 +158,11 @@ const getMSMCQTemplate = (question) => {
       };
     } else if (keyL === "evidence") {
       template[key] = question["file"]
-        ? { mimeType: question["file"]["type"] }
+        ? { ...question["file"], mimeType: question["file"]["type"] }
         : { mimeType: [] };
-    }else if (keyL === 'showremarks') {
+    } else if (keyL === "instructions") {
+      template[key] = { default: question["tip"] };
+    } else if (keyL === 'showremarks') {
       template[key] = question[questionTemplate.date[key]] === true ? 'Yes' : 'No';
     } else {
       template[key] = question[questionTemplate.multiselect[key]] || "";
@@ -189,7 +200,7 @@ const getMCQTemplate = (question) => {
       };
     } else if (keyL === "evidence") {
       template[key] = question["file"]
-        ? { mimeType: question["file"]["type"] }
+        ? { ...question["file"], mimeType: question["file"]["type"] }
         : { mimeType: [] };
     } else if (keyL === "instructions") {
       template[key] = { default: question["tip"] };
@@ -241,6 +252,12 @@ const getTextTemplate = (question, type) => {
           },
         },
       };
+    } else if (keyL === "evidence") {
+      template[key] = question["file"]
+        ? { ...question["file"], mimeType: question["file"]["type"] }
+        : { mimeType: [] };
+    } else if (keyL === "instructions") {
+      template[key] = { default: question["tip"] };
     } else if (keyL === 'showremarks') {
       template[key] = question[questionTemplate.date[key]] === true ? 'Yes' : 'No';
     }else {

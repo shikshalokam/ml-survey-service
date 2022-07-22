@@ -42,12 +42,20 @@ const setQuestionSetTemplate = (solution, programId) => {
 };
 
 const createQuestionTemplate = async (question, migratedCount) => {
-  const type = question.responseType;
-  let migratedId = question.migratedId;
+
+
+  console.log();
+  console.log("createQuestionTemplate", question);
+  console.log();
+
+  const type = question?.responseType;
+  let migratedId = question?.migratedId;
   let query = {};
   let questionToMigrate = {};
 
-  if (!migratedId) {
+  let published = question?.isPublished;
+
+  if (type && !migratedId) {
     if (type.toLowerCase() === "date") {
       questionToMigrate = getDateTemplate(question);
     }
@@ -65,47 +73,68 @@ const createQuestionTemplate = async (question, migratedCount) => {
     }
 
     if (!isEmpty(questionToMigrate)) {
+      console.log();
+      console.log(
+        "questionToMigratequestionToMigrate",
+        JSON.stringify(questionToMigrate)
+      );
+      console.log();
+      console.log("db Question", JSON.stringify(question));
+      console.log();
+
       migratedId = await createQuestions(questionToMigrate, question._id);
-      query = {
-        ...query,
-        migratedId,
-      };
+      console.log("migraysyys", migratedId);
+      question.migratedId = migratedId;
+
     }
   }
 
-  if (!!migratedId && !question.isPublished) {
+  if (migratedId && !published) {
     const res = await publishQuestion(migratedId).catch((err) => {
-      migratedCount.failed.question.count++;
       if (!migratedCount.failed.question.ids.includes(migratedId)) {
+        migratedCount.failed.question.count++;
         migratedCount.failed.question.ids.push(migratedId);
       }
-      console.log(`Error while publishing the question for questionid: ${migratedId} questionId: ${question?._id} Error:
-      ${err.response.data}`);
+
       logger.error(`Error while publishing the question for migratedId: ${migratedId} Error:
       ${JSON.stringify(err.response.data)}`);
     });
 
-    console.log("createQuestion Template publish response",res , "migratedId", migratedId, "questionId", question?._id)
-    logger.info(`createQuestion Template publish response: ${res} , "migratedId" ${migratedId} questionId, ${question?._id}`);
+    logger.info(
+      `createQuestion Template publish response: ${res} , "migratedId" ${migratedId} questionId, ${question?._id}`
+    );
 
-    if (!res) {
-      return migratedId;
+    
+
+    if (res) {
+      question.isPublished = true;
+      published = true;
+      logger.info(`createQuestion Template published: ${migratedId}`);
     }
-
-    console.log("createQuestion Template published", migratedId)
-  logger.info(`createQuestion Template published: ${migratedId}`);
-    query = {
-      ...query,
-      isPublished: true,
-    };
   }
 
-  if (!isEmpty(query)) {
+
+  if (migratedId) {
+    question.migratedId = migratedId;
+
+    query = {
+      migratedId,
+      published: published,
+    };
+  } else {
+    query = {
+      ...query,
+      published
+    }
+  }
+  
+
+  if (!isEmpty(query) && question) {
     await updateById(CONFIG.DB.TABLES.questions, question._id, {
       ...query,
     });
   }
-  return migratedId;
+  return question;
 };
 
 const updateSolutionById = async ({ id, query }) => {

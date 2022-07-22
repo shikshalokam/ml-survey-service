@@ -1,23 +1,15 @@
-const { isEmpty, uniq, get } = require("lodash");
 const { ObjectId } = require("mongodb");
 const { createQuestionSet } = require("../../api-list/question");
 
 const { CONFIG } = require("../../constant/config");
 const { findAll, updateById } = require("../../db");
 const logger = require("../../logger");
-const {
-  updateHierarchyChildren,
-  getPrecondition,
-  updateHierarchyTemplate,
-} = require("../helpers/hierarchyHelper");
-const {
-  isVisibleIfPresent,
-  isChildrenPresent,
-  setQuestionSetTemplate,
-  getQuestionFromDB,
-  createQuestionTemplate,
-} = require("../helpers/questionsetHelper");
+const { updateHierarchyTemplate } = require("../helpers/hierarchyHelper");
+const { setQuestionSetTemplate } = require("../helpers/questionsetHelper");
 const { createProgramTemplate } = require("./gProgram");
+const { getCriteriaData, initHierarchy } = require("../migrate/common");
+const { createSection } = require("./../migrate/matrix");
+const { getNonMatrixQuestions } = require("./../migrate/nonmatrix");
 
 const getQuestionSetTemplates = async (solutions, migratedCount) => {
   const data = Promise.all(
@@ -40,398 +32,252 @@ const getQuestionSetTemplates = async (solutions, migratedCount) => {
       );
       console.log();
       console.log("ProgramId", programId);
+      logger.debug(
+        `-----------------------sourcingProgramId----------------------
+        ${programId}`
+      );
 
       if (!programId) {
         return;
       }
 
-      return getQuestionSetTemplate(solution, programId, migratedCount);
+      return await migrateQuestionset(solution, programId, migratedCount);
     })
   );
   return data;
 };
 
-const getQuestionSetTemplate = async (solution, programId, migratedCount) => {
+const migrateQuestionset = async (solution, programId, migratedCount) => {
+  logger.debug(
+    `-----------------------migrateQuestionset----------------------
+    ${programId}`
+  );
   let templateData = setQuestionSetTemplate(solution, programId);
-
-  const questionsetid = solution._id.toString();
-
-  let hierarchy = {
-    questionsetDbId: questionsetid,
-    isHierarchyUpdated: solution.isHierarchyUpdated || false,
-    isBranchingUpdated: solution.isBranchingUpdated || false,
-    isPublished: solution.isPublished || false,
-    sourcingProgramId: programId,
-    isSrcProgramUpdated: solution.isSrcProgramUpdated || false,
-    isSrcProgramPublished: solution.isSrcProgramPublished || false,
-    isNominated: solution.isNominated || false,
-    isContributorAdded: solution.isContributorAdded || false,
-    isContributorAccepted: solution.isContributorAccepted || false,
-    criterias: [],
-  };
+  const questionSetId = solution?._id.toString();
 
   let questionSetMigratedId = solution.migratedId;
 
-  if (!questionSetMigratedId) {
+  if (questionSetMigratedId) {
+    migratedCount.success.questionSet.existing.migrated++;
+  } else {
     questionSetMigratedId = await createQuestionSet(templateData).catch(
       (err) => {
-        console.log(`Error while creating Questionset for solution_id: ${questionsetid} Error:`,err?.response?.data)
-        logger.error(`Error while creating Questionset for solution_id: ${questionsetid} Error:
-        ${JSON.stringify(err?.response?.data)}`);
-
-        migratedCount.failed.questionSet.migrated.count++;
+        logger.error(`migrateQuestionset: Error while creating Questionset for solution_id: ${questionsetid} Error:
+                        ${JSON.stringify(err?.response?.data)}`);
         if (!migratedCount.failed.questionSet.migrated.ids.includes(id)) {
+          migratedCount.failed.questionSet.migrated.count++;
           migratedCount.failed.questionSet.migrated.ids.push(id);
         }
       }
     );
+
+    logger.info(
+      `migrateQuestionset: questionSetMigratedId: 
+      ${questionSetMigratedId}`
+    );
+
+    console.log(`migrateQuestionset: questionSetMigratedId: 
+    ${questionSetMigratedId}`);
+
     if (!questionSetMigratedId) {
       return;
     }
 
-    await updateById(CONFIG.DB.TABLES.solutions, questionsetid, {
+    await updateById(CONFIG.DB.TABLES.solutions, questionSetId, {
       migratedId: questionSetMigratedId,
+    }).catch((err) => {
+      logger.error(
+        `migrateQuestionset: Error while updating solution migratedId: 
+        ${err}`
+      );
+      console.log(`migrateQuestionset: Error while updating question: 
+      ${err}`);
     });
 
     migratedCount.success.questionSet.current.migrated++;
-
-    hierarchy = {
-      ...hierarchy,
-      questionset: questionSetMigratedId,
-    };
-  } else {
-    migratedCount.success.questionSet.existing.migrated++;
-
-    hierarchy = {
-      ...hierarchy,
-      questionset: questionSetMigratedId,
-    };
   }
 
-  if (solution.themes) {
-    for (let i = 0; i < solution.themes.length; i++) {
-      const theme = solution.themes[i];
-      let criteriaArrayId = theme.criteria;
-      for (let j = 0; j < criteriaArrayId.length; j++) {
-        const criteria = criteriaArrayId[j];
-        const criteriaId = criteria.criteriaId.toString();
-        const criResult = await findAll(CONFIG.DB.TABLES.criteriaQuestions, {
-          _id: ObjectId(criteriaId),
-        });
+  let hierarchy = initHierarchy(
+    questionSetId,
+    solution,
+    programId,
+    questionSetMigratedId
+  );
+  let matrixHierarchy = { criterias: [] };
 
-        const questions = criResult
-          ? criResult[0].evidences
-            ? criResult[0].evidences[0].sections[0].questions
-            : []
-          : [];
-
-        console.log();
-        console.log(
-          "criResultcriResult",
-          criResult[0].name,
-          "questions.length",
-          questions.length
-        );
-        console.log();
-
-        logger.info(`CriResult name:${criResult[0].name} criteria questions = ${questions.length}`)
-
-        hierarchy.criterias.push({
-          questions: [],
-        });
-        const questionTemplates = await getQuestionTemplate(
-          questions,
-          hierarchy,
-          (index = j),
-          criResult[0],
-          solution.type,
-          criteriaId,
-          (criteriaMigratedId = criResult[0].migratedId || ""),
-          migratedCount
-        );
-        hierarchy = questionTemplates.hierarchy;
-      }
-    }
-  }
-
-  await updateHierarchyTemplate(hierarchy, solution, programId, migratedCount);
-  return hierarchy;
-};
-
-const getQuestionTemplate = async (
-  questions,
-  hierarchy,
-  index,
-  criteria,
-  type,
-  criteriaId,
-  criteriaMigratedId,
-  migratedCount
-) => {
-  hierarchy.criterias[index] = {
-    migratedId: criteriaMigratedId,
-    criDbId: criteriaId,
-    code: criteria.externalId,
-    name: criteria.name,
-    description: criteria.description,
-    mimeType: "application/vnd.sunbird.questionset",
-    primaryCategory: type,
-    questions: [],
-    branchingLogic: {},
-    allowMultipleInstances: "",
-    instances: {},
-  };
-  for (let i = 0; i < questions.length; i++) {
-    const question = questions[i];
-    const questionId = question._id.toString();
-    const templates = await getChildren(
-      questionId,
-      hierarchy,
-      index,
-      migratedCount
-    );
-  }
-
-  hierarchy.criterias[index].questions = uniq(
-    hierarchy.criterias[index].questions
+  let data = await migrateCriteriaQuestions(
+    solution,
+    hierarchy,
+    matrixHierarchy,
+    migratedCount
   );
 
-  return { questions, hierarchy };
-};
-
-const getChildren = async (questionId, hierarchy, index, migratedCount) => {
-  const question = await getQuestionFromDB(questionId);
-  const migratedId = await createQuestionTemplate(question, migratedCount);
-  const parentId = migratedId;
-  hierarchy = updateHierarchyChildren(hierarchy, migratedId, index);
-
-  logger.info(`getChildren of questionId: ${questionId} and questiontype: ${question?.responseType}`)
-
-  if (question.responseType !== "matrix") {
-    if (!isChildrenPresent(question) && !isVisibleIfPresent(question)) {
-      hierarchy = updateHierarchyChildren(hierarchy, parentId, index);
-      return hierarchy;
-    }
-
-    if (isChildrenPresent(question) && !isVisibleIfPresent(question)) {
-      const data = await IfChildrenAndNoVisibleIf(
-        question,
-        hierarchy,
-        index,
-        parentId,
-        migratedCount
-      );
-    }
-
-    if (!isChildrenPresent(question) && isVisibleIfPresent(question)) {
-      return await IfNoChildrenAndVisibleIfAndInnerChildren(
-        question,
-        hierarchy,
-        index,
-        migratedCount
-      );
-    }
-  } else if (question.responseType === "matrix") {
-    const instanceQuestions = question?.instanceQuestions;
-    if (hierarchy.criterias[index]) {
-      hierarchy.criterias[index] = {
-        ...hierarchy.criterias[index],
-        allowMultipleInstances: "Yes",
-        instances: { label: question.instanceIdentifier },
-      };
-    }
-
-    const visible = !isEmpty(get(question, "visibleIf"))
-      ? question?.visibleIf[0]
-      : {};
-
-    let matrixParentId = "";
-    let matrixParentQuestion = {};
-    let matrixParentIdMigratedId = "";
-    if (!isEmpty(visible)) {
-      matrixParentId = visible._id;
-      matrixParentQuestion = await getQuestionFromDB(matrixParentId);
-      matrixParentIdMigratedId = matrixParentQuestion?.migratedId || "";
-      if (!matrixParentIdMigratedId) {
-        matrixParentIdMigratedId = await createQuestionTemplate(
-          question,
-          migratedCount
-        );
-      }
-      hierarchy = updateHierarchyChildren(
-        hierarchy,
-        matrixParentIdMigratedId,
-        index
-      );
-    }
-
-    for (let i = 0; i < instanceQuestions.length; i++) {
-      const instanceQuestionId = instanceQuestions[i];
-      const insQuestion = await getQuestionFromDB(instanceQuestionId);
-      const insMigratedId = await createQuestionTemplate(
-        insQuestion,
-        migratedCount
-      );
-
-      hierarchy = updateHierarchyChildren(hierarchy, insMigratedId, index);
-
-      if (!isEmpty(visible)) {
-        if (
-          hierarchy.criterias[index].branchingLogic.hasOwnProperty(
-            matrixParentIdMigratedId
-          )
-        ) {
-          hierarchy.criterias[index].branchingLogic[
-            matrixParentIdMigratedId
-          ].target.push(insMigratedId);
-
-          if (insMigratedId) {
-            hierarchy.criterias[index].branchingLogic[insMigratedId] = {
-              target: [],
-              preCondition: getPrecondition(
-                visible,
-                matrixParentIdMigratedId,
-                matrixParentQuestion
-              ),
-              source: [matrixParentIdMigratedId],
-            };
-          }
-        } else {
-          {
-            hierarchy.criterias[index].branchingLogic[
-              matrixParentIdMigratedId
-            ] = {
-              target: [insMigratedId],
-              preCondition: {},
-              source: [],
-            };
-
-            if (insMigratedId) {
-              hierarchy.criterias[index].branchingLogic[insMigratedId] = {
-                target: [],
-                preCondition: getPrecondition(
-                  visible,
-                  matrixParentIdMigratedId,
-                  matrixParentQuestion
-                ),
-                source: [matrixParentIdMigratedId],
-              };
-            }
-          }
-        }
-      }
-    }
+  for (let i = 0; i < data.matrixHierarchy.criterias.length; i++) {
+    const cri = data.matrixHierarchy.criterias[i];
+    data.hierarchy.criterias.push(cri);
   }
+
+  console.log();
+  console.log("migrateQuestionset", JSON.stringify(data.hierarchy));
+  console.log();
+  await updateHierarchyTemplate(
+    data.hierarchy,
+    solution,
+    programId,
+    migratedCount
+  );
+
+  return data.hierarchy;
 };
 
-const IfChildrenAndNoVisibleIf = async (
-  question,
+const migrateCriteriaQuestions = async (
+  solution,
   hierarchy,
-  index,
-  parentId,
+  matrixHierarchy,
   migratedCount
 ) => {
-  let branching = {
-    [parentId]: {
-      target: [],
-      preCondition: {},
-      source: [],
-    },
-  };
+  logger.debug(
+    `migrateCriteriaQuestions: ${solution?._id}`
+  );
 
-  if (question.children && question.children.length && !question.visibleIf) {
-    const children = question.children;
-    for (let i = 0; i < children.length; i++) {
-      const childId = children[i].toString();
-      const childQuestion = await getQuestionFromDB(childId);
-      const migratedId = await createQuestionTemplate(
-        childQuestion,
-        migratedCount
-      );
-      hierarchy = updateHierarchyChildren(hierarchy, migratedId, index);
+  let criteriaIds = solution?.themes[0]?.criteria || [];
+  criteriaIds = criteriaIds.map((criteria) => ObjectId(criteria?.criteriaId));
+  const criterias = await findAll("criteriaQuestions", {
+    _id: { $in: criteriaIds },
+  }).catch((err) => {});
 
-      if (migratedId) {
-        branching[parentId].target.push(migratedId);
-      }
+  for (let i = 0; i < criterias.length; i++) {
+    const criteria = criterias[i];
+    let questionIds = criteria?.evidences[0].sections[0]?.questions || [];
+    questionIds = questionIds.map((question) => question?._id);
 
-      if (
-        !isChildrenPresent(childQuestion) &&
-        isVisibleIfPresent(childQuestion)
-      ) {
-        const childBranching = await IfNoChildrenAndVisibleIf(
-          question,
-          parentId,
-          childQuestion,
-          migratedCount
-        );
+    const criteriaQuestions = await findAll("questions", {
+      _id: { $in: questionIds },
+    }).catch((err) => {});
 
-        branching = {
-          ...branching,
-          ...childBranching,
-        };
-      }
-    }
-  }
+    hierarchy.criterias[i] = getCriteriaData(criteria, solution?.type);
 
-  hierarchy.criterias[index].branchingLogic = branching;
-  return hierarchy;
-};
-
-const IfNoChildrenAndVisibleIf = async (
-  parentQuestion,
-  parentId,
-  question,
-  migratedCount
-) => {
-  const visibleIf = question.visibleIf || [];
-  let childBranching = {};
-  for (let i = 0; i < visibleIf.length; i++) {
-    const visible = visibleIf[i];
-    const childId = question._id.toString();
-    const chiQuestion = await getQuestionFromDB(childId);
-    const migratedId = await createQuestionTemplate(chiQuestion, migratedCount);
-    if (migratedId) {
-      childBranching = {
-        [migratedId]: {
-          target: [],
-          preCondition: getPrecondition(visible, parentId, parentQuestion),
-          source: [parentId],
-        },
-      };
-    }
-  }
-  return childBranching;
-};
-
-const IfNoChildrenAndVisibleIfAndInnerChildren = async (
-  question,
-  hierarchy,
-  index,
-  migratedCount
-) => {
-  const visibleIf = question.visibleIf || [];
-  for (let i = 0; i < visibleIf.length; i++) {
-    const visible = visibleIf[i];
-    const parentId = visible._id.toString();
-    const parentQuestion = await getQuestionFromDB(parentId);
-    const migratedId = await createQuestionTemplate(
-      parentQuestion,
-      migratedCount
+    console.log();
+    console.log(
+      "--------------------criteria----------------------",
+      criteria?.name
     );
-    hierarchy.criterias[index].questions.push(migratedId);
-    if (
-      isChildrenPresent(parentQuestion) &&
-      !isVisibleIfPresent(parentQuestion)
-    ) {
-      return await IfChildrenAndNoVisibleIf(
-        parentQuestion,
-        hierarchy,
-        index,
-        migratedId,
+    console.log();
+
+    logger.info(
+      `migrateCriteriaQuestions: --------------------criteria---------------------- ${criteria?.name}`
+    );
+
+    const data = await migrateQuestions(
+      (type = solution?.type),
+      criteriaQuestions,
+      hierarchy,
+      matrixHierarchy,
+      migratedCount,
+      (index = i),
+      (criteriaId = criteria?._id.toString())
+    );
+
+    hierarchy = data.hierarchy;
+    matrixHierarchy = data.matrixHierarchy;
+  }
+  return { hierarchy, matrixHierarchy };
+};
+
+const migrateQuestions = async (
+  type,
+  questions,
+  hierarchy,
+  matrixHierarchy,
+  migratedCount,
+  index,
+  criteriaId
+) => {
+  let matrixQuestions = {};
+  let nonMatrixQuestions = [];
+
+  console.log();
+  console.log("migrateQuestions", questions.length);
+  console.log();
+
+  logger.info(
+    `migrateQuestions: criteria:${criteriaId} questions: ${questions.length} `
+  );
+
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+
+    console.log();
+    console.log(
+      "migrateQuestions question responsetype",
+      question?.responseType,
+      "qid",
+      question._id,
+
+    );
+    console.log();
+
+    logger.info(
+      `migrateQuestions: criteria:${criteriaId} question: ${question?._id} question responseType: ${question?.responseType} `
+    );
+
+    
+    if (question?.responseType === "matrix") {
+
+
+      const data = await createSection(
+        type,
+        matrixHierarchy,
+        matrixQuestions,
+        questions,
+        criteriaId,
+        question,
         migratedCount
       );
+      matrixQuestions = data.matrixQuestions;
+      matrixHierarchy = data.matrixHierarchy;
+      questions = data.questions;
+
+      console.log();
+      console.log("migrateQuestions createSection", matrixHierarchy);
+      console.log();
+    } else {
+      console.log();
+      console.log(
+        "==========migrateQuestions getNonMatrixQuestions============",
+        question?.responseType,
+        question?._id
+      );
+      console.log();
+
+      const data = await getNonMatrixQuestions(
+        question,
+        questions,
+        nonMatrixQuestions,
+        matrixQuestions,
+        matrixHierarchy,
+        hierarchy,
+        index,
+        type,
+        migratedCount,
+        criteriaId
+      );
+
+      console.log();
+      console.log(
+        "==========migrateQuestions getNonMatrixQuestions end ============",
+        matrixHierarchy
+      );
+      console.log();
+
+      hierarchy = data.hierarchy;
+      matrixHierarchy = data.matrixHierarchy;
+      matrixQuestions = data.matrixQuestions;
+      nonMatrixQuestions = data.nonMatrixQuestions;
+      questions = data.questions;
     }
   }
+  return { hierarchy, matrixHierarchy };
 };
 
 module.exports = {
