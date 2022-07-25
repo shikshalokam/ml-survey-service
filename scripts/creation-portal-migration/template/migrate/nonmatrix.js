@@ -14,7 +14,7 @@ const {
 } = require("../helpers/hierarchyHelper");
 const { createSection } = require("./matrix");
 
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 
 const updateNonMatrixHierarchyChildren = (
@@ -253,25 +253,6 @@ const nonMatrixChildrenAndNoVisibleIf = async (
         child
       );
 
-
-    //   const data = await getNonMatrixQuestions(
-    //     question,
-    //     questions,
-    //     nonMatrixQuestions,
-    //     matrixQuestions,
-    //     matrixHierarchy,
-    //     hierarchy,
-    //     index,
-    //     type,
-    //     migratedCount,
-    //     criteriaId
-    //   );
-    //   return data;
-      //   hierarchy = data.hierarchy;
-      //   matrixHierarchy = data.matrixHierarchy;
-      //   matrixQuestions = data.matrixQuestions;
-      //   nonMatrixQuestions = data.nonMatrixQuestions;
-      //   questions = data.questions;
     }
   }
 

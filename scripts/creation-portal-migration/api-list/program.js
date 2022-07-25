@@ -5,7 +5,7 @@ const { getHeaders } = require("./headers");
 
 
 const createProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_program;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_program;
   const data = {
     request: {
       ...templateData,
@@ -23,7 +23,7 @@ const createProgram = async (templateData) => {
 };
 
 const updateProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_program;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.update_program;
   const data = {
     request: {
       ...templateData,
@@ -40,7 +40,7 @@ const updateProgram = async (templateData) => {
 };
 
 const publishProgram = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.publish_program;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.publish_program;
   const data = {
     request: {
       ...templateData,
@@ -58,7 +58,7 @@ const publishProgram = async (templateData) => {
 };
 const nominateProgram = async (program_id, author) => {
   const url =
-    CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.add_program_nomination;
+    CONFIG.HOST.vdn + CONFIG.APIS.add_program_nomination;
   const data = {
     request: {
       program_id: program_id,
@@ -94,7 +94,7 @@ const nominateProgram = async (program_id, author) => {
 
 const updateContributorToProgram = async (reqData) => {
   const url =
-    CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_program_nomination;
+    CONFIG.HOST.vdn + CONFIG.APIS.update_program_nomination;
   const data = {
     request: {
       ...reqData,

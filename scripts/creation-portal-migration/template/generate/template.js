@@ -36,7 +36,6 @@ const getSectionTemplate = (section) => {
   };
 };
 
-
 module.exports = {
   getSectionTemplate,
 };

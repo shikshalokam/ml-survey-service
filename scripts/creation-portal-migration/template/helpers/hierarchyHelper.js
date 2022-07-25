@@ -12,11 +12,15 @@ const {
   updateQuestionSetHierarchy,
   readQuestionSetHierarchy,
 } = require("../../api-list/question");
-const { CONFIG } = require("../../constant/config");
+const { CONFIG } = require("./../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
 
 const updateHierarchyChildren = (hierarchy, migratedId, index) => {
+
+  logger.debug(`updateHierarchyChildren: migratedId = ${migratedId}`)
+
+
   if (
     migratedId &&
     !hierarchy.criterias[index].questions.includes(migratedId)

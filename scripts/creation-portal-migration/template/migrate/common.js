@@ -1,10 +1,10 @@
-const { isEmpty } = require("lodash");
+const { isEmpty, compact } = require("lodash");
 const { getPrecondition } = require("../helpers/hierarchyHelper");
 const {
   getQuestionFromDB,
   createQuestionTemplate,
 } = require("../helpers/questionsetHelper");
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 const initHierarchy = (questionsetid, solution, programId, migratedId) => {
   return {

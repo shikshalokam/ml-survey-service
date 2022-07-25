@@ -1,5 +1,4 @@
-require("dotenv").config({path: "./../.env"});
-const { CONFIG } = require("./constant/config");
+require("dotenv").config({path: "./../../.env"});
 const { createDBInstance } = require("./db/dbConfig");
 const { findAll } = require("./db");
 const {
@@ -8,10 +7,11 @@ const {
 
 const { ObjectId } = require("mongodb");
 const logger = require("./logger");
+var fs = require("fs");
+const { CONFIG } = require("./constant/config");
 
 
-
-
+fs.existsSync("logs") || fs.mkdirSync("logs");
 
 const migrateData = async (req, res) => {
   try {
@@ -71,12 +71,11 @@ const migrateData = async (req, res) => {
     };
     const db = await createDBInstance();
     // req.query.questionsetID ||
-    // const id = "5f3bc15416fdc4ed008171b1";
+    const id = "600b21c57ea68a7ed9278873";
 
-    const data = await findAll("solutions", {
-      // _id: ObjectId(id),
-      // $or: [{migratedId: {$eq: null}}, {migratedId:{$exists: false}}],
-      programId: { $exists: true },
+    const data = await findAll(CONFIG.DB.TABLES.solutions, {
+      _id: ObjectId(id),
+      // programId: { $exists: true },
       type: { $in: ["observation", "survey"] },
     });
 

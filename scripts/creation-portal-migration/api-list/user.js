@@ -6,25 +6,25 @@ const { getHeaders } = require("./headers");
 const readUser = async (userId) => {
   const params = "organisations,roles,locations,declarations,externalIds";
   const url =
-    CONFIG.SUNBIRD.HOST.sunbird +
-    CONFIG.SUNBIRD.APIS.read_user +
+    CONFIG.HOST.base +
+    CONFIG.APIS.read_user +
     userId +
     "?fields=" +
     params;
 
   const res = await axios
-    .get(url, await getHeaders(true, "sunbird"))
+    .get(url, await getHeaders(true, "base"))
     .catch((err) => {
       logger.error(`Error while reading User: ${JSON.stringify(err?.response?.data)}`)
     });
 };
 
 const searchUser = async (userId) => {
-  const url = CONFIG.SUNBIRD.HOST.sunbird + CONFIG.SUNBIRD.APIS.search_user;
+  const url = CONFIG.HOST.base + CONFIG.APIS.search_user;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "sunbird"),
+    headers: await getHeaders(true, "base"),
     data: {
       request: { filters: { id: userId } },
     },

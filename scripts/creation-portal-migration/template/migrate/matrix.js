@@ -12,7 +12,7 @@ const {
 
 const { getSectionTemplate } = require("../generate/template");
 const { compact, isEmpty } = require("lodash");
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 const createSection = async (
   type,
@@ -298,17 +298,6 @@ const childrenAndnoVisibleIf = async (
           question,
           child
         );
-
-        // return await getMatrixQuestions(
-        //   child,
-        //   questions,
-        //   matrixQuestions,
-        //   criteriaId,
-        //   matrixId,
-        //   matrixHierarchy,
-        //   type,
-        //   migratedCount
-        // );
       }
     }
   }
@@ -350,21 +339,6 @@ const noChildrenAndVisibleIf = async (
   matrixHierarchy = updatedData.matrixHierarchy;
   matrixQuestions = updatedData.matrixQuestions;
   questions = updatedData.questions;
-
-  // if (pQuestion.responseType === "matrix") {
-  //   const data = await createSection(
-  //     type,
-  //     matrixHierarchy,
-  //     matrixQuestions,
-  //     questions,
-  //     criteriaId,
-  //     pQuestion,
-  //     migratedCount
-  //   );
-  //   matrixQuestions = data.matrixQuestions;
-  //   matrixHierarchy = data.matrixHierarchy;
-  //   questions = data.questions;
-  // } else {
 
   const pMatched = isQuestionMatched(
     matrixQuestions[criteriaId][matrixId],
