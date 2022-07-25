@@ -18,14 +18,14 @@ const genToken = async (url, body, type) => {
     });
     return res ? res.data.access_token : "";
   } else {
-    const token = type === "sunbird" ? this.sunbird_token : this.vdn_token;
+    const token = type === "base" ? this.base_token : this.vdn_token;
 
     return token;
   }
 };
 
 const validateToken = (type) => {
-  const token = type === "sunbird" ? this.sunbird_token : this.vdn_token;
+  const token = type === "base" ? this.base_token : this.vdn_token;
 
   try {
     jwt.verify(token, "shhhhh");
@@ -40,14 +40,14 @@ const generateToken = async (type) => {
   let body = {};
 
   switch (type) {
-    case "sunbird":
-      url = CONFIG.SUNBIRD.HOST.sunbird + CONFIG.SUNBIRD.APIS.token;
-      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.sunbird.query });
-      this.sunbird_token = await genToken(url, body, "sunbird");
-      return this.sunbird_token;
+    case "base":
+      url = CONFIG.HOST.base + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.BASE.QUERY });
+      this.base_token = await genToken(url, body, "base");
+      return this.base_token;
     case "vdn":
-      url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.token;
-      body = querystring.stringify({ ...CONFIG.SUNBIRD.config.vdn.query });
+      url = CONFIG.HOST.vdn + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.VDN.QUERY });
       this.vdn_token = await genToken(url, body, "vdn");
       return this.vdn_token;
   }
@@ -57,20 +57,20 @@ const getHeaders = async (isTokenReq, type) => {
   let headers = {};
 
   switch (type) {
-    case "sunbird":
+    case "base":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.SUNBIRD.config.sunbird.authorization,
+        Authorization: CONFIG.KEYS.BASE.AUTHORIZATION,
       };
       if (isTokenReq) {
-        headers["x-authenticated-user-token"] = await generateToken("sunbird");
+        headers["x-authenticated-user-token"] = await generateToken("base");
       }
       break;
 
     case "vdn":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.SUNBIRD.config.vdn.authorization,
+        Authorization: CONFIG.KEYS.VDN.AUTHORIZATION,
       };
       if (isTokenReq) {
         headers["x-authenticated-user-token"] = await generateToken("vdn");

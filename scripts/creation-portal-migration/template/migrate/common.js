@@ -4,7 +4,7 @@ const {
   getQuestionFromDB,
   createQuestionTemplate,
 } = require("../helpers/questionsetHelper");
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 const initHierarchy = (questionsetid, solution, programId, migratedId) => {
   return {

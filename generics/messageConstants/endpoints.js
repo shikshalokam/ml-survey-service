@@ -18,5 +18,7 @@ module.exports = {
     GET_PROJECT_TEMPLATE_LISTS : "/v1/project/templates/listByIds",
     DOWNLOADABLE_FILE_URL: "/v1/cloud-services/files/getDownloadableUrl",
     USER_READ : "/user/v1/read",
-    USER_READ_V5 : "/v5/user/read"
+    USER_READ_V5 : "/v5/user/read",
+    QUESTIONSET_READ: "api/questionset/v1/hierarchy",
+    QUESTION_READ: "api/question/v1/read"
 }

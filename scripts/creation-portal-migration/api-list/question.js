@@ -6,7 +6,7 @@ const { getHeaders } = require("./headers");
 // Questionset
 
 const createQuestionSet = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_questionset;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_questionset;
   const data = {
     request: {
       questionset: { ...templateData },
@@ -24,7 +24,7 @@ const createQuestionSet = async (templateData) => {
 };
 
 const updateQuestionSetHierarchy = async (templateData) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.update_hierarchy;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.update_hierarchy;
 
   const config = {
     method: "patch",
@@ -39,8 +39,8 @@ const updateQuestionSetHierarchy = async (templateData) => {
 
 const publishQuestionSet = async (questionsetId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.vdn +
-    CONFIG.SUNBIRD.APIS.publish_questionset +
+    CONFIG.HOST.vdn +
+    CONFIG.APIS.publish_questionset +
     "/" +
     questionsetId;
   const config = {
@@ -56,8 +56,8 @@ const publishQuestionSet = async (questionsetId) => {
 
 const readQuestionSetHierarchy = async (questionSetId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.vdn +
-    CONFIG.SUNBIRD.APIS.read_questionset +
+    CONFIG.HOST.vdn +
+    CONFIG.APIS.read_questionset +
     questionSetId +
     "?mode=edit";
 
@@ -73,7 +73,7 @@ const readQuestionSetHierarchy = async (questionSetId) => {
 
 // Questions
 const createQuestions = async (templateData, questionId) => {
-  const url = CONFIG.SUNBIRD.HOST.vdn + CONFIG.SUNBIRD.APIS.create_question;
+  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_question;
   const data = {
     request: {
       question: { ...templateData },
@@ -95,8 +95,8 @@ const createQuestions = async (templateData, questionId) => {
 
 const publishQuestion = async (questionId) => {
   const url =
-    CONFIG.SUNBIRD.HOST.vdn +
-    CONFIG.SUNBIRD.APIS.publish_question +
+    CONFIG.HOST.vdn +
+    CONFIG.APIS.publish_question +
     "/" +
     questionId;
   const config = {

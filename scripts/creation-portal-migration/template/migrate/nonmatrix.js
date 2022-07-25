@@ -14,7 +14,7 @@ const {
 } = require("../helpers/hierarchyHelper");
 const { createSection } = require("./matrix");
 
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 
 const updateNonMatrixHierarchyChildren = (

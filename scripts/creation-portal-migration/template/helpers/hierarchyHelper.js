@@ -12,7 +12,7 @@ const {
   updateQuestionSetHierarchy,
   readQuestionSetHierarchy,
 } = require("../../api-list/question");
-const { CONFIG } = require("../../constant/config");
+const { CONFIG } = require("./../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
 

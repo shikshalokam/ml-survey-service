@@ -85,7 +85,11 @@ let enviromentVariables = {
   "DISABLE_LEARNER_SERVICE_ON_OFF": {
     "message" : "Disable learner service on/off",
     "default": "ON"
-  }
+  },
+  "REDIS_URL": {
+    "message" : "Required redis url",
+    "optional" : false
+},
 }
 
 let success = true;

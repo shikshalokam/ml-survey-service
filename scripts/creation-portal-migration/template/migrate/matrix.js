@@ -12,7 +12,7 @@ const {
 
 const { getSectionTemplate } = require("../generate/template");
 const { compact, isEmpty } = require("lodash");
-const logger = require("./../../logger");
+const logger = require("../../logger");
 
 const createSection = async (
   type,

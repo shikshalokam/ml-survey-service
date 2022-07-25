@@ -47,8 +47,20 @@ const configuration = {
   }
 };
 
+/**
+  * Redis connection information.
+  * @method
+  * @name redis_connect
+*/
+
+let redis_connect =  async function () {
+  global.cache = require("./redisConfig").connect;
+  console.log("cache", cache);
+}
+
 db_connect();
 kafka_connect();
 // elasticsearch_connect();
+redis_connect()
 
 module.exports = configuration;

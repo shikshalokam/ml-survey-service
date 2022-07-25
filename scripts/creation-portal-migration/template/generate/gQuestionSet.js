@@ -1,15 +1,15 @@
 const { ObjectId } = require("mongodb");
 const { createQuestionSet } = require("../../api-list/question");
 
-const { CONFIG } = require("../../constant/config");
+const { CONFIG } = require("./../../constant/config");
 const { findAll, updateById } = require("../../db");
 const logger = require("../../logger");
 const { updateHierarchyTemplate } = require("../helpers/hierarchyHelper");
 const { setQuestionSetTemplate } = require("../helpers/questionsetHelper");
 const { createProgramTemplate } = require("./gProgram");
 const { getCriteriaData, initHierarchy } = require("../migrate/common");
-const { createSection } = require("./../migrate/matrix");
-const { getNonMatrixQuestions } = require("./../migrate/nonmatrix");
+const { createSection } = require("../migrate/matrix");
+const { getNonMatrixQuestions } = require("../migrate/nonmatrix");
 
 const getQuestionSetTemplates = async (solutions, migratedCount) => {
   const data = Promise.all(
@@ -142,7 +142,7 @@ const migrateCriteriaQuestions = async (
 
   let criteriaIds = solution?.themes[0]?.criteria || [];
   criteriaIds = criteriaIds.map((criteria) => ObjectId(criteria?.criteriaId));
-  const criterias = await findAll("criteriaQuestions", {
+  const criterias = await findAll(CONFIG.DB.TABLES.criteria_questions, {
     _id: { $in: criteriaIds },
   }).catch((err) => {});
 
@@ -151,7 +151,7 @@ const migrateCriteriaQuestions = async (
     let questionIds = criteria?.evidences[0].sections[0]?.questions || [];
     questionIds = questionIds.map((question) => question?._id);
 
-    const criteriaQuestions = await findAll("questions", {
+    const criteriaQuestions = await findAll(CONFIG.DB.TABLES.questions, {
       _id: { $in: questionIds },
     }).catch((err) => {});
 

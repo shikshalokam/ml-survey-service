@@ -1,7 +1,7 @@
 const { capitalize, isEmpty, get } = require("lodash");
 const { ObjectId } = require("mongodb");
 const { createQuestions, publishQuestion } = require("../../api-list/question");
-const { CONFIG } = require("../../constant/config");
+const { CONFIG } = require("./../../constant/config");
 const { updateById, findAll } = require("../../db");
 const logger = require("../../logger");
 const {
