@@ -28,12 +28,12 @@ module.exports = (req) => {
             req.checkBody("createdFor").exists().withMessage("required createdFor");
         },
         updateMapObservation: function () {
-            req.checkQuery("solutionId").exists().withMessage("required solutionId id");
+            req.checkParams('_id').exists().withMessage("required solutionId id")
             req.checkBody("name").exists().withMessage("required name");
-            req.checkBody("description").exists().withMessage("required description");
-            req.checkBody("startDate").exists().withMessage("required startDate");
-            req.checkBody("endDate").exists().withMessage("required startDate");
-            req.checkBody("status").exists().withMessage("required status");
+            req.checkBody("description").optional().withMessage("required description");
+            req.checkBody("startDate").optional().withMessage("required startDate");
+            req.checkBody("endDate").optional().withMessage("required startDate");
+            req.checkBody("status").optional().withMessage("required status");
         },
 
     }
