@@ -837,11 +837,8 @@ module.exports = class ObservationSubmissions extends Abstract {
           externalId: solutionId,
           type : "observation",
          // scoringSystem : "pointsBasedScoring"
-        },
-         { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}
-         ).lean()
-        console.log("solutionDocumentntnt", solutionDocument);
-        
+        }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}).lean()
+ 
         if (!solutionDocument) {
           return resolve({
             status: httpStatusCode.bad_request.status,
@@ -850,7 +847,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         let queryObject = {
-          // "createdBy": createdBy,
+          "createdBy": createdBy,
           "entityExternalId": entityId,
           "solutionExternalId": solutionId,
           "submissionNumber" : (submissionNumber) ? submissionNumber : 1
@@ -861,7 +858,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           { "answers": 1, "criteria": 1, "evidencesStatus": 1, "entityInformation": 1, "entityProfile": 1, "solutionExternalId": 1 , "scoringSystem" : 1}
         ).lean();
 
-        console.log("sbdnsdbsndbs", queryObject, submissionDocument);
         if (!submissionDocument._id) {
           throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND
         }
@@ -997,14 +993,14 @@ module.exports = class ObservationSubmissions extends Abstract {
         req.body = req.body || {};
         let message = messageConstants.apiResponses.CRITERIA_RATING;
 
-        // let createdBy = req.query.createdBy;
+        let createdBy = req.query.createdBy;
         let solutionId = req.query.solutionId;
         let submissionNumber = (req.query.submissionNumber) ? req.query.submissionNumber : "all";
         let entityId = req.query.entityId.split(",");
 
-        // if (!createdBy) {
-        //   throw messageConstants.apiResponses.CREATED_BY_NOT_FOUND;
-        // }
+        if (!createdBy) {
+          throw messageConstants.apiResponses.CREATED_BY_NOT_FOUND;
+        }
 
         if (!solutionId) {
           throw messageConstants.apiResponses.SOLUTION_ID_NOT_FOUND;
@@ -1028,7 +1024,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         let queryObject = {
-          // "createdBy": createdBy,
+          "createdBy": createdBy,
           "solutionExternalId": solutionId,
           "entityExternalId": { $in: entityId }
         };
@@ -1182,7 +1178,6 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
     ]
   }
-
   */
    /**
    * List observation submissions
@@ -1230,7 +1225,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           "status": "completed"
         }
   }
-
   */
    /**
    * Get observation submission status
@@ -1279,7 +1273,6 @@ module.exports = class ObservationSubmissions extends Abstract {
     "status": 200,
     "result": false
   }
-
   */
    /**
    * Disable Observation Submission Based on Solution Id
@@ -1544,4 +1537,3 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
 };
-
