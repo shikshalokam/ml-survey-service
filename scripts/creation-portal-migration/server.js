@@ -5,7 +5,6 @@ const {
   getQuestionSetTemplates,
 } = require("./template/generate/gQuestionSet.js");
 
-const { ObjectId } = require("mongodb");
 const logger = require("./logger");
 var fs = require("fs");
 const { CONFIG } = require("./constant/config");
@@ -86,11 +85,9 @@ const migrateData = async (req, res) => {
     console.log();
     console.log("migratedCounttt", JSON.stringify(migratedCount));
     console.log();
-    // logger.in
+
     logger.info(`\n migratedCount ${JSON.stringify(migratedCount)}`);
-    
-    // return template;
-    process.exit();
+        process.exit();
   } catch (err) {
     logger.error(`Error while migrating : ${err}`)
 
