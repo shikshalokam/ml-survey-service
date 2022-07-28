@@ -7,8 +7,6 @@
 
 // Dependencies 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
-const kpServiceUrl = process.env.DOCK_URL
-const request = require('request');
 const questionSetService = require(ROOT_PATH + "/generics/services/questionset");
  
 /**
