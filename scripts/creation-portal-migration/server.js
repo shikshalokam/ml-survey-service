@@ -70,12 +70,9 @@ const migrateData = async (req, res) => {
       },
     };
     const db = await createDBInstance();
-    // req.query.questionsetID ||
-    const id = "600b21c57ea68a7ed9278873";
 
     const data = await findAll(CONFIG.DB.TABLES.solutions, {
-      _id: ObjectId(id),
-      // programId: { $exists: true },
+      programId: { $exists: true },
       type: { $in: ["observation", "survey"] },
     });
 
