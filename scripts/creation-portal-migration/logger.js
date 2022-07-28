@@ -28,19 +28,5 @@ var logger = new Logger({
 });
 
 
-error = async (msg) => {
-  logger.error(msg);
-};
 
-debug = async (msg) => {
-  logger.debug(msg);
-};
-info = async (msg) => {
-  logger.info(msg);
-};
-
-module.exports = {
-  info,
-  error,
-  debug,
-};
+module.exports = logger;
