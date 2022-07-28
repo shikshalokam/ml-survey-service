@@ -47,8 +47,6 @@ const configuration = {
   }
 };
 
-
-
 db_connect();
 kafka_connect();
 // elasticsearch_connect();

@@ -42,7 +42,7 @@ let health_check = async function(req,res) {
     let checks = [];
     let mongodbConnection = await mongodbHealthCheck.health_check();
     let kafkaConnection = await kafkaHealthCheck.health_check();
-    
+
     let coreServiceStatus = await kendraHealthCheck.health_check();
     let elasticSearchConnection = await elasticSearchHealthCheck.health_check();
   

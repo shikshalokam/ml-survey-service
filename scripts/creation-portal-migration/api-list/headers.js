@@ -18,14 +18,14 @@ const genToken = async (url, body, type) => {
     });
     return res ? res.data.access_token : "";
   } else {
-    const token = type === "base" ? this.base_token : this.vdn_token;
+    const token = type === "base" ? this.base_token : this.creation_portal_token;
 
     return token;
   }
 };
 
 const validateToken = (type) => {
-  const token = type === "base" ? this.base_token : this.vdn_token;
+  const token = type === "base" ? this.base_token : this.creation_portal_token;
 
   try {
     jwt.verify(token, "shhhhh");
@@ -45,11 +45,11 @@ const generateToken = async (type) => {
       body = querystring.stringify({ ...CONFIG.KEYS.BASE.QUERY });
       this.base_token = await genToken(url, body, "base");
       return this.base_token;
-    case "vdn":
-      url = CONFIG.HOST.vdn + CONFIG.APIS.token;
-      body = querystring.stringify({ ...CONFIG.KEYS.VDN.QUERY });
-      this.vdn_token = await genToken(url, body, "vdn");
-      return this.vdn_token;
+    case "creation_portal":
+      url = CONFIG.HOST.creation_portal + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.CREATION_PORTAL.QUERY });
+      this.creation_portal_token = await genToken(url, body, "creation_portal");
+      return this.creation_portal_token;
   }
 };
 
@@ -67,13 +67,13 @@ const getHeaders = async (isTokenReq, type) => {
       }
       break;
 
-    case "vdn":
+    case "creation_portal":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.KEYS.VDN.AUTHORIZATION,
+        Authorization: CONFIG.KEYS.CREATION_PORTAL.AUTHORIZATION,
       };
       if (isTokenReq) {
-        headers["x-authenticated-user-token"] = await generateToken("vdn");
+        headers["x-authenticated-user-token"] = await generateToken("creation_portal");
       }
       break;
   }

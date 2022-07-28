@@ -13,7 +13,7 @@ const CONFIG = {
 
   HOST: {
     base: process.env.BASE_HOST,
-    vdn: process.env.CREATION_PORTAL_URL,
+    creation_portal: process.env.CREATION_PORTAL_URL,
   },
   APIS: {
     token: "auth/realms/sunbird/protocol/openid-connect/token",
@@ -42,7 +42,7 @@ const CONFIG = {
       },
       AUTHORIZATION: process.env.BASE_AUTHORIZATION,
     },
-    VDN: {
+    CREATION_PORTAL: {
       QUERY: {
         username: process.env.BASE_USER,
         password: process.env.BASE_PWD,

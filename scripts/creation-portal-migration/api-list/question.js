@@ -6,7 +6,7 @@ const { getHeaders } = require("./headers");
 // Questionset
 
 const createQuestionSet = async (templateData) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_questionset;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.create_questionset;
   const data = {
     request: {
       questionset: { ...templateData },
@@ -15,7 +15,7 @@ const createQuestionSet = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: data,
   };
   const res = await axios(config);
@@ -24,12 +24,12 @@ const createQuestionSet = async (templateData) => {
 };
 
 const updateQuestionSetHierarchy = async (templateData) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.update_hierarchy;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.update_hierarchy;
 
   const config = {
     method: "patch",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: templateData,
   };
 
@@ -39,14 +39,14 @@ const updateQuestionSetHierarchy = async (templateData) => {
 
 const publishQuestionSet = async (questionsetId) => {
   const url =
-    CONFIG.HOST.vdn +
+    CONFIG.HOST.creation_portal +
     CONFIG.APIS.publish_questionset +
     "/" +
     questionsetId;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: {},
   };
 
@@ -56,7 +56,7 @@ const publishQuestionSet = async (questionsetId) => {
 
 const readQuestionSetHierarchy = async (questionSetId) => {
   const url =
-    CONFIG.HOST.vdn +
+    CONFIG.HOST.creation_portal +
     CONFIG.APIS.read_questionset +
     questionSetId +
     "?mode=edit";
@@ -64,7 +64,7 @@ const readQuestionSetHierarchy = async (questionSetId) => {
   const config = {
     method: "get",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
   };
 
   const res = await axios(config);
@@ -73,7 +73,7 @@ const readQuestionSetHierarchy = async (questionSetId) => {
 
 // Questions
 const createQuestions = async (templateData, questionId) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_question;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.create_question;
   const data = {
     request: {
       question: { ...templateData },
@@ -82,7 +82,7 @@ const createQuestions = async (templateData, questionId) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: data,
   };
   const res = await axios(config).catch((err) => {
@@ -95,14 +95,14 @@ const createQuestions = async (templateData, questionId) => {
 
 const publishQuestion = async (questionId) => {
   const url =
-    CONFIG.HOST.vdn +
+    CONFIG.HOST.creation_portal +
     CONFIG.APIS.publish_question +
     "/" +
     questionId;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn")
+    headers: await getHeaders(true, "creation_portal")
   };
 
   const res = await axios(config)

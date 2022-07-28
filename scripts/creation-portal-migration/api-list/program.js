@@ -5,7 +5,7 @@ const { getHeaders } = require("./headers");
 
 
 const createProgram = async (templateData) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.create_program;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.create_program;
   const data = {
     request: {
       ...templateData,
@@ -14,7 +14,7 @@ const createProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "vdn"),
+    headers: await getHeaders(false, "creation_portal"),
     data: data,
   };
 
@@ -23,7 +23,7 @@ const createProgram = async (templateData) => {
 };
 
 const updateProgram = async (templateData) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.update_program;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.update_program;
   const data = {
     request: {
       ...templateData,
@@ -32,7 +32,7 @@ const updateProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "vdn"),
+    headers: await getHeaders(false, "creation_portal"),
     data: data,
   };
   const res = await axios(config);
@@ -40,7 +40,7 @@ const updateProgram = async (templateData) => {
 };
 
 const publishProgram = async (templateData) => {
-  const url = CONFIG.HOST.vdn + CONFIG.APIS.publish_program;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.publish_program;
   const data = {
     request: {
       ...templateData,
@@ -49,7 +49,7 @@ const publishProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "vdn"),
+    headers: await getHeaders(false, "creation_portal"),
     data: data,
   };
 
@@ -58,7 +58,7 @@ const publishProgram = async (templateData) => {
 };
 const nominateProgram = async (program_id, author) => {
   const url =
-    CONFIG.HOST.vdn + CONFIG.APIS.add_program_nomination;
+    CONFIG.HOST.creation_portal + CONFIG.APIS.add_program_nomination;
   const data = {
     request: {
       program_id: program_id,
@@ -84,7 +84,7 @@ const nominateProgram = async (program_id, author) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: data,
   };
 
@@ -94,7 +94,7 @@ const nominateProgram = async (program_id, author) => {
 
 const updateContributorToProgram = async (reqData) => {
   const url =
-    CONFIG.HOST.vdn + CONFIG.APIS.update_program_nomination;
+    CONFIG.HOST.creation_portal + CONFIG.APIS.update_program_nomination;
   const data = {
     request: {
       ...reqData,
@@ -104,7 +104,7 @@ const updateContributorToProgram = async (reqData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "vdn"),
+    headers: await getHeaders(true, "creation_portal"),
     data: data,
   };
 
