@@ -11,7 +11,6 @@ const copyQuestionSet = function (copyReq, questionSetId) {
   }
   const options = {
     headers,
-    json: true,
     json: { request: { questionset: copyReq } }
   };
   console.log("")
