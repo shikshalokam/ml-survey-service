@@ -1,55 +1,5 @@
 
-const baseAssessment = {
-  _id: "",
-  question: "",
-  isCompleted: "",
-  showRemarks: "",
-  options: "",
-  sliderOptions: "",
-  children: "",
-  questionGroup: "",
-  fileName: "",
-  instanceQuestions: "",
-  isAGeneralQuestion: "",
-  autoCapture: "",
-  allowAudioRecording: "",
-  prefillFromEntityProfile: "",
-  entityFieldName: "",
-  isEditable: "",
-  showQuestionInPreview: "",
-  deleted: "",
-  remarks: "",
-  value: "",
-  usedForScoring: "",
-  questionType: "",
-  canBeNotApplicable: "",
-  visibleIf: "",
-  validation: "",
-  file: "",
-  externalId: "",
-  tip: "",
-  hint: "",
-  responseType: "pageQuestions",
-  modeOfCollection: "",
-  accessibility: "",
-  rubricLevel: "",
-  sectionHeader: "",
-  page: "p1",
-  questionNumber: "",
-  updatedAt: "",
-  createdAt: "",
-  __v: "",
-  createdFromQuestionId: "",
-  evidenceMethod: "",
-  payload: "",
-  startTime: "",
-  endTime: "",
-  gpsLocation: "",
-  dateFormat: "",
-  instanceIdentifier: "",
-  pageQuestions: [],
-  
-};
+
 
 const baseQuestion = {
   _id: "identifier",
@@ -199,7 +149,6 @@ const questionType = {
 };
 
 module.exports = {
-  baseAssessment,
   baseQuestion,
   questionType,
 };

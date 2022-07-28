@@ -6,7 +6,6 @@ function health_check() {
 
         const db = redis.createClient(process.env.REDIS_URL);
           
-        console.log("health_check", db);
 
         db.on("error", function () {
             return resolve(false)
