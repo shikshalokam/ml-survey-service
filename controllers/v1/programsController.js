@@ -762,4 +762,107 @@ module.exports = class Programs extends Abstract {
     })
   } 
 
+
+  /**
+  * @api {post} /programs/mapObservation
+  * @apiVersion 1.0.0
+  * @apiName mapObservation
+  * @apiGroup Program
+  * @apiSampleRequest /programs/mapObservation
+  *{
+    "programId": "5f34e44681871d939950bca5",
+    "questionsetId": "do_1135353079207444481964",
+    "createdFor": [
+        "ShikshaLokam"
+    ],
+    "name": "ShikshaLokam-QS"
+  }  
+  * @apiParamExample {json} Response:
+  {
+    "message": "mapped obsertion to program successfully",
+    "status": 200,
+    "result": {
+        "do_1135353079207444481964": "do_11357345389617152011677",
+        "do_11357345389617152011677": "62c287307d70ae36aaf96cd3"
+    }
+   }
+
+  /**
+   * Map Observation to program.
+   * @method
+   * @name mapObservation
+   * @param {Object} req - requested data.
+   * @returns {JSON} - 
+   */
+
+  async mapObservation(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+      
+        let programUpdated = await programsHelper.mapObservation(
+          req.body.programId,req.body.questionsetId,{
+            createdFor: req.body.createdFor, 
+            createdBy:  req.userDetails.userId,
+            name: req.body.name
+          }
+        );
+    
+        return resolve(programUpdated);
+          
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        });
+      }
+    });
+  }
+
+
+    /**
+  * @api {post} /programs/updateMapObservation/:solutionId
+  * @apiVersion 1.0.0
+  * @apiName mapObservation
+  * @apiGroup Program
+  * @apiParam {String} SolutionId Solution ID.
+  * @apiSampleRequest /programs/updateMapObservation
+  *{
+    "name": "ShikshaLokam",
+    "desciption": "",
+    "startDate": "2021-02-01",
+    "endDate": "2021-02-05",
+    "status": "published"
+  }  
+  * @apiParamExample {json} Response:
+  {
+    "message": "Observation successfully updated.",
+    "status": 200
+  }
+  /**
+   * updateMapObservation.
+   * @method
+   * @name updateMapObservation
+   * @param {Object} req - requested data.
+   * @returns {JSON} - 
+   */
+  async updateMapObservation(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        
+        let programUpdated = await programsHelper.mapUpdateObservation(
+          req.params._id,req.body
+          
+        );
+    
+        return resolve(programUpdated);
+      } catch (error) {
+          return reject({
+              status: error.status || httpStatusCode.internal_server_error.status,
+              message: error.message || httpStatusCode.internal_server_error.message
+          });
+      }
+    });
+  }
+
 };
