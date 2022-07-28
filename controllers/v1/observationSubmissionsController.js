@@ -838,7 +838,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           type : "observation",
          // scoringSystem : "pointsBasedScoring"
         }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}).lean()
-
+ 
         if (!solutionDocument) {
           return resolve({
             status: httpStatusCode.bad_request.status,
