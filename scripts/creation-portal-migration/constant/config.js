@@ -50,7 +50,7 @@ const CONFIG = {
         client_id: process.env.BASE_CLIENT,
         client_secret: process.env.BASE_CLIENT_SECRET,
       },
-      AUTHORIZATION: process.env.CREATION_PORTAL_URL_AUTHORIZATION,
+      AUTHORIZATION: process.env.CREATION_PORTAL_AUTHORIZATION_KEY,
     },
   },
 };
