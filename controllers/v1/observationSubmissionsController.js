@@ -837,8 +837,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           externalId: solutionId,
           type : "observation",
          // scoringSystem : "pointsBasedScoring"
-        }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}
-         ).lean()
+        }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}).lean()
         
         if (!solutionDocument) {
           return resolve({
