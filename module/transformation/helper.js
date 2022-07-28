@@ -1,6 +1,7 @@
 // Dependencies.
 const { isEmpty, find, capitalize } = require("lodash");
-const { question, questionset } = require("../../generics/services/questions");
+const { readQuestion } = require("../../generics/services/question");
+const { readQuestionSet } = require("../../generics/services/questionset");
 const { baseAssessment, questionType } = require("../../templates/questions");
 const {
   criteriaTemplate,
@@ -16,11 +17,13 @@ module.exports = class Transformation {
     isPageQuestionsRequired = true
   ) {
     return new Promise(async (resolve, reject) => {
-      const res = await questionset(migratedId).catch((err) => {
+      const res = await readQuestionSet(migratedId).catch((err) => {
         console.log("Error", err?.response?.data);
         reject(err?.response?.data);
       });
-      const questionSetHierarchy = res?.data;
+
+      const questionSetHierarchy = res?.result?.questionSet;
+
       const migratedCriteriaQuestions = questionSetHierarchy?.children || [];
       const evidences = await this.questionEvidences(
         migratedCriteriaQuestions,
@@ -111,7 +114,7 @@ module.exports = class Transformation {
 
 
       for (let j = 0; j < children.length; j++) {
-        const res = await question(children[j]?.identifier);
+        const res = await readQuestion(children[j]?.identifier);
 
         let childData = res?.data;
         readQuestions.push(childData);
@@ -192,7 +195,7 @@ module.exports = class Transformation {
           if (!branchingQueId) {
             branchingQue = find(children, { identifier: ques?.source[0] });
             branchingQueId = branchingQue?.identifier;
-            const res = await question(branchingQueId);
+            const res = await readQuestion(branchingQueId);
             branchingQue = res?.data;
           }
 

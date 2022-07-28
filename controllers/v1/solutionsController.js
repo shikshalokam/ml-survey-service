@@ -13,6 +13,10 @@ const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper");
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
+const transFormationHelper = require(MODULES_BASE_PATH + "/transformation/helper");
+
+const redis = require("./../../config/redisConfig");
+const cache = redis.client;
 
 /**
     * Solutions
@@ -2247,12 +2251,20 @@ module.exports = class Solutions extends Abstract {
   async questions(req) {
     return new Promise(async (resolve, reject) => {
       try {
-
-        let response = {
-          message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
-          result: {}
-        };
-
+          const cacheData = await cache
+            .get(`solutionQuestions:${req.params._id}`)
+            .catch((err) => {
+              console.log("Error in getting data from redis:", err);
+            });
+  
+      if (cacheData) {
+          return resolve(JSON.parse(cacheData));
+      } else {
+          let response = {
+              message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
+              result: {},
+          };
+  
         let solutionId = req.params._id;
         let userId = req.userDetails.userId;
 
@@ -2264,7 +2276,7 @@ module.exports = class Solutions extends Abstract {
 
         let solutionDocument = await database.models.solutions.findOne(
                   { _id: solutionId },
-                  solutionDocumentProjectionFields
+                  { ...solutionDocumentProjectionFields, migratedId: 1, type: 1 }
               ).lean();
           
         if( !solutionDocument ) {
@@ -2273,6 +2285,18 @@ module.exports = class Solutions extends Abstract {
             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
           });
         }
+
+            const migratedId = solutionDocument?.migratedId;
+  
+                
+            if (!migratedId) {
+              let responseMessage =
+              messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
+            return resolve({
+              status: httpStatusCode.bad_request.status,
+              message: responseMessage,
+            });
+            }
 
         let solutionDocumentFieldList = await observationsHelper.solutionDocumentFieldListInResponse()
 
@@ -2285,92 +2309,30 @@ module.exports = class Solutions extends Abstract {
         assessment.pageHeading = solutionDocument.pageHeading;
         assessment.submissionId = "";
 
-        let criteriaId = new Array;
-        let criteriaObject = {};
-        let criteriaIdArray = gen.utils.getCriteriaIdsAndWeightage(solutionDocument.themes);
-
-        criteriaIdArray.forEach(eachCriteriaId => {
-            criteriaId.push(eachCriteriaId.criteriaId);
-            criteriaObject[eachCriteriaId.criteriaId.toString()] = {
-                weightage: eachCriteriaId.weightage
-            };
-        })
-
-        let criteriaQuestionDocument = await database.models.criteriaQuestions.find(
-            { _id: { $in: criteriaId } },
-            {
-                resourceType: 0,
-                language: 0,
-                keywords: 0,
-                concepts: 0
-            }
-        ).lean();
-
-        let evidenceMethodArray = {};
-        let submissionDocumentEvidences = {};
-        let submissionDocumentCriterias = [];
-        Object.keys(solutionDocument.evidenceMethods).forEach(solutionEcm => {
-            solutionDocument.evidenceMethods[solutionEcm].startTime = "";
-            solutionDocument.evidenceMethods[solutionEcm].endTime = "";
-            solutionDocument.evidenceMethods[solutionEcm].isSubmitted = false;
-            solutionDocument.evidenceMethods[solutionEcm].submissions = new Array;
-        })
-
-        submissionDocumentEvidences = solutionDocument.evidenceMethods;
-
-        criteriaQuestionDocument.forEach(criteria => {
-
-            criteria.weightage = criteriaObject[criteria._id.toString()].weightage;
-
-            submissionDocumentCriterias.push(
-                _.omit(criteria, [
-                    "evidences"
-                ])
+            let evidenceMethodArray = {};
+            let submissionDocumentEvidences = {};
+            let submissionDocumentCriterias = [];
+            Object.keys(solutionDocument.evidenceMethods).forEach(
+              (solutionEcm) => {
+                solutionDocument.evidenceMethods[solutionEcm].startTime = "";
+                solutionDocument.evidenceMethods[solutionEcm].endTime = "";
+                solutionDocument.evidenceMethods[solutionEcm].isSubmitted = false;
+                solutionDocument.evidenceMethods[solutionEcm].submissions =
+                  new Array();
+              }
             );
-
-            criteria.evidences.forEach(evidenceMethod => {
-
-                if (evidenceMethod.code) {
-
-                    if (!evidenceMethodArray[evidenceMethod.code]) {
-
-                        evidenceMethod.sections.forEach(ecmSection => {
-                            ecmSection.name = solutionDocument.sections[ecmSection.code];
-                        })
-                        _.merge(evidenceMethod, submissionDocumentEvidences[evidenceMethod.code]);
-                        evidenceMethodArray[evidenceMethod.code] = evidenceMethod;
-
-                    } else {
-
-                        evidenceMethod.sections.forEach(evidenceMethodSection => {
-
-                            let sectionExisitsInEvidenceMethod = 0;
-                            let existingSectionQuestionsArrayInEvidenceMethod = [];
-
-                            evidenceMethodArray[evidenceMethod.code].sections.forEach(exisitingSectionInEvidenceMethod => {
-
-                                if (exisitingSectionInEvidenceMethod.code == evidenceMethodSection.code) {
-                                    sectionExisitsInEvidenceMethod = 1;
-                                    existingSectionQuestionsArrayInEvidenceMethod = exisitingSectionInEvidenceMethod.questions;
-                                }
-
-                            });
-
-                            if (!sectionExisitsInEvidenceMethod) {
-                                evidenceMethodSection.name = solutionDocument.sections[evidenceMethodSection.code];
-                                evidenceMethodArray[evidenceMethod.code].sections.push(evidenceMethodSection);
-                            } else {
-                                evidenceMethodSection.questions.forEach(questionInEvidenceMethodSection => {
-                                    existingSectionQuestionsArrayInEvidenceMethod.push(
-                                        questionInEvidenceMethodSection
-                                    );
-                                });
-                            }
-                        });
-                    }
-                }
-            });
-        });
+  
+            submissionDocumentEvidences = solutionDocument.evidenceMethods;
+  
+            let evidences = {};
+            if (!!migratedId) {
+              response.result.solution._id = migratedId;
+              evidences = await transFormationHelper.getQuestionSetHierarchy(
+                migratedId,
+                submissionDocumentCriterias,
+                solutionDocument
+              );
+            }
 
         let entityDocument ={
           "metaInformation" :{},
@@ -2387,7 +2349,7 @@ module.exports = class Solutions extends Abstract {
             {}
         );
 
-        assessment.evidences = parsedAssessment.evidences;
+        assessment.evidences = evidences.evidences;
         assessment.submissions = parsedAssessment.submissions;
 
         if (parsedAssessment.generalQuestions && parsedAssessment.generalQuestions.length > 0) {
@@ -2395,8 +2357,14 @@ module.exports = class Solutions extends Abstract {
         }
 
         response.result.assessment = assessment;
-        return resolve(response);
-      
+
+        await cache.setEx(
+              `solutionQuestions:${req.params._id}`,
+              redis.expiry,
+              JSON.stringify(response)
+            );
+            return resolve(response);
+        }
       } catch (error) {
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,

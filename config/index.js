@@ -55,7 +55,6 @@ const configuration = {
 
 let redis_connect =  async function () {
   global.cache = require("./redisConfig").connect;
-  console.log("cache", cache);
 }
 
 db_connect();

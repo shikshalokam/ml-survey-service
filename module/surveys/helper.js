@@ -1825,10 +1825,7 @@ module.exports = class SurveysHelper {
                     throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
                 }
 
-                
-                console.log();
-                console.log("getDetailsByLink");
-                console.log();
+
 
                 let solutionDocument = await solutionsHelper.solutionDocuments
                 (
@@ -1847,9 +1844,7 @@ module.exports = class SurveysHelper {
                     "isAPrivateProgram"
                   ] 
                 )
-                console.log();
-                console.log("solutionDocument", solutionDocument);
-                console.log();
+
 
                 if (!solutionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
@@ -1878,9 +1873,7 @@ module.exports = class SurveysHelper {
                     ["_id"]
                 )
                 
-                console.log();
-                console.log("surveyDocument", surveyDocument);
-                console.log();
+  
                 let surveyId;
 
                 if (surveyDocument.length > 0) {
@@ -1993,6 +1986,10 @@ module.exports = class SurveysHelper {
                 }
                 const migratedId = solutionDocument[0]?.migratedId;
     
+                if (!migratedId) {
+                    throw new Error(messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED)
+                }
+
                 solutionDocument = solutionDocument[0];
     
                 let endDateCheckRequired = true;
@@ -2099,7 +2096,6 @@ module.exports = class SurveysHelper {
                   let evidences = {};
                   
                   if (!!migratedId) {
-                    console.log("migrattetemigrattetemigrattete", migratedId);
                     solutionDocument._id = migratedId;
                     evidences = await transFormationHelper.getQuestionSetHierarchy(migratedId, submissionDocumentCriterias, solutionDocument);
                   }

@@ -19,6 +19,6 @@ module.exports = {
     DOWNLOADABLE_FILE_URL: "/v1/cloud-services/files/getDownloadableUrl",
     USER_READ : "/user/v1/read",
     USER_READ_V5 : "/v5/user/read",
-    QUESTIONSET_READ: "api/questionset/v1/hierarchy",
-    QUESTION_READ: "api/question/v1/read"
+    READ_QUESTION_SET: "api/questionset/v1/hierarchy",
+    READ_QUESTION: "api/question/v1/read",
 }

@@ -1,23 +1,21 @@
 const redis = require("redis");
 
-var CACHE = function () {
+var Connect = function () {
   var client = redis.createClient(process.env.REDIS_URL);
 
 
   client.on("connect", function () {
-    console.log("redis client connected");
+    console.log("redis connected");
   });
 
   client.on("error", console.error.bind(console, "redis connection error:"));
-
-  console.log("redis", client);
 
 
   return {
     connect: client.connect(),
     client: client,
-    expiry: 24 * 3600
+    expiry: process.env.REDIS_TTL
   };
 };
 
-module.exports = CACHE();
+module.exports = Connect();
