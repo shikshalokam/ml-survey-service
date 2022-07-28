@@ -13,7 +13,7 @@ const CONFIG = {
 
   HOST: {
     base: process.env.BASE_HOST,
-    vdn: process.env.VDN_HOST,
+    vdn: process.env.CREATION_PORTAL_URL,
   },
   APIS: {
     token: "auth/realms/sunbird/protocol/openid-connect/token",
@@ -50,7 +50,7 @@ const CONFIG = {
         client_id: process.env.BASE_CLIENT,
         client_secret: process.env.BASE_CLIENT_SECRET,
       },
-      AUTHORIZATION: process.env.VDN_AUTHORIZATION,
+      AUTHORIZATION: process.env.CREATION_PORTAL_URL_AUTHORIZATION,
     },
   },
 };
