@@ -2,12 +2,13 @@
 const { isEmpty, find, capitalize } = require("lodash");
 const { readQuestion } = require("../../generics/services/question");
 const { readQuestionSet } = require("../../generics/services/questionset");
-const { baseAssessment, questionType } = require("../../templates/questions");
+const { questionType } = require("../../templates/questionTemp");
 const {
   criteriaTemplate,
   defaultCriteria,
+  baseAssessment,
   assessmentTemplate,
-} = require("../../templates/questionset");
+} = require("../../templates/criteriaAndAssessment");
 
 module.exports = class Transformation {
   static getQuestionSetHierarchy(
