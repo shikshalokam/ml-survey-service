@@ -9,6 +9,7 @@
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 
 
 /**
@@ -232,7 +233,7 @@ module.exports = class SurveySubmissionsHelper {
                         "createdBy"
                     ]
                 );
-                
+
                 if (!submissionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
                 }
@@ -743,6 +744,7 @@ module.exports = class SurveySubmissionsHelper {
     static surveySubmissionDetails(submissionId, status = "") {
         return new Promise(async (resolve, reject) => {
             try {
+
                 let queryObject = {
                     _id: submissionId
                 }
@@ -752,13 +754,47 @@ module.exports = class SurveySubmissionsHelper {
                 }
 
                 let surveySubmissionsDocument = await this.surveySubmissionDocuments( queryObject );
-    
+                
                 if (!surveySubmissionsDocument.length) {
                     throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
                 }
 
+                surveySubmissionsDocument = surveySubmissionsDocument[0];
+                
+                //adding question options to answers array 
+                if ( surveySubmissionsDocument.answers && Object.keys(surveySubmissionsDocument.answers).length > 0 ){
+                    
+                    let questionIds = [];
+                    for (let questionKey in surveySubmissionsDocument.answers) { 
+                        questionIds.push(questionKey);
+                    }
+
+                    if ( questionIds.length > 0 ) {
+
+                        let questionDocuments = await questionsHelper.questionDocument({
+                            _id : {
+                                $in : gen.utils.arrayIdsTobjectIds(questionIds)
+                            }
+                        }, [ 
+                            "options"
+                        ]);
+
+                        if ( questionDocuments.length > 0 ) {
+
+                            for ( let pointerToAnswers in surveySubmissionsDocument.answers ) {
+
+                                let findQuestion = questionDocuments.filter(eachQuestion=>eachQuestion._id == pointerToAnswers);
+                                
+                                if ( findQuestion && findQuestion.length > 0 ) {
+                                    surveySubmissionsDocument.answers[pointerToAnswers].options = findQuestion[0].options;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 let solutionDocument = await solutionsHelper.solutionDocuments({
-                    _id: surveySubmissionsDocument[0].solutionId
+                    _id: surveySubmissionsDocument.solutionId
                 }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
     
                 if(!solutionDocument.length){
@@ -766,14 +802,14 @@ module.exports = class SurveySubmissionsHelper {
                 }
                 
                 solutionDocument = solutionDocument[0];
-                surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
+                surveySubmissionsDocument['solutionInfo'] = solutionDocument;
 
-                if ( surveySubmissionsDocument[0].programId && surveySubmissionsDocument[0].programId != "" ) {
+                if ( surveySubmissionsDocument.programId && surveySubmissionsDocument.programId != "" ) {
 
                     let programDocument = 
                     await programsHelper.list(
                         {
-                            _id: surveySubmissionsDocument[0].programId,
+                            _id: surveySubmissionsDocument.programId,
                         },
                         ["name","description"],
                     );
@@ -781,11 +817,11 @@ module.exports = class SurveySubmissionsHelper {
                     if( !programDocument[0] ) {
                         throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
                     }
-                    surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
+                    surveySubmissionsDocument['programInfo'] = programDocument[0];
 
                 }
 
-                return resolve(surveySubmissionsDocument[0]);
+                return resolve(surveySubmissionsDocument);
 
             } catch (error) {
                 return reject({
