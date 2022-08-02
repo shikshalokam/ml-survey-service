@@ -7,7 +7,8 @@
 
 // Dependencies 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
-
+const questionSetService = require(ROOT_PATH + "/generics/services/questionset");
+ 
 /**
     * ProgramsHelper
     * @class
@@ -437,5 +438,167 @@ module.exports = class ProgramsHelper {
       }
     })
   }
+
+     /**
+   * 
+   * @method
+   * @name mapObservation
+   * @param {String} programId - Program Id.
+   * @param {Array} entities - entities.
+   * @returns {JSON} - Removed entities data.
+   */
+
+      static mapObservation(programId, questionSetId, copyReq) {
+        return new Promise(async (resolve, reject) => {
+          try {
+            let status;
+            let programData = await database.models.programs.findOne({ _id: programId }).lean();
+            if (!programData) {
+              return resolve({
+                message: messageConstants.apiResponses.PROGRAM_NOT_FOUND,
+                status: httpStatusCode.bad_request.status,
+              });
+            }
+            const copyQuestionSetRes = await questionSetService.copyQuestionSet(copyReq, questionSetId)
+            const copiedQuestionsetId = copyQuestionSetRes.result.node_id[questionSetId]
+            const readRes = await questionSetService.readQuestionSet(copiedQuestionsetId)
+            let readQuestionSetRes = readRes.result.questionSet
+            let updateRequest = {
+              request: {
+                data: {
+                  nodesModified: {
+                    [readQuestionSetRes.identifier]: {
+                      metadata: {
+                        visibility: "Private"
+                      }
+                    }
+                  },
+                  hierarchy: {
+                    [readQuestionSetRes.identifier]: {
+                      name: readQuestionSetRes.name,
+                      children: readQuestionSetRes.childNodes,
+                      root: true
+                    }
+                  }
+                }
+              }
+            }
+            const updateRes = await questionSetService.updateQuestionSetHierarchy(updateRequest)
+            if(updateRes.status === httpStatusCode.ok.status) {
+              let publishRes = await questionSetService.publishQuestionSet(copiedQuestionsetId);
+              if(publishRes.status === httpStatusCode.ok.status) {
+                let solution = {}
+                solution["programId"] = programId;
+                solution["entityType"] = readQuestionSetRes.entityType;
+                solution["createdBy"] = readQuestionSetRes.createdBy;
+                solution["name"] = readQuestionSetRes.name;
+                solution["description"] = readQuestionSetRes.description;
+                solution["migratedId"] = copiedQuestionsetId;
+                solution["externalId"]  = programData.externalId;
+                solution["type"] = readQuestionSetRes.primaryCategory;
+                solution["subType"] = readQuestionSetRes.entityType;
+                let solutionDocument
+                try {
+                  solutionDocument = await database.models.solutions.create(
+                    solution
+                  );
+                }  catch (error) {
+                  return resolve({
+                    success: false,
+                    status: error.status ?
+                      error.status : httpStatusCode['internal_server_error'].status,
+                    message: error.message
+                  })
+                }
+                solutionDocument._id ? status = `${solutionDocument._id} created` : status = `${solutionDocument._id} could not be created`;
+                if(status) {
+                  await database.models.programs.updateOne({ _id: programId }, { $addToSet: { components: solutionDocument._id } });
+                  return resolve({
+                    status: httpStatusCode.ok.status,
+                    result: {
+                      [questionSetId]: copiedQuestionsetId,
+                      [copiedQuestionsetId]: solutionDocument._id
+                    },
+                    message: "mapped solution to program successfully"
+                  })
+                }
+              }
+            }
+          } catch (error) {
+            return resolve({
+              success: false,
+              status: error.status ?
+                error.status : httpStatusCode['internal_server_error'].status,
+              message: error.message
+            })
+          }
+        })
+      } 
+
+
+     /**
+   * 
+   * @method
+   * @name mapObservation
+   * @param {String} programId - Program Id.
+   * @param {Array} entities - entities.
+   * @returns {JSON} - Removed entities data.
+   */
+
+  static mapUpdateObservation(solutionId, updateReq) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let solutionDocument = await database.models.solutions.findOne({
+          _id: solutionId,
+        }).lean()
+        if (!solutionDocument) {
+          return resolve({
+            message: messageConstants.apiResponses.SOLUTION_NOT_FOUND,
+            status: httpStatusCode.bad_request.status,
+          });
+        }
+        const updateRes = await questionSetService.updateQuestionSet(updateReq, solutionDocument.migratedId)
+        if(updateRes.status === 200) {
+          const publishQuestionSetRes = await questionSetService.publishQuestionSet(solutionDocument.migratedId)
+          if(publishQuestionSetRes.status === 200) {
+            let updateQuery = {};
+            updateQuery["$set"] = {};
+            if (updateReq.name) {
+              updateQuery["$set"]["name"] = updateReq.name;
+            }
+            if (updateReq.description) {
+              updateQuery["$set"]["description"] = updateReq.description;
+            }
+            if (updateReq.startDate) {
+              updateQuery["$set"]["startDate"] = updateReq.startDate;
+            }
+            if (updateReq.startDate) {
+              updateQuery["$set"]["endDate"] = updateReq.endDate;
+            }
+            if (updateReq.status) {
+              updateQuery["$set"]["status"] = updateReq.status;
+            }
+            let updatedSolutionDoc = await database.models.solutions.updateOne(
+              {
+                _id: solutionId,
+              },
+              updateQuery
+            ).lean();
+            return resolve({
+              message: messageConstants.apiResponses.OBSERVATION_UPDATED,
+            });
+
+          }
+        }
+      } catch (error) {
+        return resolve({
+          success: false,
+          status: error.status ?
+            error.status : httpStatusCode['internal_server_error'].status,
+          message: error.message
+        })
+      }
+    })
+  } 
 
 };
