@@ -6,9 +6,9 @@ const {
 } = require("../helpers/questionsetHelper");
 const logger = require("../../logger");
 
-const initHierarchy = (questionsetid, solution, programId, migratedId) => {
+const initHierarchy = (questionsetid, solution, programId, referenceQuestionSetId) => {
   return {
-    questionset: migratedId,
+    questionset: referenceQuestionSetId,
     questionsetDbId: questionsetid,
     isHierarchyUpdated: solution?.isHierarchyUpdated || false,
     isBranchingUpdated: solution?.isBranchingUpdated || false,
@@ -26,7 +26,7 @@ const initHierarchy = (questionsetid, solution, programId, migratedId) => {
 const getCriteriaData = (criteria, type, question = {}) => {
   if (isEmpty(question)) {
     return {
-      migratedId: "",
+      referenceQuestionSetId: "",
       criDbId: criteria?._id.toString(),
       code: criteria?.externalId,
       name: criteria?.name,
@@ -40,7 +40,7 @@ const getCriteriaData = (criteria, type, question = {}) => {
     };
   } else {
     return {
-      migratedId: "",
+      referenceQuestionSetId: "",
       _id: criteria?._id,
       criDbId: criteria?._id.toString(),
       code: criteria?.externalId,
@@ -122,7 +122,7 @@ const getQuestion = async (questions, questions2, id, migratedCount) => {
     question = matched;
   }
 
-  if (!isEmpty(question) && (!question?.migratedId || !question?.isPublished)) {
+  if (!isEmpty(question) && (!question?.referenceQuestionSetId || !question?.isPublished)) {
     question = await createQuestionTemplate(question, migratedCount);
   }
 
@@ -170,38 +170,38 @@ const updateHierarchyBranching = (
   pQuestion,
   child
 ) => {
-  const migratedId = child?.migratedId;
+  const referenceQuestionSetId = child?.referenceQuestionSetId;
 
   const visible = child?.visibleIf ? child?.visibleIf[0] : {};
 
   logger.debug(
-    `updateHierarchyBranching: migratedId = ${migratedId}; parentId = ${parentId}; visible: ${visible}`
+    `updateHierarchyBranching: referenceQuestionSetId = ${referenceQuestionSetId}; parentId = ${parentId}; visible: ${visible}`
   );
 
   if (!isEmpty(visible)) {
-    if (hasProperty(branching, index, parentId) && migratedId) {
+    if (hasProperty(branching, index, parentId) && referenceQuestionSetId) {
       if (
         !branching.criterias[index].branchingLogic[parentId].target.includes(
-          migratedId
+          referenceQuestionSetId
         )
       ) {
         branching.criterias[index].branchingLogic[parentId].target.push(
-          migratedId
+          referenceQuestionSetId
         );
       }
 
-      branching.criterias[index].branchingLogic[migratedId] = {
+      branching.criterias[index].branchingLogic[referenceQuestionSetId] = {
         target: [],
         preCondition: getPrecondition(visible, parentId, pQuestion),
         source: [parentId],
       };
-    } else if (migratedId) {
+    } else if (referenceQuestionSetId) {
       branching.criterias[index].branchingLogic[parentId] = {
-        target: [migratedId],
+        target: [referenceQuestionSetId],
         preCondition: {},
         source: [],
       };
-      branching.criterias[index].branchingLogic[migratedId] = {
+      branching.criterias[index].branchingLogic[referenceQuestionSetId] = {
         target: [],
         preCondition: getPrecondition(visible, parentId, pQuestion),
         source: [parentId],

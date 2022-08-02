@@ -55,7 +55,7 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
   let templateData = setQuestionSetTemplate(solution, programId);
   const questionSetId = solution?._id.toString();
 
-  let questionSetMigratedId = solution.migratedId;
+  let questionSetMigratedId = solution.referenceQuestionSetId;
 
   if (questionSetMigratedId) {
     migratedCount.success.questionSet.existing.migrated++;
@@ -84,10 +84,10 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
     }
 
     await updateById(CONFIG.DB.TABLES.solutions, questionSetId, {
-      migratedId: questionSetMigratedId,
+      referenceQuestionSetId: questionSetMigratedId,
     }).catch((err) => {
       logger.error(
-        `migrateQuestionset: Error while updating solution migratedId: 
+        `migrateQuestionset: Error while updating solution referenceQuestionSetId: 
         ${err}`
       );
       console.log(`migrateQuestionset: Error while updating question: 

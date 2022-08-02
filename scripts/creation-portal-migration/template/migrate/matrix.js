@@ -287,14 +287,14 @@ const childrenAndnoVisibleIf = async (
         matrixHierarchy = updateMatrixHierarchy(
           matrixHierarchy,
           matrixId,
-          child?.migratedId,
+          child?.referenceQuestionSetId,
           criteriaId
         );
         matrixHierarchy = updateMatrixHierarchyBranching(
           matrixHierarchy,
           criteriaId,
           matrixId,
-          question?.migratedId,
+          question?.referenceQuestionSetId,
           question,
           child
         );
@@ -350,14 +350,14 @@ const noChildrenAndVisibleIf = async (
     matrixHierarchy = updateMatrixHierarchy(
       matrixHierarchy,
       matrixId,
-      pQuestion?.migratedId,
+      pQuestion?.referenceQuestionSetId,
       criteriaId
     );
     matrixHierarchy = updateMatrixHierarchyBranching(
       matrixHierarchy,
       criteriaId,
       matrixId,
-      pQuestion?.migratedId,
+      pQuestion?.referenceQuestionSetId,
       pQuestion,
       question
     );
@@ -384,19 +384,19 @@ const noChildrenAndVisibleIf = async (
 const updateMatrixHierarchy = (
   matrixHierarchy,
   matrixId,
-  migratedId,
+  referenceQuestionSetId,
   criteriaId
 ) => {
   logger.debug(
-    `updateMatrixHierarchy: matrixId = ${matrixId}; migratedId = ${migratedId}`
+    `updateMatrixHierarchy: matrixId = ${matrixId}; referenceQuestionSetId = ${referenceQuestionSetId}`
   );
 
   const criterias = matrixHierarchy.criterias || [];
   for (let i = 0; i < criterias.length; i++) {
     const criteria = criterias[i];
     if (criteria?._id.toString() === matrixId) {
-      if (!criteria.questions.includes(migratedId)) {
-        criteria.questions.push(migratedId);
+      if (!criteria.questions.includes(referenceQuestionSetId)) {
+        criteria.questions.push(referenceQuestionSetId);
       }
     }
     criterias[i] = criteria;
@@ -419,7 +419,7 @@ const updateMatrixHierarchyQuestions = (
   questions
 ) => {
   logger.debug(
-    `updateMatrixHierarchyQuestions: criteriaId = ${criteriaId}; matrixId = ${matrixId};  question: ${question?._id}: migratedId: ${question?.migratedId}`
+    `updateMatrixHierarchyQuestions: criteriaId = ${criteriaId}; matrixId = ${matrixId};  question: ${question?._id}: referenceQuestionSetId: ${question?.referenceQuestionSetId}`
   );
 
   const matched = isQuestionMatched(
@@ -438,7 +438,7 @@ const updateMatrixHierarchyQuestions = (
     matrixHierarchy = updateMatrixHierarchy(
       matrixHierarchy,
       matrixId,
-      question?.migratedId,
+      question?.referenceQuestionSetId,
       criteriaId
     );
   }

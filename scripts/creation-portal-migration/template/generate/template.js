@@ -32,7 +32,7 @@ const getSectionTemplate = (section) => {
     timesUsed: "",
     updatedAt: section?.updatedAt,
     weightage: "",
-    migratedId: null,
+    referenceQuestionSetId: null,
   };
 };
 

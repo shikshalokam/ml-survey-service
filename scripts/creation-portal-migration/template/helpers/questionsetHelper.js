@@ -49,13 +49,13 @@ const createQuestionTemplate = async (question, migratedCount) => {
   console.log();
 
   const type = question?.responseType;
-  let migratedId = question?.migratedId;
+  let referenceQuestionSetId = question?.referenceQuestionSetId;
   let query = {};
   let questionToMigrate = {};
 
   let published = question?.isPublished;
 
-  if (type && !migratedId) {
+  if (type && !referenceQuestionSetId) {
     if (type.toLowerCase() === "date") {
       questionToMigrate = getDateTemplate(question);
     }
@@ -82,26 +82,25 @@ const createQuestionTemplate = async (question, migratedCount) => {
       console.log("db Question", JSON.stringify(question));
       console.log();
 
-      migratedId = await createQuestions(questionToMigrate, question._id);
-      console.log("migraysyys", migratedId);
-      question.migratedId = migratedId;
+      referenceQuestionSetId = await createQuestions(questionToMigrate, question._id);
+      question.referenceQuestionSetId = referenceQuestionSetId;
 
     }
   }
 
-  if (migratedId && !published) {
-    const res = await publishQuestion(migratedId).catch((err) => {
-      if (!migratedCount.failed.question.ids.includes(migratedId)) {
+  if (referenceQuestionSetId && !published) {
+    const res = await publishQuestion(referenceQuestionSetId).catch((err) => {
+      if (!migratedCount.failed.question.ids.includes(referenceQuestionSetId)) {
         migratedCount.failed.question.count++;
-        migratedCount.failed.question.ids.push(migratedId);
+        migratedCount.failed.question.ids.push(referenceQuestionSetId);
       }
 
-      logger.error(`Error while publishing the question for migratedId: ${migratedId} Error:
+      logger.error(`Error while publishing the question for referenceQuestionSetId: ${referenceQuestionSetId} Error:
       ${JSON.stringify(err.response.data)}`);
     });
 
     logger.info(
-      `createQuestion Template publish response: ${res} , "migratedId" ${migratedId} questionId, ${question?._id}`
+      `createQuestion Template publish response: ${res} , "referenceQuestionSetId" ${referenceQuestionSetId} questionId, ${question?._id}`
     );
 
     
@@ -109,16 +108,16 @@ const createQuestionTemplate = async (question, migratedCount) => {
     if (res) {
       question.isPublished = true;
       published = true;
-      logger.info(`createQuestion Template published: ${migratedId}`);
+      logger.info(`createQuestion Template published: ${referenceQuestionSetId}`);
     }
   }
 
 
-  if (migratedId) {
-    question.migratedId = migratedId;
+  if (referenceQuestionSetId) {
+    question.referenceQuestionSetId = referenceQuestionSetId;
 
     query = {
-      migratedId,
+      referenceQuestionSetId,
       published: published,
     };
   } else {

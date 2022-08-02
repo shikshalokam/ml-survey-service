@@ -42,7 +42,7 @@ const updateNonMatrixHierarchyChildren = (
     if (matched === false) {
       hierarchy = updateHierarchyChildren(
         hierarchy,
-        question?.migratedId,
+        question?.referenceQuestionSetId,
         index
       );
       nonMatrixQuestions.push(question);
@@ -248,7 +248,7 @@ const nonMatrixChildrenAndNoVisibleIf = async (
       hierarchy = updateHierarchyBranching(
         hierarchy,
         index,
-        question?.migratedId,
+        question?.referenceQuestionSetId,
         question,
         child
       );
@@ -320,7 +320,7 @@ const nonMatrixNoChildrenAndVisibleIf = async (
     hierarchy = updateHierarchyBranching(
       hierarchy,
       index,
-      pQuestion?.migratedId,
+      pQuestion?.referenceQuestionSetId,
       pQuestion,
       question
     );

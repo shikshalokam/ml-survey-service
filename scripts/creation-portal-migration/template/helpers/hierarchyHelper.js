@@ -16,16 +16,16 @@ const { CONFIG } = require("./../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
 
-const updateHierarchyChildren = (hierarchy, migratedId, index) => {
+const updateHierarchyChildren = (hierarchy, referenceQuestionSetId, index) => {
 
-  logger.debug(`updateHierarchyChildren: migratedId = ${migratedId}`)
+  logger.debug(`updateHierarchyChildren: referenceQuestionSetId = ${referenceQuestionSetId}`)
 
 
   if (
-    migratedId &&
-    !hierarchy.criterias[index].questions.includes(migratedId)
+    referenceQuestionSetId &&
+    !hierarchy.criterias[index].questions.includes(referenceQuestionSetId)
   ) {
-    hierarchy.criterias[index].questions.push(migratedId);
+    hierarchy.criterias[index].questions.push(referenceQuestionSetId);
   }
   return hierarchy;
 };
@@ -154,7 +154,7 @@ const updateHierarchyTemplate = async (
 
     for (let i = 0; i < hierarchy.criterias.length; i++) {
       const criterias = hierarchy.criterias[i];
-      hierarchy.criterias[i].migratedId = result[criterias.name];
+      hierarchy.criterias[i].referenceQuestionSetId = result[criterias.name];
     }
   } else {
     migratedCount.success.questionSet.existing.hierarchy++;
@@ -252,11 +252,11 @@ const branchingQuestionSetHierarchy = async (hierarchy) => {
     const hierarchyData = find(questionSetHierarchy.children, {
       name: criteria?.name,
     });
-    criteria.migratedId =
+    criteria.referenceQuestionSetId =
       hierarchy.questionset && hierarchy.isHierarchyUpdated
         ? hierarchyData?.identifier
-        : criteria.migratedId;
-    if (criteria?.migratedId) {
+        : criteria.referenceQuestionSetId;
+    if (criteria?.referenceQuestionSetId) {
       const metadata = pick(criteria, [
         "code",
         "name",
@@ -266,7 +266,7 @@ const branchingQuestionSetHierarchy = async (hierarchy) => {
         "allowMultipleInstances",
         "instances",
       ]);
-      updateHierarchyData.request.data.nodesModified[criteria.migratedId] = {
+      updateHierarchyData.request.data.nodesModified[criteria.referenceQuestionSetId] = {
         metadata: {
           ...metadata,
           allowBranching: "Yes",
@@ -278,9 +278,9 @@ const branchingQuestionSetHierarchy = async (hierarchy) => {
       };
       updateHierarchyData.request.data.hierarchy[
         hierarchy.questionset
-      ].children.push(criteria.migratedId);
+      ].children.push(criteria.referenceQuestionSetId);
 
-      updateHierarchyData.request.data.hierarchy[criteria.migratedId] = {
+      updateHierarchyData.request.data.hierarchy[criteria.referenceQuestionSetId] = {
         children: compact(criteria.questions),
         root: false,
       };
