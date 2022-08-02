@@ -89,7 +89,15 @@ let enviromentVariables = {
   "REDIS_URL": {
     "message" : "Required redis url",
     "optional" : false
-},
+  },
+  "REDIS_DB": {
+    "message" : "Required redis dbname",
+    "optional" : false
+  },
+  "REDIS_TTL": {
+    "message" : "Required redis ttl",
+    "optional" : false
+  },
 }
 
 let success = true;

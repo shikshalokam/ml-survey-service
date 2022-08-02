@@ -53,9 +53,12 @@ const configuration = {
   * @name redis_connect
 */
 
-let redis_connect =  async function () {
-  global.cache = require("./redisConfig").connect;
-}
+let redis_connect =   function () {
+  const redis = require("./redisConfig");
+  redis.connect;
+  global.cache = redis.client;
+  global.cacheTtl = redis.expiry;
+};
 
 db_connect();
 kafka_connect();

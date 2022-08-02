@@ -14,10 +14,7 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
-const transFormationHelper = require(MODULES_BASE_PATH + "/transformation/helper");
-  
-const redis = require("./../../config/redisConfig");
-const cache = redis.client;
+const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
 
 /**
     * Observations
@@ -980,15 +977,6 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
-            const cacheData = await cache
-              .get(`assessment:${req.params._id}:${req.params.entityId}`)
-              .catch((err) => {
-                console.log("Error in getting data from redis:", err);
-              });
-    
-            if (cacheData) {
-              return resolve(JSON.parse(cacheData));
-            } else {
               let response = {
                 message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
                 result: {},
@@ -1042,7 +1030,7 @@ module.exports = class Observations extends Abstract {
                 let solutionDocument = await database.models.solutions.findOne(
                     solutionQueryObject, {
                     ...solutionDocumentProjectionFields,
-                    migratedId: 1,
+                    referenceQuestionSetId: 1,
                     type: 1
                 }).lean();
     
@@ -1054,9 +1042,9 @@ module.exports = class Observations extends Abstract {
                     });
                 }
 
-              const migratedId = solutionDocument?.migratedId;
-    
-              if (!migratedId) {
+              const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
+
+              if (!referenceQuestionSetId) {
                 let responseMessage =
                 messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
               return resolve({
@@ -1194,14 +1182,13 @@ module.exports = class Observations extends Abstract {
                 submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
               let evidences = {};
-              if (!!migratedId) {
-                response.result.solution._id = migratedId;
+              if (!!referenceQuestionSetId) {
+                response.result.solution._id = referenceQuestionSetId;
                 evidences = await transFormationHelper.getQuestionSetHierarchy(
-                  migratedId,
                   submissionDocumentCriterias,
                   solutionDocument
                 );
-                                    }
+                }
 
                 submissionDocument.evidences = submissionDocumentEvidences;
                 submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
@@ -1252,14 +1239,9 @@ module.exports = class Observations extends Abstract {
 
               response.result.assessment = assessment;
     
-              await cache.setEx(
-                `assessment:${req.params._id}:${req.params.entityId}`,
-                redis.expiry,
-                JSON.stringify(response)
-              );
-    
+
               return resolve(response);
-            }
+            
             } catch (error) {
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,

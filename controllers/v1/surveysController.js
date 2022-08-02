@@ -12,9 +12,6 @@ const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
 const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
-const redis = require("./../../config/redisConfig");
-const cache = redis.client;
-
 /**
     * Surveys
     * @class
@@ -635,16 +632,6 @@ module.exports = class Surveys extends Abstract {
     async details(req) {
         return new Promise(async (resolve, reject) => {
           try {
-            const cacheData = await cache
-              .get(`surveyDetails:${req.params._id}`)
-              .catch((err) => {
-                console.log("Error in getting data from redis:", err);
-            });
-    
-            if (cacheData) {
-              return resolve(JSON.parse(cacheData));
-            } else {
-    
             let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
             let surveyDetails = {};
@@ -665,28 +652,19 @@ module.exports = class Surveys extends Abstract {
 
                 let bodyData = req.body ? req.body : {};
 
-                surveyDetails = await surveysHelper.getDetailsByLink2(
+                surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,
                     req.userDetails.userId,
                     req.userDetails.userToken,
-                    bodyData
+                    bodyData,
+                    "transformation"
                 );
             }
 
-              await cache.setEx(
-                `surveyDetails:${req.params._id}`,
-                redis.expiry,
-                JSON.stringify({
-                  message: surveyDetails.message,
-                  result: surveyDetails.data,
-                })
-              );
-    
             return resolve({
                 message: surveyDetails.message,
                 result: surveyDetails.data,
             });
-            }
         } catch (error) {
             return reject({
                 status: error.status || httpStatusCode.internal_server_error.status,

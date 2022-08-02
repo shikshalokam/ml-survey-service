@@ -15,10 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
-const transFormationHelper = require(MODULES_BASE_PATH + "/transformation/helper");
-
-const redis = require("./../../config/redisConfig");
-const cache = redis.client;
+const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
 
 /**
     * ObservationSubmissions
@@ -102,15 +99,6 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
-          const cacheData = await cache
-            .get(`submissionCreate:${req.params._id}:${req.params.entityId}`)
-            .catch((err) => {
-              console.log("Error in getting data from redis:", err);
-            });
-  
-          if (cacheData) {
-            return resolve(JSON.parse(cacheData));
-          } else {
             let observationDocument =
  await observationsHelper.observationDocuments({
           _id: req.params._id,
@@ -170,7 +158,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           "project",
           "referenceFrom",
           "criteriaLevelReport",
-          "migratedId",
+          "referenceQuestionSetId",
           "type",
         ]
 );
@@ -184,9 +172,9 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         solutionDocument = solutionDocument[0];
 
-            const migratedId = solutionDocument?.migratedId;
+            const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
 
-            if (!migratedId) {
+            if (!referenceQuestionSetId) {
               let responseMessage =
               messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
             return resolve({
@@ -285,9 +273,8 @@ module.exports = class ObservationSubmissions extends Abstract {
       submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
       let evidences = {};
-          if (!!migratedId) {
+          if (!!referenceQuestionSetId) {
             evidences = await transFormationHelper.getQuestionSetHierarchy(
-                migratedId,
                 submissionDocumentCriterias,
                 solutionDocument,
                 false
@@ -331,23 +318,14 @@ module.exports = class ObservationSubmissions extends Abstract {
       
       let responseMessage = messageConstants.apiResponses.OBSERVATION_SUBMISSION_CREATED;
 
-      await cache.setEx(
-              `submissionCreate:${req.params._id}:${req.params.entityId}`,
-              redis.expiry,
-              JSON.stringify({
-                message: responseMessage,
-                result: observations,
-              })
-            );
   
       return resolve({
           message: responseMessage,
           result: observations
       });
-    }
       } catch (error) {
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
+          status: error?.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
           errorObject: error
         });

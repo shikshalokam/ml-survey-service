@@ -1,24 +1,33 @@
 // Dependencies.
 const { isEmpty, find, capitalize } = require("lodash");
-const { readQuestion } = require("../../generics/services/question");
-const { readQuestionSet } = require("../../generics/services/questionset");
-const { questionType } = require("../../templates/questionTemp");
-const {
-  criteriaTemplate,
-  defaultCriteria,
-  baseAssessment,
-  assessmentTemplate,
-} = require("../../templates/criteriaAndAssessment");
+const { readQuestionSet, readQuestion } = require(ROOT_PATH +
+  "/generics/services/knowledge-platform");
+const { questionType } = require(MODULES_BASE_PATH +
+  "/questions/questionTemplate");
+const { criteriaTemplate, defaultCriteria } = require(MODULES_BASE_PATH +
+  "/criteria/criteriaTemplate");
+const { baseAssessment, assessmentTemplate } = require(MODULES_BASE_PATH +
+  "/assessments/assessmentTemplate");
 
 module.exports = class Transformation {
   static getQuestionSetHierarchy(
-    migratedId,
     submissionDocumentCriterias,
     solutionDocument,
     isPageQuestionsRequired = true
   ) {
     return new Promise(async (resolve, reject) => {
-      const res = await readQuestionSet(migratedId).catch((err) => {
+      const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
+
+      const cacheData = await cache
+        .get(`${solutionDocument._id}:${referenceQuestionSetId}`)
+        .catch((err) => {
+          console.log("Error in getting data from redis:", err);
+        });
+
+      if (!!cacheData) {
+        resolve(JSON.parse(cacheData));
+      } else {
+      const res = await readQuestionSet(referenceQuestionSetId).catch((err) => {
         console.log("Error", err?.response?.data);
         reject(err?.response?.data);
       });
@@ -47,10 +56,20 @@ module.exports = class Transformation {
       assessmentTemplate.assessment.evidences[0].description =
         questionSetHierarchy?.descripton || "";
 
+      await cache.setEx(
+        `${solutionDocument._id}:${referenceQuestionSetId}`,
+        cacheTtl,
+        JSON.stringify({
+          ...evidences,
+          evidences: assessmentTemplate.assessment.evidences,
+        })
+      );
+
       resolve({
         ...evidences,
         evidences: assessmentTemplate.assessment.evidences,
       });
+      } 
     });
   }
 
@@ -82,7 +101,6 @@ module.exports = class Transformation {
 
         const children = criteria?.children || [];
 
-
         if (isPageQuestionsRequired && children.length > 0) {
           const pageQuestions = await this.getPageQuestions(
             criteria,
@@ -91,7 +109,7 @@ module.exports = class Transformation {
           );
 
           const isMatrixQuestion = criteria?.instances?.label;
-          
+
           let matrixQuestion = {};
           if (isMatrixQuestion) {
             matrixQuestion = this.getMatrixQuestions(criteria);
@@ -111,9 +129,6 @@ module.exports = class Transformation {
   static getPageQuestions(criteria, children, pageQuestions) {
     const readQuestions = [];
     return new Promise(async (resolve, reject) => {
-
-
-
       for (let j = 0; j < children.length; j++) {
         const res = await readQuestion(children[j]?.identifier);
 
@@ -132,7 +147,6 @@ module.exports = class Transformation {
           );
         }
 
-
         // question transformation
         const childTemplate = await this.tranformQuestionData(
           {},
@@ -143,7 +157,6 @@ module.exports = class Transformation {
 
         pageQuestions.push(childTemplate);
       }
-
 
       resolve(pageQuestions);
     });
@@ -185,7 +198,6 @@ module.exports = class Transformation {
 
           const index = ques?.preCondition?.and[0][operator];
 
-
           let branchingQue = find(readQuestions, {
             identifier: ques?.source[0],
           });
@@ -218,9 +230,7 @@ module.exports = class Transformation {
   }
 
   static tranformQuestionData(childQuestion, childData, index, child) {
-
     const type = this.getTemplateType(childData);
-
 
     return new Promise((resolve, reject) => {
       for (let key in questionType[type]) {
@@ -228,7 +238,6 @@ module.exports = class Transformation {
         if (questionType.defaultFields.includes(key)) {
           childQuestion[key] = keyData;
         } else if (questionType.arrayFields.includes(key)) {
-
           childQuestion[key] = childData[keyData] || [];
         } else if (key === "question") {
           const questionData = [];
@@ -319,7 +328,6 @@ module.exports = class Transformation {
             : child[keyData]
             ? child[keyData]
             : "";
-
         }
       }
       resolve(childQuestion);

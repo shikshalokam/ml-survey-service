@@ -64,7 +64,6 @@ const readQuestionSet = function (copiedQuestionsetId) {
       request.get(url, { headers: headers }, readQuestionSetCallBack)
 
     } catch (error) {
-      console.log("errt", error)
       return reject(error);
     }
   })
@@ -133,14 +132,14 @@ const publishQuestionSet = function (questionsetId) {
 
 }
 
-const updateQuestionSet = function (updateReq, migratedId) {
+const updateQuestionSet = function (updateReq, referenceQuestionSetId) {
   return new Promise((resolve, reject) => {
     try {
       const headers = {
         "content-type": "application/json",
         "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
       }
-      let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + migratedId;
+      let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + referenceQuestionSetId;
       const options = {
         headers,
         json: true,
@@ -166,10 +165,65 @@ const updateQuestionSet = function (updateReq, migratedId) {
   })
 }
 
+const readQuestion = function (questionId = "") {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let url = CREATION_PORTAL_URL + messageConstants.endpoints.READ_QUESTION;
+      const fields = ["body","question","primaryCategory","mimeType","qType","answer","templateId","responseDeclaration","interactionTypes","interactions","name","solutions","editorState","media","remarks","evidence","hints","instructions","numberOnly","characterLimit","showEvidence","evidenceMimeType","showRemarks","remarksLimit","markAsNotMandatory"]
+      if (questionId !== "") {
+        url =
+          url +
+          "/" +
+          questionId +
+          "?" +
+          `fields=${fields.join(",")}`;
+      }
+
+
+      const options = {
+        headers: {
+          "content-type": "application/json",
+          Authorization: process.env.CREATION_PORTAL_AUTHORIZATION_KEY,
+        },
+      };
+
+      request.get(url, options, questionReadCallback);
+      let result = {
+        success: true,
+      };
+      function questionReadCallback(err, data) {
+
+        if (err) {
+          result.success = false;
+        } else {
+          let response = JSON.parse(data.body);
+          if (response.responseCode === httpStatusCode["ok"].code) {
+            result["data"] = response?.result?.question;
+          } else {
+            result.success = false;
+          }
+        }
+
+        return resolve(result);
+      }
+      setTimeout(function () {
+        return resolve(
+          (result = {
+            success: false,
+          })
+        );
+      }, messageConstants.common.SERVER_TIME_OUT);
+    } catch (error) {
+      return reject(error);
+    }
+  });
+};
+
 module.exports = {
   copyQuestionSet: copyQuestionSet,
   readQuestionSet: readQuestionSet,
   updateQuestionSetHierarchy: updateQuestionSetHierarchy,
   publishQuestionSet: publishQuestionSet,
-  updateQuestionSet: updateQuestionSet
+  updateQuestionSet: updateQuestionSet,
+  readQuestion: readQuestion,
 };

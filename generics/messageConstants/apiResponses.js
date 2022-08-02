@@ -369,5 +369,5 @@ module.exports = {
     "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
     "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
     "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile",
-    "SOLUTION_IS_NOT_MIGRATED": "Required solution migratedId"
+    "SOLUTION_IS_NOT_MIGRATED": "Required solution referenceQuestionSetId"
 }

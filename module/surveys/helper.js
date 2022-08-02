@@ -21,7 +21,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
-const transFormationHelper = require(MODULES_BASE_PATH + "/transformation/helper");
+const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
 
 /**
     * SurveysHelper
@@ -688,7 +688,7 @@ module.exports = class SurveysHelper {
      * @returns {JSON} - returns survey solution,program and question details.
      */
 
-    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {},version = "") {
+    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {},version = "", type="") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -788,7 +788,8 @@ module.exports = class SurveysHelper {
                     userId,
                     validateSurvey.data.submissionId,
                     roleInformation,
-                    token
+                    token,
+                    type
                 )
 
                 if (!surveyDetails.success) {
@@ -823,7 +824,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="") {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", type="") {
         return new Promise(async (resolve, reject) => {
             try {
                 
@@ -860,11 +861,25 @@ module.exports = class SurveysHelper {
 
                 let solutionDocument = await solutionsHelper.solutionDocuments(
                     solutionQueryObject,
-                    solutionDocumentProjectionFields
+                    [
+                    ...solutionDocumentProjectionFields,
+                    "referenceQuestionSetId",
+                    "type"
+                    ],   
                 )
 
                 if (!solutionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
+                }
+
+                let referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
+
+                if (!!type) {
+                    referenceQuestionSetId = solutionDocument[0]?.referenceQuestionSetId;
+    
+                    if (!referenceQuestionSetId) {
+                        throw new Error(messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED)
+                    }
                 }
 
                 solutionDocument = solutionDocument[0];
@@ -969,6 +984,13 @@ module.exports = class SurveysHelper {
 
                 submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
+                let evidences = {};
+                  
+                if (!!type && !!referenceQuestionSetId) {
+                    solutionDocument._id = referenceQuestionSetId;
+                    evidences = await transFormationHelper.getQuestionSetHierarchy(referenceQuestionSetId, submissionDocumentCriterias, solutionDocument);
+                }
+
                 let criteria = criteriaQuestionDocument[0];
 
                 criteria.weightage = weightage;
@@ -1046,7 +1068,7 @@ module.exports = class SurveysHelper {
                         status: messageConstants.common.SUBMISSION_STATUS_STARTED,
                         evidences: submissionDocumentEvidences,
                         evidencesStatus: Object.values(submissionDocumentEvidences),
-                        criteria: submissionDocumentCriterias,
+                        criteria: !!type ? evidences.submissionDocumentCriterias : submissionDocumentCriterias,
                         surveyInformation: {
                             ..._.omit(surveyDocument, ["_id", "deleted", "__v"])
                         },
@@ -1100,7 +1122,7 @@ module.exports = class SurveysHelper {
                     (solutionDocument && solutionDocument.questionSequenceByEcm) ? solutionDocument.questionSequenceByEcm : false
                 );
 
-                assessment.evidences = parsedAssessment.evidences;
+                assessment.evidences = !!type ?  evidences.evidences : parsedAssessment.evidences;
                 assessment.submissions = parsedAssessment.submissions;
                 if (parsedAssessment.generalQuestions && parsedAssessment.generalQuestions.length > 0) {
                     assessment.generalQuestions = parsedAssessment.generalQuestions;
@@ -1803,403 +1825,6 @@ module.exports = class SurveysHelper {
                 return resolve({
                     success: false,
                     message: err.message,
-                    data: false
-                });
-            }
-        })
-    }
-
-    static getDetailsByLink2(link= "", userId= "", token= "", roleInformation= {},version = "") {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if (link == "") {
-                    throw new Error(messageConstants.apiResponses.LINK_REQUIRED_CHECK)
-                }
-
-                if (userId == "") {
-                    throw new Error(messageConstants.apiResponses.USER_ID_REQUIRED_CHECK)
-                }
-
-                if(token == "") {
-                    throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
-                }
-
-
-
-                let solutionDocument = await solutionsHelper.solutionDocuments
-                (
-                  { 
-                       link: link,
-                  },
-                  [ 
-                    "externalId",
-                    "name",
-                    "description",
-                    "type",
-                    "endDate",
-                    "status",
-                    "programId",
-                    "programExternalId",
-                    "isAPrivateProgram"
-                  ] 
-                )
-
-
-                if (!solutionDocument.length) {
-                    throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
-                }
-
-                if ( version === "" ) {
-                    
-                    if (new Date() > new Date(solutionDocument[0].endDate)) {
-
-                        if (solutionDocument[0].status == messageConstants.common.ACTIVE_STATUS) {
-                            await solutionsHelper.updateSolutionDocument
-                            (
-                                { link : link },
-                                { $set : { status: messageConstants.common.INACTIVE_STATUS } }
-                            )
-                        }
-                        
-                        throw new Error(messageConstants.apiResponses.LINK_IS_EXPIRED)
-                    }
-                }
- 
-                let surveyDocument = await this.surveyDocuments
-                (
-                    { solutionId: solutionDocument[0]._id,
-                      createdBy: userId },
-                    ["_id"]
-                )
-                
-  
-                let surveyId;
-
-                if (surveyDocument.length > 0) {
-                    surveyId = surveyDocument[0]._id;
-                }
-                else {
-
-                    let createSurveyDocument = await this.createSurveyDocument
-                        (
-                            userId,
-                            solutionDocument[0]
-                            // userOrgDetails[userId]
-                        )
-
-                    if (!createSurveyDocument.success) {
-                        throw new Error(messageConstants.apiResponses.SURVEY_CREATION_FAILED)
-                    }
-
-                    surveyId = createSurveyDocument.data._id;
-                }
-
-                let validateSurvey = await this.validateSurvey
-                (
-                    surveyId,
-                    userId,
-                    version && version === messageConstants.common.VERSION_3 ? false : true
-                )
-    
-                if (!validateSurvey.success) {
-                    return resolve(validateSurvey);
-                }
-                
-                let surveyDetails = await this.detailsV4
-                (
-                    surveyId,
-                    userId,
-                    validateSurvey.data.submissionId,
-                    roleInformation,
-                    token
-                )
-
-                if (!surveyDetails.success) {
-                    return resolve(surveyDetails);
-                }
-
-                return resolve({
-                    success: true,
-                    message: surveyDetails.message,
-                    data: surveyDetails.data
-                });
-
-                
-            } catch (error) {
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data: false
-                });
-            }
-        });
-    }
-
-
-    static detailsV4(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="") {
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                if (surveyId == "") {
-                    throw new Error(messageConstants.apiResponses.SURVEY_ID_REQUIRED)
-                }
-    
-                if (userId == "") {
-                    throw new Error(messageConstants.apiResponses.USER_ID_REQUIRED_CHECK)
-                }
-    
-                let surveyDocument = await this.surveyDocuments
-                    (
-                        {
-                            _id: surveyId,
-                            status: messageConstants.common.PUBLISHED,
-                            isDeleted: false
-                        }
-                    )
-    
-                if (!surveyDocument.length) {
-                    throw new Error(messageConstants.apiResponses.SURVEY_NOT_FOUND)
-                }
-    
-                surveyDocument = surveyDocument[0];
-    
-                let solutionQueryObject = {
-                    _id: surveyDocument.solutionId,
-                    status: messageConstants.common.ACTIVE_STATUS,
-                    isDeleted: false
-                };
-    
-                let solutionDocumentProjectionFields = await this.solutionDocumentProjectionFieldsForDetailsAPI();
-    
-                let solutionDocument = await solutionsHelper.solutionDocuments(
-                    solutionQueryObject, [
-                    ...solutionDocumentProjectionFields,
-                    "migratedId",
-                    "type"
-                ]
-                    
-                )
-    
-                if (!solutionDocument.length) {
-                    throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND)
-                }
-                const migratedId = solutionDocument[0]?.migratedId;
-    
-                if (!migratedId) {
-                    throw new Error(messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED)
-                }
-
-                solutionDocument = solutionDocument[0];
-    
-                let endDateCheckRequired = true;
-    
-                if ( submissionId != "" ) {
-                    let submissionDocument = await surveySubmissionsHelper.surveySubmissionDocuments(
-                        {
-                            _id: submissionId
-                        },
-                        [
-                            "status"
-                        ]
-                    );
-    
-                    if(submissionDocument && submissionDocument.length > 0){
-                        if ( submissionDocument[0].status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ){
-                            endDateCheckRequired = false;
-                        }
-                    }
-                }
-    
-                if (endDateCheckRequired) {
-    
-                    if (new Date() > new Date(solutionDocument.endDate)) {
-                        if (solutionDocument.status == messageConstants.common.ACTIVE_STATUS) {
-                            await solutionHelper.updateSolutionDocument
-                            (
-                                { _id : solutionDocument._id },
-                                { $set : { status: messageConstants.common.INACTIVE_STATUS } }
-                            )
-                        }
-    
-                        throw new Error(messageConstants.apiResponses.LINK_IS_EXPIRED)
-                    }
-                }
-                
-                let programDocument = [];
-    
-                if (surveyDocument.programId) {
-    
-                    let programQueryObject = {
-                        _id: surveyDocument.programId,
-                        status: messageConstants.common.ACTIVE_STATUS,
-                        components: { $in: [ObjectId(surveyDocument.solutionId)] }
-                    };
-    
-                    programDocument = await programsHelper.list(
-                        programQueryObject,
-                        [
-                            "externalId",
-                            "name",
-                            "description",
-                            "imageCompression",
-                            "isAPrivateProgram"
-                        ]
-                    );
-                }
-    
-                let solutionDocumentFieldList = await this.solutionDocumentFieldListInResponse();
-    
-                let result = {};
-    
-                result.solution = await _.pick(solutionDocument, solutionDocumentFieldList);
-    
-                if (programDocument.length > 0) {
-                  result.program = programDocument[0];
-                }
-    
-                let assessment = {};
-    
-                assessment.name = solutionDocument.name;
-                assessment.description = solutionDocument.description;
-                assessment.externalId = solutionDocument.externalId;
-    
-                let criteriaId = solutionDocument.themes[0].criteria[0].criteriaId;
-                let weightage = solutionDocument.themes[0].criteria[0].weightage;
-    
-                let criteriaQuestionDocument = await criteriaQuestionsHelper.list(
-                    { _id: criteriaId },
-                    "all",
-                    [
-                        "resourceType",
-                        "language",
-                        "keywords",
-                        "concepts"
-                    ]
-                )
-    
-                let evidenceMethodArray = {};
-                let submissionDocumentEvidences = {};
-                let submissionDocumentCriterias = [];
-    
-                Object.keys(solutionDocument.evidenceMethods).forEach(solutionEcm => {
-                   
-                    solutionDocument.evidenceMethods[solutionEcm].startTime = "";
-                    solutionDocument.evidenceMethods[solutionEcm].endTime = "";
-                    solutionDocument.evidenceMethods[solutionEcm].isSubmitted = false;
-                    solutionDocument.evidenceMethods[solutionEcm].submissions = new Array;
-                })
-    
-                submissionDocumentEvidences = solutionDocument.evidenceMethods;
-    
-    
-                  let evidences = {};
-                  
-                  if (!!migratedId) {
-                    solutionDocument._id = migratedId;
-                    evidences = await transFormationHelper.getQuestionSetHierarchy(migratedId, submissionDocumentCriterias, solutionDocument);
-                  }
-                
-                let criteria = criteriaQuestionDocument[0];
-
-                criteria.weightage = weightage;
-    
-               
-                if (submissionId !== "") {
-                    assessment.submissionId = submissionId;
-    
-                    let surveySubmissionDocument = 
-                    await surveySubmissionsHelper.surveySubmissionDocuments(
-                        {
-                            _id : submissionId
-                        },["evidences"]
-                    );
-    
-                    submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
-    
-                } else {
-                    let submissionDocument = {
-                        solutionId: solutionDocument._id,
-                        solutionExternalId: solutionDocument.externalId,
-                        surveyId: surveyDocument._id,
-                        createdBy: surveyDocument.createdBy,
-                        evidenceSubmissions: [],
-                        status: messageConstants.common.SUBMISSION_STATUS_STARTED,
-                        evidences: submissionDocumentEvidences,
-                        evidencesStatus: Object.values(submissionDocumentEvidences),
-                        criteria: evidences.submissionDocumentCriterias,
-                        surveyInformation: {
-                            ..._.omit(surveyDocument, ["_id", "deleted", "__v"])
-                        },
-                        isAPrivateProgram: surveyDocument.isAPrivateProgram
-                    };
-                    submissionDocument.surveyInformation.startDate = new Date();
-    
-                    //Fetch user profile information by calling sunbird's user read api.
-                    let userProfileData = {};
-                    let userProfile = await userProfileService.profile(userToken, userId);
-                    if ( userProfile.success && 
-                        userProfile.data &&
-                        userProfile.data.response
-                    ) {
-                        userProfileData = userProfile.data.response;
-                    } 
-                    submissionDocument.userProfile = userProfileData;
-                    
-                    if (Object.keys(roleInformation).length > 0 && roleInformation.role) {
-                        //commented for multiple role
-                        // let roleDocument = await userRolesHelper.list
-                        // ( { code : roleInformation.role },
-                        //   [ "_id"]
-                        // )
-    
-                        // if (roleDocument.length > 0) {
-                        //     roleInformation.roleId = roleDocument[0]._id; 
-                        // }
-    
-                        submissionDocument.userRoleInformation = roleInformation;
-                    }
-    
-                    if (programDocument.length > 0) {
-                        submissionDocument.programId = programDocument[0]._id;
-                        submissionDocument.programExternalId = programDocument[0].externalId;
-                    }
-    
-                    let submissionDoc = await database.models.surveySubmissions.create(
-                        submissionDocument
-                    );
-                    
-                    if (submissionDoc._id) {
-                        assessment.submissionId = submissionDoc._id;
-                    }
-                }
-                
-                const parsedAssessment = await assessmentsHelper.parseQuestionsV2(
-                    Object.values(evidenceMethodArray),
-                    ["A1"],
-                    submissionDocumentEvidences,
-                    (solutionDocument && solutionDocument.questionSequenceByEcm) ? solutionDocument.questionSequenceByEcm : false
-                );
-    
-                assessment.evidences = evidences.evidences;
-                assessment.submissions = parsedAssessment.submissions;
-                if (parsedAssessment.generalQuestions && parsedAssessment.generalQuestions.length > 0) {
-                    assessment.generalQuestions = parsedAssessment.generalQuestions;
-                }
-    
-                result.assessment = assessment;
-    
-                return resolve({
-                    success: true,
-                    message: messageConstants.apiResponses.SURVEY_DETAILS_FETCHED_SUCCESSFULLY,
-                    data: result
-                });
-    
-            }
-            catch (error) {
-                return reject({
-                    success: false,
-                    message: error.message,
                     data: false
                 });
             }
