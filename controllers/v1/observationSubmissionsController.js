@@ -114,12 +114,19 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
         
         observationDocument = observationDocument[0];
-
-        let filterData = {
-            "id" : req.query.entityId,
-            "type" : observationDocument.entityType
-        };
-
+        let filterData = {};
+        if (gen.utils.checkIfValidUUID(req.query.entityId)) {
+            filterData = {
+              "id" : req.query.entityId,
+              "type" : observationDocument.entityType
+            };
+        } else {
+            filterData = {
+              "code" : req.query.entityId,
+              "type" : observationDocument.entityType
+            };
+        }
+        
         let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
         
         if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {

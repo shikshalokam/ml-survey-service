@@ -140,7 +140,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
     * @param {object} bodyData -  location id
     * @returns {Promise} returns a promise.
   */
-  const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", fields) {
+  const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", fields = [] ) {
       return new Promise(async (resolve, reject) => {
           try {
               let bodyData = {};

@@ -112,21 +112,21 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
+                // if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
 
-                    let solutionData = 
-                    await coreService.solutionDetailsBasedOnRoleAndLocation(
-                        requestingUserAuthToken,
-                        userRoleAndProfileInformation,
-                        solutionId
-                    );
+                //     let solutionData = 
+                //     await coreService.solutionDetailsBasedOnRoleAndLocation(
+                //         requestingUserAuthToken,
+                //         userRoleAndProfileInformation,
+                //         solutionId
+                //     );
 
-                    if( !solutionData.success ) {
-                        throw {
-                            message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
-                        }
-                    } 
-                }
+                //     if( !solutionData.success ) {
+                //         throw {
+                //             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
+                //         }
+                //     } 
+                // }
 
                 if( solutionData[0].isReusable ) {
 
@@ -1747,21 +1747,44 @@ module.exports = class ObservationsHelper {
             let entities = [];
 
             if( observationDocument[0].entities && observationDocument[0].entities.length > 0 ) {
-                
                 //set request body for learners API
-                let filterData = {
-                    "id" : observationDocument[0].entities
-                };
-                let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+                let entityIds = [];
+                let locationCodes = [];
+                let entitiesData = [];
+                locationIds.forEach(entity=>{
+                    if (gen.utils.checkIfValidUUID(entity)) {
+                        entityIds.push(entity);
+                    } else {
+                        locationCodes.push(entity);
+                    }
+                });
 
-                if(!entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
-                    throw {
-                        message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
-                    }               
+                if ( entityIds.length > 0 ) {
+                    let bodyData = {
+                        "id" : entityIds
+                    } 
+                    let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                    if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                        entitiesData =  entityData.data.response;
+                    }
                 }
 
-                let entitiesData = entitiesDocument.data.response;
+                if ( locationCodes.length > 0 ) {
+                    let bodyData = {
+                        "code" : locationCodes
+                    } 
+                    let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                    if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                        entitiesData =  entitiesData.concat(entityData.data.response);
+                    }
+                }
             
+                if ( !entitiesData.length > 0 ) {
+                    throw {
+                        message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                    } 
+                }
+                
                 for ( 
                     let pointerToEntities = 0; 
                     pointerToEntities < entitiesData.length;

@@ -972,21 +972,50 @@ module.exports = class EntitiesHelper {
     return new Promise(async (resolve, reject) => {
         try {
              //set request body for learners API
-             let validEntityIds = []
-             let filterData = {
-                 "id" : entityIds,
-                 "type" : entityType
-             };
-             let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
+            let locationIds = [];
+            let locationCodes = [];
+            let entityInformations = [];
+            let validEntityIds = [];
+            entityIds.forEach(entity=>{
+                if (gen.utils.checkIfValidUUID(entity)) {
+                    locationIds.push(entity);
+                } else {
+                    locationCodes.push(entity);
+                }
+            });
 
-             let entities = entitiesDocument.data.response;
-             
-             if( entities.length > 0 ) {
-                entities.map(entity => {
+            if ( locationIds.length > 0 ) {
+                let bodyData = {
+                    "id" : locationIds,
+                    "type" : entityType
+                } 
+                let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityData.data.response;
+                }
+            }
+            
+            if ( locationCodes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationCodes,
+                    "type" : entityType
+                } 
+                let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityInformations.concat(entityData.data.response);
+                }
+            }
+           
+            if ( !entityInformations.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                } 
+            } else {
+                entityInformations.map(entity => {
                     validEntityIds.push(entity.id);
-                });              
-             }
-             
+                });    
+            }
+            
             return resolve({
                 entityIds: validEntityIds
             });
@@ -1809,21 +1838,44 @@ module.exports = class EntitiesHelper {
     return new Promise(async (resolve, reject) => {
         try {
             //set request body for learners api
-            let filterData = {
-                "id" : locationIds
-            };
-           
-            let entitiesDocument = await sunbirdService.learnerLocationSearch( filterData );
-            if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
-                throw {
-                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
-                }               
+            let entityIds = [];
+            let locationCodes = [];
+            let entityInformations = [];
+            locationIds.forEach(entity=>{
+                if (gen.utils.checkIfValidUUID(entity)) {
+                    entityIds.push(entity);
+                } else {
+                    locationCodes.push(entity);
+                }
+            });
+
+            if ( entityIds.length > 0 ) {
+                let bodyData = {
+                    "id" : entityIds
+                } 
+                let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityData.data.response;
+                }
             }
 
-            let entities = entitiesDocument.data.response;
+            if ( locationCodes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationCodes
+                } 
+                let entityData = await sunbirdService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityInformations.concat(entityData.data.response);
+                }
+            }
+           
+            if ( !entityInformations.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                } 
+            }
             
-            //formating response
-            let entityDetails = await this.extractDataFromLocationResult(entities);
+            let entityDetails = await this.extractDataFromLocationResult( entityInformations );
             
             return resolve({
                 success : true,
