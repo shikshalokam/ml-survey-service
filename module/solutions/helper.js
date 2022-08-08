@@ -943,7 +943,6 @@ module.exports = class SolutionsHelper {
                 userId,
                 solutionData
               );
-
               return resolve(
                 _.pick(
                   duplicateSolution,
@@ -954,12 +953,12 @@ module.exports = class SolutionsHelper {
                     "frameworkId",
                     "programExternalId",
                     "programId",
-                    "entityTypeId",
                     "entityType",
                     "isAPrivateProgram",
                     "entities"
                   ]
-                  ));
+                  )); 
+                                   
 
           } catch (error) {
               return reject(error);

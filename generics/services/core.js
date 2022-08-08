@@ -226,7 +226,6 @@ const solutionBasedOnRoleAndLocation = function ( token,bodyData,type,searchText
             
             const url = 
             coreServiceBaseURL + messageConstants.endpoints.SOLUTIONS_BASED_ON_ROLE_LOCATION+ "?type="+ type +"&search="+ searchText;
-
             const options = {
                 headers : {
                     "content-type": "application/json",

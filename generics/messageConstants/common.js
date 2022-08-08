@@ -56,5 +56,6 @@ module.exports = {
     VERSION_3 : "v3",
     DRAFT : "draft",
     DISTRICT : "district",
-    SERVER_TIME_OUT : 5000
+    SERVER_TIME_OUT : 5000,
+    OK : "OK"
 }

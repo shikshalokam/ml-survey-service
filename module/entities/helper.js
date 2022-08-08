@@ -10,6 +10,8 @@ const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 // const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
+
 
  /**
     * EntitiesHelper
@@ -907,7 +909,7 @@ module.exports = class EntitiesHelper {
    * Search entity.
    * @method 
    * @name search
-   * @param {String} entityTypeId - Entity type id.
+   * @param {String} entityType - Entity type.
    * @param {String} searchText - Text to be search.
    * @param {Number} pageSize - total page size.
    * @param {Number} pageNo - Page no.
@@ -917,7 +919,7 @@ module.exports = class EntitiesHelper {
    */
 
     static search(
-        entityTypeId, 
+        entityType, 
         searchText,
         pageSize, 
         pageNo, 
@@ -926,106 +928,104 @@ module.exports = class EntitiesHelper {
     ) {
         return new Promise(async (resolve, reject) => {
             try {
+                
+                let entityDocuments = [];
+                let bodyData={
+                    "type" : entityType
+                };
 
-                let queryObject = {};
-
-                queryObject["$match"] = {};
-
-                if (entityIds && entityIds.length > 0) {
-                    queryObject["$match"]["_id"] = {};
-                    queryObject["$match"]["_id"]["$in"] = entityIds;
+                if ( entityIds ){
+                    bodyData={
+                        "id" : entityIds
+                    };
                 }
-
-                if( aclData.length > 0 ) {
-                    queryObject["$match"]["metaInformation.tags"] = 
-                    { $in : aclData };
+                
+                let entitiesData = await userProfileService.learnerLocationSearch( bodyData, pageSize, pageNo, searchText );
+                
+                if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
+                    return resolve(entitiesData.data.response) 
                 }
-
-                queryObject["$match"]["entityTypeId"] = entityTypeId;
-
-                queryObject["$match"]["$or"] = [
-                    { "metaInformation.name": new RegExp(searchText, 'i') },
-                    { "metaInformation.externalId": new RegExp("^" + searchText, 'm') },
-                    { "metaInformation.addressLine1": new RegExp(searchText, 'i') },
-                    { "metaInformation.addressLine2": new RegExp(searchText, 'i') }
-                ];
-
-                let entityDocuments = await database.models.entities.aggregate([
-                    queryObject,
-                    {
-                        $project: {
-                            name: "$metaInformation.name",
-                            externalId: "$metaInformation.externalId",
-                            addressLine1: "$metaInformation.addressLine1",
-                            addressLine2: "$metaInformation.addressLine2",
-                            districtName: "$metaInformation.districtName"
-                        }
-                    },
-                    {
-                        $facet: {
-                            "totalCount": [
-                                { "$count": "count" }
-                            ],
-                            "data": [
-                                { $skip: pageSize * (pageNo - 1) },
-                                { $limit: pageSize }
-                            ],
-                        }
-                    }, {
-                        $project: {
-                            "data": 1,
-                            "count": {
-                                $arrayElemAt: ["$totalCount.count", 0]
-                            }
-                        }
-                    }
-                ]);
-
+                let totalcount = entitiesData.data.count;
+                let immediateEntities = entitiesData.data.response;
+                
+                entityDocuments.push({
+                    data : immediateEntities,
+                    count : totalcount
+                })
                 return resolve(entityDocuments);
-
             } catch (error) {
                 return reject(error);
             }
         })
     }
 
-    /**
+
+/**
    * validate entities.
    * @method 
    * @name validateEntities
-   * @param {String} entityTypeId - Entity type id.
+   * @param {String} entityType - Entity type.
    * @param {Array} entityIds - Array of entity ids.
    */
-
-    static validateEntities(entityIds, entityTypeId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let ids = []
-
-                let entitiesDocuments = await database.models.entities.find(
-                    {
-                        _id: { $in: gen.utils.arrayIdsTobjectIds(entityIds) },
-                        entityTypeId: entityTypeId
-                    },
-                    {
-                        _id: 1
-                    }
-                ).lean();
-
-                if (entitiesDocuments.length > 0) {
-                    ids = entitiesDocuments.map(entityId => entityId._id);
+    
+ static validateEntities(entityIds, entityType) {
+    return new Promise(async (resolve, reject) => {
+        try {
+             //set request body for learners API
+            let locationIds = [];
+            let locationCodes = [];
+            let entityInformations = [];
+            let validEntityIds = [];
+            entityIds.forEach(entity=>{
+                if (gen.utils.checkIfValidUUID(entity)) {
+                    locationIds.push(entity);
+                } else {
+                    locationCodes.push(entity);
                 }
+            });
 
-                return resolve({
-                    entityIds: ids
-                });
-
-
-            } catch (error) {
-                return reject(error);
+            if ( locationIds.length > 0 ) {
+                let bodyData = {
+                    "id" : locationIds,
+                    "type" : entityType
+                } 
+                let entityData = await userProfileService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityData.data.response;
+                }
             }
-        })
-    }
+            
+            if ( locationCodes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationCodes,
+                    "type" : entityType
+                } 
+                let entityData = await userProfileService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityInformations.concat(entityData.data.response);
+                }
+            }
+           
+            if ( !entityInformations.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                } 
+            } else {
+                entityInformations.map(entity => {
+                    validEntityIds.push(entity.id);
+                });    
+            }
+            
+            return resolve({
+                entityIds: validEntityIds
+            });
+
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
     /**
    * Implement find query for entity
@@ -1837,33 +1837,51 @@ module.exports = class EntitiesHelper {
   static listByLocationIds(locationIds) {
     return new Promise(async (resolve, reject) => {
         try {
+            //set request body for learners api
+            let entityIds = [];
+            let locationCodes = [];
+            let entityInformations = [];
+            locationIds.forEach(entity=>{
+                if (gen.utils.checkIfValidUUID(entity)) {
+                    entityIds.push(entity);
+                } else {
+                    locationCodes.push(entity);
+                }
+            });
 
-            let filterQuery = {
-                $or : [{
-                  "registryDetails.code" : { $in : locationIds }
-                },{
-                  "registryDetails.locationId" : { $in : locationIds }
-                }]
-              };      
-
-            let entities = 
-            await this.entityDocuments(
-                filterQuery,
-                ["metaInformation", "entityType", "entityTypeId","registryDetails"]
-            );
-
-            if( !entities.length > 0 ) {
-                throw {
-                    message : messageConstants.apiResponses.ENTITIES_FETCHED
+            if ( entityIds.length > 0 ) {
+                let bodyData = {
+                    "id" : entityIds
+                } 
+                let entityData = await userProfileService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityData.data.response;
                 }
             }
 
+            if ( locationCodes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationCodes
+                } 
+                let entityData = await userProfileService.learnerLocationSearch( bodyData );
+                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
+                    entityInformations =  entityInformations.concat(entityData.data.response);
+                }
+            }
+           
+            if ( !entityInformations.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                } 
+            }
+            
+            let entityDetails = await this.extractDataFromLocationResult( entityInformations );
+            
             return resolve({
                 success : true,
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
-                data : entities
+                data : entityDetails
             });
-
         } catch(error) {
             return resolve({
                 success : false,
@@ -1874,7 +1892,7 @@ module.exports = class EntitiesHelper {
   }
 
    /**
-   * Observation entiites search response data.
+   * Observation entities search response data.
    * @method
    * @name observationSearchEntitiesResponse
    * @param {Array} entities - entities data.
@@ -1883,30 +1901,72 @@ module.exports = class EntitiesHelper {
    */
 
   static observationSearchEntitiesResponse(entities,observationEntityIds) {
-
+   
+    let formatedData = [];
     let observationEntities = [];
-    
     if ( observationEntityIds && observationEntityIds.length > 0 ) {
         observationEntities = observationEntityIds.map(entity => entity.toString());
     }
+    
 
     if( entities.length > 0 ) {
         entities.forEach(eachMetaData => {
-            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData._id.toString())) ? true : false;
-            if(eachMetaData.districtName && eachMetaData.districtName != "") {
-                eachMetaData.name += ", "+eachMetaData.districtName;
+            let data = {};
+            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData.id)) ? true : false;
+            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.code);
+            if( eachMetaData.type == messageConstants.common.SCHOOL && eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
+                eachMetaData.name += ", "+eachMetaData.code;
             }
-
-            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.externalId);
-
-            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
-                eachMetaData.name += ", "+eachMetaData.externalId;
-            }
+            data._id = eachMetaData.id;
+            data.name = eachMetaData.name;
+            data.externalId = eachMetaData.code;
+            data.addressLine1 = "";
+            data.districtName = "";
+            data.selected = eachMetaData.selected;
+            formatedData.push(data);
         })
     }
-
+    entities = [];
+    entities = formatedData;
     return entities;
+
   }
+
+  /**
+    * Format entity data from sunbird.
+    * @method
+    * @name extractDataFromLocationResult
+    * @param {Array} entitityDetails - entity data.
+    * @returns {JSON} - formated entity details 
+    */
+
+   static extractDataFromLocationResult(entitityDetails) {
+
+    return new Promise(async (resolve, reject) => {
+
+        try {
+            let entityDocument = [];
+            entitityDetails.map(entityData => {
+                let data = {};
+                data._id = entityData.id;
+                data.entityType = entityData.type;
+                data.metaInformation = {};
+                data.metaInformation.name = entityData.name;
+                data.metaInformation.externalId = entityData.code
+                data.registryDetails = {};
+                data.registryDetails.locationId = entityData.id;
+                data.registryDetails.code = entityData.code;
+                entityDocument.push(data);
+            });
+
+            return resolve(entityDocument);
+        } catch (error) {
+            return reject(error);
+        }
+
+    });
+
+}
 
 };
 
@@ -1982,6 +2042,9 @@ function addTagsInEntities(entityMetaInformation) {
         }
     })
   }
+
+
+  
 
 
 
