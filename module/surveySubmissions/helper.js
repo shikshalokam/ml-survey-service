@@ -761,36 +761,9 @@ module.exports = class SurveySubmissionsHelper {
 
                 surveySubmissionsDocument = surveySubmissionsDocument[0];
                 
-                //adding question options to answers array 
-                if ( surveySubmissionsDocument.answers && Object.keys(surveySubmissionsDocument.answers).length > 0 ){
-                    
-                    let questionIds = [];
-                    for (let questionKey in surveySubmissionsDocument.answers) { 
-                        questionIds.push(questionKey);
-                    }
-
-                    if ( questionIds.length > 0 ) {
-
-                        let questionDocuments = await questionsHelper.questionDocument({
-                            _id : {
-                                $in : gen.utils.arrayIdsTobjectIds(questionIds)
-                            }
-                        }, [ 
-                            "options"
-                        ]);
-
-                        if ( questionDocuments.length > 0 ) {
-
-                            for ( let pointerToAnswers in surveySubmissionsDocument.answers ) {
-
-                                let findQuestion = questionDocuments.filter(eachQuestion=>eachQuestion._id == pointerToAnswers);
-                                
-                                if ( findQuestion && findQuestion.length > 0 ) {
-                                    surveySubmissionsDocument.answers[pointerToAnswers].options = findQuestion[0].options;
-                                }
-                            }
-                        }
-                    }
+                //adding question options, externalId to answers array 
+                if ( surveySubmissionsDocument.status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ) {
+                    surveySubmissionsDocument = await questionsHelper.addOptionsToAnswers(surveySubmissionsDocument);
                 }
 
                 let solutionDocument = await solutionsHelper.solutionDocuments({

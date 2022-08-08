@@ -1041,4 +1041,59 @@ module.exports = class QuestionsHelper {
         });
     }
 
+    /**
+   * Add Question Options to Answers Array
+   * @method
+   * @name addOptionsToAnswers
+   * @param {Object} submission - observation/survey submission.
+   * @returns {JSON} - observation submission details
+   */
+
+    static addOptionsToAnswers(submissionDocument) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if ( submissionDocument && submissionDocument.answers && Object.keys(submissionDocument.answers).length > 0) {
+
+                    let questionIds = [];
+                    for (let questionKey in submissionDocument.answers) { 
+                        questionIds.push(questionKey);
+                    }
+
+                    if ( questionIds.length > 0 ) {
+
+                        let questionDocuments = await this.questionDocument({
+                            _id : {
+                                $in : gen.utils.arrayIdsTobjectIds(questionIds)
+                            }
+                        }, [ 
+                            "options","externalId"
+                        ]);
+
+                        if ( questionDocuments.length > 0 ) {
+
+                            for ( let pointerToAnswers in submissionDocument.answers ) {
+
+                                let findQuestion = questionDocuments.filter(eachQuestion=>eachQuestion._id == pointerToAnswers);
+                                if ( findQuestion && findQuestion.length > 0 ) {
+                                    submissionDocument.answers[pointerToAnswers].options = findQuestion[0].options;
+                                    submissionDocument.answers[pointerToAnswers].externalId = findQuestion[0].externalId;
+                                }
+                            }
+                        }
+                    }
+                }
+
+              return resolve(submissionDocument);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error.message,
+                    data: false
+                });
+            }
+        })
+    }
+
 };
