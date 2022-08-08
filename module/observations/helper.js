@@ -112,21 +112,21 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                // if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
+                if( userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0) {
 
-                //     let solutionData = 
-                //     await coreService.solutionDetailsBasedOnRoleAndLocation(
-                //         requestingUserAuthToken,
-                //         userRoleAndProfileInformation,
-                //         solutionId
-                //     );
+                    let solutionData = 
+                    await coreService.solutionDetailsBasedOnRoleAndLocation(
+                        requestingUserAuthToken,
+                        userRoleAndProfileInformation,
+                        solutionId
+                    );
 
-                //     if( !solutionData.success ) {
-                //         throw {
-                //             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
-                //         }
-                //     } 
-                // }
+                    if( !solutionData.success ) {
+                        throw {
+                            message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
+                        }
+                    } 
+                }
 
                 if( solutionData[0].isReusable ) {
 
