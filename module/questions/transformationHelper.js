@@ -16,60 +16,64 @@ module.exports = class Transformation {
     isPageQuestionsRequired = true
   ) {
     return new Promise(async (resolve, reject) => {
-      const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
+      try {
+        const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
 
-      const cacheData = await cache
-        .get(`${solutionDocument._id}:${referenceQuestionSetId}`)
-        .catch((err) => {
-          console.log("Error in getting data from redis:", err);
+        const cacheData = await redisCache
+          .get(solutionDocument._id)
+          .catch((err) => {
+            console.log("Error in getting data from redis:", err);
+          });
+  
+        if (cacheData) {
+          resolve(JSON.parse(cacheData));
+        } else {
+        const res = await readQuestionSet(referenceQuestionSetId).catch((err) => {
+          console.log("Error", err?.response?.data);
+          reject(err?.response?.data);
         });
-
-      if (!!cacheData) {
-        resolve(JSON.parse(cacheData));
-      } else {
-      const res = await readQuestionSet(referenceQuestionSetId).catch((err) => {
-        console.log("Error", err?.response?.data);
-        reject(err?.response?.data);
-      });
-
-      const questionSetHierarchy = res?.result?.questionSet;
-
-      const migratedCriteriaQuestions = questionSetHierarchy?.children || [];
-      const evidences = await this.questionEvidences(
-        migratedCriteriaQuestions,
-        submissionDocumentCriterias,
-        isPageQuestionsRequired
-      );
-
-      assessmentTemplate.assessment.evidences[0].name = capitalize(
-        solutionDocument?.type
-      );
-      assessmentTemplate.assessment.evidences[0].sections[0].name = `${capitalize(
-        solutionDocument?.type
-      )} Questions`;
-
-      assessmentTemplate.assessment.evidences[0].sections[0].questions =
-        evidences?.evidenceSections || [];
-      assessmentTemplate.assessment.evidences[0].sections[0].code = "SQ";
-      assessmentTemplate.assessment.evidences[0].code =
-        assessmentTemplate.assessment.evidences[0].externalId = "SF";
-      assessmentTemplate.assessment.evidences[0].description =
-        questionSetHierarchy?.descripton || "";
-
-      await cache.setEx(
-        `${solutionDocument._id}:${referenceQuestionSetId}`,
-        cacheTtl,
-        JSON.stringify({
+  
+        const questionSetHierarchy = res?.result?.questionSet;
+  
+        const migratedCriteriaQuestions = questionSetHierarchy?.children || [];
+        const evidences = await this.questionEvidences(
+          migratedCriteriaQuestions,
+          submissionDocumentCriterias,
+          isPageQuestionsRequired
+        );
+  
+        assessmentTemplate.assessment.evidences[0].name = capitalize(
+          solutionDocument?.type
+        );
+        assessmentTemplate.assessment.evidences[0].sections[0].name = `${capitalize(
+          solutionDocument?.type
+        )} Questions`;
+  
+        assessmentTemplate.assessment.evidences[0].sections[0].questions =
+          evidences?.evidenceSections || [];
+        assessmentTemplate.assessment.evidences[0].sections[0].code = "SQ";
+        assessmentTemplate.assessment.evidences[0].code =
+          assessmentTemplate.assessment.evidences[0].externalId = "SF";
+        assessmentTemplate.assessment.evidences[0].description =
+          questionSetHierarchy?.descripton || "";
+  
+        await redisCache.setEx(
+          solutionDocument._id,
+          cacheTtl,
+          JSON.stringify({
+            ...evidences,
+            evidences: assessmentTemplate.assessment.evidences,
+          })
+        );
+  
+        resolve({
           ...evidences,
           evidences: assessmentTemplate.assessment.evidences,
-        })
-      );
-
-      resolve({
-        ...evidences,
-        evidences: assessmentTemplate.assessment.evidences,
-      });
-      } 
+        });
+        }
+      }  catch (error) {
+        return reject(error);
+      }
     });
   }
 

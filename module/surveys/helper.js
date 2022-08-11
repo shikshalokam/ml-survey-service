@@ -688,7 +688,7 @@ module.exports = class SurveysHelper {
      * @returns {JSON} - returns survey solution,program and question details.
      */
 
-    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {},version = "", type="") {
+    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {},version = "", isTransformationRequired="") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -789,7 +789,7 @@ module.exports = class SurveysHelper {
                     validateSurvey.data.submissionId,
                     roleInformation,
                     token,
-                    type
+                    isTransformationRequired
                 )
 
                 if (!surveyDetails.success) {
@@ -824,7 +824,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", type="") {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", isTransformationRequired=false) {
         return new Promise(async (resolve, reject) => {
             try {
                 
@@ -865,7 +865,7 @@ module.exports = class SurveysHelper {
                     ...solutionDocumentProjectionFields,
                     "referenceQuestionSetId",
                     "type"
-                    ],   
+                    ],
                 )
 
                 if (!solutionDocument.length) {
@@ -874,7 +874,7 @@ module.exports = class SurveysHelper {
 
                 let referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
 
-                if (!!type) {
+                if (isTransformationRequired) {
                     referenceQuestionSetId = solutionDocument[0]?.referenceQuestionSetId;
     
                     if (!referenceQuestionSetId) {
@@ -986,7 +986,7 @@ module.exports = class SurveysHelper {
 
                 let evidences = {};
                   
-                if (!!type && !!referenceQuestionSetId) {
+                if (isTransformationRequired && referenceQuestionSetId) {
                     solutionDocument._id = referenceQuestionSetId;
                     evidences = await transFormationHelper.getQuestionSetHierarchy(referenceQuestionSetId, submissionDocumentCriterias, solutionDocument);
                 }
@@ -1068,7 +1068,7 @@ module.exports = class SurveysHelper {
                         status: messageConstants.common.SUBMISSION_STATUS_STARTED,
                         evidences: submissionDocumentEvidences,
                         evidencesStatus: Object.values(submissionDocumentEvidences),
-                        criteria: !!type ? evidences.submissionDocumentCriterias : submissionDocumentCriterias,
+                        criteria: isTransformationRequired ? evidences.submissionDocumentCriterias : submissionDocumentCriterias,
                         surveyInformation: {
                             ..._.omit(surveyDocument, ["_id", "deleted", "__v"])
                         },
@@ -1122,7 +1122,7 @@ module.exports = class SurveysHelper {
                     (solutionDocument && solutionDocument.questionSequenceByEcm) ? solutionDocument.questionSequenceByEcm : false
                 );
 
-                assessment.evidences = !!type ?  evidences.evidences : parsedAssessment.evidences;
+                assessment.evidences = isTransformationRequired ?  evidences.evidences : parsedAssessment.evidences;
                 assessment.submissions = parsedAssessment.submissions;
                 if (parsedAssessment.generalQuestions && parsedAssessment.generalQuestions.length > 0) {
                     assessment.generalQuestions = parsedAssessment.generalQuestions;

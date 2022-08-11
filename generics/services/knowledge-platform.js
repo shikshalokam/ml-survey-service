@@ -2,13 +2,13 @@
 const request = require('request');
 const CREATION_PORTAL_URL = process.env.CREATION_PORTAL_URL
 
+const headers = {
+  "content-type": "application/json",
+  "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
+}
 
 const copyQuestionSet = function (copyReq, questionSetId) {
   const copyQuestionSetUrl = CREATION_PORTAL_URL + messageConstants.endpoints.COPY_QUESTION_SET + "/" + questionSetId;
-  const headers = {
-    "content-type": "application/json",
-    "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
-  }
   const options = {
     headers,
     json: { request: { questionset: copyReq } }
@@ -44,10 +44,6 @@ const readQuestionSet = function (copiedQuestionsetId) {
     try {
 
       let url = CREATION_PORTAL_URL + messageConstants.endpoints.READ_QUESTION_SET + "/" + copiedQuestionsetId + "?mode=edit";
-      const headers = {
-        "content-type": "application/json",
-        "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
-      }
       const readQuestionSetCallBack = function (err, data) {
 
 
@@ -75,10 +71,6 @@ const updateQuestionSetHierarchy = function (req) {
     try {
 
       let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
-      const headers = {
-        "content-type": "application/json",
-        "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
-      }
       function updateQuestionSetHierarchyCallBack(err, data) {
         if (err || data.statusCode != 200) {
           return reject({
@@ -105,10 +97,6 @@ const publishQuestionSet = function (questionsetId) {
     try {
 
       let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
-      const headers = {
-        "content-type": "application/json",
-        "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
-      }
       async function publishQuestionSetCallBack(err, data) {
         if (err || data.statusCode != 200) {
           const errmsg = JSON.parse(data.body)
@@ -135,10 +123,6 @@ const publishQuestionSet = function (questionsetId) {
 const updateQuestionSet = function (updateReq, referenceQuestionSetId) {
   return new Promise((resolve, reject) => {
     try {
-      const headers = {
-        "content-type": "application/json",
-        "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
-      }
       let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + referenceQuestionSetId;
       const options = {
         headers,
@@ -181,10 +165,7 @@ const readQuestion = function (questionId = "") {
 
 
       const options = {
-        headers: {
-          "content-type": "application/json",
-          Authorization: process.env.CREATION_PORTAL_AUTHORIZATION_KEY,
-        },
+        headers: headers,
       };
 
       request.get(url, options, questionReadCallback);

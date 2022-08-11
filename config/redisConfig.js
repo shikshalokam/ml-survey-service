@@ -4,8 +4,8 @@ var Connect = function () {
   var client = redis.createClient({
     host: process.env.REDIS_URL,
     // Redis Host username and password
-    username: process.env.REDIS_USER,
-    password: process.env.REDIS_PWD,
+    // username: process.env.REDIS_USER,
+    // password: process.env.REDIS_PWD,
     database: process.env.REDIS_DB,
     socket: {
       connectTimeout: 30000

@@ -172,16 +172,15 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         solutionDocument = solutionDocument[0];
 
-            const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
+        const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
 
-            if (!referenceQuestionSetId) {
-              let responseMessage =
-              messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
+        if (!referenceQuestionSetId) {
+          let responseMessage = messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
             return resolve({
               status: httpStatusCode.bad_request.status,
               message: responseMessage,
-            });
-            }
+          });
+        }
 
   
         let entityProfileForm = await database.models.entityTypes.findOne(
@@ -273,7 +272,7 @@ module.exports = class ObservationSubmissions extends Abstract {
       submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
       let evidences = {};
-          if (!!referenceQuestionSetId) {
+          if (referenceQuestionSetId) {
             evidences = await transFormationHelper.getQuestionSetHierarchy(
                 submissionDocumentCriterias,
                 solutionDocument,
@@ -325,7 +324,7 @@ module.exports = class ObservationSubmissions extends Abstract {
       });
       } catch (error) {
         return reject({
-          status: error?.status || httpStatusCode.internal_server_error.status,
+          status: error.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
           errorObject: error
         });

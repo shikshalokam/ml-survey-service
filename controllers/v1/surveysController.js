@@ -657,7 +657,7 @@ module.exports = class Surveys extends Abstract {
                     req.userDetails.userId,
                     req.userDetails.userToken,
                     bodyData,
-                    "transformation"
+                    true
                 );
             }
 

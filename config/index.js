@@ -56,7 +56,7 @@ const configuration = {
 let redis_connect =   function () {
   const redis = require("./redisConfig");
   redis.connect;
-  global.cache = redis.client;
+  global.redisCache = redis.client;
   global.cacheTtl = redis.expiry;
 };
 

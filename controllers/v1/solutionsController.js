@@ -2314,7 +2314,7 @@ module.exports = class Solutions extends Abstract {
             submissionDocumentEvidences = solutionDocument.evidenceMethods;
   
             let evidences = {};
-            if (!!referenceQuestionSetId) {
+            if (referenceQuestionSetId) {
               response.result.solution._id = referenceQuestionSetId;
               evidences = await transFormationHelper.getQuestionSetHierarchy(
                 submissionDocumentCriterias,

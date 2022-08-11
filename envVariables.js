@@ -96,7 +96,8 @@ let enviromentVariables = {
   },
   "REDIS_TTL": {
     "message" : "Required redis ttl",
-    "optional" : false
+    "optional" : true,
+    "default": 86400
   },
 }
 
