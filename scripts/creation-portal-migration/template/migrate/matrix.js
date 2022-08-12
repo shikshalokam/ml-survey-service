@@ -144,7 +144,6 @@ const getMatrixQuestions = async (
   );
 
   if (!isChildrenPresent(question) && !isVisibleIfPresent(question)) {
-    console.log("getMatrixQuestions noChildrenAndnoVisibleIf ", question._id);
     const data = noChildrenAndnoVisibleIf(
       matrixQuestions,
       criteriaId,
@@ -198,9 +197,7 @@ const noChildrenAndnoVisibleIf = (
   matrixHierarchy,
   questions
 ) => {
-  console.log();
-  console.log("noChildrenAndnoVisibleIf");
-  console.log();
+
 
   logger.debug(
     `noChildrenAndnoVisibleIf: criteriaId = ${criteriaId}; matrixId = ${matrixId};  question: ${question?._id}`
@@ -287,14 +284,14 @@ const childrenAndnoVisibleIf = async (
         matrixHierarchy = updateMatrixHierarchy(
           matrixHierarchy,
           matrixId,
-          child?.referenceQuestionSetId,
+          child?.referenceQuestionId,
           criteriaId
         );
         matrixHierarchy = updateMatrixHierarchyBranching(
           matrixHierarchy,
           criteriaId,
           matrixId,
-          question?.referenceQuestionSetId,
+          question?.referenceQuestionId,
           question,
           child
         );
@@ -350,14 +347,14 @@ const noChildrenAndVisibleIf = async (
     matrixHierarchy = updateMatrixHierarchy(
       matrixHierarchy,
       matrixId,
-      pQuestion?.referenceQuestionSetId,
+      pQuestion?.referenceQuestionId,
       criteriaId
     );
     matrixHierarchy = updateMatrixHierarchyBranching(
       matrixHierarchy,
       criteriaId,
       matrixId,
-      pQuestion?.referenceQuestionSetId,
+      pQuestion?.referenceQuestionId,
       pQuestion,
       question
     );
@@ -384,19 +381,19 @@ const noChildrenAndVisibleIf = async (
 const updateMatrixHierarchy = (
   matrixHierarchy,
   matrixId,
-  referenceQuestionSetId,
+  referenceQuestionId,
   criteriaId
 ) => {
   logger.debug(
-    `updateMatrixHierarchy: matrixId = ${matrixId}; referenceQuestionSetId = ${referenceQuestionSetId}`
+    `updateMatrixHierarchy: matrixId = ${matrixId}; referenceQuestionId = ${referenceQuestionId}`
   );
 
   const criterias = matrixHierarchy.criterias || [];
   for (let i = 0; i < criterias.length; i++) {
     const criteria = criterias[i];
     if (criteria?._id.toString() === matrixId) {
-      if (!criteria.questions.includes(referenceQuestionSetId)) {
-        criteria.questions.push(referenceQuestionSetId);
+      if (!criteria.questions.includes(referenceQuestionId)) {
+        criteria.questions.push(referenceQuestionId);
       }
     }
     criterias[i] = criteria;
@@ -419,7 +416,7 @@ const updateMatrixHierarchyQuestions = (
   questions
 ) => {
   logger.debug(
-    `updateMatrixHierarchyQuestions: criteriaId = ${criteriaId}; matrixId = ${matrixId};  question: ${question?._id}: referenceQuestionSetId: ${question?.referenceQuestionSetId}`
+    `updateMatrixHierarchyQuestions: criteriaId = ${criteriaId}; matrixId = ${matrixId};  question: ${question?._id}: referenceQuestionId: ${question?.referenceQuestionId}`
   );
 
   const matched = isQuestionMatched(
@@ -438,12 +435,10 @@ const updateMatrixHierarchyQuestions = (
     matrixHierarchy = updateMatrixHierarchy(
       matrixHierarchy,
       matrixId,
-      question?.referenceQuestionSetId,
+      question?.referenceQuestionId,
       criteriaId
     );
   }
-
-  console.log("updateMatrixHierarchyQuestions ", matrixHierarchy);
 
   return { matrixHierarchy, matrixQuestions, questions };
 };

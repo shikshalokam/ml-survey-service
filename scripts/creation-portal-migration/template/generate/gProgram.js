@@ -24,9 +24,9 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   const userId =
     userData?.length > 0
       ? solution.author
-      : "5a587cc1-e018-4859-a0a8-e842650b9d64";
+      : process.env.DEFAULT_USER_ID_TO_CREATE_PROGRAM;
   const rootOrgId =
-    userData?.length > 0 ? userData[0]?.rootOrgId : "01309282781705830427";
+    userData?.length > 0 ? userData[0]?.rootOrgId : process.env.DEFAULT_CONTRIBUTOR_USER_CHANNEL_ID;
 
   const template = {
     name: `Migrated ${solution?.name} sourcing project`,
@@ -40,12 +40,12 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     target_type: "searchCriteria",
     content_types: [],
     target_collection_category: [],
-    sourcing_org_name: "NIT",
+    sourcing_org_name: process.env.DEFAULT_USER_SOURCING_ORG_NAME_TO_CREATE_PROGRAM,
     rootorg_id: rootOrgId,
     createdby: userId,
     createdOn: `${getDate(0)}`,
     startdate: `${getDate(1)}`,
-    slug: "sunbird",
+    slug: process.env.DEFAULT_SLUG,
     status: "Draft",
     program_id: "",
     rolemapping: [],
@@ -170,9 +170,9 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   if (!solution.isContributorAdded) {
     const add_contri = {
       program_id: programId,
-      user_id: "bb551fff-121e-4a18-b969-984ac62bd572",
+      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
       rolemapping: {
-        CONTRIBUTOR: ["4e397c42-495e-4fdb-8558-f98176230916"],
+        CONTRIBUTOR: [process.env.DEFAULT_CONTRIBUTOR_USER_ID],
       },
     };
 
@@ -206,7 +206,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   if (!solution.isContributorAccepted) {
     const accept_contri = {
       program_id: programId,
-      user_id: "bb551fff-121e-4a18-b969-984ac62bd572",
+      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
       status: "Approved",
       updatedby: userId,
     };
@@ -294,12 +294,12 @@ const updateProgramTemplate = async (program_id, solution) => {
           defaultTab: 2,
         },
       ],
-      framework: ["nit_tpd"],
+      framework: [process.env.DEFAULT_FRAMEWORK_ID],
       frameworkObj: {
-        code: "nit_tpd",
-        name: "nit_tpd",
-        type: "TPD",
-        identifier: "nit_tpd",
+        code: process.env.DEFAULT_FRAMEWORK_ID,
+        name: process.env.DEFAULT_FRAMEWORK_ID,
+        type: process.env.DEFAULT_FRAMEWORK_TYPE,
+        identifier: process.env.DEFAULT_FRAMEWORK,
       },
       sharedContext: [],
     },

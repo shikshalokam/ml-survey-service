@@ -122,7 +122,7 @@ const getQuestion = async (questions, questions2, id, migratedCount) => {
     question = matched;
   }
 
-  if (!isEmpty(question) && (!question?.referenceQuestionSetId || !question?.isPublished)) {
+  if (!isEmpty(question) && (!question?.referenceQuestionId || !question?.isPublished)) {
     question = await createQuestionTemplate(question, migratedCount);
   }
 
@@ -170,38 +170,38 @@ const updateHierarchyBranching = (
   pQuestion,
   child
 ) => {
-  const referenceQuestionSetId = child?.referenceQuestionSetId;
+  const referenceQuestionId = child?.referenceQuestionId;
 
   const visible = child?.visibleIf ? child?.visibleIf[0] : {};
 
   logger.debug(
-    `updateHierarchyBranching: referenceQuestionSetId = ${referenceQuestionSetId}; parentId = ${parentId}; visible: ${visible}`
+    `updateHierarchyBranching: referenceQuestionId = ${referenceQuestionId}; parentId = ${parentId}; visible: ${visible}`
   );
 
   if (!isEmpty(visible)) {
-    if (hasProperty(branching, index, parentId) && referenceQuestionSetId) {
+    if (hasProperty(branching, index, parentId) && referenceQuestionId) {
       if (
         !branching.criterias[index].branchingLogic[parentId].target.includes(
-          referenceQuestionSetId
+          referenceQuestionId
         )
       ) {
         branching.criterias[index].branchingLogic[parentId].target.push(
-          referenceQuestionSetId
+          referenceQuestionId
         );
       }
 
-      branching.criterias[index].branchingLogic[referenceQuestionSetId] = {
+      branching.criterias[index].branchingLogic[referenceQuestionId] = {
         target: [],
         preCondition: getPrecondition(visible, parentId, pQuestion),
         source: [parentId],
       };
-    } else if (referenceQuestionSetId) {
+    } else if (referenceQuestionId) {
       branching.criterias[index].branchingLogic[parentId] = {
-        target: [referenceQuestionSetId],
+        target: [referenceQuestionId],
         preCondition: {},
         source: [],
       };
-      branching.criterias[index].branchingLogic[referenceQuestionSetId] = {
+      branching.criterias[index].branchingLogic[referenceQuestionId] = {
         target: [],
         preCondition: getPrecondition(visible, parentId, pQuestion),
         source: [parentId],

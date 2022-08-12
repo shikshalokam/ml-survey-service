@@ -42,7 +42,7 @@ const updateNonMatrixHierarchyChildren = (
     if (matched === false) {
       hierarchy = updateHierarchyChildren(
         hierarchy,
-        question?.referenceQuestionSetId,
+        question?.referenceQuestionId,
         index
       );
       nonMatrixQuestions.push(question);
@@ -80,12 +80,7 @@ const getNonMatrixQuestions = async (
     migratedCount
   );
 
-  console.log("getNonMatrixQuestions", question);
-
-
   if (!isChildrenPresent(question) && !isVisibleIfPresent(question)) {
-
-    console.log("getNonMatrixQuestions nonMatrix NoChildrenAndNoVisibleIf", )
 
     const data = nonMatrixNoChildrenAndNoVisibleIf(
       question,
@@ -104,12 +99,8 @@ const getNonMatrixQuestions = async (
     matrixQuestions = data.matrixQuestions;
     matrixHierarchy = data.matrixHierarchy;
 
-    console.log("getNonMatrixQuestions nonMatrix NoChildrenAndNoVisibleIf", )
-
   } else if (isChildrenPresent(question) && !isVisibleIfPresent(question)) {
  
-    console.log("getNonMatrixQuestions nonMatrix ChildrenAndNoVisibleIf", )
-
     const data = await nonMatrixChildrenAndNoVisibleIf(
       question,
       questions,
@@ -129,9 +120,6 @@ const getNonMatrixQuestions = async (
     questions = data.questions;
 
   } else if (!isChildrenPresent(question) && isVisibleIfPresent(question)) {
-
-    console.log("getNonMatrixQuestions nonMatrix NoChildrenAndVisibleIf", )
-
 
     const data = await nonMatrixNoChildrenAndVisibleIf(
       question,
@@ -248,7 +236,7 @@ const nonMatrixChildrenAndNoVisibleIf = async (
       hierarchy = updateHierarchyBranching(
         hierarchy,
         index,
-        question?.referenceQuestionSetId,
+        question?.referenceQuestionId,
         question,
         child
       );
@@ -320,7 +308,7 @@ const nonMatrixNoChildrenAndVisibleIf = async (
     hierarchy = updateHierarchyBranching(
       hierarchy,
       index,
-      pQuestion?.referenceQuestionSetId,
+      pQuestion?.referenceQuestionId,
       pQuestion,
       question
     );

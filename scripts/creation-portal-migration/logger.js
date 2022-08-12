@@ -1,5 +1,5 @@
 var path = require("path");
-
+var fs = require("fs");
 var Logger = require("bunyan");
 
 const date =
@@ -8,6 +8,8 @@ const date =
   new Date().getMonth() +
   "-" +
   new Date().getFullYear();
+
+fs.existsSync("logs") || fs.mkdirSync("logs");
 
 var logger = new Logger({
   name: "creation-portal-migration",

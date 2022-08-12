@@ -16,16 +16,16 @@ const { CONFIG } = require("./../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
 
-const updateHierarchyChildren = (hierarchy, referenceQuestionSetId, index) => {
+const updateHierarchyChildren = (hierarchy, referenceQuestionId, index) => {
 
-  logger.debug(`updateHierarchyChildren: referenceQuestionSetId = ${referenceQuestionSetId}`)
+  logger.debug(`updateHierarchyChildren: referenceQuestionId = ${referenceQuestionId}`)
 
 
   if (
-    referenceQuestionSetId &&
-    !hierarchy.criterias[index].questions.includes(referenceQuestionSetId)
+    referenceQuestionId &&
+    !hierarchy.criterias[index].questions.includes(referenceQuestionId)
   ) {
-    hierarchy.criterias[index].questions.push(referenceQuestionSetId);
+    hierarchy.criterias[index].questions.push(referenceQuestionId);
   }
   return hierarchy;
 };
@@ -113,8 +113,6 @@ const updateHierarchyTemplate = async (
     };
   }
 
-  console.log("updateHierarchydata", JSON.stringify(updateHierarchyData));
-  console.log();
 
   logger.info(
     `updateHierarchyTemplate: Hierarchydata = ${JSON.stringify(
@@ -162,7 +160,6 @@ const updateHierarchyTemplate = async (
 
   if (!hierarchy.isBranchingUpdated) {
     const branchinghierarchy = await branchingQuestionSetHierarchy(hierarchy);
-    console.log("branchinghierarchy", JSON.stringify(branchinghierarchy));
 
     const result = await updateQuestionSetHierarchy(branchinghierarchy).catch(
       (err) => {

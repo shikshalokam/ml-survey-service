@@ -6,11 +6,7 @@ const {
 } = require("./template/generate/gQuestionSet.js");
 
 const logger = require("./logger");
-var fs = require("fs");
 const { CONFIG } = require("./constant/config");
-
-
-fs.existsSync("logs") || fs.mkdirSync("logs");
 
 const migrateData = async (req, res) => {
   try {
@@ -82,12 +78,8 @@ const migrateData = async (req, res) => {
       migratedCount
     );
 
-    console.log();
-    console.log("migratedCounttt", JSON.stringify(migratedCount));
-    console.log();
-
     logger.info(`\n migratedCount ${JSON.stringify(migratedCount)}`);
-        process.exit();
+    process.exit();
   } catch (err) {
     logger.error(`Error while migrating : ${err}`)
 

@@ -15,23 +15,11 @@ const getQuestionSetTemplates = async (solutions, migratedCount) => {
   const data = Promise.all(
     solutions.map(async (solution) => {
       let programId = solution.sourcingProgramId;
-      console.log();
-      console.log(
-        "-----------------------sourcingProgramId----------------------",
-        programId
-      );
-      console.log();
       programId = await createProgramTemplate(
         solution,
         programId,
         migratedCount
       );
-      console.log();
-      console.log(
-        "-----------------------------program-------------------------------------"
-      );
-      console.log();
-      console.log("ProgramId", programId);
       logger.debug(
         `-----------------------sourcingProgramId----------------------
         ${programId}`
@@ -76,8 +64,6 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
       ${questionSetMigratedId}`
     );
 
-    console.log(`migrateQuestionset: questionSetMigratedId: 
-    ${questionSetMigratedId}`);
 
     if (!questionSetMigratedId) {
       return;
@@ -90,8 +76,7 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
         `migrateQuestionset: Error while updating solution referenceQuestionSetId: 
         ${err}`
       );
-      console.log(`migrateQuestionset: Error while updating question: 
-      ${err}`);
+
     });
 
     migratedCount.success.questionSet.current.migrated++;
@@ -117,9 +102,7 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
     data.hierarchy.criterias.push(cri);
   }
 
-  console.log();
-  console.log("migrateQuestionset", JSON.stringify(data.hierarchy));
-  console.log();
+
   await updateHierarchyTemplate(
     data.hierarchy,
     solution,
@@ -157,13 +140,6 @@ const migrateCriteriaQuestions = async (
 
     hierarchy.criterias[i] = getCriteriaData(criteria, solution?.type);
 
-    console.log();
-    console.log(
-      "--------------------criteria----------------------",
-      criteria?.name
-    );
-    console.log();
-
     logger.info(
       `migrateCriteriaQuestions: --------------------criteria---------------------- ${criteria?.name}`
     );
@@ -196,9 +172,6 @@ const migrateQuestions = async (
   let matrixQuestions = {};
   let nonMatrixQuestions = [];
 
-  console.log();
-  console.log("migrateQuestions", questions.length);
-  console.log();
 
   logger.info(
     `migrateQuestions: criteria:${criteriaId} questions: ${questions.length} `
@@ -207,15 +180,6 @@ const migrateQuestions = async (
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
 
-    console.log();
-    console.log(
-      "migrateQuestions question responsetype",
-      question?.responseType,
-      "qid",
-      question._id,
-
-    );
-    console.log();
 
     logger.info(
       `migrateQuestions: criteria:${criteriaId} question: ${question?._id} question responseType: ${question?.responseType} `
@@ -238,18 +202,7 @@ const migrateQuestions = async (
       matrixHierarchy = data.matrixHierarchy;
       questions = data.questions;
 
-      console.log();
-      console.log("migrateQuestions createSection", matrixHierarchy);
-      console.log();
     } else {
-      console.log();
-      console.log(
-        "==========migrateQuestions getNonMatrixQuestions============",
-        question?.responseType,
-        question?._id
-      );
-      console.log();
-
       const data = await getNonMatrixQuestions(
         question,
         questions,
@@ -262,13 +215,6 @@ const migrateQuestions = async (
         migratedCount,
         criteriaId
       );
-
-      console.log();
-      console.log(
-        "==========migrateQuestions getNonMatrixQuestions end ============",
-        matrixHierarchy
-      );
-      console.log();
 
       hierarchy = data.hierarchy;
       matrixHierarchy = data.matrixHierarchy;

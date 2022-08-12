@@ -6,25 +6,25 @@ const { getHeaders } = require("./headers");
 const readUser = async (userId) => {
   const params = "organisations,roles,locations,declarations,externalIds";
   const url =
-    CONFIG.HOST.base +
+    CONFIG.HOST.ed +
     CONFIG.APIS.read_user +
     userId +
     "?fields=" +
     params;
 
   const res = await axios
-    .get(url, await getHeaders(true, "base"))
+    .get(url, await getHeaders(true, "ed"))
     .catch((err) => {
       logger.error(`Error while reading User: ${JSON.stringify(err?.response?.data)}`)
     });
 };
 
 const searchUser = async (userId) => {
-  const url = CONFIG.HOST.base + CONFIG.APIS.search_user;
+  const url = CONFIG.HOST.ed + CONFIG.APIS.search_user;
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "base"),
+    headers: await getHeaders(true, "ed"),
     data: {
       request: { filters: { id: userId } },
     },

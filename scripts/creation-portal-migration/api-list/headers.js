@@ -1,6 +1,6 @@
 const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
-const querystring = require("querystring");
+const querystring = require("query-string");
 const jwt = require("jsonwebtoken");
 const logger = require("../logger");
 
@@ -18,18 +18,24 @@ const genToken = async (url, body, type) => {
     });
     return res ? res.data.access_token : "";
   } else {
-    const token = type === "base" ? this.base_token : this.creation_portal_token;
+    const token = type === "ed" ? this.ed_token : this.creation_portal_token;
 
     return token;
   }
 };
 
 const validateToken = (type) => {
-  const token = type === "base" ? this.base_token : this.creation_portal_token;
+  const token = type === "ed" ? this.ed_token : this.creation_portal_token;
 
   try {
-    jwt.verify(token, "shhhhh");
-    return true;
+    if (token) {
+      const decoded = jwt.decode(token, {header: true});
+      if (Date.now() >= decoded?.exp * 1000) {
+        return false;
+      }
+      return true;
+    }
+    return false;
   } catch (err) {
     return false;
   }
@@ -40,11 +46,11 @@ const generateToken = async (type) => {
   let body = {};
 
   switch (type) {
-    case "base":
-      url = CONFIG.HOST.base + CONFIG.APIS.token;
-      body = querystring.stringify({ ...CONFIG.KEYS.BASE.QUERY });
-      this.base_token = await genToken(url, body, "base");
-      return this.base_token;
+    case "ed":
+      url = CONFIG.HOST.ed + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.ED.QUERY });
+      this.ed_token = await genToken(url, body, "ed");
+      return this.ed_token;
     case "creation_portal":
       url = CONFIG.HOST.creation_portal + CONFIG.APIS.token;
       body = querystring.stringify({ ...CONFIG.KEYS.CREATION_PORTAL.QUERY });
@@ -57,13 +63,13 @@ const getHeaders = async (isTokenReq, type) => {
   let headers = {};
 
   switch (type) {
-    case "base":
+    case "ed":
       headers = {
         "Content-Type": "application/json",
-        Authorization: CONFIG.KEYS.BASE.AUTHORIZATION,
+        Authorization: CONFIG.KEYS.ED.AUTHORIZATION,
       };
       if (isTokenReq) {
-        headers["x-authenticated-user-token"] = await generateToken("base");
+        headers["x-authenticated-user-token"] = await generateToken("ed");
       }
       break;
 

@@ -1,5 +1,6 @@
 const { getDBInstance } = require("./dbConfig");
 const { ObjectId } = require("mongodb");
+const logger = require("../logger");
 
 const findAll = async (clName, query) => {
   try {
@@ -9,7 +10,7 @@ const findAll = async (clName, query) => {
       .find({ ...query })
       .toArray();
   } catch (err) {
-    console.log("findAll Error: ", err);
+    logger.error(`findAll Error: , ${err}`);
   }
 };
 
@@ -24,7 +25,7 @@ const updateById = async (clName, id, query) => {
         { upsert: true }
       );
   } catch (err) {
-    console.log("updateById  = ", id, "Error: ", err);
+    logger.error(`"updateById  = ", ${id}, "Error: ", ${err}`);
   }
 };
 

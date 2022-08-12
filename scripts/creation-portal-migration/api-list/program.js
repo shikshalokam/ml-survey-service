@@ -77,8 +77,8 @@ const nominateProgram = async (program_id, author) => {
         },
       ],
       content_types: [],
-      organisation_id: "937dd865-b256-4c1a-9830-a9b5b89f0913",
-      user_id: "bb551fff-121e-4a18-b969-984ac62bd572",
+      organisation_id: process.env.DEFAULT_PROGRAM_CREATOR_ORGANISATION_ID,
+      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
     },
   };
   const config = {

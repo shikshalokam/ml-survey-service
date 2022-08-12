@@ -86,7 +86,6 @@ const createQuestions = async (templateData, questionId) => {
     data: data,
   };
   const res = await axios(config).catch((err) => {
-    console.log(`Error while creating the question for questionid: ${questionId} Error:`,err?.response?.data)
     logger.error(`Error while creating the question for questionid: ${questionId} Error:
     ${JSON.stringify(err.response.data)}`);
   });
