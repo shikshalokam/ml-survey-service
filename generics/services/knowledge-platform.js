@@ -4,7 +4,7 @@ const CREATION_PORTAL_URL = process.env.CREATION_PORTAL_URL
 
 const headers = {
   "content-type": "application/json",
-  "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION_KEY
+  "Authorization": process.env.CREATION_PORTAL_AUTHORIZATION
 }
 
 const copyQuestionSet = function (copyReq, questionSetId) {
