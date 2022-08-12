@@ -61,7 +61,6 @@
     "morgan": "^1.9.0",
     "p-each-series": "^2.1.0",
     "path": "^0.12.7",
-    "querystring": "^0.2.1",
     "redis": "^4.2.0",
     "request": "^2.88.0",
     "require-all": "^2.2.0",
