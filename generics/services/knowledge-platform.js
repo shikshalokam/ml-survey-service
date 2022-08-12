@@ -97,7 +97,7 @@ const publishQuestionSet = function (questionsetId) {
     try {
 
       let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
-      async function publishQuestionSetCallBack(err, data) {
+      function publishQuestionSetCallBack(err, data) {
         if (err || data.statusCode != 200) {
           const errmsg = JSON.parse(data.body)
           return reject({
