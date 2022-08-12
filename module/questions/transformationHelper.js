@@ -20,7 +20,7 @@ module.exports = class Transformation {
         const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
 
         const cacheData = await redisCache
-          .get(solutionDocument._id)
+          .get(`${solutionDocument._id}`)
           .catch((err) => {
             console.log("Error in getting data from redis:", err);
           });
@@ -58,7 +58,7 @@ module.exports = class Transformation {
           questionSetHierarchy?.descripton || "";
   
         await redisCache.setEx(
-          solutionDocument._id,
+          `${solutionDocument._id}`,
           cacheTtl,
           JSON.stringify({
             ...evidences,

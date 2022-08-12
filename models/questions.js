@@ -48,6 +48,6 @@ module.exports = {
     isEditable : { type : Boolean, default : true },
     showQuestionInPreview : { type : Boolean, default : false },
     createdFromQuestionId : "ObjectId",
-    referenceQuestionSetId: String,
+    referenceQuestionId: String,
   }
 };
