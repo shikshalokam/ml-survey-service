@@ -635,9 +635,9 @@ module.exports = class Observations extends Abstract {
                         "id" : req.query.parentEntityId
                     };
 
-                    let entitiesDocument = await userProfileService.learnerLocationSearch( filterData );
-
-                    if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
+                    let entitiesDocument = await userProfileService.locationSearch( filterData );
+                    
+                    if ( !entitiesDocument.success ) {
                         return resolve({
                             "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                             "result" : {
@@ -646,7 +646,7 @@ module.exports = class Observations extends Abstract {
                             }
                         })
                     }
-                    let entitiesData = entitiesDocument.data.response;
+                    let entitiesData = entitiesDocument.data;
                     
                     if( entitiesData && entitiesData[0].type === result.entityType ) {
                         response.result = [];
@@ -709,9 +709,9 @@ module.exports = class Observations extends Abstract {
                                 "code" : schoolCodes
                             };
                             
-                            let entitiesData = await userProfileService.learnerLocationSearch( bodyData );
+                            let entitiesData = await userProfileService.locationSearch( bodyData );
                         
-                            if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response || !entitiesData.data.response.length > 0 ) {
+                            if( !entitiesData.success ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                                     "result" : {
@@ -724,7 +724,7 @@ module.exports = class Observations extends Abstract {
 
                             let data = 
                                 await entitiesHelper.observationSearchEntitiesResponse(
-                                entitiesData.data.response,
+                                entitiesData.data,
                                 result.entities
                             );
 
@@ -740,7 +740,7 @@ module.exports = class Observations extends Abstract {
                             let subEntitiesMatchingType = [];
                             let parentId = [];
                             parentId.push(req.query.parentEntityId );
-                            let subEntities = await subEntitiesWithMatchingType( parentId,result.entityType,subEntitiesMatchingType )
+                            let subEntities = await getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
                    
                             if( !subEntities.length > 0 ) {
                                 return resolve({
@@ -834,7 +834,6 @@ module.exports = class Observations extends Abstract {
                 return resolve(response);
 
             } catch (error) {
-                
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,
                     message: error.message || httpStatusCode.internal_server_error.message,
@@ -1091,15 +1090,15 @@ module.exports = class Observations extends Abstract {
                     };
                 }
                 
-                let entitiesDocument = await userProfileService.learnerLocationSearch( filterData );
+                let entitiesDocument = await userProfileService.locationSearch( filterData );
                 
-                if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
+                if ( !entitiesDocument.success ) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
                         message: messageConstants.apiResponses.ENTITY_NOT_FOUND 
                     });
                 }
-                let entities = entitiesDocument.data.response;
+                let entities = entitiesDocument.data;
 
                 let entityData = await entitiesHelper.extractDataFromLocationResult(entities);
                 
@@ -2254,26 +2253,30 @@ module.exports = class Observations extends Abstract {
 /**
   * get subEntities of matching type by recursion.
   * @method
-  * @name subEntitiesWithMatchingType
-  * @returns {Array} - Sub entities matching the type .
+  * @name getSubEntitiesBasedOnEntityType
+  * @param {Array} parentEntities - Array of entity Ids - parent entities.
+  * @param {String} entityType - Entity type.
+  * @param {Array} matchingData - subentities of type {entityType} of {parentEntities}
+  * @returns {Array} - Sub entities matching the type.
 */
 
-async function subEntitiesWithMatchingType( parentIds,entityType,matchingData ){
-    if( !parentIds.length > 0 ){
+async function getSubEntitiesBasedOnEntityType( parentEntities, entityType, matchingData ) {
+    //get sub entities of type {entityType} of entities {parentEntity}
+    if( !parentEntities.length > 0 ){
       return matchingData;
     }
 
     let bodyData={
-        "parentId" : parentIds
+        "parentId" : parentEntities
     };
     
-    let entityDetails = await userProfileService.learnerLocationSearch(bodyData);
+    let entityDetails = await userProfileService.locationSearch(bodyData);
 
-    if( ( !entityDetails.success || !entityDetails.data || !entityDetails.data.response.length > 0 ) && !matchingData.length > 0 ) {
+    if( ( !entityDetails.success ) && !matchingData.length > 0 ) {
       return matchingData;
     }
     
-    let entityData = entityDetails.data.response;  
+    let entityData = entityDetails.data;  
     let mismatchEntities = [];
 
     entityData.map(entity => {
@@ -2285,7 +2288,7 @@ async function subEntitiesWithMatchingType( parentIds,entityType,matchingData ){
     });
 
     if( mismatchEntities.length > 0 ){
-      await subEntitiesWithMatchingType(mismatchEntities,entityType,matchingData)
+      await getSubEntitiesBasedOnEntityType(mismatchEntities, entityType, matchingData)
     } 
     let uniqueEntities = [];
     matchingData.map( data => {

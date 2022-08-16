@@ -1789,9 +1789,9 @@ module.exports = class ObservationsHelper {
                     let bodyData = {
                         "id" : entityIds
                     } 
-                    let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                    if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                        entitiesData =  entityData.data.response;
+                    let entityData = await userProfileService.locationSearch( bodyData );
+                    if ( entityData.success ) {
+                        entitiesData =  entityData.data;
                     }
                 }
 
@@ -1799,9 +1799,9 @@ module.exports = class ObservationsHelper {
                     let bodyData = {
                         "code" : locationCodes
                     } 
-                    let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                    if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                        entitiesData =  entitiesData.concat(entityData.data.response);
+                    let entityData = await userProfileService.locationSearch( bodyData );
+                    if ( entityData.success ) {
+                        entitiesData =  entitiesData.concat(entityData.data);
                     }
                 }
             

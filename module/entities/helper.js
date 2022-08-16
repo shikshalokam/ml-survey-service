@@ -940,13 +940,13 @@ module.exports = class EntitiesHelper {
                     };
                 }
                 
-                let entitiesData = await userProfileService.learnerLocationSearch( bodyData, pageSize, pageNo, searchText );
+                let entitiesData = await userProfileService.locationSearch( bodyData, pageSize, pageNo, searchText );
                 
-                if( !entitiesData.success || !entitiesData.data || !entitiesData.data.response.length > 0 ) {
+                if( !entitiesData.success ) {
                     return resolve(entitiesData.data.response) 
                 }
-                let totalcount = entitiesData.data.count;
-                let immediateEntities = entitiesData.data.response;
+                let totalcount = entitiesData.count;
+                let immediateEntities = entitiesData.data;
                 
                 entityDocuments.push({
                     data : immediateEntities,
@@ -989,9 +989,9 @@ module.exports = class EntitiesHelper {
                     "id" : locationIds,
                     "type" : entityType
                 } 
-                let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                    entityInformations =  entityData.data.response;
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformations =  entityData.data;
                 }
             }
             
@@ -1000,9 +1000,9 @@ module.exports = class EntitiesHelper {
                     "code" : locationCodes,
                     "type" : entityType
                 } 
-                let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                    entityInformations =  entityInformations.concat(entityData.data.response);
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformations =  entityInformations.concat(entityData.data);
                 }
             }
            
@@ -1853,9 +1853,9 @@ module.exports = class EntitiesHelper {
                 let bodyData = {
                     "id" : entityIds
                 } 
-                let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                    entityInformations =  entityData.data.response;
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformations =  entityData.data;
                 }
             }
 
@@ -1863,9 +1863,9 @@ module.exports = class EntitiesHelper {
                 let bodyData = {
                     "code" : locationCodes
                 } 
-                let entityData = await userProfileService.learnerLocationSearch( bodyData );
-                if ( entityData.success && entityData.data && entityData.data.response && entityData.data.response.length > 0 ) {
-                    entityInformations =  entityInformations.concat(entityData.data.response);
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformations =  entityInformations.concat(entityData.data);
                 }
             }
            

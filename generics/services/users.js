@@ -8,8 +8,6 @@
 //dependencies
 const request = require('request');
 const userServiceUrl = process.env.USER_SERVICE_URL;
-const dataLimit = process.env.SUNBIRD_RESPONSE_DATA_LIMIT ? parseInt(process.env.SUNBIRD_RESPONSE_DATA_LIMIT) : 10000;
-const timeout = process.env.SUNBIRD_SERVER_TIMEOUT ? parseInt(process.env.SUNBIRD_SERVER_TIMEOUT) : 5000;
 
 const profile = function ( token,userId = "" ) {
     return new Promise(async (resolve, reject) => {
@@ -63,13 +61,15 @@ const profile = function ( token,userId = "" ) {
 /**
   * 
   * @function
-  * @name learnerLocationSearch
-  * @param {String} bearerToken - authorization token.
-  * @param {object} filterData -  bodydata .
+  * @name locationSearch
+  * @param {object} filterData -  bodydata.
+  * @param {String} pageSize - requesting page size.
+  * @param {String} pageNo - requesting page number
+  * @param {String} searchKey - search key.
   * @returns {Promise} returns a promise.
 */
 
-const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "" ) {
+const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "" ) {
     return new Promise(async (resolve, reject) => {
         try {
   
@@ -79,9 +79,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
   
           if ( pageSize !== "" ) {
               bodyData["request"]["limit"] = pageSize;
-          } else {
-              bodyData["request"]["limit"] = dataLimit;
-          }
+          } 
   
           if ( pageNo !== "" ) {
               let offsetValue = pageSize * ( pageNo - 1 ); 
@@ -100,25 +98,30 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
               },
               json : bodyData
           };
-  
-          request.post(url,options,locationSearchCallback);
+          
+          request.post(url,options,requestCallback);
   
           let result = {
               success : true
           };
   
-          function locationSearchCallback(err, data) {
+          function requestCallback(err, data) {
   
               if (err) {
                   result.success = false;
               } else {
-                    
-                  let response = data.body;
-                  if ( response.responseCode === messageConstants.common.OK ) {
-                      result["data"] = response.result;
-                  } else {
-                        result.success = false;
-                  }
+                let response = data.body;
+                
+                if( response.responseCode === messageConstants.common.OK &&
+                    response.result &&
+                    response.result.response &&
+                    response.result.response.length > 0
+                ) {
+                    result["data"] = response.result.response;
+                    result["count"] = response.result.count;
+                } else {
+                    result.success = false;
+                }
               }
               return resolve(result);
           }
@@ -127,7 +130,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
               return resolve (result = {
                   success : false
                });
-           }, timeout);
+           }, messageConstants.common.SERVER_TIME_OUT);
   
         } catch (error) {
             return reject(error);
@@ -138,8 +141,11 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
   /**
     * @function
     * @name orgSchoolSearch
-    * @param {String} bearerToken - authorization token.
-    * @param {object} bodyData -  location id
+    * @param {object} filterData -  bodydata.
+    * @param {String} pageSize - requesting page size.
+    * @param {String} pageNo - requesting page number
+    * @param {String} searchKey - search key.
+    * @param {object} fields -  query data.
     * @returns {Promise} returns a promise.
   */
   const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", fields = [] ) {
@@ -178,12 +184,12 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
                   json : bodyData
               };
     
-              request.post(url,options,sunbirdCallback);
+              request.post(url,options,requestCallback);
               let result = {
                   success : true
               };
     
-              function sunbirdCallback(err, data) {
+              function requestCallback(err, data) {
     
                   if (err) {
                       result.success = false;
@@ -203,7 +209,7 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
                   return resolve (result = {
                       success : false
                    });
-               }, timeout);
+               }, messageConstants.common.SERVER_TIME_OUT);
   
           } catch (error) {
               return reject(error);
@@ -213,6 +219,6 @@ const learnerLocationSearch = function ( filterData, pageSize = "", pageNo = "",
 
 module.exports = {
     profile : profile,
-    learnerLocationSearch : learnerLocationSearch,
+    locationSearch : locationSearch,
     orgSchoolSearch : orgSchoolSearch
 }

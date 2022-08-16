@@ -129,16 +129,16 @@ module.exports = class ObservationSubmissions extends Abstract {
             };
         }
         
-        let entitiesDocument = await userProfileService.learnerLocationSearch( filterData );
+        let entitiesDocument = await userProfileService.locationSearch( filterData );
         
-        if ( !entitiesDocument.success || !entitiesDocument.data || !entitiesDocument.data.response || !entitiesDocument.data.response.length > 0 ) {
+        if ( !entitiesDocument.success ) {
             return resolve({ 
                 status: httpStatusCode.bad_request.status, 
                 message: messageConstants.apiResponses.ENTITY_NOT_FOUND
             });
         }
         
-        let entityResult = entitiesDocument.data.response;
+        let entityResult = entitiesDocument.data;
         let entityData = await entitiesHelper.extractDataFromLocationResult(entityResult);
         let entityDocument = entityData[0]
         
