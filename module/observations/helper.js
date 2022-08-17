@@ -1691,7 +1691,7 @@ module.exports = class ObservationsHelper {
     
                         delete solutionData.data._id;
 
-                        //check the user have access to create observation
+                        //validate the user access to create observation
                         let validateUserRole = await this.validateUserRole(bodyData, solutionId);
                         if ( !validateUserRole.success ){
                             throw {
@@ -2010,14 +2010,16 @@ module.exports = class ObservationsHelper {
     * Check user eligibity to create observation
     * @method
     * @name validateUserRole
-    * @param {String} observationId - Observation id.
-    * @returns {Object} List of observation entities.
+    * @param {Object} bodyData - user location request data
+    * @param {String} solutionId - Solution id.
+    * @returns {Object} return the eligibity of user
    */
 
     static validateUserRole( bodyData, solutionId ) {
         return new Promise(async (resolve, reject) => {
             try {
 
+                //validate solution
                 let solutionDocument = await solutionHelper.solutionDocuments({
                     _id : solutionId
                 },["entityType"]);
@@ -2033,12 +2035,14 @@ module.exports = class ObservationsHelper {
 
                 for ( let roleCount = 0; roleCount < bodyData.role.split(",").length; roleCount++ ) {
                     const eachRole = bodyData.role.split(",")[roleCount];
+                    //finding the list of allowed entity types based on role and location
                     const allowedEntityTypesForRole = 
                         await this.subEntityListBasedOnRoleAndLocation(
                           bodyData,
                           eachRole
                         );
 
+                    //finding the entity type array with highest length
                     if(allowedEntityTypesForRole.result && allowedEntityTypesForRole.result.length > currentMaximumCountOfRequiredEntities) {
                         currentMaximumCountOfRequiredEntities = allowedEntityTypesForRole.result.length;
                         allowedEntityTypes = allowedEntityTypesForRole.result;
@@ -2072,10 +2076,20 @@ module.exports = class ObservationsHelper {
         })
     }
 
+    /**
+    * Get the sub entity types based on role and location
+    * @method
+    * @name subEntityListBasedOnRoleAndLocation
+    * @param {Object} bodyData - user location request data
+    * @param {String} role - Role of the user.
+    * @returns {Object} List of entity types.
+   */
+
     static subEntityListBasedOnRoleAndLocation( bodyData, role ) {
         return new Promise(async (resolve, reject) => {
             try {
-                
+
+                //validate the role
                 let rolesDocument = await userRolesHelper.list(
                   {
                     code: role
@@ -2094,6 +2108,7 @@ module.exports = class ObservationsHelper {
                     "registryDetails.locationId" : bodyData[messageConstants.common.STATE]
                 }
 
+                //find the state entity
                 let entityDocuments = await entitiesHelper.entityDocuments(filterQuery,["childHierarchyPath"]);
                 if( !entityDocuments.length > 0 ) {
                     throw {
@@ -2103,19 +2118,21 @@ module.exports = class ObservationsHelper {
 
                 let allowedEntityTypes = [];
 
+                //if entity type is state adding the state to the childHierarchyPath array
                 if( rolesDocument[0].entityTypes[0].entityType === messageConstants.common.STATE ) {
                     allowedEntityTypes = entityDocuments[0].childHierarchyPath;
                     allowedEntityTypes.unshift(messageConstants.common.STATE);
                 } else {
 
                     let targetedEntityType = "";
-
+                    //find the targeted role based on role
                     rolesDocument[0].entityTypes.forEach(singleEntityType => {
                        if( entityDocuments[0].childHierarchyPath.includes(singleEntityType.entityType) ) {
                            targetedEntityType = singleEntityType.entityType;
                        }
                     });
-   
+                    
+                    //find the index of the targeted entity type
                     let findTargetedEntityIndex = 
                     entityDocuments[0].childHierarchyPath.findIndex(element => element === targetedEntityType);
 
@@ -2125,7 +2142,7 @@ module.exports = class ObservationsHelper {
                            result : []
                         }
                     }
-   
+                    //find the targeted entity type based on role
                     allowedEntityTypes = entityDocuments[0].childHierarchyPath.slice(findTargetedEntityIndex);
                 }
 
