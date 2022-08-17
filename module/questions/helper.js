@@ -1042,14 +1042,14 @@ module.exports = class QuestionsHelper {
     }
 
     /**
-   * Add Question Options to Answers Array
+   * Add Question Options to Submission Answers
    * @method
-   * @name addOptionsToAnswers
+   * @name addOptionsToSubmission
    * @param {Object} submission - observation/survey submission.
-   * @returns {JSON} - observation submission details
+   * @returns {JSON} - observation/survey submission details
    */
 
-    static addOptionsToAnswers(submissionDocument) {
+    static addOptionsToSubmission(submissionDocument) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -1060,26 +1060,21 @@ module.exports = class QuestionsHelper {
                         questionIds.push(questionKey);
                     }
 
-                    if ( questionIds.length > 0 ) {
+                    let questionDocuments = await this.questionDocument({
+                        _id : {
+                            $in : gen.utils.arrayIdsTobjectIds(questionIds)
+                        }
+                    }, [ 
+                        "options","externalId"
+                    ]);
 
-                        let questionDocuments = await this.questionDocument({
-                            _id : {
-                                $in : gen.utils.arrayIdsTobjectIds(questionIds)
-                            }
-                        }, [ 
-                            "options","externalId"
-                        ]);
+                    if ( questionDocuments.length > 0 ) {
 
-                        if ( questionDocuments.length > 0 ) {
-
-                            for ( let pointerToAnswers in submissionDocument.answers ) {
-
-                                let findQuestion = questionDocuments.filter(eachQuestion=>eachQuestion._id == pointerToAnswers);
-                                if ( findQuestion && findQuestion.length > 0 ) {
-                                    submissionDocument.answers[pointerToAnswers].options = findQuestion[0].options;
-                                    submissionDocument.answers[pointerToAnswers].externalId = findQuestion[0].externalId;
-                                }
-                            }
+                        for ( let pointerToQuestion = 0; pointerToQuestion < questionDocuments.length; pointerToQuestion++ ) {
+                          let currentQuestion = questionDocuments[pointerToQuestion];
+                          if ( submissionDocument.answers[currentQuestion._id] != undefined ) {
+                              Object.assign(submissionDocument.answers[currentQuestion._id], {options: currentQuestion.options, externalId: currentQuestion.externalId});
+                          }
                         }
                     }
                 }

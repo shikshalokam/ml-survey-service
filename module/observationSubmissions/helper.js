@@ -1259,8 +1259,8 @@ module.exports = class ObservationSubmissionsHelper {
                 }
 
                 //adding question options, externalId to answers array 
-                if ( observationSubmissionsDocument.status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ) {
-                    observationSubmissionsDocument = await questionsHelper.addOptionsToAnswers(observationSubmissionsDocument);
+                if ( observationSubmissionsDocument.answers && Object.keys(observationSubmissionsDocument.answers).length > 0 ) {
+                    observationSubmissionsDocument = await questionsHelper.addOptionsToSubmission(observationSubmissionsDocument);
                 }
 
                 let solutionDocument = await solutionHelper.solutionDocuments({

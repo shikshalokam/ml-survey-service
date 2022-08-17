@@ -762,8 +762,8 @@ module.exports = class SurveySubmissionsHelper {
                 surveySubmissionsDocument = surveySubmissionsDocument[0];
                 
                 //adding question options, externalId to answers array 
-                if ( surveySubmissionsDocument.status == messageConstants.common.SUBMISSION_STATUS_COMPLETED ) {
-                    surveySubmissionsDocument = await questionsHelper.addOptionsToAnswers(surveySubmissionsDocument);
+                if ( surveySubmissionsDocument.answers && Object.keys(surveySubmissionsDocument.answers).length > 0 ) {
+                    surveySubmissionsDocument = await questionsHelper.addOptionsToSubmission(surveySubmissionsDocument);
                 }
 
                 let solutionDocument = await solutionsHelper.solutionDocuments({
