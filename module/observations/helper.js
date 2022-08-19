@@ -140,7 +140,16 @@ module.exports = class ObservationsHelper {
                         throw {
                             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
                         }
-                    } 
+                    }
+
+                    //validate the user access to create observation
+                    let validateUserRole = await this.validateUserRole(bodyData, solutionId);
+                    if ( !validateUserRole.success ){
+                        throw {
+                            status: httpStatusCode.bad_request.status,
+                            message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
+                        };
+                    }
                 }
 
                 if( solutionData[0].isReusable ) {
