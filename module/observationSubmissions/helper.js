@@ -1258,6 +1258,11 @@ module.exports = class ObservationSubmissionsHelper {
                     throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
                 }
 
+                //adding question options, externalId to answers array 
+                if ( observationSubmissionsDocument.answers && Object.keys(observationSubmissionsDocument.answers).length > 0 ) {
+                    observationSubmissionsDocument = await questionsHelper.addOptionsToSubmission(observationSubmissionsDocument);
+                }
+
                 let solutionDocument = await solutionHelper.solutionDocuments({
                     _id: observationSubmissionsDocument.solutionId
                 }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
