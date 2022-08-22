@@ -322,7 +322,6 @@ module.exports = {
     "SURVEYS_FETCHED": "Surveys fetched successfully",
     "TARGETED_SURVEY_FETCHED": "Targeted surveys fetched successfully",
     "TARGETED_SOLUTIONS_FETCHED": "Successfully targeted solutions fetched",
-    "ENTITIES_NOT_FOUND": "No entities found",
     "OBSERVATION_ENTITIES_FETCHED": "Observation entities fetched successfully",
     "ENTITY_TYPE_MIS_MATCHED": "Provided solution entity type mis matched",
     "TARGETED_OBSERVATION_FETCHED": "Targeted observations fetched successfully",
@@ -368,5 +367,7 @@ module.exports = {
     "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role",
     "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
     "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
-    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile"
+    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile",
+    "USER_ROLES_NOT_FOUND" : "Could not found user roles",
+    "OBSERVATION_NOT_RELEVENT_FOR_USER" : "Dear User, this Observation is not relevant for your sub-role and location"
 }

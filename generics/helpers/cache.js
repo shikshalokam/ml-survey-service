@@ -21,9 +21,10 @@ function getValue(key){
 
     if (cache.has(key)) {
         data = cache.get(key);
+        return data;
+    } else {
+        return false;
     }
-
-    return data;
 }
 
 
@@ -33,12 +34,12 @@ function getValue(key){
   * @name set
   * @params key - name of the cache key.
   * @params value - cache data to set.  
-  * @returns {Array} - cache updated data.
+  * @returns {Boolean} - true
 */
 
 function setValue(key, value, timeout){
     let data = cache.set( key, value, timeout );
-    return data;
+    return true;
 }
 
 /**
@@ -46,13 +47,13 @@ function setValue(key, value, timeout){
   * @method
   * @name remove
   * @params key - cache key need to be removed. 
-  * @returns 
+  * @returns {Boolean} - true
 */
 
 function removeKey(key){
 
     let data = cache.del(key);
-    return;
+    return true;
 }
 
 module.exports = {

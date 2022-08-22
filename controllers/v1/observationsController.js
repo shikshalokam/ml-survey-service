@@ -708,7 +708,7 @@ module.exports = class Observations extends Abstract {
                             let bodyData={
                                 "code" : schoolCodes
                             };
-                            
+                            // search school data with location code.
                             let entitiesData = await userProfileService.locationSearch( bodyData );
                         
                             if( !entitiesData.success ) {

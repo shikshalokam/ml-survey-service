@@ -100,6 +100,9 @@ module.exports = function () {
     await libraryCategoriesHelper.setLibraryCategories();
   })();
 
+  //define cache as global variable
+  global.cache = require(ROOT_PATH + "/generics/helpers/cache");
+
 };
 
 function mkdirp(dir, exist = "", state = 1) {
@@ -115,3 +118,4 @@ function mkdirp(dir, exist = "", state = 1) {
     }
   }
 }
+

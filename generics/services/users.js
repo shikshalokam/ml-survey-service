@@ -94,7 +94,7 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
           userServiceUrl + messageConstants.endpoints.GET_LOCATION_DATA;
           const options = {
               headers : {
-                  "content-type": "application/json"
+                  "content-type": "application/json",
               },
               json : bodyData
           };

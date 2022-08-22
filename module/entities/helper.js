@@ -1841,6 +1841,7 @@ module.exports = class EntitiesHelper {
             let entityIds = [];
             let locationCodes = [];
             let entityInformations = [];
+            //if not uuid considering as location code- for school.
             locationIds.forEach(entity=>{
                 if (gen.utils.checkIfValidUUID(entity)) {
                     entityIds.push(entity);
@@ -1874,7 +1875,7 @@ module.exports = class EntitiesHelper {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 } 
             }
-            
+            // Formate entity details.
             let entityDetails = await this.extractDataFromLocationResult( entityInformations );
             
             return resolve({
