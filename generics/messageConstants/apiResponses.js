@@ -369,5 +369,7 @@ module.exports = {
     "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
     "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
     "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile",
+    "USER_ROLES_NOT_FOUND" : "Could not found user roles",
+    "OBSERVATION_NOT_RELEVENT_FOR_USER" : "Dear User, this Observation is not relevant for your sub-role and location"
     "SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE":"No submission found or Submission status is not completed"
 }

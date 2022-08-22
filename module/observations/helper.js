@@ -21,6 +21,7 @@ const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
+const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 
 /**
     * ObservationsHelper
@@ -139,7 +140,16 @@ module.exports = class ObservationsHelper {
                         throw {
                             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
                         }
-                    } 
+                    }
+
+                    //validate the user access to create observation
+                    let validateUserRole = await this.validateUserRole(bodyData, solutionId);
+                    if ( !validateUserRole.success ){
+                        throw {
+                            status: httpStatusCode.bad_request.status,
+                            message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
+                        };
+                    }
                 }
 
                 if( solutionData[0].isReusable ) {
@@ -1689,6 +1699,15 @@ module.exports = class ObservationsHelper {
                         }
     
                         delete solutionData.data._id;
+
+                        //validate the user access to create observation
+                        let validateUserRole = await this.validateUserRole(bodyData, solutionId);
+                        if ( !validateUserRole.success ){
+                            throw {
+                                status: httpStatusCode.bad_request.status,
+                                message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
+                            };
+                        }
         
                         let observation = await this.create(
                             solutionId,
@@ -1994,6 +2013,162 @@ module.exports = class ObservationsHelper {
                 });
             }
         });
+    }
+
+     /**
+    * Check user eligibity to create observation
+    * @method
+    * @name validateUserRole
+    * @param {Object} bodyData - user location request data
+    * @param {String} solutionId - Solution id.
+    * @returns {Object} return the eligibity of user
+   */
+
+    static validateUserRole( bodyData, solutionId ) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                //validate solution
+                let solutionDocument = await solutionHelper.solutionDocuments({
+                    _id : solutionId
+                },["entityType"]);
+
+                if(!solutionDocument[0]) {
+                    throw {
+                        message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
+                    };
+                }
+
+                let currentMaximumCountOfRequiredEntities = 0;
+                let allowedEntityTypes = new Array;
+
+                for ( let roleCount = 0; roleCount < bodyData.role.split(",").length; roleCount++ ) {
+                    const eachRole = bodyData.role.split(",")[roleCount];
+                    //finding the list of allowed entity types based on role and location
+                    const allowedEntityTypesForRole = 
+                        await this.subEntityListBasedOnRoleAndLocation(
+                          bodyData,
+                          eachRole
+                        );
+
+                    //finding the entity type array with highest length
+                    if(allowedEntityTypesForRole.result && allowedEntityTypesForRole.result.length > currentMaximumCountOfRequiredEntities) {
+                        currentMaximumCountOfRequiredEntities = allowedEntityTypesForRole.result.length;
+                        allowedEntityTypes = allowedEntityTypesForRole.result;
+                    }
+                }
+
+                //check solution entity type is exist in allowed roles
+                if ( !allowedEntityTypes.length > 0 || 
+                    !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 
+                    !(Object.keys(bodyData).includes(solutionDocument[0].entityType))) 
+                {
+                    throw {
+                        status: httpStatusCode.bad_request.status,
+                        message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
+                    };
+                }
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.OBSERVATION_SOLUTION_DETAILS,
+                    data : false
+                });
+                
+            } catch (error) {
+                return resolve({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    data : false
+                });
+            }
+        })
+    }
+
+    /**
+    * Get the sub entity types based on role and location
+    * @method
+    * @name subEntityListBasedOnRoleAndLocation
+    * @param {Object} bodyData - user location request data
+    * @param {String} role - Role of the user.
+    * @returns {Object} List of entity types.
+   */
+
+    static subEntityListBasedOnRoleAndLocation( bodyData, role ) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                //validate the role
+                let rolesDocument = await userRolesHelper.list(
+                  {
+                    code: role
+                  },
+                  ["entityTypes.entityType"]
+                );
+
+                if (!rolesDocument.length > 0) {
+                    throw {
+                        status: httpStatusCode.bad_request.status,
+                        message: messageConstants.apiResponses.USER_ROLES_NOT_FOUND
+                    };    
+                }
+
+                let filterQuery = {
+                    "registryDetails.locationId" : bodyData[messageConstants.common.STATE]
+                }
+
+                //find the state entity
+                let entityDocuments = await entitiesHelper.entityDocuments(filterQuery,["childHierarchyPath"]);
+                if( !entityDocuments.length > 0 ) {
+                    throw {
+                        message : messageConstants.apiResponses.ENTITIES_NOT_FOUND
+                    }
+                }
+
+                let allowedEntityTypes = [];
+
+                //if entity type is state adding the state to the childHierarchyPath array
+                if( rolesDocument[0].entityTypes[0].entityType === messageConstants.common.STATE ) {
+                    allowedEntityTypes = entityDocuments[0].childHierarchyPath;
+                    allowedEntityTypes.unshift(messageConstants.common.STATE);
+                } else {
+
+                    let targetedEntityType = "";
+                    //find the targeted role based on role
+                    rolesDocument[0].entityTypes.forEach(singleEntityType => {
+                       if( entityDocuments[0].childHierarchyPath.includes(singleEntityType.entityType) ) {
+                           targetedEntityType = singleEntityType.entityType;
+                       }
+                    });
+                    
+                    //find the index of the targeted entity type
+                    let findTargetedEntityIndex = 
+                    entityDocuments[0].childHierarchyPath.findIndex(element => element === targetedEntityType);
+
+                    if( findTargetedEntityIndex < 0 ) {
+                        throw {
+                           message : messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER,
+                           result : []
+                        }
+                    }
+                    //find the targeted entity type based on role
+                    allowedEntityTypes = entityDocuments[0].childHierarchyPath.slice(findTargetedEntityIndex);
+                }
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.OBSERVATION_SOLUTION_DETAILS,
+                    result: allowedEntityTypes
+                });
+                
+            } catch (error) {
+                return resolve({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    data : false
+                });
+            }
+        })
     }
 
 };
