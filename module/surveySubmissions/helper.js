@@ -106,7 +106,7 @@ module.exports = class SurveySubmissionsHelper {
                 surveySubmissionId = ObjectId(surveySubmissionId);
             }
 
-            let surveySubmissionsDocument = await this.surveySubmissionDetails( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
+            let surveySubmissionsDocument = await this.getDetails( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
             
             if ( !surveySubmissionsDocument || Object.keys(surveySubmissionsDocument).length === 0 ) {
                 throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE);
@@ -735,13 +735,13 @@ module.exports = class SurveySubmissionsHelper {
    /**
    * Get survey submission details
    * @method
-   * @name surveySubmissionDetails
+   * @name getDetails
    * @param {String} submissionId - survey submissionId
    *  @param {String} status - survey submission status.
    * @returns {JSON} - survey submission details
    */
 
-    static surveySubmissionDetails(submissionId, status = "") {
+    static getDetails(submissionId, status = "") {
         return new Promise(async (resolve, reject) => {
             try {
 
