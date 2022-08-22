@@ -368,5 +368,6 @@ module.exports = {
     "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role",
     "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
     "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
-    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile"
+    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile",
+    "SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE":"No submission found or Submission status is not completed"
 }
