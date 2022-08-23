@@ -2266,22 +2266,16 @@ async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) 
 
     if( ( !childEntities.success ) && !result.length > 0 ) {
       return result;
-    }
-    
-    let entityData = childEntities.data;  
+    } 
     let parentEntities = [];
-
-    entityData.map(entity => {
-      if( entity.type == entityType ) {
-        result.push(entity)
-      } else {
-        parentEntities.push(entity.id)
-      }
-    });
-
+    if( childEntities.data[0].type == entityType ) {
+        result = childEntities.data;
+    } else {
+        parentEntities = childEntities.data;
+    }
     if( parentEntities.length > 0 ){
       await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
     } 
     return result; 
-   }
+}
    
