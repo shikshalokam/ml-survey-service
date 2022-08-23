@@ -1789,21 +1789,13 @@ module.exports = class ObservationsHelper {
             let entities = [];
 
             if( observationDocument[0].entities && observationDocument[0].entities.length > 0 ) {
+                let locationDeatails = gen.utils.filterLocationIdandCode(observationDocument[0].entities);
                 //set request body for learners API
-                let entityIds = [];
-                let locationCodes = [];
                 let entitiesData = [];
-                locationIds.forEach(entity=>{
-                    if (gen.utils.checkIfValidUUID(entity)) {
-                        entityIds.push(entity);
-                    } else {
-                        locationCodes.push(entity);
-                    }
-                });
 
-                if ( entityIds.length > 0 ) {
+                if ( locationDeatails.ids.length > 0 ) {
                     let bodyData = {
-                        "id" : entityIds
+                        "id" : locationDeatails.ids
                     } 
                     let entityData = await userProfileService.locationSearch( bodyData );
                     if ( entityData.success ) {
@@ -1811,9 +1803,9 @@ module.exports = class ObservationsHelper {
                     }
                 }
 
-                if ( locationCodes.length > 0 ) {
+                if ( locationDeatails.codes.length > 0 ) {
                     let bodyData = {
-                        "code" : locationCodes
+                        "code" : locationDeatails.codes
                     } 
                     let entityData = await userProfileService.locationSearch( bodyData );
                     if ( entityData.success ) {
@@ -1838,7 +1830,7 @@ module.exports = class ObservationsHelper {
                     let observationSubmissions = 
                     await observationSubmissionsHelper.observationSubmissionsDocument({
                         observationId : observationId,
-                        entityId : currentEntities._id
+                        entityId : currentEntities.id
                     });
                     
                     let entity = {
@@ -2156,7 +2148,7 @@ module.exports = class ObservationsHelper {
                     let stateLocationCode = entitiesData.data[0].code;
                     
                     // Calling form api using location code.
-                    subEntities = await formService.formData( stateLocationCode, entityKey );
+                    subEntities = await formService.configForStateLocation( stateLocationCode, entityKey );
                     if( !subEntities.length > 0 ) {
                         return resolve({
                             message : messageConstants.apiResponses.ENTITIES_NOT_FOUND,

@@ -11,14 +11,14 @@ const formServiceUrl = process.env.FORM_SERVICE_URL;
 
 /**
   * @function
-  * @name formData
+  * @name configForStateLocation
   * @param {String} stateLocationCode - state location code. eg: 28
   * @param {object} entityKey -  key to store data in cache. eg: subEntityTypesOf_bc75cc99-9205-463e-a722-5326857838f8
   * @returns {Promise} returns a promise.
 */
 
 
-const formData = function ( stateLocationCode, entityKey ) {
+const configForStateLocation = function ( stateLocationCode, entityKey ) {
     return new Promise(async (resolve, reject) => {
         try {
             //Get Sub Entity Types present in a particular state
@@ -106,5 +106,5 @@ async function formRead ( stateLocationCode ) {
 }
 
 module.exports = {
-    formData : formData
+    configForStateLocation : configForStateLocation
 }

@@ -1077,17 +1077,13 @@ module.exports = class Observations extends Abstract {
                     });
                 }
 
-                let filterData = {};
+                let filterData = {
+                    "type" : observationDocument.entityType
+                };
                 if (gen.utils.checkIfValidUUID(req.query.entityId)) {
-                    filterData = {
-                        "id" : req.query.entityId,
-                        "type" : observationDocument.entityType
-                    };
+                    filterData.id = req.query.entityId;
                 } else {
-                    filterData = {
-                        "code" : req.query.entityId,
-                        "type" : observationDocument.entityType
-                    };
+                    filterData.code = req.query.entityId;
                 }
                 
                 let entitiesDocument = await userProfileService.locationSearch( filterData );
@@ -1098,11 +1094,8 @@ module.exports = class Observations extends Abstract {
                         message: messageConstants.apiResponses.ENTITY_NOT_FOUND 
                     });
                 }
-                let entities = entitiesDocument.data;
 
-                let entityData = await entitiesHelper.extractDataFromLocationResult(entities);
-                
-                let entityDocument = entityData[0];
+                let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data);
                 
                 entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
 
@@ -1204,7 +1197,7 @@ module.exports = class Observations extends Abstract {
                 // })
 
                 response.result.entityProfile = {
-                    _id: entityDocument._id,
+                    _id: entityDocument.id,
                     entityType: entityDocument.entityType,
                     // form: form
                 };
@@ -2254,46 +2247,42 @@ module.exports = class Observations extends Abstract {
   * get subEntities of matching type by recursion.
   * @method
   * @name getSubEntitiesBasedOnEntityType
-  * @param {Array} parentEntities - Array of entity Ids - parent entities.
+  * @param {Array} entityIds - Array of entity Ids - parent entities.
   * @param {String} entityType - Entity type.
-  * @param {Array} matchingData - subentities of type {entityType} of {parentEntities}
+  * @param {Array} result - subentities of type {entityType} of {entityIds}
   * @returns {Array} - Sub entities matching the type.
 */
 
-async function getSubEntitiesBasedOnEntityType( parentEntities, entityType, matchingData ) {
+async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) {
     //get sub entities of type {entityType} of entities {parentEntity}
-    if( !parentEntities.length > 0 ){
-      return matchingData;
+    if( !entityIds.length > 0 ){
+      return result;
     }
 
     let bodyData={
-        "parentId" : parentEntities
+        "parentId" : entityIds
     };
     
-    let entityDetails = await userProfileService.locationSearch(bodyData);
+    let childEntities = await userProfileService.locationSearch(bodyData);
 
-    if( ( !entityDetails.success ) && !matchingData.length > 0 ) {
-      return matchingData;
+    if( ( !childEntities.success ) && !result.length > 0 ) {
+      return result;
     }
     
-    let entityData = entityDetails.data;  
-    let mismatchEntities = [];
+    let entityData = childEntities.data;  
+    let parentEntities = [];
 
     entityData.map(entity => {
       if( entity.type == entityType ) {
-        matchingData.push(entity)
+        result.push(entity)
       } else {
-        mismatchEntities.push(entity.id)
+        parentEntities.push(entity.id)
       }
     });
 
-    if( mismatchEntities.length > 0 ){
-      await getSubEntitiesBasedOnEntityType(mismatchEntities, entityType, matchingData)
+    if( parentEntities.length > 0 ){
+      await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
     } 
-    let uniqueEntities = [];
-    matchingData.map( data => {
-      if (uniqueEntities.includes(data) === false) uniqueEntities.push(data);
-    });
-    return uniqueEntities; 
+    return result; 
    }
    

@@ -116,17 +116,13 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
         
         observationDocument = observationDocument[0];
-        let filterData = {};
+        let filterData = {
+          "type" : observationDocument.entityType
+        };
         if (gen.utils.checkIfValidUUID(req.query.entityId)) {
-            filterData = {
-              "id" : req.query.entityId,
-              "type" : observationDocument.entityType
-            };
+            filterData.id = req.query.entityId;
         } else {
-            filterData = {
-              "code" : req.query.entityId,
-              "type" : observationDocument.entityType
-            };
+          filterData.code = req.query.entityId;
         }
         
         let entitiesDocument = await userProfileService.locationSearch( filterData );
@@ -138,9 +134,7 @@ module.exports = class ObservationSubmissions extends Abstract {
             });
         }
         
-        let entityResult = entitiesDocument.data;
-        let entityData = await entitiesHelper.extractDataFromLocationResult(entityResult);
-        let entityDocument = entityData[0]
+        let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data);
         
         entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
         
@@ -823,7 +817,7 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let createdBy = req.query.createdBy;
         let solutionId = req.query.solutionId;
-        let code = req.params._id;
+        let entityId = req.params._id;
         let submissionNumber = (req.query.submissionNumber) ? parseInt(req.query.submissionNumber) : 1;
 
         if (!createdBy) {
@@ -834,7 +828,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           throw messageConstants.apiResponses.SOLUTION_ID_NOT_FOUND;
         }
 
-        if (!code) {
+        if (!entityId) {
           throw messageConstants.apiResponses.ENTITY_ID_NOT_FOUND;
         }
 
@@ -854,7 +848,7 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let queryObject = {
           "createdBy": createdBy,
-          "entityExternalId": code,
+          "entityExternalId": entityId,
           "solutionExternalId": solutionId,
           "submissionNumber" : (submissionNumber) ? submissionNumber : 1
         }

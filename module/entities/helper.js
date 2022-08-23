@@ -971,22 +971,14 @@ module.exports = class EntitiesHelper {
  static validateEntities(entityIds, entityType) {
     return new Promise(async (resolve, reject) => {
         try {
+            let locationDeatails = gen.utils.filterLocationIdandCode(entityIds);
              //set request body for learners API
-            let locationIds = [];
-            let locationCodes = [];
             let entityInformations = [];
             let validEntityIds = [];
-            entityIds.forEach(entity=>{
-                if (gen.utils.checkIfValidUUID(entity)) {
-                    locationIds.push(entity);
-                } else {
-                    locationCodes.push(entity);
-                }
-            });
-
-            if ( locationIds.length > 0 ) {
+            
+            if ( locationDeatails.ids.length > 0 ) {
                 let bodyData = {
-                    "id" : locationIds,
+                    "id" : locationDeatails.ids,
                     "type" : entityType
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
@@ -995,9 +987,9 @@ module.exports = class EntitiesHelper {
                 }
             }
             
-            if ( locationCodes.length > 0 ) {
+            if ( locationDeatails.codes.length > 0 ) {
                 let bodyData = {
-                    "code" : locationCodes,
+                    "code" : locationDeatails.codes,
                     "type" : entityType
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
@@ -1837,22 +1829,14 @@ module.exports = class EntitiesHelper {
   static listByLocationIds(locationIds) {
     return new Promise(async (resolve, reject) => {
         try {
-            //set request body for learners api
-            let entityIds = [];
-            let locationCodes = [];
-            let entityInformations = [];
             //if not uuid considering as location code- for school.
-            locationIds.forEach(entity=>{
-                if (gen.utils.checkIfValidUUID(entity)) {
-                    entityIds.push(entity);
-                } else {
-                    locationCodes.push(entity);
-                }
-            });
+            let locationDeatails = gen.utils.filterLocationIdandCode(locationIds);
+            //set request body for learners api
+            let entityInformations = [];
 
-            if ( entityIds.length > 0 ) {
+            if ( locationDeatails.ids.length > 0 ) {
                 let bodyData = {
-                    "id" : entityIds
+                    "id" : locationDeatails.ids
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
                 if ( entityData.success ) {
@@ -1860,9 +1844,9 @@ module.exports = class EntitiesHelper {
                 }
             }
 
-            if ( locationCodes.length > 0 ) {
+            if ( locationDeatails.codes.length > 0 ) {
                 let bodyData = {
-                    "code" : locationCodes
+                    "code" : locationDeatails.codes
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
                 if ( entityData.success ) {
@@ -1875,7 +1859,7 @@ module.exports = class EntitiesHelper {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 } 
             }
-            // Formate entity details.
+            // Format entity details.
             let entityDetails = await this.extractDataFromLocationResult( entityInformations );
             
             return resolve({
@@ -1949,7 +1933,7 @@ module.exports = class EntitiesHelper {
             let entityDocument = [];
             entitityDetails.map(entityData => {
                 let data = {};
-                data._id = entityData.id;
+                data.id = entityData.id;
                 data.entityType = entityData.type;
                 data.metaInformation = {};
                 data.metaInformation.name = entityData.name;
@@ -1960,7 +1944,7 @@ module.exports = class EntitiesHelper {
                 entityDocument.push(data);
             });
 
-            return resolve(entityDocument);
+            return resolve(entityDocument[0]);
         } catch (error) {
             return reject(error);
         }
