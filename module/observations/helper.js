@@ -1792,27 +1792,17 @@ module.exports = class ObservationsHelper {
                 let locationDeatails = gen.utils.filterLocationIdandCode(observationDocument[0].entities);
                 //set request body for learners API
                 let entitiesData = [];
-
+                let bodyData ={};
                 if ( locationDeatails.ids.length > 0 ) {
-                    let bodyData = {
-                        "id" : locationDeatails.ids
-                    } 
-                    let entityData = await userProfileService.locationSearch( bodyData );
-                    if ( entityData.success ) {
-                        entitiesData =  entityData.data;
-                    }
+                    bodyData.id = locationDeatails.ids;
+                } else if ( locationDeatails.codes.length > 0 ) {
+                    bodyData.code = locationDeatails.codes;
                 }
-
-                if ( locationDeatails.codes.length > 0 ) {
-                    let bodyData = {
-                        "code" : locationDeatails.codes
-                    } 
-                    let entityData = await userProfileService.locationSearch( bodyData );
-                    if ( entityData.success ) {
-                        entitiesData =  entitiesData.concat(entityData.data);
-                    }
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entitiesData =  entityData.data;
                 }
-            
+                
                 if ( !entitiesData.length > 0 ) {
                     throw {
                         message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION

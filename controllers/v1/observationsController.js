@@ -1097,9 +1097,6 @@ module.exports = class Observations extends Abstract {
 
                 let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data, returnObject = true);
                 
-                entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
-
-                
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
 
                 let solutionQueryObject = {

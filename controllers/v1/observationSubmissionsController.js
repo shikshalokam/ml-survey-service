@@ -135,9 +135,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
         
         let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data, returnObject = true);
-        
-        entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
-        
+              
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
           status: "active",
