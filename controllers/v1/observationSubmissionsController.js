@@ -124,8 +124,9 @@ module.exports = class ObservationSubmissions extends Abstract {
         } else {
           filterData.code = req.query.entityId;
         }
-        
-        let entitiesDocument = await userProfileService.locationSearch( filterData );
+        let returnObject = true;
+        let formatResult = true;
+        let entitiesDocument = await userProfileService.locationSearch( filterData,"", "", "", formatResult, returnObject );
         
         if ( !entitiesDocument.success ) {
             return resolve({ 
@@ -133,8 +134,7 @@ module.exports = class ObservationSubmissions extends Abstract {
                 message: messageConstants.apiResponses.ENTITY_NOT_FOUND
             });
         }
-        
-        let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data, returnObject = true);
+        let entityDocument = entitiesDocument.data;
               
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,

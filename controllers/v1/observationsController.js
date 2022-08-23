@@ -1086,7 +1086,9 @@ module.exports = class Observations extends Abstract {
                     filterData.code = req.query.entityId;
                 }
                 
-                let entitiesDocument = await userProfileService.locationSearch( filterData );
+                let formatResult = true; 
+                let returnObject = true;
+                let entitiesDocument = await userProfileService.locationSearch( filterData,"","","",formatResult, returnObject );
                 
                 if ( !entitiesDocument.success ) {
                     return resolve({ 
@@ -1095,7 +1097,7 @@ module.exports = class Observations extends Abstract {
                     });
                 }
 
-                let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data, returnObject = true);
+                let entityDocument = entitiesDocument.data;
                 
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
 

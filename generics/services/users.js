@@ -66,13 +66,14 @@ const profile = function ( token,userId = "" ) {
   * @param {String} pageSize - requesting page size.
   * @param {String} pageNo - requesting page number
   * @param {String} searchKey - search key.
+  * @param {Boolean} formatResult - format result
+  * @param {Boolean} returnObject - return object or array.
   * @returns {Promise} returns a promise.
 */
 
-const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "" ) {
+const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", formatResult = false, returnObject = false ) {
     return new Promise(async (resolve, reject) => {
         try {
-  
           let bodyData = {};
           bodyData["request"] = {};
           bodyData["request"]["filters"] = filterData;
@@ -94,9 +95,9 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
           userServiceUrl + messageConstants.endpoints.GET_LOCATION_DATA;
           const options = {
               headers : {
-                  "content-type": "application/json",
-              },
-              json : bodyData
+                  "content-type": "application/json"
+            },
+            json : bodyData
           };
           
           request.post(url,options,requestCallback);
@@ -117,8 +118,30 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                     response.result.response &&
                     response.result.response.length > 0
                 ) {
-                    result["data"] = response.result.response;
-                    result["count"] = response.result.count;
+                    // format result if true
+                    if ( formatResult ) {
+                        let entityDocument = [];
+                        response.result.response.map(entityData => {
+                            let data = {};
+                            data.id = entityData.id;
+                            data.entityType = entityData.type;
+                            data.metaInformation = {};
+                            data.metaInformation.name = entityData.name;
+                            data.metaInformation.externalId = entityData.code
+                            data.registryDetails = {};
+                            data.registryDetails.locationId = entityData.id;
+                            data.registryDetails.code = entityData.code;
+                            entityDocument.push(data);
+                        });
+                        if ( returnObject ) {
+                            result["data"] = entityDocument[0];
+                        } else {
+                            result["data"] = entityDocument;
+                        }
+                    } else {
+                        result["data"] = response.result.response;
+                        result["count"] = response.result.count;
+                    }
                 } else {
                     result.success = false;
                 }

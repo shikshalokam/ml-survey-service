@@ -1833,12 +1833,13 @@ module.exports = class EntitiesHelper {
             let locationDeatails = gen.utils.filterLocationIdandCode(locationIds);
             //set request body for learners api
             let entityInformations = [];
-
+            let formatResult = true;
+        
             if ( locationDeatails.ids.length > 0 ) {
                 let bodyData = {
                     "id" : locationDeatails.ids
                 } 
-                let entityData = await userProfileService.locationSearch( bodyData );
+                let entityData = await userProfileService.locationSearch( bodyData, "", "", "", formatResult );
                 if ( entityData.success ) {
                     entityInformations =  entityData.data;
                 }
@@ -1848,7 +1849,7 @@ module.exports = class EntitiesHelper {
                 let bodyData = {
                     "code" : locationDeatails.codes
                 } 
-                let entityData = await userProfileService.locationSearch( bodyData );
+                let entityData = await userProfileService.locationSearch( bodyData,"","","", formatResult );
                 if ( entityData.success ) {
                     entityInformations =  entityInformations.concat(entityData.data);
                 }
@@ -1859,13 +1860,11 @@ module.exports = class EntitiesHelper {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 } 
             }
-            // Format entity details.
-            let entityDetails = await this.extractDataFromLocationResult( entityInformations );
             
             return resolve({
                 success : true,
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
-                data : entityDetails
+                data : entityInformations
             });
         } catch(error) {
             return resolve({
@@ -1915,44 +1914,9 @@ module.exports = class EntitiesHelper {
     entities = formatedData;
     return entities;
 
-  }
+  
 
-  /**
-    * Format entity data from sunbird.
-    * @method
-    * @name extractDataFromLocationResult
-    * @param {Array} entitityDetails - entity data.
-    * @returns {JSON} - formated entity details 
-    */
-
-   static extractDataFromLocationResult(entitityDetails, returnObject = false) {
-
-    return new Promise(async (resolve, reject) => {
-
-        try {
-            let entityDocument = [];
-            entitityDetails.map(entityData => {
-                let data = {};
-                data.id = entityData.id;
-                data.entityType = entityData.type;
-                data.metaInformation = {};
-                data.metaInformation.name = entityData.name;
-                data.metaInformation.externalId = entityData.code
-                data.registryDetails = {};
-                data.registryDetails.locationId = entityData.id;
-                data.registryDetails.code = entityData.code;
-                entityDocument.push(data);
-            });
-            if ( returnObject ) {
-                return resolve(entityDocument[0]);
-            } else {
-                return resolve(entityDocument);
-            }
-        } catch (error) {
-            return reject(error);
-        }
-
-    });
+  
 
 }
 
