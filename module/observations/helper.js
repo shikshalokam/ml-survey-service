@@ -143,7 +143,7 @@ module.exports = class ObservationsHelper {
                     }
 
                     //validate the user access to create observation
-                    let validateUserRole = await this.validateUserRole(bodyData, solutionId);
+                    let validateUserRole = await this.validateUserRole(userRoleAndProfileInformation, solutionId);
                     if ( !validateUserRole.success ){
                         throw {
                             status: httpStatusCode.bad_request.status,
