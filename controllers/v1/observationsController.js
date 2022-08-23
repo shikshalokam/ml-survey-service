@@ -1095,7 +1095,7 @@ module.exports = class Observations extends Abstract {
                     });
                 }
 
-                let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data);
+                let entityDocument = await entitiesHelper.extractDataFromLocationResult(entitiesDocument.data, returnObject = true);
                 
                 entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
 

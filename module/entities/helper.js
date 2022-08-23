@@ -1925,7 +1925,7 @@ module.exports = class EntitiesHelper {
     * @returns {JSON} - formated entity details 
     */
 
-   static extractDataFromLocationResult(entitityDetails) {
+   static extractDataFromLocationResult(entitityDetails, returnObject = false) {
 
     return new Promise(async (resolve, reject) => {
 
@@ -1943,8 +1943,11 @@ module.exports = class EntitiesHelper {
                 data.registryDetails.code = entityData.code;
                 entityDocument.push(data);
             });
-
-            return resolve(entityDocument[0]);
+            if ( returnObject ) {
+                return resolve(entityDocument[0]);
+            } else {
+                return resolve(entityDocument);
+            }
         } catch (error) {
             return reject(error);
         }
