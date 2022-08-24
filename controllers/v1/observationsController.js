@@ -590,6 +590,13 @@ module.exports = class Observations extends Abstract {
 
                 let projection = [];
 
+                if ( !req.query.observationId && !req.query.solutionId ) {
+                    throw {
+                        status: httpStatusCode.bad_request.status,
+                        message: messageConstants.apiResponses.OBSERVATION_SOLUTION_ID_REQUIRED
+                    };
+                }
+
                 if ( req.query.observationId ) {
                     let findObject = {};
                     findObject[entitiesHelper.entitiesSchemaData().SCHEMA_ENTITY_OBJECT_ID] = req.query.observationId;
