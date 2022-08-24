@@ -973,7 +973,7 @@ module.exports = class EntitiesHelper {
         try {
             let locationDeatails = gen.utils.filterLocationIdandCode(entityIds);
              //set request body for learners API
-            let entityInformations = [];
+            let entityInformation = [];
             let validEntityIds = [];
             
             if ( locationDeatails.ids.length > 0 ) {
@@ -983,7 +983,7 @@ module.exports = class EntitiesHelper {
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
                 if ( entityData.success ) {
-                    entityInformations =  entityData.data;
+                    entityInformation =  entityData.data;
                 }
             }
             
@@ -994,16 +994,16 @@ module.exports = class EntitiesHelper {
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData );
                 if ( entityData.success ) {
-                    entityInformations =  entityInformations.concat(entityData.data);
+                    entityInformation =  entityInformation.concat(entityData.data);
                 }
             }
            
-            if ( !entityInformations.length > 0 ) {
+            if ( !entityInformation.length > 0 ) {
                 throw {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 } 
             } else {
-                entityInformations.map(entity => {
+                entityInformation.map(entity => {
                     validEntityIds.push(entity.id);
                 });    
             }
@@ -1832,7 +1832,7 @@ module.exports = class EntitiesHelper {
             //if not uuid considering as location code- for school.
             let locationDeatails = gen.utils.filterLocationIdandCode(locationIds);
             //set request body for learners api
-            let entityInformations = [];
+            let entityInformation = [];
             let formatResult = true;
         
             if ( locationDeatails.ids.length > 0 ) {
@@ -1841,7 +1841,7 @@ module.exports = class EntitiesHelper {
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData, "", "", "", formatResult );
                 if ( entityData.success ) {
-                    entityInformations =  entityData.data;
+                    entityInformation =  entityData.data;
                 }
             }
 
@@ -1851,11 +1851,11 @@ module.exports = class EntitiesHelper {
                 } 
                 let entityData = await userProfileService.locationSearch( bodyData,"","","", formatResult );
                 if ( entityData.success ) {
-                    entityInformations =  entityInformations.concat(entityData.data);
+                    entityInformation =  entityInformation.concat(entityData.data);
                 }
             }
            
-            if ( !entityInformations.length > 0 ) {
+            if ( !entityInformation.length > 0 ) {
                 throw {
                     message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
                 } 
@@ -1864,7 +1864,7 @@ module.exports = class EntitiesHelper {
             return resolve({
                 success : true,
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
-                data : entityInformations
+                data : entityInformation
             });
         } catch(error) {
             return resolve({

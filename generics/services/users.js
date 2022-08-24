@@ -123,7 +123,7 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                         let entityDocument = [];
                         response.result.response.map(entityData => {
                             let data = {};
-                            data.id = entityData.id;
+                            data._id = entityData.id;
                             data.entityType = entityData.type;
                             data.metaInformation = {};
                             data.metaInformation.name = entityData.name;
@@ -217,11 +217,14 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                   if (err) {
                       result.success = false;
                   } else {
-                      
-                      let response = data.body;
-                      
-                      if( response.responseCode === messageConstants.common.OK) {
-                          result["data"] = response.result;
+            
+                      if( response.responseCode === messageConstants.common.OK &&
+                          response.result &&
+                          response.result.response &&
+                          response.result.response.content &&
+                          response.result.response.content.length > 0
+                        ){
+                          result["data"] = response.result.response.content;
                       } else {
                           result.success = false;
                       }
@@ -238,10 +241,49 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
               return reject(error);
           }
       })
-  }
+}
+
+/**
+  * get subEntities of matching type by recursion.
+  * @method
+  * @name getSubEntitiesBasedOnEntityType
+  * @param {Array} entityIds - Array of entity Ids - parent entities.
+  * @param {String} entityType - Entity type.
+  * @param {Array} result - subentities of type {entityType} of {entityIds}
+  * @returns {Array} - Sub entities matching the type.
+*/
+
+async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) {
+    //get sub entities of type {entityType} of entities {parentEntity}
+    if( !entityIds.length > 0 ){
+      return result;
+    }
+
+    let bodyData={
+        "parentId" : entityIds
+    };
+    
+    let childEntities = await locationSearch(bodyData);
+    
+    if( ( !childEntities.success ) && !result.length > 0 ) {
+      return result;
+    } 
+    let parentEntities = [];
+    
+    if( childEntities.data[0].type == entityType ) {
+        result = childEntities.data;
+    } else {
+        parentEntities = childEntities.data;
+    }
+    if( parentEntities.length > 0 ){
+      await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
+    } 
+    return result; 
+}
 
 module.exports = {
     profile : profile,
     locationSearch : locationSearch,
-    orgSchoolSearch : orgSchoolSearch
+    orgSchoolSearch : orgSchoolSearch,
+    getSubEntitiesBasedOnEntityType : getSubEntitiesBasedOnEntityType
 }

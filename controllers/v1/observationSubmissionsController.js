@@ -192,7 +192,7 @@ module.exports = class ObservationSubmissions extends Abstract {
         
 
         let submissionDocument = {
-          entityId: entityDocument.id,
+          entityId: entityDocument._id,
           entityExternalId: (entityDocument.metaInformation.externalId) ? entityDocument.metaInformation.externalId : "",
           entityInformation: entityDocument.metaInformation,
           solutionId: solutionDocument._id,

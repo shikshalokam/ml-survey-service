@@ -1696,7 +1696,7 @@ module.exports = class ObservationsHelper {
                                 return resolve(entityData);
                             }
             
-                            solutionData.data["entities"] = [entityData.data[0].id];
+                            solutionData.data["entities"] = [entityData.data[0]._id];
                         }
     
                         delete solutionData.data._id;

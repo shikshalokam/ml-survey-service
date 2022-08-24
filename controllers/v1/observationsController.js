@@ -683,11 +683,7 @@ module.exports = class Observations extends Abstract {
                                 fields
                             );
                             
-                            if( !subEntitiesCode.success ||
-                                !subEntitiesCode.data ||
-                                !subEntitiesCode.data.response ||
-                                !subEntitiesCode.data.response.content ||
-                                !subEntitiesCode.data.response.content.length > 0 ) {
+                            if( !subEntitiesCode.success ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                                     "result" : {
@@ -696,7 +692,7 @@ module.exports = class Observations extends Abstract {
                                     }
                                 })
                             }
-                            let schoolDetails = subEntitiesCode.data.response.content;
+                            let schoolDetails = subEntitiesCode.data;
                            
                             //get code from all data
                             let schoolCodes = [];
@@ -740,8 +736,8 @@ module.exports = class Observations extends Abstract {
                             let subEntitiesMatchingType = [];
                             let parentId = [];
                             parentId.push(req.query.parentEntityId );
-                            let subEntities = await getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
-                   
+                            let subEntities = await userProfileService.getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
+                            console.log("subEntities : ",subEntities)
                             if( !subEntities.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
@@ -1196,7 +1192,7 @@ module.exports = class Observations extends Abstract {
                 // })
 
                 response.result.entityProfile = {
-                    _id: entityDocument.id,
+                    _id: entityDocument._id,
                     entityType: entityDocument.entityType,
                     // form: form
                 };
@@ -1208,7 +1204,7 @@ module.exports = class Observations extends Abstract {
                 response.result.program = programDocument[0];
 
                 let submissionDocument = {
-                    entityId: entityDocument.id,
+                    entityId: entityDocument._id,
                     entityExternalId: (entityDocument.metaInformation.externalId) ? entityDocument.metaInformation.externalId : "",
                     entityInformation: entityDocument.metaInformation,
                     solutionId: solutionDocument._id,
@@ -2240,42 +2236,5 @@ module.exports = class Observations extends Abstract {
     }
 
 
-}
-
-/**
-  * get subEntities of matching type by recursion.
-  * @method
-  * @name getSubEntitiesBasedOnEntityType
-  * @param {Array} entityIds - Array of entity Ids - parent entities.
-  * @param {String} entityType - Entity type.
-  * @param {Array} result - subentities of type {entityType} of {entityIds}
-  * @returns {Array} - Sub entities matching the type.
-*/
-
-async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) {
-    //get sub entities of type {entityType} of entities {parentEntity}
-    if( !entityIds.length > 0 ){
-      return result;
-    }
-
-    let bodyData={
-        "parentId" : entityIds
-    };
-    
-    let childEntities = await userProfileService.locationSearch(bodyData);
-
-    if( ( !childEntities.success ) && !result.length > 0 ) {
-      return result;
-    } 
-    let parentEntities = [];
-    if( childEntities.data[0].type == entityType ) {
-        result = childEntities.data;
-    } else {
-        parentEntities = childEntities.data;
-    }
-    if( parentEntities.length > 0 ){
-      await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
-    } 
-    return result; 
 }
    
