@@ -923,8 +923,6 @@ module.exports = class EntitiesHelper {
         searchText,
         pageSize, 
         pageNo, 
-        entityIds = false,
-        aclData = []
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -933,14 +931,8 @@ module.exports = class EntitiesHelper {
                 let bodyData={
                     "type" : entityType
                 };
-
-                if ( entityIds ){
-                    bodyData={
-                        "id" : entityIds
-                    };
-                }
-                
-                let entitiesData = await userProfileService.locationSearch( bodyData, pageSize, pageNo, searchText );
+                let resultForSearchEntities =true
+                let entitiesData = await userProfileService.locationSearch( bodyData, pageSize, pageNo, searchText, false, false, resultForSearchEntities );
                 
                 if( !entitiesData.success ) {
                     return resolve(entitiesData.data.response) 
@@ -1875,8 +1867,8 @@ module.exports = class EntitiesHelper {
     })
   }
 
-   /**
-   * Observation entities search response data.
+/**
+   * Observation entiites search response data.
    * @method
    * @name observationSearchEntitiesResponse
    * @param {Array} entities - entities data.
@@ -1884,41 +1876,31 @@ module.exports = class EntitiesHelper {
    * @returns {Object} entity Document
    */
 
-  static observationSearchEntitiesResponse(entities,observationEntityIds) {
-   
-    let formatedData = [];
+ static observationSearchEntitiesResponse(entities,observationEntityIds) {
+
     let observationEntities = [];
+    
     if ( observationEntityIds && observationEntityIds.length > 0 ) {
         observationEntities = observationEntityIds.map(entity => entity.toString());
     }
-    
 
     if( entities.length > 0 ) {
         entities.forEach(eachMetaData => {
-            let data = {};
-            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData.id)) ? true : false;
-            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.code);
-            if( eachMetaData.type == messageConstants.common.SCHOOL && eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
-                eachMetaData.name += ", "+eachMetaData.code;
+            eachMetaData.selected = (observationEntities.length > 0 && observationEntities.includes(eachMetaData._id.toString())) ? true : false;
+            if(eachMetaData.districtName && eachMetaData.districtName != "") {
+                eachMetaData.name += ", "+eachMetaData.districtName;
             }
-            data._id = eachMetaData.id;
-            data.name = eachMetaData.name;
-            data.externalId = eachMetaData.code;
-            data.addressLine1 = "";
-            data.districtName = "";
-            data.selected = eachMetaData.selected;
-            formatedData.push(data);
+
+            let isValidUUID = gen.utils.checkIfValidUUID(eachMetaData.externalId);
+
+            if( eachMetaData.externalId && eachMetaData.externalId !== "" && isValidUUID === false ) {
+                eachMetaData.name += ", "+eachMetaData.externalId;
+            }
         })
     }
-    entities = [];
-    entities = formatedData;
+
     return entities;
-
-  
-
-  
-
-}
+  }
 
 };
 

@@ -581,6 +581,7 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
+                let formatForSearchEntities = true;
                 let response = {
                     result: {}
                 };
@@ -635,7 +636,15 @@ module.exports = class Observations extends Abstract {
                         "id" : req.query.parentEntityId
                     };
 
-                    let entitiesDocument = await userProfileService.locationSearch( filterData );
+                    let entitiesDocument = await userProfileService.locationSearch( 
+                            filterData,
+                            "",
+                            "",
+                            "",
+                            false,
+                            false,
+                            formatForSearchEntities
+                        );
                     
                     if ( !entitiesDocument.success ) {
                         return resolve({
@@ -705,7 +714,15 @@ module.exports = class Observations extends Abstract {
                                 "code" : schoolCodes
                             };
                             // search school data with location code.
-                            let entitiesData = await userProfileService.locationSearch( bodyData );
+                            let entitiesData = await userProfileService.locationSearch( 
+                                bodyData,   
+                                "",
+                                "",
+                                "",
+                                false,
+                                false,
+                                formatForSearchEntities
+                            );
                         
                             if( !entitiesData.success ) {
                                 return resolve({
@@ -767,10 +784,18 @@ module.exports = class Observations extends Abstract {
                                 let endIndex = startIndex + req.pageSize;
                                 subEntities = subEntities.slice(startIndex, endIndex);
                             }
-                        
+
+                            let entityDocument = [];
+                            subEntities.map(entityData => {
+                                let data = {};
+                                data._id = entityData.id;
+                                data.name = entityData.name;
+                                data.externalId = entityData.code;
+                                entityDocument.push(data);
+                            });
                             let data = 
                                 await entitiesHelper.observationSearchEntitiesResponse(
-                                    subEntities,
+                                    entityDocument,
                                     result.entities
                             )
                             
@@ -784,49 +809,30 @@ module.exports = class Observations extends Abstract {
                         }       
                     }
                     
+                } else {
+                    let entityDocuments = await entitiesHelper.search(
+                        result.entityType, 
+                        req.searchText, 
+                        req.pageSize, 
+                        req.pageNo
+                    );
+    
+                    let data = 
+                    await entitiesHelper.observationSearchEntitiesResponse(
+                        entityDocuments[0].data,
+                        result.entities
+                    )
+    
+                    entityDocuments[0].data = data;
+    
+                    if ( !(entityDocuments[0].count) ) {
+                        entityDocuments[0].count = 0;
+                        messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                    }
+                    response.result = entityDocuments;
+                    response["message"] = messageData;
                 }
-                //document not present, confirm with Akash
-                // let userAclInformation = await userExtensionHelper.userAccessControlList(
-                //     userId
-                // );
-
-                // let tags = [];
                 
-                // if( 
-                //     userAclInformation.success && 
-                //     Object.keys(userAclInformation.acl).length > 0 
-                // ) {
-                //     Object.values(userAclInformation.acl).forEach(acl=>{
-                //         tags = tags.concat(acl);
-                //     })
-                // }
-
-                let entityDocuments = await entitiesHelper.search(
-                    result.entityTypeId, 
-                    req.searchText, 
-                    req.pageSize, 
-                    req.pageNo, 
-                    
-                    userAllowedEntities && userAllowedEntities.length > 0 ? 
-                    userAllowedEntities : 
-                    false,
-                );
-
-                let data = 
-                await entitiesHelper.observationSearchEntitiesResponse(
-                    entityDocuments[0].data,
-                    result.entities
-                )
-
-                entityDocuments[0].data = data;
-
-                if ( !(entityDocuments[0].count) ) {
-                    entityDocuments[0].count = 0;
-                    messageData = messageConstants.apiResponses.ENTITY_NOT_FOUND;
-                }
-                response.result = entityDocuments;
-                response["message"] = messageData;
-
                 return resolve(response);
 
             } catch (error) {

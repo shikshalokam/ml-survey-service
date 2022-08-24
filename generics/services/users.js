@@ -71,7 +71,7 @@ const profile = function ( token,userId = "" ) {
   * @returns {Promise} returns a promise.
 */
 
-const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", formatResult = false, returnObject = false ) {
+const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", formatResult = false, returnObject = false, resultForSearchEntities = false ) {
     return new Promise(async (resolve, reject) => {
         try {
           let bodyData = {};
@@ -127,7 +127,7 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                             data.entityType = entityData.type;
                             data.metaInformation = {};
                             data.metaInformation.name = entityData.name;
-                            data.metaInformation.externalId = entityData.code
+                            data.metaInformation.externalId = entityData.code;
                             data.registryDetails = {};
                             data.registryDetails.locationId = entityData.id;
                             data.registryDetails.code = entityData.code;
@@ -135,10 +135,23 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                         });
                         if ( returnObject ) {
                             result["data"] = entityDocument[0];
+                            result["count"] = response.result.count;
                         } else {
                             result["data"] = entityDocument;
+                            result["count"] = response.result.count;
                         }
-                    } else {
+                    } else if ( resultForSearchEntities ) {
+                        let entityDocument = [];
+                        response.result.response.map(entityData => {
+                            let data = {};
+                            data._id = entityData.id;
+                            data.name = entityData.name;
+                            data.externalId = entityData.code;
+                            entityDocument.push(data);
+                        });
+                        result["data"] = entityDocument;
+                        result["count"] = response.result.count;
+                    }else {
                         result["data"] = response.result.response;
                         result["count"] = response.result.count;
                     }
