@@ -754,7 +754,7 @@ module.exports = class Observations extends Abstract {
                             let parentId = [];
                             parentId.push(req.query.parentEntityId );
                             let subEntities = await userProfileService.getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
-            
+                            
                             if( !subEntities.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
@@ -767,24 +767,19 @@ module.exports = class Observations extends Abstract {
                             
                             
                             let searchText= req.searchText ? req.searchText : "";
-                            if( searchText !== "" ){
-                                let matchEntities = [];
-                                subEntities.map( entityData => {
-                                    if( entityData.name.match(new RegExp(searchText, 'i')) || entityData.code.match(new RegExp("^" + searchText, 'm')) ) {
-                                        matchEntities.push(entityData)
-                                    }
-                                });
-                                subEntities = [];
-                                subEntities = matchEntities;
+                            let subEntityIds = subEntities.map(function (entity) { return entity.id; });
+                            let filterData = {
+                                "id" : subEntityIds
                             }
-            
-                            let totalCount = subEntities.length;
-                            if (totalCount > 0) {
-                                let startIndex = req.pageSize * (req.pageNo - 1);
-                                let endIndex = startIndex + req.pageSize;
-                                subEntities = subEntities.slice(startIndex, endIndex);
-                            }
-
+                            let entitiesDocument = await userProfileService.locationSearch( 
+                                filterData,
+                                pageSize,
+                                pageNo,
+                                searchText
+                            );
+                            subEntities = [];
+                            subEntities = entitiesDocument.data;
+                            
                             let entityDocument = [];
                             subEntities.map(entityData => {
                                 let data = {};
@@ -804,7 +799,7 @@ module.exports = class Observations extends Abstract {
     
                             response.result.push({
                                 "data" : data,
-                                "count" : totalCount
+                                "count" : entitiesDocument.count
                             });
                         }       
                     }
