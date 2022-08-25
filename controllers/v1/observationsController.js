@@ -754,7 +754,7 @@ module.exports = class Observations extends Abstract {
                             let parentId = [];
                             parentId.push(req.query.parentEntityId );
                             let subEntities = await userProfileService.getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
-                            console.log("subEntities : ",subEntities)
+            
                             if( !subEntities.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
