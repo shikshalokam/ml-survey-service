@@ -287,7 +287,7 @@ async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) 
     if( childEntities.data[0].type == entityType ) {
         result = childEntities.data;
     } else {
-        parentEntities = childEntities.data;
+        parentEntities = childEntities.map(function (entity) { return entity.id; });
     }
     if( parentEntities.length > 0 ){
       await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
