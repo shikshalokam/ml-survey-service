@@ -68,6 +68,7 @@ const profile = function ( token,userId = "" ) {
   * @param {String} searchKey - search key.
   * @param {Boolean} formatResult - format result
   * @param {Boolean} returnObject - return object or array.
+  * @param {Boolean} resultForSearchEntities - format result for searchEntities api call.
   * @returns {Promise} returns a promise.
 */
 
