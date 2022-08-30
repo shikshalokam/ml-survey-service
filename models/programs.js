@@ -32,7 +32,6 @@ module.exports = {
     },
     scope : {
       entityType : String,
-      entityTypeId : "ObjectId",
       entities : {
         type : Array,
         index : true

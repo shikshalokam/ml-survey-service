@@ -91,6 +91,7 @@ module.exports = class ObservationsHelper {
                 if( requestingUserAuthToken == "" ) {
                     throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN);
                 }
+
                 //eG code entityTypeId removed from projection.
                 let solutionData = 
                 await solutionHelper.solutionDocuments({
@@ -991,7 +992,6 @@ module.exports = class ObservationsHelper {
                 roles: 1,
                 evidenceMethods: 1,
                 sections: 1,
-                entityTypeId: 1,
                 entityType: 1,
                 captureGpsLocationAtQuestionLevel : 1,
                 enableQuestionReadOut : 1,
@@ -1202,7 +1202,6 @@ module.exports = class ObservationsHelper {
                     "description",
                     "frameworkExternalId",
                     "frameworkId",
-                    "entityTypeId",
                     "entityType",
                     "isAPrivateProgram",
                     "programExternalId",
@@ -1320,7 +1319,6 @@ module.exports = class ObservationsHelper {
                     "frameworkId": observationSolutionData[0].frameworkId,
                     "programExternalId": observationSolutionData[0].programExternalId,
                     "programId": programId,
-                    "entityTypeId": observationSolutionData[0].entityTypeId,
                     "entityType": observationSolutionData[0].entityType,
                     "isAPrivateProgram": observationSolutionData[0].isAPrivateProgram,
                     "entities": entities
@@ -1805,7 +1803,7 @@ module.exports = class ObservationsHelper {
                 
                 if ( !entitiesData.length > 0 ) {
                     throw {
-                        message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                        message : messageConstants.apiResponses.ENTITIES_NOT_FOUND
                     } 
                 }
                 
@@ -2061,6 +2059,7 @@ module.exports = class ObservationsHelper {
                         allowedEntityTypes = allowedEntityTypesForRole.result;
                     }
                 }
+
                 //check solution entity type is exist in allowed roles
                 if ( !allowedEntityTypes.length > 0 || 
                     !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 

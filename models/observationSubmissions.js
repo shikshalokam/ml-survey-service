@@ -45,10 +45,6 @@ module.exports = {
       index : true
     },
     submissionsUpdatedHistory: Array,
-    entityTypeId: {
-      type : "ObjectId",
-      index : true
-    },
     entityType: {
       type : String,
       index : true

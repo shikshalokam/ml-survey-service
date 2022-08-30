@@ -1218,7 +1218,6 @@ module.exports = class Observations extends Abstract {
                     },
                     frameworkId: solutionDocument.frameworkId,
                     frameworkExternalId: solutionDocument.frameworkExternalId,
-                    entityTypeId: solutionDocument.entityTypeId,
                     entityType: solutionDocument.entityType,
                     scoringSystem: solutionDocument.scoringSystem,
                     isRubricDriven: solutionDocument.isRubricDriven,

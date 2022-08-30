@@ -665,8 +665,7 @@ module.exports = class SolutionsHelper {
             description: 1,
             keywords: 1,
             externalId: 1,
-            programId: 1,
-            entityTypeId: 1
+            programId: 1
           };
         }
 
