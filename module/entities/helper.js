@@ -992,7 +992,7 @@ module.exports = class EntitiesHelper {
            
             if ( !entityInformation.length > 0 ) {
                 throw {
-                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                    message : messageConstants.apiResponses.ENTITY_NOT_FOUND
                 } 
             } else {
                 entityInformation.map(entity => {
@@ -1849,7 +1849,7 @@ module.exports = class EntitiesHelper {
            
             if ( !entityInformation.length > 0 ) {
                 throw {
-                    message : messageConstants.apiResponses.NO_ENTITY_FOUND_IN_LOCATION
+                    message : messageConstants.apiResponses.ENTITY_NOT_FOUND
                 } 
             }
             
@@ -1858,6 +1858,7 @@ module.exports = class EntitiesHelper {
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
                 data : entityInformation
             });
+
         } catch(error) {
             return resolve({
                 success : false,
