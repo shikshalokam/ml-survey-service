@@ -581,6 +581,7 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
+
                 let formatForSearchEntities = true;
                 let response = {
                     result: {}
@@ -590,7 +591,6 @@ module.exports = class Observations extends Abstract {
                 let result;
 
                 let projection = [];
-
 
                 if ( req.query.observationId ) {
                     let findObject = {
@@ -632,7 +632,7 @@ module.exports = class Observations extends Abstract {
                 let messageData = messageConstants.apiResponses.ENTITY_FETCHED;
 
                 if( !(userAllowedEntities.length > 0) && req.query.parentEntityId ) {
-                   let filterData = {
+                    let filterData = {
                         "id" : req.query.parentEntityId
                     };
 
@@ -655,6 +655,7 @@ module.exports = class Observations extends Abstract {
                             }
                         })
                     }
+
                     let entitiesData = entitiesDocument.data;
                     
                     if( entitiesData && entitiesData[0].type === result.entityType ) {
@@ -691,7 +692,7 @@ module.exports = class Observations extends Abstract {
                                 req.searchText,
                                 fields
                             );
-                            
+
                             if( !subEntitiesCode.success ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
@@ -701,15 +702,14 @@ module.exports = class Observations extends Abstract {
                                     }
                                 })
                             }
+                        
                             let schoolDetails = subEntitiesCode.data;
-                           
                             //get code from all data
                             let schoolCodes = [];
                             schoolDetails.map(schoolData=> {
                                 schoolCodes.push(schoolData.externalId);
                             });
                             
-        
                             let bodyData={
                                 "code" : schoolCodes
                             };
@@ -734,7 +734,6 @@ module.exports = class Observations extends Abstract {
                                 })
                             }
                             
-
                             let data = 
                                 await entitiesHelper.observationSearchEntitiesResponse(
                                 entitiesData.data,
@@ -742,13 +741,14 @@ module.exports = class Observations extends Abstract {
                             );
 
                             response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
-
                             response.result.push({
                                 "data" : data,
-                                "count" : subEntitiesCode.data.response.count
+                                "count" : subEntitiesCode.count
                             });
                             return resolve(response);
+                            
                         } else {
+
                             response.result = [];
                             let subEntitiesMatchingType = [];
                             let parentId = [];
@@ -765,18 +765,17 @@ module.exports = class Observations extends Abstract {
                                 })
                             }
                             
-                            
-                            let searchText= req.searchText ? req.searchText : "";
-                            let subEntityIds = subEntities.map(function (entity) { return entity.id; });
                             let filterData = {
-                                "id" : subEntityIds
+                                "id" : subEntities
                             }
+
                             let entitiesDocument = await userProfileService.locationSearch( 
                                 filterData,
-                                pageSize,
-                                pageNo,
-                                searchText
+                                req.pageSize,
+                                req.pageNo,
+                                req.searchText ? req.searchText : ""
                             );
+
                             subEntities = [];
                             subEntities = entitiesDocument.data;
                             
@@ -788,15 +787,13 @@ module.exports = class Observations extends Abstract {
                                 data.externalId = entityData.code;
                                 entityDocument.push(data);
                             });
-                            let data = 
-                                await entitiesHelper.observationSearchEntitiesResponse(
-                                    entityDocument,
-                                    result.entities
+
+                            let data = await entitiesHelper.observationSearchEntitiesResponse(
+                                entityDocument,
+                                result.entities
                             )
                             
-    
                             response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
-    
                             response.result.push({
                                 "data" : data,
                                 "count" : entitiesDocument.count
@@ -805,6 +802,7 @@ module.exports = class Observations extends Abstract {
                     }
                     
                 } else {
+
                     let entityDocuments = await entitiesHelper.search(
                         result.entityType, 
                         req.searchText, 
@@ -817,7 +815,7 @@ module.exports = class Observations extends Abstract {
                         entityDocuments[0].data,
                         result.entities
                     )
-    
+
                     entityDocuments[0].data = data;
     
                     if ( !(entityDocuments[0].count) ) {
@@ -1095,9 +1093,11 @@ module.exports = class Observations extends Abstract {
                 }
 
                 let entityDocument = entitiesDocument.data;
-                
-                const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
+                if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
+                    entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
+                }
 
+                const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
                 let solutionQueryObject = {
                     _id: observationDocument.solutionId,
                     status: "active",

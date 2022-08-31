@@ -134,7 +134,11 @@ module.exports = class ObservationSubmissions extends Abstract {
                 message: messageConstants.apiResponses.ENTITY_NOT_FOUND
             });
         }
+
         let entityDocument = entitiesDocument.data;
+        if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
+          entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
+        }
               
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
