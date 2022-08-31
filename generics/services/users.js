@@ -49,7 +49,7 @@ const profile = function ( token,userId = "" ) {
             setTimeout(function () {
                 return resolve (result = {
                     success : false
-                 });
+                });
              }, messageConstants.common.SERVER_TIME_OUT);
 
         } catch (error) {
@@ -75,98 +75,98 @@ const profile = function ( token,userId = "" ) {
 const locationSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", formatResult = false, returnObject = false, resultForSearchEntities = false ) {
     return new Promise(async (resolve, reject) => {
         try {
-          let bodyData = {};
-          bodyData["request"] = {};
-          bodyData["request"]["filters"] = filterData;
+
+            let bodyData = {};
+            bodyData["request"] = {};
+            bodyData["request"]["filters"] = filterData;
   
-          if ( pageSize !== "" ) {
-              bodyData["request"]["limit"] = pageSize;
-          } 
+            if ( pageSize !== "" ) {
+                bodyData["request"]["limit"] = pageSize;
+            } 
+    
+            if ( pageNo !== "" ) {
+                let offsetValue = pageSize * ( pageNo - 1 ); 
+                bodyData["request"]["offset"] = offsetValue;
+            }
   
-          if ( pageNo !== "" ) {
-              let offsetValue = pageSize * ( pageNo - 1 ); 
-              bodyData["request"]["offset"] = offsetValue;
-          }
-  
-          if ( searchKey !== "" ) {
-              bodyData["request"]["query"] = searchKey
-          }
+            if ( searchKey !== "" ) {
+                bodyData["request"]["query"] = searchKey
+            }
           
-          const url = 
-          userServiceUrl + messageConstants.endpoints.GET_LOCATION_DATA;
-          const options = {
-              headers : {
-                  "content-type": "application/json"
-            },
-            json : bodyData
-          };
+            const url = 
+            userServiceUrl + messageConstants.endpoints.GET_LOCATION_DATA;
+            const options = {
+                headers : {
+                    "content-type": "application/json"
+                },
+                json : bodyData
+            };
           
           request.post(url,options,requestCallback);
   
-          let result = {
-              success : true
-          };
+            let result = {
+                success : true
+            };
   
-          function requestCallback(err, data) {
-  
-              if (err) {
-                  result.success = false;
-              } else {
-                let response = data.body;
-                
-                if( response.responseCode === messageConstants.common.OK &&
-                    response.result &&
-                    response.result.response &&
-                    response.result.response.length > 0
-                ) {
-                    // format result if true
-                    if ( formatResult ) {
-                        let entityDocument = [];
-                        response.result.response.map(entityData => {
-                            let data = {};
-                            data._id = entityData.id;
-                            data.entityType = entityData.type;
-                            data.metaInformation = {};
-                            data.metaInformation.name = entityData.name;
-                            data.metaInformation.externalId = entityData.code;
-                            data.registryDetails = {};
-                            data.registryDetails.locationId = entityData.id;
-                            data.registryDetails.code = entityData.code;
-                            entityDocument.push(data);
-                        });
-                        if ( returnObject ) {
-                            result["data"] = entityDocument[0];
-                            result["count"] = response.result.count;
-                        } else {
+            function requestCallback(err, data) {
+                if (err) {
+                    result.success = false;
+                } else {
+
+                    let response = data.body;
+                    if( response.responseCode === messageConstants.common.OK &&
+                        response.result &&
+                        response.result.response &&
+                        response.result.response.length > 0
+                    ) {
+                        // format result if true
+                        if ( formatResult ) {
+                            let entityDocument = [];
+                            response.result.response.map(entityData => {
+                                let data = {};
+                                data._id = entityData.id;
+                                data.entityType = entityData.type;
+                                data.metaInformation = {};
+                                data.metaInformation.name = entityData.name;
+                                data.metaInformation.externalId = entityData.code;
+                                data.registryDetails = {};
+                                data.registryDetails.locationId = entityData.id;
+                                data.registryDetails.code = entityData.code;
+                                entityDocument.push(data);
+                            });
+                            if ( returnObject ) {
+                                result["data"] = entityDocument[0];
+                                result["count"] = response.result.count;
+                            } else {
+                                result["data"] = entityDocument;
+                                result["count"] = response.result.count;
+                            }
+                        } else if ( resultForSearchEntities ) {
+                            let entityDocument = [];
+                            response.result.response.map(entityData => {
+                                let data = {};
+                                data._id = entityData.id;
+                                data.name = entityData.name;
+                                data.externalId = entityData.code;
+                                entityDocument.push(data);
+                            });
                             result["data"] = entityDocument;
                             result["count"] = response.result.count;
-                        }
-                    } else if ( resultForSearchEntities ) {
-                        let entityDocument = [];
-                        response.result.response.map(entityData => {
-                            let data = {};
-                            data._id = entityData.id;
-                            data.name = entityData.name;
-                            data.externalId = entityData.code;
-                            entityDocument.push(data);
-                        });
-                        result["data"] = entityDocument;
-                        result["count"] = response.result.count;
-                    }else {
+                    } else {
                         result["data"] = response.result.response;
                         result["count"] = response.result.count;
                     }
                 } else {
                     result.success = false;
                 }
-              }
-              return resolve(result);
+            }
+                return resolve(result);
           }
   
-          setTimeout( function () {
-              return resolve (result = {
-                  success : false
-               });
+            setTimeout( function () {
+                return resolve (result = {
+                    success : false
+                });
            }, messageConstants.common.SERVER_TIME_OUT);
   
         } catch (error) {
@@ -185,77 +185,81 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
     * @param {object} fields -  query data.
     * @returns {Promise} returns a promise.
   */
-  const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", fields = [] ) {
-      return new Promise(async (resolve, reject) => {
-          try {
-              let bodyData = {};
-              bodyData["request"] = {};
-              bodyData["request"]["filters"] = filterData;
+    const orgSchoolSearch = function ( filterData, pageSize = "", pageNo = "", searchKey = "", fields = [] ) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let bodyData = {};
+                bodyData["request"] = {};
+                bodyData["request"]["filters"] = filterData;
   
-              if ( pageSize !== "" ) {
-                  bodyData["request"]["limit"] = pageSize;
-              } 
+                if ( pageSize !== "" ) {
+                    bodyData["request"]["limit"] = pageSize;
+                } 
       
-              if ( pageNo !== "" ) {
-                  let offsetValue = pageSize * ( pageNo - 1 ); 
-                  bodyData["request"]["offset"] = offsetValue;
-              }
-      
-              if ( searchKey !== "" ) {
-                  bodyData["request"]["fuzzy"] = {
-                      "orgName" : searchKey
-                  }
-              }
+                if ( pageNo !== "" ) {
+                    let offsetValue = pageSize * ( pageNo - 1 ); 
+                    bodyData["request"]["offset"] = offsetValue;
+                }
+        
+                if ( searchKey !== "" ) {
+                    bodyData["request"]["fuzzy"] = {
+                        "orgName" : searchKey
+                    }
+                }
   
-              //for getting specified key data only.
-              if ( fields.length > 0 ) {
-                  bodyData["request"]["fields"] = fields;
-              }
+                //for getting specified key data only.
+                if ( fields.length > 0 ) {
+                    bodyData["request"]["fields"] = fields;
+                }
               
-              const url = 
-              userServiceUrl + messageConstants.endpoints.GET_SCHOOL_DATA;
-              const options = {
-                  headers : {
+                const url = 
+                userServiceUrl + messageConstants.endpoints.GET_SCHOOL_DATA;
+                const options = {
+                    headers : {
                       "content-type": "application/json"
-                  },
-                  json : bodyData
-              };
+                    },
+                    json : bodyData
+                };
+
+                request.post(url,options,requestCallback);
+                let result = {
+                    success : true
+                };
     
-              request.post(url,options,requestCallback);
-              let result = {
-                  success : true
-              };
+                function requestCallback(err, data) {
     
-              function requestCallback(err, data) {
-    
-                  if (err) {
-                      result.success = false;
-                  } else {
-            
-                      if( response.responseCode === messageConstants.common.OK &&
-                          response.result &&
-                          response.result.response &&
-                          response.result.response.content &&
-                          response.result.response.content.length > 0
+                    if (err) {
+                        result.success = false;
+                    } else {
+
+                        let response = data.body;
+                        if ( response.responseCode === messageConstants.common.OK &&
+                            response.result &&
+                            response.result.response &&
+                            response.result.response.content &&
+                            response.result.response.content.length > 0
                         ){
-                          result["data"] = response.result.response.content;
-                      } else {
-                          result.success = false;
-                      }
-                  }
-                  return resolve(result);
-              }
-              setTimeout(function () {
-                  return resolve (result = {
-                      success : false
-                   });
+                            result["data"] = response.result.response.content;
+                            result["count"] = response.result.response.count;
+                        } else {
+                            result.success = false;
+                        }
+                    }
+
+                    return resolve(result);
+                }
+                setTimeout(function () {
+                    return resolve (result = {
+                        success : false
+                    });
                }, messageConstants.common.SERVER_TIME_OUT);
   
-          } catch (error) {
-              return reject(error);
-          }
-      })
-}
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
 
 /**
   * get subEntities of matching type by recursion.
@@ -267,32 +271,36 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
   * @returns {Array} - Sub entities matching the type.
 */
 
-async function getSubEntitiesBasedOnEntityType( entityIds, entityType, result ) {
-    //get sub entities of type {entityType} of entities {parentEntity}
-    if( !entityIds.length > 0 ){
-      return result;
+async function getSubEntitiesBasedOnEntityType( parentIds, entityType, result ) {
+     
+    if( !parentIds.length > 0 ){
+        return result;
+    }
+    let bodyData={
+        "parentId" : parentIds
+    };
+
+    let entityDetails = await locationSearch(bodyData);
+    if( !entityDetails.success ) {
+        return (result);
     }
 
-    let bodyData={
-        "parentId" : entityIds
-    };
-    
-    let childEntities = await locationSearch(bodyData);
-    
-    if( ( !childEntities.success ) && !result.length > 0 ) {
-      return result;
-    } 
+    let entityData = entityDetails.data;
     let parentEntities = [];
-    
-    if( childEntities.data[0].type == entityType ) {
-        result = childEntities.data;
+    entityData.map(entity => {
+    if( entity.type == entityType ) {
+        result.push(entity.id)
     } else {
-        parentEntities = childEntities.map(function (entity) { return entity.id; });
+        parentEntities.push(entity.id)
     }
+    });
+
     if( parentEntities.length > 0 ){
-      await getSubEntitiesBasedOnEntityType(parentEntities, entityType, result)
+        await getSubEntitiesBasedOnEntityType(parentEntities,entityType,result)
     } 
-    return result; 
+
+    let uniqueEntities = _.uniq(result);
+    return uniqueEntities;
 }
 
 module.exports = {
