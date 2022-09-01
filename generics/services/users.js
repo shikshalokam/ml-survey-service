@@ -152,7 +152,7 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                             });
                             result["data"] = entityDocument;
                             result["count"] = response.result.count;
-                    } else {
+                    }else {
                         result["data"] = response.result.response;
                         result["count"] = response.result.count;
                     }
@@ -303,9 +303,48 @@ async function getSubEntitiesBasedOnEntityType( parentIds, entityType, result ) 
     return uniqueEntities;
 }
 
+/**
+  * get Parent Entities of an entity.
+  * @method
+  * @name getParentEntities
+  * @param {String} entityId - entity id
+  * @returns {Array} - parent entities.
+*/
+
+async function getParentEntities( entityId, iteration = 0, parentEntities ) {
+
+    if ( iteration == 0 ) {
+        console.log("came inside")
+        parentEntities = [];
+    }
+
+    let filterQuery = {
+        "id" : entityId
+    };
+
+    let entityDetails = await locationSearch(filterQuery);
+    if ( !entityDetails.success ) {
+        return parentEntities;
+    } else {
+        
+        let entityData = entityDetails.data[0];
+        if ( iteration > 0 ) parentEntities.push(entityData);
+        if ( entityData.parentId ) {
+            iteration = iteration + 1;
+            entityId = entityData.parentId;
+            await getParentEntities(entityId, iteration, parentEntities);
+        }
+    }
+
+    return parentEntities;
+
+}
+
+
 module.exports = {
     profile : profile,
     locationSearch : locationSearch,
     orgSchoolSearch : orgSchoolSearch,
-    getSubEntitiesBasedOnEntityType : getSubEntitiesBasedOnEntityType
+    getSubEntitiesBasedOnEntityType : getSubEntitiesBasedOnEntityType,
+    getParentEntities : getParentEntities
 }

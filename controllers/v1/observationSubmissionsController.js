@@ -139,7 +139,10 @@ module.exports = class ObservationSubmissions extends Abstract {
         if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
           entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
         }
-              
+
+        let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
+        entityDocument.metaInformation.hierarchy = entityHierarchy;
+
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
           status: "active",
@@ -336,7 +339,7 @@ module.exports = class ObservationSubmissions extends Abstract {
       return resolve({
           message: responseMessage,
           result: observations
-        });
+      });
       
       } catch (error) {
         return reject({

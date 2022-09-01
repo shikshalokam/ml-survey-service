@@ -1097,6 +1097,9 @@ module.exports = class Observations extends Abstract {
                     entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
                 }
 
+                let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
+                entityDocument.metaInformation.hierarchy = entityHierarchy;
+
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
                 let solutionQueryObject = {
                     _id: observationDocument.solutionId,
