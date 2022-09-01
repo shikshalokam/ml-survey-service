@@ -314,7 +314,6 @@ async function getSubEntitiesBasedOnEntityType( parentIds, entityType, result ) 
 async function getParentEntities( entityId, iteration = 0, parentEntities ) {
 
     if ( iteration == 0 ) {
-        console.log("came inside")
         parentEntities = [];
     }
 
