@@ -142,6 +142,7 @@ module.exports = class ObservationsHelper {
                             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
                         }
                     } 
+                    
                     //validate the user access to create observation
                     let validateUserRole = await this.validateUserRole(userRoleAndProfileInformation, solutionId);
                     if ( !validateUserRole.success ){
@@ -324,20 +325,11 @@ module.exports = class ObservationsHelper {
                 }
 
                 let observations = new Array;
-
                 let assessorObservationsQueryObject = [
                     {
                         $match: {
                             createdBy: userId,
                             status: { $ne: "inactive" }
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "entities",
-                            localField: "entities",
-                            foreignField: "_id",
-                            as: "entityDocuments"
                         }
                     },
                     {
@@ -348,26 +340,39 @@ module.exports = class ObservationsHelper {
                             "startDate": 1,
                             "endDate": 1,
                             "status": 1,
-                            "solutionId": 1,
-                            "entityDocuments._id": 1,
-                            "entityDocuments.metaInformation.externalId": 1,
-                            "entityDocuments.metaInformation.name": 1
+                            "solutionId": 1
                         }
                     }
                 ];
 
                 const userObservations = await database.models.observations.aggregate(assessorObservationsQueryObject);
-                
-                
                 let observation;
                 let submissions;
-                let entityObservationSubmissionStatus;
+                let entities = [];
+        
+                for ( let pointerToEachObs = 0; pointerToEachObs < userObservations.length; pointerToEachObs++ ) {
+                    if ( userObservations[pointerToEachObs].entities ) entities.push(...userObservations[pointerToEachObs].entities)
+                }
 
-                for (let pointerToAssessorObservationArray = 0; pointerToAssessorObservationArray < userObservations.length; pointerToAssessorObservationArray++) {
+                let uniqueEntities = _.uniq(entities);
+                let entityDocuments = [];
+                
+                if ( uniqueEntities.length > 0 ) {
+                    let filterData = {
+                        "id" : uniqueEntities
+                    };
+                    let formatResult =  false;
+
+                    let entityDocument = await userProfileService.locationSearch( filterData,"", "", "", formatResult );
+                    if ( entityDocument.success && entityDocument.data) {
+                        entityDocuments = entityDocument.data;
+                    }
+                }
+
+                for ( let pointerToAssessorObservationArray = 0; pointerToAssessorObservationArray < userObservations.length; pointerToAssessorObservationArray++ ) {
 
                     observation = userObservations[pointerToAssessorObservationArray];
-
-                    if(sourceApi == "v2") {
+                    if ( sourceApi == "v2" ) {
 
                         submissions = await database.models.observationSubmissions.find(
                             {
@@ -383,8 +388,6 @@ module.exports = class ObservationsHelper {
                                 "answers": 0
                             }
                         ).sort( { createdAt: -1 } );
-
-                        
 
                     } else {
 
@@ -406,7 +409,6 @@ module.exports = class ObservationsHelper {
                     }
                     
                     let observationEntitySubmissions = {};
-
                     submissions.forEach(observationEntitySubmission => {
                         if (!observationEntitySubmissions[observationEntitySubmission.entityId]) {
                             observationEntitySubmissions[observationEntitySubmission.entityId] = {
@@ -418,23 +420,35 @@ module.exports = class ObservationsHelper {
                         observationEntitySubmissions[observationEntitySubmission.entityId].submissionStatus = observationEntitySubmission.status;
                         observationEntitySubmissions[observationEntitySubmission.entityId].submissions.push(observationEntitySubmission);
                     })
-                    
-                    // entityObservationSubmissionStatus = submissions.reduce(
-                    //     (ac, entitySubmission) => ({ ...ac, [entitySubmission.entityId.toString()]: {submissionStatus:(entitySubmission.entityId && entitySubmission.status) ? entitySubmission.status : "pending"} }), {})
 
+                    //update entities with submission details
+                    let observationEntities = observation.entities;
+                    if ( observationEntities.length > 0 ) {
+                        observation.entities = new Array;
+                        
+                        for ( let pointerToEntities = 0; 
+                            pointerToEntities < observationEntities.length;
+                            pointerToEntities++
+                        ) {
+                            let currentEntity = observationEntities[pointerToEntities];
+                            //find the entity in the entity documents
+                            let observationEntity = entityDocuments.find(entity => entity.id == currentEntity);
+                            if ( observationEntity ) {
+                                //update observation entities
+                                observation.entities.push({
+                                    _id: observationEntity.id,
+                                    submissionStatus: (observationEntitySubmissions[observationEntity.id]) ? observationEntitySubmissions[observationEntity.id].submissionStatus : "pending",
+                                    submissions: (observationEntitySubmissions[observationEntity.id]) ? observationEntitySubmissions[observationEntity.id].submissions : new Array,
+                                    externalId: observationEntity.code,
+                                    name: observationEntity.name
+                                })
+                            }
+                        }
+                    } else {
+                        observation.entities = new Array;
+                    }
                     
-                    observation.entities = new Array;
-                    observation.entityDocuments.forEach(observationEntity => {
-                        observation.entities.push({
-                            _id: observationEntity._id,
-                            submissionStatus: (observationEntitySubmissions[observationEntity._id]) ? observationEntitySubmissions[observationEntity._id].submissionStatus : "pending",
-                            submissions: (observationEntitySubmissions[observationEntity._id]) ? observationEntitySubmissions[observationEntity._id].submissions : new Array,
-                            ...observationEntity.metaInformation
-                        });
-                    })
-                    
-                    observations.push(_.omit(observation, ["entityDocuments"]));
-                    
+                    observations.push(observation);
                 }
                 
                 return resolve(observations);
