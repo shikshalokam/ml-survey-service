@@ -1525,17 +1525,13 @@ module.exports = class Observations extends Abstract {
                     throw messageConstants.apiResponses.FRAMEWORK_NOT_FOUND;
                 }
 
-                let entityTypeDocument = await database.models.entityTypes.findOne({
-                    name: req.query.entityType,
-                    isObservable: true
-                }, {
-                        _id: 1,
-                        name: 1
-                    }).lean();
-
-                if (!entityTypeDocument._id) {
+                let bodyData = { "type" : req.query.entityType };
+                let entityTypeDocument = await userProfileService.locationSearch( bodyData);
+                if ( !entityTypeDocument.success ) {
                     throw messageConstants.apiResponses.ENTITY_TYPES_NOT_FOUND;
                 }
+                
+                let entityType = entityTypeDocument.data[0].type;
 
                 let criteriasIdArray = gen.utils.getCriteriaIds(frameworkDocument.themes);
 
@@ -1585,8 +1581,7 @@ module.exports = class Observations extends Abstract {
                 newSolutionDocument.frameworkId = frameworkDocument._id;
                 newSolutionDocument.frameworkExternalId = frameworkDocument.externalId;
 
-                newSolutionDocument.entityTypeId = entityTypeDocument._id;
-                newSolutionDocument.entityType = entityTypeDocument.name;
+                newSolutionDocument.entityType = entityType;
                 newSolutionDocument.isReusable = true;
 
                 let newBaseSolution = 
