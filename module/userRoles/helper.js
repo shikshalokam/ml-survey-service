@@ -143,7 +143,7 @@ module.exports = class UserRolesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let entityTypeNameToEntityTypeMap = await this.getEntityTypeToIdMap();
+                // let entityTypeNameToEntityTypeMap = await this.getEntityTypeToIdMap();
 
                 const userRolesUploadedData = await Promise.all(
                     userRolesCSVData.map(async userRole => {
@@ -159,11 +159,16 @@ module.exports = class UserRolesHelper {
                                 userRole.entityTypes = new Array;
     
                                 roleEntityTypes.forEach(entityType => {
-                                    if(entityTypeNameToEntityTypeMap[entityType]) {
-                                        userRole.entityTypes.push(entityTypeNameToEntityTypeMap[entityType]);
-                                    } else {
-                                        throw messageConstants.apiResponses.INVALID_ENTITY_TYPE;
+                                    let role = {
+                                        "entityType": entityType
                                     }
+                                    userRole.entityTypes.push(role);
+                                    //commented for entity generalization
+                                    // if(entityTypeNameToEntityTypeMap[entityType]) {
+                                    //     userRole.entityTypes.push(entityTypeNameToEntityTypeMap[entityType]);
+                                    // } else {
+                                    //     throw messageConstants.apiResponses.INVALID_ENTITY_TYPE;
+                                    // }
                                 })
                             } else {
                                 delete userRole.entityTypes;
