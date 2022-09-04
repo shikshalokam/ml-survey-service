@@ -63,5 +63,4 @@ module.exports = {
     GET_METHOD : "GET",
     SUBENTITY :"subEntityTypesOf_",
     STATE: "state"
-
 }

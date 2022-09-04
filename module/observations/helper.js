@@ -142,10 +142,10 @@ module.exports = class ObservationsHelper {
                             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED
                         }
                     } 
-                    
+
                     //validate the user access to create observation
                     let validateUserRole = await this.validateUserRole(userRoleAndProfileInformation, solutionId);
-                    if ( !validateUserRole.success ){
+                    if ( !validateUserRole.success ) {
                         throw {
                             status: httpStatusCode.bad_request.status,
                             message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
@@ -1453,7 +1453,8 @@ module.exports = class ObservationsHelper {
                         "name" : 1, 
                         "description" : 1,
                         "solutionId" : 1,
-                        "programId" : 1
+                        "programId" : 1,
+                        "entityType" : 1
                     }
                 };
 
@@ -1715,12 +1716,13 @@ module.exports = class ObservationsHelper {
 
                         //validate the user access to create observation
                         let validateUserRole = await this.validateUserRole(bodyData, solutionId);
-                        if ( !validateUserRole.success ){
+                        if ( !validateUserRole.success ) {
                             throw {
                                 status: httpStatusCode.bad_request.status,
                                 message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
                             };
                         }
+
                         let observation = await this.create(
                             solutionId,
                             solutionData.data,
@@ -2044,6 +2046,7 @@ module.exports = class ObservationsHelper {
      static validateUserRole( bodyData, solutionId ) {
         return new Promise(async (resolve, reject) => {
             try {
+            
                 //validate solution
                 let solutionDocument = await solutionHelper.solutionDocuments({
                     _id : solutionId
@@ -2117,6 +2120,7 @@ module.exports = class ObservationsHelper {
                 let stateLocationId = bodyData[messageConstants.common.STATE]
                 
                 let entityKey = messageConstants.common.SUBENTITY + stateLocationId;
+
                 //validate the role
                 let rolesDocument = await userRolesHelper.list(
                   {
@@ -2124,7 +2128,7 @@ module.exports = class ObservationsHelper {
                   },
                   ["entityTypes.entityType"]
                 );
-                
+
                 if (!rolesDocument.length > 0) {
                     throw {
                         status: httpStatusCode.bad_request.status,
@@ -2151,7 +2155,8 @@ module.exports = class ObservationsHelper {
                     let stateLocationCode = entitiesData.data[0].code;
                     
                     // Calling form api using location code.
-                    subEntities = await formService.configForStateLocation( stateLocationCode, entityKey );
+                    subEntities = await 
+                    .configForStateLocation( stateLocationCode, entityKey );
                     if( !subEntities.length > 0 ) {
                         return resolve({
                             message : messageConstants.apiResponses.ENTITIES_NOT_FOUND,
@@ -2187,6 +2192,7 @@ module.exports = class ObservationsHelper {
                     message : messageConstants.apiResponses.OBSERVATION_SOLUTION_DETAILS,
                     result : allowedEntityTypes
                 });
+
             } catch (error) {
                 return resolve({
                     status: error.status || httpStatusCode.internal_server_error.status,
