@@ -2155,8 +2155,7 @@ module.exports = class ObservationsHelper {
                     let stateLocationCode = entitiesData.data[0].code;
                     
                     // Calling form api using location code.
-                    subEntities = await 
-                    .configForStateLocation( stateLocationCode, entityKey );
+                    subEntities = await formService.configForStateLocation( stateLocationCode, entityKey );
                     if( !subEntities.length > 0 ) {
                         return resolve({
                             message : messageConstants.apiResponses.ENTITIES_NOT_FOUND,
