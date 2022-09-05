@@ -322,7 +322,6 @@ module.exports = {
     "SURVEYS_FETCHED": "Surveys fetched successfully",
     "TARGETED_SURVEY_FETCHED": "Targeted surveys fetched successfully",
     "TARGETED_SOLUTIONS_FETCHED": "Successfully targeted solutions fetched",
-    "ENTITIES_NOT_FOUND": "No entities found",
     "OBSERVATION_ENTITIES_FETCHED": "Observation entities fetched successfully",
     "ENTITY_TYPE_MIS_MATCHED": "Provided solution entity type mis matched",
     "TARGETED_OBSERVATION_FETCHED": "Targeted observations fetched successfully",

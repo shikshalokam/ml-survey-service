@@ -2,7 +2,7 @@ module.exports = {
   name: "observationSubmissions",
   schema: {
     entityId: {
-      type : "ObjectId",
+      type : String,
       index : true
     },
     observationId: {
@@ -45,10 +45,6 @@ module.exports = {
       index : true
     },
     submissionsUpdatedHistory: Array,
-    entityTypeId: {
-      type : "ObjectId",
-      index : true
-    },
     entityType: {
       type : String,
       index : true

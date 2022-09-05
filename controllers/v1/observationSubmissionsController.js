@@ -15,6 +15,7 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
 
 
 /**
@@ -89,7 +90,7 @@ module.exports = class ObservationSubmissions extends Abstract {
    * @name create
    * @param {Object} req -request data.
    * @param {String} req.params._id -observation solution id.
-   * @param {String} req.query.entityId -entity id.
+   * @param {String} req.query.entityId -location id.
    * @param {String} req.userDetails.userId - logged in user id.
    * @param {String} req.userDetails.userToken - logged in user token.
    * @returns {JSON} - observation submissions creation.
@@ -99,44 +100,48 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
+        
         let observationDocument = await observationsHelper.observationDocuments({
           _id: req.params._id,
           createdBy: req.userDetails.userId,
           status: {$ne:"inactive"},
-          entities: ObjectId(req.query.entityId)
+          entities: req.query.entityId
         });
-
+        
         if (!observationDocument[0]) {
           return resolve({ 
             status: httpStatusCode.bad_request.status, 
             message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
            });
         }
-
-        observationDocument = observationDocument[0];
-
-        let entityDocument = await entitiesHelper.entityDocuments({
-          _id: req.query.entityId,
-          entityType: observationDocument.entityType
-        }, [
-          "metaInformation",
-          "entityTypeId",
-          "entityType",
-          "registryDetails"
-        ]);
-
-        if (!entityDocument[0]) {
-          return resolve({ 
-            status: httpStatusCode.bad_request.status, 
-            message: messageConstants.apiResponses.ENTITY_NOT_FOUND
-          });
-        }
         
-        entityDocument = entityDocument[0];
+        observationDocument = observationDocument[0];
+        let filterData = {
+          "type" : observationDocument.entityType
+        };
+        if (gen.utils.checkIfValidUUID(req.query.entityId)) {
+            filterData.id = req.query.entityId;
+        } else {
+          filterData.code = req.query.entityId;
+        }
+        let returnObject = true;
+        let formatResult = true;
+        let entitiesDocument = await userProfileService.locationSearch( filterData,"", "", "", formatResult, returnObject );
+        
+        if ( !entitiesDocument.success ) {
+            return resolve({ 
+                status: httpStatusCode.bad_request.status, 
+                message: messageConstants.apiResponses.ENTITY_NOT_FOUND
+            });
+        }
 
+        let entityDocument = entitiesDocument.data;
         if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
           entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
         }
+
+        let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
+        entityDocument.metaInformation.hierarchy = entityHierarchy;
 
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
@@ -147,7 +152,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           "frameworkId",
           "frameworkExternalId",
           "evidenceMethods",
-          "entityTypeId",
           "entityType",
           "programId",
           "programExternalId",
@@ -167,19 +171,20 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
 
         solutionDocument = solutionDocument[0];
+        
+        //need to check usage of entityProfileForm, why it is fetched. if needed create new logic
+        // let entityProfileForm = await database.models.entityTypes.findOne(
+        //     solutionDocument.entityTypeId,
+        //     {
+        //         profileForm: 1
+        //     }
+        // ).lean();
 
-        let entityProfileForm = await database.models.entityTypes.findOne(
-            solutionDocument.entityTypeId,
-            {
-                profileForm: 1
-            }
-        ).lean();
-
-        if (!entityProfileForm) {
-          return resolve({ 
-            status: httpStatusCode.bad_request.status,
-             message: messageConstants.apiResponses.ENTITY_PROFILE_FORM_NOT_FOUND });
-        }
+        // if (!entityProfileForm) {
+        //   return resolve({ 
+        //     status: httpStatusCode.bad_request.status,
+        //      message: messageConstants.apiResponses.ENTITY_PROFILE_FORM_NOT_FOUND });
+        // }
 
         let lastSubmissionNumber = 0;
 
@@ -204,7 +209,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           isAPrivateProgram : solutionDocument.isAPrivateProgram,
           frameworkId: solutionDocument.frameworkId,
           frameworkExternalId: solutionDocument.frameworkExternalId,
-          entityTypeId: solutionDocument.entityTypeId,
           entityType: solutionDocument.entityType,
           observationId: observationDocument._id,
           observationInformation: {
@@ -313,9 +317,9 @@ module.exports = class ObservationSubmissions extends Abstract {
         req.headers["x-app-ver"] ? req.headers["x-app-ver"] :
         req.headers.appversion;
       }
-
+      
       let newObservationSubmissionDocument = await database.models.observationSubmissions.create(submissionDocument);
-
+      
       if( newObservationSubmissionDocument.referenceFrom === messageConstants.common.PROJECT ) {
         await observationSubmissionsHelper.pushSubmissionToImprovementService(
           _.pick(newObservationSubmissionDocument,["project","status","_id"])
@@ -323,10 +327,11 @@ module.exports = class ObservationSubmissions extends Abstract {
       }
       
       // Push new observation submission to kafka for reporting/tracking.
+      
       observationSubmissionsHelper.pushObservationSubmissionForReporting(newObservationSubmissionDocument._id);
-
+      
       let observations = new Array;
-
+      
       observations = await observationsHelper.listV2(req.userDetails.userId);
       
       let responseMessage = messageConstants.apiResponses.OBSERVATION_SUBMISSION_CREATED;
@@ -335,7 +340,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           message: responseMessage,
           result: observations
       });
-
+      
       } catch (error) {
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,
@@ -832,7 +837,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           throw messageConstants.apiResponses.ENTITY_ID_NOT_FOUND;
         }
 
-
+        
         let solutionDocument = await database.models.solutions.findOne({
           externalId: solutionId,
           type : "observation",
@@ -857,7 +862,7 @@ module.exports = class ObservationSubmissions extends Abstract {
           queryObject,
           { "answers": 1, "criteria": 1, "evidencesStatus": 1, "entityInformation": 1, "entityProfile": 1, "solutionExternalId": 1 , "scoringSystem" : 1}
         ).lean();
-
+         
         if (!submissionDocument._id) {
           throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND
         }

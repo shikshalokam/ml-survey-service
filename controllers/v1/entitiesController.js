@@ -1000,7 +1000,6 @@ module.exports = class Entities extends Abstract {
     "result": [
         {
             "_id": "5db173598a8e070bedca6ba1",
-            "entityTypeId": "5d7a290e6371783ceb11064c",
             "entityType": "state",
             "metaInformation": {
                 "externalId": "DL",
@@ -1014,7 +1013,6 @@ module.exports = class Entities extends Abstract {
         },
         {
             "_id": "5db1738b8a8e070bedca6bae",
-            "entityTypeId": "5d15a959e9185967a6d5e8ac",
             "entityType": "district",
             "metaInformation": {
                 "externalId": "DL-West A",
