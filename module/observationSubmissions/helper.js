@@ -81,7 +81,6 @@ module.exports = class ObservationSubmissionsHelper {
                     projection
                 ).lean();
             }   
-            
             return resolve(submissionDocuments);
         } catch (error) {
             return reject({
@@ -443,7 +442,6 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.canBeNotAllowed",
                 "evidencesStatus.notApplicable",
             ];
-
             let result = await this.observationSubmissionsDocument
             (
                  queryObject,
@@ -452,7 +450,7 @@ module.exports = class ObservationSubmissionsHelper {
                      "createdAt" : -1 
                 }
             );
-
+            
             if( !result.length > 0 ) {
                 return resolve({
                     status : httpStatusCode.ok.status,

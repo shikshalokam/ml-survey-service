@@ -10,6 +10,8 @@ const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 // const elasticSearch = require(ROOT_PATH + "/generics/helpers/elasticSearch");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const FileStream = require(ROOT_PATH + "/generics/fileStream");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
+
 
  /**
     * EntitiesHelper
@@ -907,7 +909,7 @@ module.exports = class EntitiesHelper {
    * Search entity.
    * @method 
    * @name search
-   * @param {String} entityTypeId - Entity type id.
+   * @param {String} entityType - Entity type.
    * @param {String} searchText - Text to be search.
    * @param {Number} pageSize - total page size.
    * @param {Number} pageNo - Page no.
@@ -917,115 +919,97 @@ module.exports = class EntitiesHelper {
    */
 
     static search(
-        entityTypeId, 
+        entityType, 
         searchText,
         pageSize, 
         pageNo, 
-        entityIds = false,
-        aclData = []
     ) {
         return new Promise(async (resolve, reject) => {
             try {
-
-                let queryObject = {};
-
-                queryObject["$match"] = {};
-
-                if (entityIds && entityIds.length > 0) {
-                    queryObject["$match"]["_id"] = {};
-                    queryObject["$match"]["_id"]["$in"] = entityIds;
+                
+                let entityDocuments = [];
+                let bodyData={
+                    "type" : entityType
+                };
+                let resultForSearchEntities =true
+                let entitiesData = await userProfileService.locationSearch( bodyData, pageSize, pageNo, searchText, false, false, resultForSearchEntities );
+                
+                if( !entitiesData.success ) {
+                    return resolve(entitiesData.data.response) 
                 }
-
-                if( aclData.length > 0 ) {
-                    queryObject["$match"]["metaInformation.tags"] = 
-                    { $in : aclData };
-                }
-
-                queryObject["$match"]["entityTypeId"] = entityTypeId;
-
-                queryObject["$match"]["$or"] = [
-                    { "metaInformation.name": new RegExp(searchText, 'i') },
-                    { "metaInformation.externalId": new RegExp("^" + searchText, 'm') },
-                    { "metaInformation.addressLine1": new RegExp(searchText, 'i') },
-                    { "metaInformation.addressLine2": new RegExp(searchText, 'i') }
-                ];
-
-                let entityDocuments = await database.models.entities.aggregate([
-                    queryObject,
-                    {
-                        $project: {
-                            name: "$metaInformation.name",
-                            externalId: "$metaInformation.externalId",
-                            addressLine1: "$metaInformation.addressLine1",
-                            addressLine2: "$metaInformation.addressLine2",
-                            districtName: "$metaInformation.districtName"
-                        }
-                    },
-                    {
-                        $facet: {
-                            "totalCount": [
-                                { "$count": "count" }
-                            ],
-                            "data": [
-                                { $skip: pageSize * (pageNo - 1) },
-                                { $limit: pageSize }
-                            ],
-                        }
-                    }, {
-                        $project: {
-                            "data": 1,
-                            "count": {
-                                $arrayElemAt: ["$totalCount.count", 0]
-                            }
-                        }
-                    }
-                ]);
-
+                let totalcount = entitiesData.count;
+                let immediateEntities = entitiesData.data;
+                
+                entityDocuments.push({
+                    data : immediateEntities,
+                    count : totalcount
+                })
                 return resolve(entityDocuments);
-
             } catch (error) {
                 return reject(error);
             }
         })
     }
 
-    /**
+
+/**
    * validate entities.
    * @method 
    * @name validateEntities
-   * @param {String} entityTypeId - Entity type id.
+   * @param {String} entityType - Entity type.
    * @param {Array} entityIds - Array of entity ids.
    */
-
-    static validateEntities(entityIds, entityTypeId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let ids = []
-
-                let entitiesDocuments = await database.models.entities.find(
-                    {
-                        _id: { $in: gen.utils.arrayIdsTobjectIds(entityIds) },
-                        entityTypeId: entityTypeId
-                    },
-                    {
-                        _id: 1
-                    }
-                ).lean();
-
-                if (entitiesDocuments.length > 0) {
-                    ids = entitiesDocuments.map(entityId => entityId._id);
+    
+ static validateEntities(entityIds, entityType) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let locationDeatails = gen.utils.filterLocationIdandCode(entityIds);
+             //set request body for learners API
+            let entityInformation = [];
+            let validEntityIds = [];
+            
+            if ( locationDeatails.ids.length > 0 ) {
+                let bodyData = {
+                    "id" : locationDeatails.ids,
+                    "type" : entityType
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformation =  entityData.data;
                 }
-
-                return resolve({
-                    entityIds: ids
-                });
-
-
-            } catch (error) {
-                return reject(error);
             }
-        })
-    }
+            
+            if ( locationDeatails.codes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationDeatails.codes,
+                    "type" : entityType
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entityInformation =  entityInformation.concat(entityData.data);
+                }
+            }
+           
+            if ( !entityInformation.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.ENTITY_NOT_FOUND
+                } 
+            } else {
+                entityInformation.map(entity => {
+                    validEntityIds.push(entity.id);
+                });    
+            }
+            
+            return resolve({
+                entityIds: validEntityIds
+            });
+
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
     /**
    * Implement find query for entity
@@ -1837,31 +1821,42 @@ module.exports = class EntitiesHelper {
   static listByLocationIds(locationIds) {
     return new Promise(async (resolve, reject) => {
         try {
-
-            let filterQuery = {
-                $or : [{
-                  "registryDetails.code" : { $in : locationIds }
-                },{
-                  "registryDetails.locationId" : { $in : locationIds }
-                }]
-              };      
-
-            let entities = 
-            await this.entityDocuments(
-                filterQuery,
-                ["metaInformation", "entityType", "entityTypeId","registryDetails"]
-            );
-
-            if( !entities.length > 0 ) {
-                throw {
-                    message : messageConstants.apiResponses.ENTITIES_FETCHED
+            //if not uuid considering as location code- for school.
+            let locationDeatails = gen.utils.filterLocationIdandCode(locationIds);
+            //set request body for learners api
+            let entityInformation = [];
+            let formatResult = true;
+        
+            if ( locationDeatails.ids.length > 0 ) {
+                let bodyData = {
+                    "id" : locationDeatails.ids
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData, "", "", "", formatResult );
+                if ( entityData.success ) {
+                    entityInformation =  entityData.data;
                 }
             }
 
+            if ( locationDeatails.codes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationDeatails.codes
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData,"","","", formatResult );
+                if ( entityData.success ) {
+                    entityInformation =  entityInformation.concat(entityData.data);
+                }
+            }
+           
+            if ( !entityInformation.length > 0 ) {
+                throw {
+                    message : messageConstants.apiResponses.ENTITY_NOT_FOUND
+                } 
+            }
+            
             return resolve({
                 success : true,
                 message : messageConstants.apiResponses.ENTITY_FETCHED,
-                data : entities
+                data : entityInformation
             });
 
         } catch(error) {
@@ -1873,7 +1868,7 @@ module.exports = class EntitiesHelper {
     })
   }
 
-   /**
+/**
    * Observation entiites search response data.
    * @method
    * @name observationSearchEntitiesResponse
@@ -1882,7 +1877,7 @@ module.exports = class EntitiesHelper {
    * @returns {Object} entity Document
    */
 
-  static observationSearchEntitiesResponse(entities,observationEntityIds) {
+ static observationSearchEntitiesResponse(entities,observationEntityIds) {
 
     let observationEntities = [];
     
@@ -1982,6 +1977,9 @@ function addTagsInEntities(entityMetaInformation) {
         }
     })
   }
+
+
+  
 
 
 

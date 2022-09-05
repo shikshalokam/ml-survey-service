@@ -85,6 +85,11 @@ let enviromentVariables = {
   "DISABLE_LEARNER_SERVICE_ON_OFF": {
     "message" : "Disable learner service on/off",
     "default": "ON"
+  },
+  "FORM_SERVICE_URL" : {
+    "message" : "Form service base url",
+    "optional" : true,
+    "default" : "http://player:3000"
   }
 }
 

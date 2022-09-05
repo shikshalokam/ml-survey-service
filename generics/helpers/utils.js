@@ -274,6 +274,29 @@ function checkIfValidUUID(value) {
   const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
   return regexExp.test(value);
 }
+
+/**
+  * filter out location id and code
+  * @function
+  * @name filterLocationIdandCode
+  * @returns {Object} - Object contain locationid and location code array.  
+*/
+
+function filterLocationIdandCode(dataArray) {
+    let locationIds = [];
+    let locationCodes = [];
+    dataArray.forEach(element=>{
+        if (this.checkIfValidUUID(element)) {
+            locationIds.push(element);
+        } else {
+            locationCodes.push(element);
+        }
+    });
+    return ({
+      ids : locationIds,
+      codes : locationCodes
+    });
+}
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -296,5 +319,6 @@ module.exports = {
   md5Hash : md5Hash,
   removeDuplicatesFromArray : removeDuplicatesFromArray,
   convertStringToBoolean : convertStringToBoolean,
-  checkIfValidUUID : checkIfValidUUID
+  checkIfValidUUID : checkIfValidUUID,
+  filterLocationIdandCode :filterLocationIdandCode
 };
