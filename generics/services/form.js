@@ -7,7 +7,6 @@
 
 //dependencies
 const request = require('request');
-const formServiceUrl = process.env.FORM_SERVICE_URL;
 
 /**
   * @function
@@ -65,11 +64,12 @@ async function formRead ( stateLocationCode ) {
                     action: messageConstants.common.GET_METHOD
                 }
             }
+
             const url = 
-            formServiceUrl + messageConstants.endpoints.GET_FORM_DATA;
+            process.env.FORM_SERVICE_URL + messageConstants.endpoints.GET_FORM_DATA;
             const options = {
                 headers : {
-                    "content-type": "application/json",
+                    "content-type": "application/json"
                 },
                 json : bodyData
             };
