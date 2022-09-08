@@ -48,7 +48,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
   let query = {};
   let questionToMigrate = {};
 
-  let published = question?.isPublished;
+  let isPublished = question?.migrationReference?.isPublished;
 
   if (type && !referenceQuestionId) {
     if (type.toLowerCase() === "date") {
@@ -75,7 +75,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
     }
   }
 
-  if (referenceQuestionId && !published) {
+  if (referenceQuestionId && !isPublished) {
     const res = await publishQuestion(referenceQuestionId).catch((err) => {
       if (!migratedCount.failed.question.ids.includes(referenceQuestionId)) {
         migratedCount.failed.question.count++;
@@ -90,28 +90,28 @@ const createQuestionTemplate = async (question, migratedCount) => {
       `createQuestion Template publish response: ${res} , "referenceQuestionId" ${referenceQuestionId} questionId, ${question?._id}`
     );
 
-    
-
     if (res) {
-      question.isPublished = true;
-      published = true;
+      question = {
+        ...question,
+        migrationReference: { isPublished: true },
+      };
+      isPublished = true;
       logger.info(`createQuestion Template published: ${referenceQuestionId}`);
     }
   }
-
 
   if (referenceQuestionId) {
     question.referenceQuestionId = referenceQuestionId;
 
     query = {
       referenceQuestionId,
-      published: published,
+      "migrationReference.isPublished": isPublished,
     };
   } else {
     query = {
       ...query,
-      published
-    }
+      "migrationReference.isPublished": isPublished,
+    };
   }
 
   if (!isEmpty(query) && question) {

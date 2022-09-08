@@ -22,7 +22,7 @@ const CONFIG = {
     create_questionset: process.env.CREATE_QUESTION_SET || "api/questionset/v1/create",
     update_hierarchy: process.env.UPDATE_QUESTION_SET_HIERARCHY || "api/questionset/v1/hierarchy/update",
     publish_questionset: process.env.PUBLISH_QUESTION_SET || "api/questionset/v1/publish",
-    read_questionset: "api/" + process.env.READ_QUESTION_SET || "api/questionset/v1/hierarchy/",
+    read_questionset: "api/" + process.env.READ_QUESTION_SET + "/" || "api/questionset/v1/hierarchy/",
     create_question: process.env.CREATE_QUESTION || "api/question/v1/create",
     publish_question: process.env.PUBLISH_QUESTION || "api/question/v1/publish",
     create_program: process.env.CREATE_PROGRAM || "api/program/v1/create",

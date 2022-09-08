@@ -1,4 +1,4 @@
-const { isEmpty, compact } = require("lodash");
+const { isEmpty } = require("lodash");
 const { getPrecondition } = require("../helpers/hierarchyHelper");
 const {
   getQuestionFromDB,
@@ -10,15 +10,15 @@ const initHierarchy = (questionsetid, solution, programId, referenceQuestionSetI
   return {
     questionset: referenceQuestionSetId,
     questionsetDbId: questionsetid,
-    isHierarchyUpdated: solution?.isHierarchyUpdated || false,
-    isBranchingUpdated: solution?.isBranchingUpdated || false,
-    isPublished: solution?.isPublished || false,
+    isHierarchyUpdated: solution?.migrationReference?.isHierarchyUpdated || false,
+    isBranchingUpdated: solution?.migrationReference?.isBranchingUpdated || false,
+    isPublished: solution?.migrationReference?.isPublished || false,
     sourcingProgramId: programId,
-    isSrcProgramUpdated: solution?.isSrcProgramUpdated || false,
-    isSrcProgramPublished: solution?.isSrcProgramPublished || false,
-    isNominated: solution?.isNominated || false,
-    isContributorAdded: solution?.isContributorAdded || false,
-    isContributorAccepted: solution?.isContributorAccepted || false,
+    isSrcProgramUpdated: solution?.migrationReference?.isSrcProgramUpdated || false,
+    isSrcProgramPublished: solution?.migrationReference?.isSrcProgramPublished || false,
+    isNominated: solution?.migrationReference?.isNominated || false,
+    isContributorAdded: solution?.migrationReference?.isContributorAdded || false,
+    isContributorAccepted: solution?.migrationReference?.isContributorAccepted || false,
     criterias: [],
   };
 };
@@ -37,6 +37,8 @@ const getCriteriaData = (criteria, type, question = {}) => {
       branchingLogic: {},
       allowMultipleInstances: "",
       instances: {},
+      pageQuestions: {},
+      isMatrix: false,
     };
   } else {
     return {
@@ -52,6 +54,8 @@ const getCriteriaData = (criteria, type, question = {}) => {
       branchingLogic: {},
       allowMultipleInstances: "Yes",
       instances: { label: question?.instanceIdentifier },
+      pageQuestions: {},
+      isMatrix: true
     };
   }
 };
@@ -122,7 +126,7 @@ const getQuestion = async (questions, questions2, id, migratedCount) => {
     question = matched;
   }
 
-  if (!isEmpty(question) && (!question?.referenceQuestionId || !question?.isPublished)) {
+  if (!isEmpty(question) && (!question?.referenceQuestionId || !question?.migrationReference?.isPublished)) {
     question = await createQuestionTemplate(question, migratedCount);
   }
 

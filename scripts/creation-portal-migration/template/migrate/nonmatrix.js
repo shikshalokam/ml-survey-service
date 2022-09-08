@@ -43,7 +43,8 @@ const updateNonMatrixHierarchyChildren = (
       hierarchy = updateHierarchyChildren(
         hierarchy,
         question?.referenceQuestionId,
-        index
+        index,
+        question
       );
       nonMatrixQuestions.push(question);
     }

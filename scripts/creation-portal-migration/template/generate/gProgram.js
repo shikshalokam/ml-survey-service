@@ -69,7 +69,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     },
   };
 
-  let programId = solution.sourcingProgramId;
+  let programId = solution?.migrationReference?.sourcingProgramId;
 
   let query = {};
 
@@ -91,12 +91,12 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     logger.info(
       `Sourcing Program created for solution_id: ${solution?._id} === ${programId}`
     );
-    query = { ...query, sourcingProgramId: programId };
+    query = { ...query, "migrationReference.sourcingProgramId": programId };
   } else {
     migratedCount.success.program.existing.migrated++;
   }
 
-  if (!solution.isSrcProgramUpdated) {
+  if (!solution?.migrationReference?.isSrcProgramUpdated) {
     const update_res = await updateProgramTemplate(programId, solution);
     if (!update_res) {
       migratedCount.failed.program.updated.count++;
@@ -112,13 +112,13 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
 
     query = {
       ...query,
-      isSrcProgramUpdated: true,
+      "migrationReference.isSrcProgramUpdated": true,
     };
   } else {
     migratedCount.success.program.existing.updated++;
   }
 
-  if (!solution.isSrcProgramPublished) {
+  if (!solution?.migrationReference?.isSrcProgramPublished) {
     const pub_res = await publishProgramTemplate(programId, solution?._id);
 
     if (!pub_res) {
@@ -136,13 +136,13 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
 
     query = {
       ...query,
-      isSrcProgramPublished: true,
+      "migrationReference.isSrcProgramPublished": true,
     };
   } else {
     migratedCount.success.program.existing.published++;
   }
 
-  if (!solution.isNominated) {
+  if (!solution?.migrationReference?.isNominated) {
     const res = await nominateProgram(programId, userId).catch((err) => {
       // updateFailedCount(migratedCount, "nominated",  solution?._id);
       migratedCount.failed.program.nominated.count++;
@@ -162,12 +162,12 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
       `Sourcing Program nominated for solution_id: ${solution?._id} === ${programId}`
     );
 
-    query = { ...query, isNominated: true };
+    query = { ...query, "migrationReference.isNominated": true };
   } else {
     migratedCount.success.program.existing.nominated++;
   }
 
-  if (!solution.isContributorAdded) {
+  if (!solution?.migrationReference?.isContributorAdded) {
     const add_contri = {
       program_id: programId,
       user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
@@ -198,12 +198,12 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
       `Sourcing Program added contributor for solution_id: ${solution?._id} === ${programId}`
     );
 
-    query = { ...query, isContributorAdded: true };
+    query = { ...query, "migrationReference.isContributorAdded": true };
   } else {
     migratedCount.success.program.existing.contributor++;
   }
 
-  if (!solution.isContributorAccepted) {
+  if (!solution?.migrationReference?.isContributorAccepted) {
     const accept_contri = {
       program_id: programId,
       user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
@@ -232,7 +232,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
       `Sourcing Program accepted nomination for solution_id: ${solution?._id} === ${programId}`
     );
 
-    query = { ...query, isContributorAccepted: true };
+    query = { ...query, "migrationReference.isContributorAccepted": true };
   } else {
     migratedCount.success.program.existing.accepted++;
   }
@@ -254,22 +254,22 @@ const updateSolutionDb = async (query, solution, migratedCount) => {
     );
   });
 
-  if (query.hasOwnProperty("sourcingProgramId")) {
+  if (query.hasOwnProperty("migrationReference.sourcingProgramId")) {
     migratedCount.success.program.current.migrated++;
   }
-  if (query.hasOwnProperty("isSrcProgramUpdated")) {
+  if (query.hasOwnProperty("migrationReference.isSrcProgramUpdated")) {
     migratedCount.success.program.current.updated++;
   }
-  if (query.hasOwnProperty("isSrcProgramPublished")) {
+  if (query.hasOwnProperty("migrationReference.isSrcProgramPublished")) {
     migratedCount.success.program.current.published++;
   }
-  if (query.hasOwnProperty("isNominated")) {
+  if (query.hasOwnProperty("migrationReference.isNominated")) {
     migratedCount.success.program.current.nominated++;
   }
-  if (query.hasOwnProperty("isContributorAdded")) {
+  if (query.hasOwnProperty("migrationReference.isContributorAdded")) {
     migratedCount.success.program.current.contributor++;
   }
-  if (query.hasOwnProperty("isContributorAccepted")) {
+  if (query.hasOwnProperty("migrationReference.isContributorAccepted")) {
     migratedCount.success.program.current.accepted++;
   }
 };

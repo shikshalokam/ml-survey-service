@@ -14,7 +14,7 @@ const { getNonMatrixQuestions } = require("../migrate/nonmatrix");
 const getQuestionSetTemplates = async (solutions, migratedCount) => {
   const data = Promise.all(
     solutions.map(async (solution) => {
-      let programId = solution.sourcingProgramId;
+      let programId = solution?.migrationReference?.sourcingProgramId;
       programId = await createProgramTemplate(
         solution,
         programId,
