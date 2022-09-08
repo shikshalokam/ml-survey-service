@@ -2,6 +2,9 @@ let Abstract = class Abstract {
   constructor(schema) {
     this.model = database.createModel(schema);
     this.schema = schema.name;
+    if ( schema.compoundIndex && schema.compoundIndex.length > 0 ) {
+      database.runCompoundIndex(schema.name,schema.compoundIndex);
+    }
 
     this.httpStatus = {
       ok: 200,
