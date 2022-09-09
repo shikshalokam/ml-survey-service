@@ -12,6 +12,7 @@ const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper")
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper");
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
+const userService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * SolutionsHelper
@@ -665,8 +666,7 @@ module.exports = class SolutionsHelper {
             description: 1,
             keywords: 1,
             externalId: 1,
-            programId: 1,
-            entityTypeId: 1
+            programId: 1
           };
         }
 
@@ -943,7 +943,6 @@ module.exports = class SolutionsHelper {
                 userId,
                 solutionData
               );
-
               return resolve(
                 _.pick(
                   duplicateSolution,
@@ -954,12 +953,12 @@ module.exports = class SolutionsHelper {
                     "frameworkId",
                     "programExternalId",
                     "programId",
-                    "entityTypeId",
                     "entityType",
                     "isAPrivateProgram",
                     "entities"
                   ]
-                  ));
+                  )); 
+                                   
 
           } catch (error) {
               return reject(error);
@@ -1103,7 +1102,7 @@ module.exports = class SolutionsHelper {
             let entitiesToAdd = 
             await entitiesHelper.validateEntities(
               data.entities,
-              solutionDocument[0].entityTypeId
+              solutionDocument[0].entityType
             );
 
             data.entities = entitiesToAdd.entityIds;
@@ -1752,66 +1751,79 @@ module.exports = class SolutionsHelper {
 
           if( Object.keys(scopeData).length > 0 ) {
 
-            if( scopeData.entityType ) {
+            if ( scopeData.entityType ) {
               
-              let entityType =  await entityTypesHelper.list(
-                {
-                  name : scopeData.entityType
-                },
-                {
-                  "name" : 1 ,"_id" : 1
-                }
-              );
-          
-              currentSolutionScope.entityType = entityType[0].name;
-              currentSolutionScope.entityTypeId = entityType[0]._id;
+              let bodyData = { "type" : scopeData.entityType }
+              let entityTypeData = await userService.locationSearch( bodyData);
+              if ( entityTypeData.success ) {
+                currentSolutionScope.entityType = entityTypeData.data[0].type
+              }
 
             }
 
             if( scopeData.entities && scopeData.entities.length > 0 ) {
-              
-              let entities = 
-              await entitiesHelper.entityDocuments(
-                {
-                  _id : { $in : scopeData.entities },
-                  entityTypeId : currentSolutionScope.entityTypeId
-                },["_id"]
-              );
-  
-              if( !entities.length > 0 ) {
+
+              let entityIds = [];
+              let bodyData={};
+              let locationData = gen.utils.filterLocationIdandCode(scopeData.entities);
+
+              if ( locationData.ids.length > 0 ) {
+                bodyData = {
+                  "id" : locationData.ids,
+                  "type" : currentSolutionScope.entityType
+                } 
+
+                let entityData = await userService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                  entityData.data.forEach( entity => {
+                    entityIds.push(entity.id)
+                  });
+                }
+              }
+
+              if ( locationData.codes.length > 0 ) {
+                let filterData = {
+                  "code" : locationData.codes,
+                  "type" : currentSolutionScope.entityType
+                }
+
+                let entityDetails = await userService.locationSearch( filterData );
+                
+                if ( entityDetails.success ) {
+                  entityDetails.data.forEach( entity => {
+                    entityIds.push(entity.id) 
+                  });
+                }
+              }
+
+              if( !entityIds.length > 0 ) {
                 return resolve({
                   status : httpStatusCode.bad_request.status,
                   message : messageConstants.apiResponses.ENTITIES_NOT_FOUND
                 });
               }
 
-              let entityIds = [];
+              let entitiesData = [];
+              // if( currentSolutionScope.entityType !== programData[0].scope.entityType ) {
+              //   let result = [];
+              //   let childEntities = await userService.getSubEntitiesBasedOnEntityType(currentSolutionScope.entities, currentSolutionScope.entityType, result);
+              //   if( childEntities.length > 0 ) {
+              //     entitiesData = entityIds.filter(element => childEntities.includes(element));
+              //   }
+              // } else {
+                entitiesData = entityIds
+              // }
 
-            for( let entity = 0; entity < entities.length; entity ++ ) {
-              
-              let entityQuery = {
-                _id : { $in : currentSolutionScope.entities },
-                [`groups.${currentSolutionScope.entityType}`] : entities[entity]._id
+              if( !entitiesData.length > 0 ) {
+                
+                return resolve({
+                  status : httpStatusCode.bad_request.status,
+                  message : messageConstants.apiResponses.SCOPE_ENTITY_INVALID
+                });
+
               }
 
-              let entityInParent = 
-              await entitiesHelper.entityDocuments(entityQuery);
-
-              if( entityInParent.length > 0 ) {
-                entityIds.push(ObjectId(entities[entity]._id));
-              }
-            }
-
-            if( !entityIds.length > 0 ) {
-              
-              return resolve({
-                status : httpStatusCode.bad_request.status,
-                message : messageConstants.apiResponses.SCOPE_ENTITY_INVALID
-              });
-
-            }
-
-            currentSolutionScope.entities = entityIds;
+              currentSolutionScope.entities = entitiesData;
             }
 
             if( scopeData.roles.length > 0 ) {
