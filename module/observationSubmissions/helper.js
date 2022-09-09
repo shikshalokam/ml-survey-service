@@ -16,6 +16,7 @@ const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationSubmissionsHelper
@@ -891,7 +892,6 @@ module.exports = class ObservationSubmissionsHelper {
                         }
                     });
                 }
-
                 let entityTypes = [];
                 submissions.forEach(submission => {
                     if (!entityTypes.includes(submission.entityType)) {
@@ -984,17 +984,36 @@ module.exports = class ObservationSubmissionsHelper {
             submissions.forEach( submission => {
                entityIds.push(submission.entityId);
             })
-
-            let entitiesData = await entitiesHelper.entityDocuments({
-                _id: { $in: entityIds }
-            }, ["metaInformation.externalId", "metaInformation.name"]);
-
-            if (!entitiesData.length > 0) {
+            
+            let locationDeatails = gen.utils.filterLocationIdandCode(entityIds);
+             //set request body for learners API
+            let entitiesData = [];
+            
+            if ( locationDeatails.ids.length > 0 ) {
+                let bodyData = {
+                    "id" : locationDeatails.ids,
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entitiesData =  entityData.data;
+                }
+            }
+            
+            if ( locationDeatails.codes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationDeatails.codes,
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entitiesData =  entityInformation.concat(entityData.data);
+                }
+            }
+            if( !entitiesData.length > 0 ) {
                 throw {
                     message: messageConstants.apiResponses.ENTITIES_NOT_FOUND
                 }
             }
-
+            
             let entities = {};
 
             for ( 
@@ -1006,12 +1025,12 @@ module.exports = class ObservationSubmissionsHelper {
                 let currentEntities = entitiesData[pointerToEntities];
                 
                 let entity = {
-                    _id : currentEntities._id,
-                    externalId : currentEntities.metaInformation.externalId,
-                    name : currentEntities.metaInformation.name
+                    _id : currentEntities.id,
+                    externalId : currentEntities.code,
+                    name : currentEntities.name
                 };
 
-                entities[currentEntities._id] = entity;
+                entities[currentEntities.id] = entity;
             }
 
             let solutionDocuments = await solutionHelper.solutionDocuments
