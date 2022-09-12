@@ -241,9 +241,9 @@ module.exports = class ObservationSubmissions extends Abstract {
       } 
      
 
-      if( solutionDocument.referenceFrom === messageConstants.common.PROJECT ) {
+      if( observationDocument.referenceFrom === messageConstants.common.PROJECT ) {
         submissionDocument["referenceFrom"] = messageConstants.common.PROJECT;
-        submissionDocument["project"] = solutionDocument.project;
+        submissionDocument["project"] = observationDocument.project;
       }
 
       let criteriaId = new Array;
