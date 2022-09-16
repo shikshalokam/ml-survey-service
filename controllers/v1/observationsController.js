@@ -1583,7 +1583,7 @@ module.exports = class Observations extends Abstract {
                 updateThemes(newSolutionDocument.themes);
 
                 newSolutionDocument.type = "observation";
-                newSolutionDocument.subType = (frameworkDocument.subType && frameworkDocument.subType != "") ? frameworkDocument.subType : entityTypeDocument.name;
+                newSolutionDocument.subType = (frameworkDocument.subType && frameworkDocument.subType != "") ? frameworkDocument.subType : entityType;
 
                 newSolutionDocument.externalId = 
                 frameworkDocument.externalId + "-OBSERVATION-TEMPLATE";
