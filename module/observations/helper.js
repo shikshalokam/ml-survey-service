@@ -958,18 +958,32 @@ module.exports = class ObservationsHelper {
 
                 let observationDocument = await this.observationDocuments(filterQuery);
 
-                if(!observationDocument[0]) {
+                if( !observationDocument[0] ) {
                     throw new Error(messageConstants.apiResponses.OBSERVATION_NOT_FOUND);
                 }
 
-                if(observationDocument[0].entities.length>0) {
+                if( observationDocument[0].entities.length > 0 ) {
 
-                    let entitiesDocument = await entitiesHelper.entityDocuments({
-                        _id:{$in:observationDocument[0].entities}
-                    });
+                    let filterData = {
+                        "id" : observationDocument[0].entities
+                    };
 
-                    observationDocument[0]["count"] = entitiesDocument.length;
-                    observationDocument[0].entities = entitiesDocument;
+                    let entitiesDocument = await userProfileService.locationSearch( 
+                        filterData,
+                        "",
+                        "",
+                        "",
+                        true,
+                        false
+                    );
+
+                    if ( entitiesDocument.success ) {
+                        observationDocument[0].entities = entitiesDocument.data;
+                        observationDocument[0].count = entitiesDocument.count;
+                    } else {
+                        observationDocument[0].entities = [];
+                        observationDocument[0].count = 0;
+                    }
                 }
 
                 return resolve(observationDocument[0]);
