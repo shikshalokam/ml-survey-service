@@ -1,8 +1,14 @@
 module.exports = {
   name: "observations",
   schema: {
-    name: String,
-    description: String,
+    name: {
+      type : String,
+      index : true
+    },
+    description: {
+      type : String,
+      index : true
+    },
     createdBy: {
       type : String,
       index : true
@@ -33,10 +39,6 @@ module.exports = {
       type : String,
       index : true
     },
-    entityTypeId: {
-      type : "ObjectId",
-      index : true
-    },
     entityType : String,
     entities: Array,
     isAPrivateProgram : {
@@ -52,6 +54,18 @@ module.exports = {
     referenceFrom : {
       type: String,
       index: true
+    },
+    userRoleInformation : Object,
+    userProfile : Object,
+    deleted : {
+      type : Boolean,
+      index: true
     }
-  }
+  },
+  compoundIndex: [
+    {
+        "name" :{ createdBy: 1, solutionId: 1 },
+        "indexType" : { unique: true }
+    }
+  ]
 };

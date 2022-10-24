@@ -15,6 +15,8 @@ const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const userProfileService = require(ROOT_PATH + "/generics/services/users");
 
 /**
     * ObservationSubmissionsHelper
@@ -80,7 +82,6 @@ module.exports = class ObservationSubmissionsHelper {
                     projection
                 ).lean();
             }   
-            
             return resolve(submissionDocuments);
         } catch (error) {
             return reject({
@@ -92,15 +93,15 @@ module.exports = class ObservationSubmissionsHelper {
     });
 }
 
-      /**
-   * Push completed observation submission in kafka for reporting.
+    /**
+   * Push observation submission in kafka for reporting.
    * @method
-   * @name pushCompletedObservationSubmissionForReporting
+   * @name pushObservationSubmissionForReporting
    * @param {String} observationSubmissionId - observation submission id.
    * @returns {JSON} - message that observation submission is pushed to kafka.
    */
 
-    static pushCompletedObservationSubmissionForReporting(observationSubmissionId) {
+    static pushObservationSubmissionForReporting(observationSubmissionId) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -112,16 +113,9 @@ module.exports = class ObservationSubmissionsHelper {
                     observationSubmissionId = ObjectId(observationSubmissionId);
                 }
 
-                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
-                    _id: observationSubmissionId,
-                    status: "completed"
-                }).lean();
+                const observationSubmissionsDocument = await this.details(observationSubmissionId);
 
-                if (!observationSubmissionsDocument) {
-                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE;
-                }
-
-                if( observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
+                if(observationSubmissionsDocument.status == "completed" && observationSubmissionsDocument.referenceFrom === messageConstants.common.PROJECT ) {
                     
                     await this.pushSubmissionToImprovementService(
                         _.pick(
@@ -130,9 +124,10 @@ module.exports = class ObservationSubmissionsHelper {
                     );
                 }
 
+               
                 console.log("--- logs starts here -----");
-                const kafkaMessage = await kafkaClient.pushCompletedObservationSubmissionToKafka(observationSubmissionsDocument);
-
+                const kafkaMessage = await kafkaClient.pushObservationSubmissionToKafka(observationSubmissionsDocument);
+               
                 if(kafkaMessage.status != "success") {
                     let errorObject = {
                         formData: {
@@ -148,60 +143,16 @@ module.exports = class ObservationSubmissionsHelper {
                 return resolve(kafkaMessage);
 
             } catch (error) {
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error.message,
+                    data: {}
+                    
+                });
             }
         })
     }
 
-    /**
-   * Push incomplete observation submission for reporting.
-   * @method
-   * @name pushInCompleteObservationSubmissionForReporting
-   * @param {String} observationSubmissionId - observation submission id.
-   * @returns {JSON} consists of kafka message whether it is pushed for reporting
-   * or not.
-   */
-
-    static pushInCompleteObservationSubmissionForReporting(observationSubmissionId) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                if (observationSubmissionId == "") {
-                    throw "No observation submission id found";
-                }
-
-                if(typeof observationSubmissionId == "string") {
-                    observationSubmissionId = ObjectId(observationSubmissionId);
-                }
-
-                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
-                    _id: observationSubmissionId,
-                    status: {$ne : "completed"}
-                }).lean();
-
-                if (!observationSubmissionsDocument) {
-                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE;
-                }
-            
-                const kafkaMessage = await kafkaClient.pushInCompleteObservationSubmissionToKafka(observationSubmissionsDocument);
-
-                if(kafkaMessage.status != "success") {
-                    let errorObject = {
-                        formData: {
-                            observationSubmissionId:observationSubmissionsDocument._id.toString(),
-                            message:kafkaMessage.message
-                        }
-                    };
-                    console.log(errorObject);
-                }
-
-                return resolve(kafkaMessage);
-
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
 
      /**
    * Push observation submission to queue for rating.
@@ -273,16 +224,17 @@ module.exports = class ObservationSubmissionsHelper {
                     throw new Error(messageConstants.apiResponses.OBSERVATION_SUBMISSSION_NOT_FOUND);
                 }
 
-                let solutionDocument = await database.models.solutions.findOne({
+               
+                let solutionDocument = await solutionHelper.solutionDocuments({
                     externalId: submissionDocument.solutionExternalId,
-                    type : "observation",
-                    // scoringSystem : "pointsBasedScoring"
-                }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1, sendSubmissionRatingEmailsTo : 1}).lean();
-
-                if (!solutionDocument) {
+                    type : "observation"
+                }, [ "themes","levelToScoreMapping","scoringSystem","flattenedThemes","sendSubmissionRatingEmailsTo"]);
+    
+                if (!solutionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
                 }
-
+                solutionDocument = solutionDocument[0];
+              
                 if(solutionDocument.sendSubmissionRatingEmailsTo && solutionDocument.sendSubmissionRatingEmailsTo != "") {
                     emailRecipients = solutionDocument.sendSubmissionRatingEmailsTo;
                 }
@@ -351,7 +303,12 @@ module.exports = class ObservationSubmissionsHelper {
                                     if (question.responseType == "multiselect") {
                                         questionMaxScore += option.score;
                                     }
-                                    (option.score && option.score > 0) ? submissionDocument.questionDocuments[question._id.toString()][`${option.value}-score`] = option.score : "";
+                                    if ("score" in option) {
+                                        option.score >= 0 ?
+                                        submissionDocument.questionDocuments[question._id.toString()][`${option.value}-score`] =
+                                        option.score : "";
+                                    }
+                                    // (option.score && option.score >= 0) ? submissionDocument.questionDocuments[question._id.toString()][`${option.value}-score`] = option.score : "";
                                 })
                             }
                             if (question.sliderOptions && question.sliderOptions.length > 0) {
@@ -375,17 +332,17 @@ module.exports = class ObservationSubmissionsHelper {
                             completedDate: new Date()
                         }
                     );
-                    await this.pushCompletedObservationSubmissionForReporting(submissionId);
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
+                    await this.pushObservationSubmissionForReporting(submissionId);
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_SUCCESS+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 } else {
-                    emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
+                    // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,JSON.stringify(resultingArray));
                     return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
                 }
 
             } catch (error) {
 
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
@@ -431,13 +388,13 @@ module.exports = class ObservationSubmissionsHelper {
                     }
                 );
                 
-                await this.pushCompletedObservationSubmissionForReporting(submissionId);
+                await this.pushObservationSubmissionForReporting(submissionId);
                 
-                emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
+                // emailClient.pushMailToEmailService(emailRecipients,"Successfully marked submission " + submissionId + "complete and pushed for reporting","NO TEXT AVAILABLE");
                 return resolve(messageConstants.apiResponses.OBSERVATION_RATING);
 
             } catch (error) {
-                emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
+                // emailClient.pushMailToEmailService(emailRecipients,messageConstants.apiResponses.OBSERVATION_AUTO_RATING_FAILED+" - "+submissionId,error.message);
                 return reject(error);
             }
         })
@@ -486,7 +443,6 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.canBeNotAllowed",
                 "evidencesStatus.notApplicable",
             ];
-
             let result = await this.observationSubmissionsDocument
             (
                  queryObject,
@@ -495,7 +451,7 @@ module.exports = class ObservationSubmissionsHelper {
                      "createdAt" : -1 
                 }
             );
-
+            
             if( !result.length > 0 ) {
                 return resolve({
                     status : httpStatusCode.ok.status,
@@ -660,7 +616,7 @@ module.exports = class ObservationSubmissionsHelper {
         catch (error) {
             return resolve({
                 success: false,
-                message: error.message,
+                message: error,
                 data: false
             })
         }
@@ -900,11 +856,19 @@ module.exports = class ObservationSubmissionsHelper {
             }
             let result = {};
             
+            // Search for user roles
+            let userRoleFilterArray = new Array;
+            bodyData.role.split(",").forEach((eachRole) => {
+                userRoleFilterArray.push(new RegExp(eachRole))
+            })
+            
             let query = {
                 createdBy: userId,
                 deleted: false,
                 status: messageConstants.common.SUBMISSION_STATUS_COMPLETED,
-                "userRoleInformation.role" : bodyData.role
+                "userRoleInformation.role" : {
+                    $in : userRoleFilterArray
+                }
             }
 
             if (pageNo == 1) {
@@ -928,7 +892,6 @@ module.exports = class ObservationSubmissionsHelper {
                         }
                     });
                 }
-
                 let entityTypes = [];
                 submissions.forEach(submission => {
                     if (!entityTypes.includes(submission.entityType)) {
@@ -1021,17 +984,36 @@ module.exports = class ObservationSubmissionsHelper {
             submissions.forEach( submission => {
                entityIds.push(submission.entityId);
             })
-
-            let entitiesData = await entitiesHelper.entityDocuments({
-                _id: { $in: entityIds }
-            }, ["metaInformation.externalId", "metaInformation.name"]);
-
-            if (!entitiesData.length > 0) {
+            
+            let locationDeatails = gen.utils.filterLocationIdandCode(entityIds);
+             //set request body for learners API
+            let entitiesData = [];
+            
+            if ( locationDeatails.ids.length > 0 ) {
+                let bodyData = {
+                    "id" : locationDeatails.ids,
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entitiesData =  entityData.data;
+                }
+            }
+            
+            if ( locationDeatails.codes.length > 0 ) {
+                let bodyData = {
+                    "code" : locationDeatails.codes,
+                } 
+                let entityData = await userProfileService.locationSearch( bodyData );
+                if ( entityData.success ) {
+                    entitiesData =  entityInformation.concat(entityData.data);
+                }
+            }
+            if( !entitiesData.length > 0 ) {
                 throw {
                     message: messageConstants.apiResponses.ENTITIES_NOT_FOUND
                 }
             }
-
+            
             let entities = {};
 
             for ( 
@@ -1043,12 +1025,12 @@ module.exports = class ObservationSubmissionsHelper {
                 let currentEntities = entitiesData[pointerToEntities];
                 
                 let entity = {
-                    _id : currentEntities._id,
-                    externalId : currentEntities.metaInformation.externalId,
-                    name : currentEntities.metaInformation.name
+                    _id : currentEntities.id,
+                    externalId : currentEntities.code,
+                    name : currentEntities.name
                 };
 
-                entities[currentEntities._id] = entity;
+                entities[currentEntities.id] = entity;
             }
 
             let solutionDocuments = await solutionHelper.solutionDocuments
@@ -1271,6 +1253,68 @@ module.exports = class ObservationSubmissionsHelper {
     
         })
     } 
+
+
+   /**
+   * Get observation submission details
+   * @method
+   * @name details
+   * @param {String} observationSubmissionId - observation submission id.
+   * @returns {JSON} - observation submission details
+   */
+
+    static details(observationSubmissionId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let observationSubmissionsDocument = await database.models.observationSubmissions.findOne({
+                    _id: observationSubmissionId,
+                }).lean();
+
+                if (!observationSubmissionsDocument) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                //adding question options, externalId to answers array 
+                if ( observationSubmissionsDocument.answers && Object.keys(observationSubmissionsDocument.answers).length > 0 ) {
+                    observationSubmissionsDocument = await questionsHelper.addOptionsToSubmission(observationSubmissionsDocument);
+                }
+
+                let solutionDocument = await solutionHelper.solutionDocuments({
+                    _id: observationSubmissionsDocument.solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                observationSubmissionsDocument['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: observationSubmissionsDocument.programId,
+                    },
+                    ["name","description"],
+                );
+    
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                observationSubmissionsDocument['programInfo'] = programDocument[0];
+
+                return resolve(observationSubmissionsDocument);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
+            }
+        })
+    }
 
 
 };

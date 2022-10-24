@@ -58,11 +58,21 @@ var DB = function() {
     return model;
   };
 
+  const runCompoundIndex = function(modelName,opts) {
+    if (opts && opts.length > 0) {
+      for ( let indexPointer = 0 ; indexPointer < opts.length ; indexPointer++ ) {
+        let currentIndex = opts[indexPointer];
+        db.collection(modelName).createIndex(currentIndex.name, currentIndex.indexType);
+      }
+    }
+  }
+
   return {
     database: db,
     createModel: createModel,
     ObjectId: ObjectId,
-    models: db.models
+    models: db.models,
+    runCompoundIndex: runCompoundIndex
   };
 };
 

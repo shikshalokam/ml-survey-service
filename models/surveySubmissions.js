@@ -4,7 +4,8 @@ module.exports = {
       surveyId: {
         type: "ObjectId",
         index: true,
-        required: true
+        required: true,
+        unique: true
       },
       createdBy: {
         type: String,
@@ -43,9 +44,13 @@ module.exports = {
         type : Boolean,
         index: true
       },
-      surveyInformation: Object,
+      surveyInformation: {
+        name: { type: String, index: true },
+        description: { type: String, index: true }
+      },
       appInformation : Object,
-      userRoleInformation : Object
+      userRoleInformation : Object,
+      userProfile : Object
     }
   };
 

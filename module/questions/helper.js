@@ -1041,4 +1041,54 @@ module.exports = class QuestionsHelper {
         });
     }
 
+    /**
+   * Add Question Options to Submission Answers
+   * @method
+   * @name addOptionsToSubmission
+   * @param {Object} submission - observation/survey submission.
+   * @returns {JSON} - observation/survey submission details
+   */
+
+    static addOptionsToSubmission(submissionDocument) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if ( submissionDocument && submissionDocument.answers && Object.keys(submissionDocument.answers).length > 0) {
+
+                    let questionIds = [];
+                    for (let questionKey in submissionDocument.answers) { 
+                        questionIds.push(questionKey);
+                    }
+
+                    let questionDocuments = await this.questionDocument({
+                        _id : {
+                            $in : gen.utils.arrayIdsTobjectIds(questionIds)
+                        }
+                    }, [ 
+                        "options","externalId"
+                    ]);
+
+                    if ( questionDocuments.length > 0 ) {
+
+                        for ( let pointerToQuestion = 0; pointerToQuestion < questionDocuments.length; pointerToQuestion++ ) {
+                          let currentQuestion = questionDocuments[pointerToQuestion];
+                          if ( submissionDocument.answers[currentQuestion._id] != undefined ) {
+                              Object.assign(submissionDocument.answers[currentQuestion._id], {options: currentQuestion.options, externalId: currentQuestion.externalId});
+                          }
+                        }
+                    }
+                }
+
+              return resolve(submissionDocument);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error.message,
+                    data: false
+                });
+            }
+        })
+    }
+
 };

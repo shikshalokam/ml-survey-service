@@ -29,7 +29,6 @@ module.exports = {
     themes: Array,
     flattenedThemes : Array,
     questionSequenceByEcm: Object,
-    entityTypeId: "ObjectId",
     entityType: String,
     type: {
       type: String,
@@ -107,7 +106,6 @@ module.exports = {
         type : String,
         index : true
       },
-      entityTypeId : "ObjectId",
       entities : {
         type : Array,
         index : true
@@ -132,6 +130,7 @@ module.exports = {
     minNoOfSubmissionsRequired: {
         type: Number,
         default: 1
-    }
+    },
+    reportInformation : Object
   }
 };

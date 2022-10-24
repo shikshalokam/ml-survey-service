@@ -20,19 +20,15 @@ module.exports = (req) => {
             req.checkBody('title').exists().notEmpty().withMessage("required observation submission title")
         },
 
-        pushCompletedObservationSubmissionForReporting: function () {
-            req.checkParams('_id').exists().withMessage("required submission id")
-        },
-
-        pushIncompleteObservationSubmissionForReporting: function () {
+        pushObservationSubmissionForReporting: function () {
             req.checkParams('_id').exists().withMessage("required submission id")
         },
 
         list: function () {
             req.checkParams('_id').exists().withMessage("required observation id")
             .isMongoId().withMessage("Invalid observation id");
-            req.checkQuery('entityId').exists().withMessage("required entity id")
-            .isMongoId().withMessage("Invalid entity id");
+            req.checkQuery('entityId').exists().withMessage("required entity id");
+            
         },
 
         status: function () {

@@ -1,20 +1,20 @@
 const kafkaCommunicationsOnOff = (!process.env.KAFKA_COMMUNICATIONS_ON_OFF || process.env.KAFKA_COMMUNICATIONS_ON_OFF != "OFF") ? "ON" : "OFF"
-const completedObservationSubmissionKafkaTopic = (process.env.COMPLETED_OBSERVATION_SUBMISSION_TOPIC && process.env.COMPLETED_OBSERVATION_SUBMISSION_TOPIC != "OFF") ? process.env.COMPLETED_OBSERVATION_SUBMISSION_TOPIC : "sl-observations-dev"
 const completedSubmissionKafkaTopic = (process.env.COMPLETED_SUBMISSION_TOPIC && process.env.COMPLETED_SUBMISSION_TOPIC != "OFF") ? process.env.COMPLETED_SUBMISSION_TOPIC : "sl-submissions-dev"
-const inCompleteObservationSubmissionKafkaTopic = (process.env.INCOMPLETE_OBSERVATION_SUBMISSION_TOPIC && process.env.INCOMPLETE_OBSERVATION_SUBMISSION_TOPIC != "OFF") ? process.env.INCOMPLETE_OBSERVATION_SUBMISSION_TOPIC : "sl-incomplete-observations-dev"
 const inCompleteSubmissionKafkaTopic = (process.env.INCOMPLETE_SUBMISSION_TOPIC && process.env.INCOMPLETE_SUBMISSION_TOPIC != "OFF") ? process.env.INCOMPLETE_SUBMISSION_TOPIC : "sl-incomplete-submissions-dev"
 const submissionRatingQueueKafkaTopic = (process.env.SUBMISSION_RATING_QUEUE_TOPIC && process.env.SUBMISSION_RATING_QUEUE_TOPIC != "OFF") ? process.env.SUBMISSION_RATING_QUEUE_TOPIC : "sl-submissions-rating-dev"
 const notificationsKafkaTopic = (process.env.NOTIFICATIONS_TOPIC && process.env.NOTIFICATIONS_TOPIC != "OFF") ? process.env.NOTIFICATIONS_TOPIC : "sl-notifications-dev"
 const completedSurveySubmissionKafkaTopic = (process.env.COMPLETED_SURVEY_SUBMISSION_TOPIC && process.env.COMPLETED_SURVEY_SUBMISSION_TOPIC != "OFF") ? process.env.COMPLETED_SURVEY_SUBMISSION_TOPIC : "sl_surveys_raw"
 const inCompleteSurveySubmissionKafkaTopic = (process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC && process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC != "OFF") ? process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC : "sl_incomplete_surveys_raw"
 const improvementProjectSubmissionTopic = (process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC && process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC != "OFF") ? process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC : "sl-improvement-project-submission-dev";
+const observationSubmissionKafkaTopic = (process.env.OBSERVATION_SUBMISSION_TOPIC && process.env.OBSERVATION_SUBMISSION_TOPIC != "OFF") ? process.env.OBSERVATION_SUBMISSION_TOPIC : "sl-observations-dev"
 
-const pushCompletedObservationSubmissionToKafka = function (message) {
+
+const pushObservationSubmissionToKafka = function (message) {
   return new Promise(async (resolve, reject) => {
       try {
 
           let kafkaPushStatus = await pushMessageToKafka([{
-            topic: completedObservationSubmissionKafkaTopic,
+            topic: observationSubmissionKafkaTopic,
             messages: JSON.stringify(message)
           }])
 
@@ -35,23 +35,6 @@ const pushCompletedSubmissionToKafka = function (message) {
 
           let kafkaPushStatus = await pushMessageToKafka([{
             topic: completedSubmissionKafkaTopic,
-            messages: JSON.stringify(message)
-          }])
-
-          return resolve(kafkaPushStatus)
-
-      } catch (error) {
-          return reject(error);
-      }
-  })
-}
-
-const pushInCompleteObservationSubmissionToKafka = function (message) {
-  return new Promise(async (resolve, reject) => {
-      try {
-
-          let kafkaPushStatus = await pushMessageToKafka([{
-            topic: inCompleteObservationSubmissionKafkaTopic,
             messages: JSON.stringify(message)
           }])
 
@@ -189,6 +172,12 @@ const pushMessageToKafka = function(payload) {
       throw reject("Kafka configuration is not done")
     }
 
+    console.log("-------Kafka producer log starts here------------------");
+    console.log("Topic Name: ",  payload[0].topic);
+    console.log("Message: ", JSON.stringify(payload));
+    console.log("-------Kafka producer log ends here------------------");
+
+
     kafkaClient.kafkaProducer.send(payload, (err, data) => {
       if (err) {
         return reject("Kafka push to topic "+ payload[0].topic +" failed.")
@@ -216,14 +205,13 @@ const pushMessageToKafka = function(payload) {
 
 module.exports = {
   pushCompletedSubmissionToKafka : pushCompletedSubmissionToKafka,
-  pushCompletedObservationSubmissionToKafka : pushCompletedObservationSubmissionToKafka,
   pushUserMappingNotificationToKafka : pushUserMappingNotificationToKafka,
   pushSubmissionToKafkaQueueForRating : pushSubmissionToKafkaQueueForRating,
   pushObservationSubmissionToKafkaQueueForRating : pushObservationSubmissionToKafkaQueueForRating,
   pushInCompleteSubmissionToKafka : pushInCompleteSubmissionToKafka,
-  pushInCompleteObservationSubmissionToKafka : pushInCompleteObservationSubmissionToKafka,
   pushCompletedSurveySubmissionToKafka : pushCompletedSurveySubmissionToKafka,
   pushInCompleteSurveySubmissionToKafka : pushInCompleteSurveySubmissionToKafka,
-  pushSubmissionToImprovementService : pushSubmissionToImprovementService
+  pushSubmissionToImprovementService : pushSubmissionToImprovementService,
+  pushObservationSubmissionToKafka: pushObservationSubmissionToKafka
 };
 

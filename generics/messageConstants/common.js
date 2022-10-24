@@ -54,5 +54,13 @@ module.exports = {
     CREATED_BY_ME : "createdByMe",
     ALL_ROLES : "all",
     VERSION_3 : "v3",
-    DRAFT : "draft"
+    DRAFT : "draft",
+    DISTRICT : "district",
+    SERVER_TIME_OUT : 5000,
+    OK : "OK",
+    PROFILE_CONFIG_FORM_KEY : "profileConfig",
+    CACHE_TTL : 43200 ,
+    GET_METHOD : "GET",
+    SUBENTITY :"subEntityTypesOf_",
+    STATE: "state"
 }

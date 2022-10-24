@@ -42,11 +42,7 @@ let enviromentVariables = {
     "message" : "OFF/TOPIC_NAME",
     "optional" : false
   },
-  "COMPLETED_OBSERVATION_SUBMISSION_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
-  },
-  "INCOMPLETE_OBSERVATION_SUBMISSION_TOPIC" : {
+  "OBSERVATION_SUBMISSION_TOPIC" : {
     "message" : "OFF/TOPIC_NAME",
     "optional" : false
   },
@@ -89,6 +85,11 @@ let enviromentVariables = {
   "DISABLE_LEARNER_SERVICE_ON_OFF": {
     "message" : "Disable learner service on/off",
     "default": "ON"
+  },
+  "FORM_SERVICE_URL" : {
+    "message" : "Form service base url",
+    "optional" : true,
+    "default" : "http://player:3000"
   }
 }
 

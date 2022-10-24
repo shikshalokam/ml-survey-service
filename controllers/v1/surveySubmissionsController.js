@@ -446,5 +446,4 @@ module.exports = class SurveySubmissions extends Abstract {
 
     })
   }
-
 }

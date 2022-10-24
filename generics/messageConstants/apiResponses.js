@@ -322,7 +322,6 @@ module.exports = {
     "SURVEYS_FETCHED": "Surveys fetched successfully",
     "TARGETED_SURVEY_FETCHED": "Targeted surveys fetched successfully",
     "TARGETED_SOLUTIONS_FETCHED": "Successfully targeted solutions fetched",
-    "ENTITIES_NOT_FOUND": "No entities found",
     "OBSERVATION_ENTITIES_FETCHED": "Observation entities fetched successfully",
     "ENTITY_TYPE_MIS_MATCHED": "Provided solution entity type mis matched",
     "TARGETED_OBSERVATION_FETCHED": "Targeted observations fetched successfully",
@@ -365,5 +364,11 @@ module.exports = {
     "EVIDENCE_CAN_BE_NOT_APPLICABLE_FALSE": "Cannot make evidence not applicable",
     "EVIDENCE_ALREADY_MARKED_AS_NOT_APPLICABLE": " is already marked as not applicable",
     "OBSERVATION_OR_SOLUTION_CHECK" : "Required Observation Id or Solution Id ",
-    "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role"
+    "SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED": "Solution is not targeted to the role",
+    "OBSERVATION_SUBMISSION_FOUND" : "Observation submission fetched successfully",
+    "SURVEY_SUBMISSION_FOUND": "Survey submission fetched successfully",
+    "SOLUTION_ID_AND_USERPROFILE_REQUIRED": "Required solution Id and userProfile",
+    "USER_ROLES_NOT_FOUND" : "Could not found user roles",
+    "OBSERVATION_NOT_RELEVENT_FOR_USER" : "Dear User, this Observation is not relevant for your sub-role and location",
+    "SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE":"No submission found or Submission status is not completed"
 }

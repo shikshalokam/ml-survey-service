@@ -12,6 +12,7 @@ const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
 const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
+
 /**
     * Surveys
     * @class
@@ -207,7 +208,7 @@ module.exports = class Surveys extends Abstract {
      * @apiSampleRequest /assessment/api/v1/surveys/getDetailsByLink/392f95246771664a81335f1be7d109f3
      * @apiParamExample {json} Request:
      * {
-     *  "role" : "HM",
+     *  "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -437,7 +438,7 @@ module.exports = class Surveys extends Abstract {
     * @apiSampleRequest /assessment/api/v1/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
     * @apiParamExample {json}  Request-Body:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
         "state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
@@ -638,7 +639,7 @@ module.exports = class Surveys extends Abstract {
             let surveyDetails = {};
 
             if( validateSurveyId || req.query.solutionId ) {
-
+                
                 let surveyId = req.params._id ? req.params._id : "";
        
                 surveyDetails = await surveysHelper.detailsV3
@@ -685,7 +686,7 @@ module.exports = class Surveys extends Abstract {
     * @apiSampleRequest /assessment/api/v1/surveys/getSurvey?page=1&limit=10
     * @apiParamExample {json}  Request-Body:
     * {
-    *   "role" : "HM",
+    *   "role" : "HM,DEO",
    		"state" : "236f5cff-c9af-4366-b0b6-253a1789766a",
         "district" : "1dcbc362-ec4c-4559-9081-e0c2864c2931",
         "school" : "c5726207-4f9f-4f45-91f1-3e9e8e84d824"

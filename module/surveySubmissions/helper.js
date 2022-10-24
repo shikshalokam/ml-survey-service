@@ -8,6 +8,9 @@
 // Dependencies
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
+const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
+const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
+
 
 /**
     * SurveySubmissionsHelper
@@ -51,7 +54,7 @@ module.exports = class SurveySubmissionsHelper {
                 projection[field] = 0;
               })
             }
-
+           
             let surveySubmissionDocuments;
 
             if ( sortedData !== "all" ) {
@@ -70,7 +73,6 @@ module.exports = class SurveySubmissionsHelper {
                     projection
                 ).lean();
             }   
-
             return resolve(surveySubmissionDocuments);
             
         } catch (error) {
@@ -104,24 +106,18 @@ module.exports = class SurveySubmissionsHelper {
                 surveySubmissionId = ObjectId(surveySubmissionId);
             }
 
-            let surveySubmissionsDocument = await this.surveySubmissionDocuments
-            (
-                {
-                _id: surveySubmissionId,
-                status: messageConstants.common.SUBMISSION_STATUS_COMPLETED
-                }
-            )
-
-            if (!surveySubmissionsDocument) {
-                throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND+"or"+messageConstants.apiResponses.SUBMISSION_STATUS_NOT_COMPLETE);
+            let surveySubmissionsDocument = await this.getDetails( surveySubmissionId, messageConstants.common.SUBMISSION_STATUS_COMPLETED );
+            
+            if ( !surveySubmissionsDocument || Object.keys(surveySubmissionsDocument).length === 0 ) {
+                throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE);
             }
 
-            const kafkaMessage = await kafkaClient.pushCompletedSurveySubmissionToKafka(surveySubmissionsDocument[0]);
+            const kafkaMessage = await kafkaClient.pushCompletedSurveySubmissionToKafka(surveySubmissionsDocument);
 
             if(kafkaMessage.status != "success") {
                 let errorObject = {
                     formData: {
-                        surveySubmissionId:surveySubmissionsDocument[0]._id.toString(),
+                        surveySubmissionId:surveySubmissionsDocument._id.toString(),
                         message:kafkaMessage.message
                     }
                 };
@@ -237,7 +233,7 @@ module.exports = class SurveySubmissionsHelper {
                         "createdBy"
                     ]
                 );
-                
+
                 if (!submissionDocument.length) {
                     throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
                 }
@@ -456,11 +452,11 @@ module.exports = class SurveySubmissionsHelper {
 
                 if ( filter && filter !== "" ) {
                     if( filter === messageConstants.common.CREATED_BY_ME ) {
-                        matchQuery["$match"]["isAPrivateProgram"] = {
+                        submissionMatchQuery["$match"]["isAPrivateProgram"] = {
                             $ne : false
                         };
                     } else if ( filter === messageConstants.common.ASSIGN_TO_ME ) {
-                        matchQuery["$match"]["isAPrivateProgram"] = false;
+                        submissionMatchQuery["$match"]["isAPrivateProgram"] = false;
                     }
                 }
 
@@ -678,4 +674,135 @@ module.exports = class SurveySubmissionsHelper {
     });
 }
 
+    /**
+     * Get survey submission details
+     * @method
+     * @name details
+     * @param {String} submissionId - survey submissionId
+     * @returns {JSON} - survey submission details
+     */
+
+    static details(submissionId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let surveySubmissionsDocument = await this.surveySubmissionDocuments
+                ({
+                    _id: submissionId
+                })
+
+                if (!surveySubmissionsDocument.length) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                let solutionDocument = await solutionsHelper.solutionDocuments({
+                    _id: surveySubmissionsDocument[0].solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                surveySubmissionsDocument[0]['solutionInfo'] = solutionDocument;
+
+                let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: surveySubmissionsDocument[0].programId,
+                    },
+                    ["name","description"],
+                );
+
+                if( !programDocument[0] ) {
+                    throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                }
+                surveySubmissionsDocument[0]['programInfo'] = programDocument[0];
+
+                return resolve(surveySubmissionsDocument[0]);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
+            }
+        })
+    }
+
+
+   /**
+   * Get survey submission details
+   * @method
+   * @name getDetails
+   * @param {String} submissionId - survey submissionId
+   *  @param {String} status - survey submission status.
+   * @returns {JSON} - survey submission details
+   */
+
+    static getDetails(submissionId, status = "") {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let queryObject = {
+                    _id: submissionId
+                }
+
+                if ( status != "" ) {
+                    queryObject.status = status;
+                }
+
+                let surveySubmissionsDocument = await this.surveySubmissionDocuments( queryObject );
+                
+                if (!surveySubmissionsDocument.length) {
+                    throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND;
+                }
+
+                surveySubmissionsDocument = surveySubmissionsDocument[0];
+                
+                //adding question options, externalId to answers array 
+                if ( surveySubmissionsDocument.answers && Object.keys(surveySubmissionsDocument.answers).length > 0 ) {
+                    surveySubmissionsDocument = await questionsHelper.addOptionsToSubmission(surveySubmissionsDocument);
+                }
+
+                let solutionDocument = await solutionsHelper.solutionDocuments({
+                    _id: surveySubmissionsDocument.solutionId
+                }, [ "name","scoringSystem","description","questionSequenceByEcm"]);
+    
+                if(!solutionDocument.length){
+                    throw messageConstants.apiResponses.SOLUTION_NOT_FOUND;
+                }
+                
+                solutionDocument = solutionDocument[0];
+                surveySubmissionsDocument['solutionInfo'] = solutionDocument;
+
+                if ( surveySubmissionsDocument.programId && surveySubmissionsDocument.programId != "" ) {
+
+                    let programDocument = 
+                    await programsHelper.list(
+                        {
+                            _id: surveySubmissionsDocument.programId,
+                        },
+                        ["name","description"],
+                    );
+        
+                    if( !programDocument[0] ) {
+                        throw  messageConstants.apiResponses.PROGRAM_NOT_FOUND
+                    }
+                    surveySubmissionsDocument['programInfo'] = programDocument[0];
+
+                }
+
+                return resolve(surveySubmissionsDocument);
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error,
+                    data: {}
+                });
+            }
+        })
+    }
 }
