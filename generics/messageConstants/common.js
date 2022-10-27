@@ -58,7 +58,7 @@ module.exports = {
     DISTRICT : "district",
     SERVER_TIME_OUT : 5000,
     OK : "OK",
-    PROFILE_CONFIG_FORM_KEY : "profileConfig",
+    PROFILE_CONFIG_FORM_KEY : "profileConfig_v2",
     CACHE_TTL : 43200 ,
     GET_METHOD : "GET",
     SUBENTITY :"subEntityTypesOf_",
