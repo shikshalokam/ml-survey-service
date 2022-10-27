@@ -297,6 +297,18 @@ function filterLocationIdandCode(dataArray) {
       codes : locationCodes
     });
 }
+
+/**
+  * check whether string contains only number
+  * @function
+  * @name checkIfStringIsNumber
+  * @returns {Boolean} returns a Boolean value true/false
+*/
+
+function checkIfStringIsNumber(str) {
+  return /^[0-9]+$/.test(str);
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -320,5 +332,6 @@ module.exports = {
   removeDuplicatesFromArray : removeDuplicatesFromArray,
   convertStringToBoolean : convertStringToBoolean,
   checkIfValidUUID : checkIfValidUUID,
-  filterLocationIdandCode :filterLocationIdandCode
+  filterLocationIdandCode :filterLocationIdandCode,
+  checkIfStringIsNumber : checkIfStringIsNumber
 };

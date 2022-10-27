@@ -201,10 +201,16 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
                     let offsetValue = pageSize * ( pageNo - 1 ); 
                     bodyData["request"]["offset"] = offsetValue;
                 }
-        
+
                 if ( searchKey !== "" ) {
-                    bodyData["request"]["fuzzy"] = {
-                        "orgName" : searchKey
+                    if ( gen.utils.checkIfStringIsNumber(searchKey) ) {
+                        bodyData["request"]["fuzzy"] = {
+                            "externalId" : searchKey
+                        }
+                    } else {
+                        bodyData["request"]["fuzzy"] = {
+                            "orgName" : searchKey
+                        }
                     }
                 }
   
