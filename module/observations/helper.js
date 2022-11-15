@@ -2414,7 +2414,7 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
             return resolve({
                 success: true,
                 profileMismatchFound : (updateUserProfileLocationInformation || updateUserProfileRoleInformation) ? true : false,
-                data: updatedUserProfile
+                data: userProfile
             });
 
         } catch (error) {
