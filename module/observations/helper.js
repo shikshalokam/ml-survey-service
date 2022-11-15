@@ -223,6 +223,24 @@ module.exports = class ObservationsHelper {
                     data.project._id = ObjectId(data.project._id);
                     data.referenceFrom = messageConstants.common.PROJECT;
                 }
+
+                //compare & update userProfile with userRoleInformation
+                if ( 
+                    userRoleInformation && 
+                    userProfileInformation &&
+                    Object.keys(userRoleInformation).length > 0 &&
+                    Object.keys(userProfileInformation).length > 0 
+                ){
+
+                    let updatedUserProfile = await _updateUserProfileBasedOnUserRoleInfo(
+                        userProfileInformation,
+                        userRoleInformation
+                    );
+
+                    if (updatedUserProfile && updatedUserProfile.success == true && updatedUserProfile.profileMismatchFound == true) {
+                        userProfileInformation = updatedUserProfile.data;
+                    }
+                }
                 
                 let observationData = 
                 await database.models.observations.create(
@@ -2217,3 +2235,194 @@ module.exports = class ObservationsHelper {
     }
 
 };
+
+/**
+  * Validate & Update UserProfile in Projects.
+  * @method
+  * @name _updateUserProfileBasedOnUserRoleInfo 
+  * @param {Object} userProfile - userProfile data.
+  * @param {Object} userRoleInformation - userRoleInformation data.
+  * @returns {Object} updated UserProfile information.
+*/
+
+function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let updateUserProfileRoleInformation = false;   // Flag to see if roleInformation i.e. userProfile.profileUserTypes has to be updated based on userRoleInfromation.roles
+
+            if(userRoleInformation.role) { // Check if userRoleInformation has role value.
+                let rolesInUserRoleInformation = userRoleInformation.role.split(","); // userRoleInfomration.role can be multiple with comma separated.
+
+                let resetCurrentUserProfileRoles = false; // Flag to reset current userProfile.profileUserTypes i.e. if current role in profile is not at all there in userRoleInformation.roles
+                // Check if userProfile.profileUserTypes exists and is an array of length > 0
+                if(userProfile.profileUserTypes && Array.isArray(userProfile.profileUserTypes) && userProfile.profileUserTypes.length >0) {
+
+                    // Loop through current roles in userProfile.profileUserTypes
+                    for (let pointerToCurrentProfileUserTypes = 0; pointerToCurrentProfileUserTypes < userProfile.profileUserTypes.length; pointerToCurrentProfileUserTypes++) {
+                        const currentProfileUserType = userProfile.profileUserTypes[pointerToCurrentProfileUserTypes];
+
+                        if(currentProfileUserType.subType && currentProfileUserType.subType !== null) { // If the role has a subType
+
+                            // Check if subType exists in userRoleInformation role, if not means profile data is old and should be reset.
+                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.subType.toUpperCase())) {
+                                resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
+                                break;
+                            }
+                        } else { // If the role subType is null or is not there
+
+                            // Check if type exists in userRoleInformation role, if not means profile data is old and should be reset.
+                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.type.toUpperCase())) {
+                                resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(resetCurrentUserProfileRoles) { // Reset userProfile.profileUserTypes
+                    userProfile.profileUserTypes = new Array;
+                }
+
+                // Loop through each subRole in userRoleInformation
+                for (let pointerToRolesInUserInformation = 0; pointerToRolesInUserInformation < rolesInUserRoleInformation.length; pointerToRolesInUserInformation++) {
+                    const subRole = rolesInUserRoleInformation[pointerToRolesInUserInformation];
+                    // Check if userProfile.profileUserTypes exists and is an array of length > 0
+                    if(userProfile.profileUserTypes && Array.isArray(userProfile.profileUserTypes) && userProfile.profileUserTypes.length >0) {
+                        if(!_.find(userProfile.profileUserTypes, { 'type': subRole.toLowerCase() }) && !_.find(userProfile.profileUserTypes, { 'subType': subRole.toLowerCase() })) { 
+                            updateUserProfileRoleInformation = true; // Need to update userProfile.profileUserTypes
+                            if(subRole.toUpperCase() === "TEACHER") { // If subRole is not teacher
+                                userProfile.profileUserTypes.push({
+                                    "subType" : null,
+                                    "type" : "teacher"
+                                })
+                            } else { // If subRole is not teacher
+                                userProfile.profileUserTypes.push({
+                                    "subType" : subRole.toLowerCase(),
+                                    "type" : "administrator"
+                                })
+                            }
+                        }
+                    } else { // Make a new entry if userProfile.profileUserTypes is empty or does not exist.
+                        updateUserProfileRoleInformation = true; // Need to update userProfile.profileUserTypes
+                        userProfile.profileUserTypes = new Array;
+                        if(subRole.toUpperCase() === "TEACHER") { // If subRole is teacher
+                            userProfile.profileUserTypes.push({
+                                "subType" : null,
+                                "type" : "teacher"
+                            })
+                        } else { // If subRole is not teacher
+                            userProfile.profileUserTypes.push({
+                                "subType" : subRole.toLowerCase(),
+                                "type" : "administrator"
+                            })
+                        }
+                    }
+                }
+            }
+
+            if(updateUserProfileRoleInformation) { // If profileUserTypes in userProfile was wrong and is updated as per userRoleInformation
+                userProfile.userRoleMismatchFoundAndUpdated = true;
+            }
+
+            // Create location only object from userRoleInformation
+            let userRoleInformationLocationObject = _.omit(userRoleInformation, ['role']);
+            
+            // All location keys from userRoleInformation
+            let userRoleInfomrationLocationKeys = Object.keys(userRoleInformationLocationObject);
+
+            let updateUserProfileLocationInformation = false;   // Flag to see if userLocations i.e. userProfile.userLocations has to be updated based on userRoleInfromation location values
+
+            // Loop through all location keys.
+            for (let pointerToUserRoleInfromationLocationKeys = 0; pointerToUserRoleInfromationLocationKeys < userRoleInfomrationLocationKeys.length; pointerToUserRoleInfromationLocationKeys++) {
+                
+                const locationType = userRoleInfomrationLocationKeys[pointerToUserRoleInfromationLocationKeys]; // e.g. state, district, school
+                const locationValue = userRoleInformationLocationObject[locationType]; // Location UUID values or school code.
+                
+                // Check if userProfile.userLocations exists and is an array of length > 0
+                if(userProfile.userLocations && Array.isArray(userProfile.userLocations) && userProfile.userLocations.length >0) {
+
+                    if(locationType === "school") { // If location type school exist check if same is there in userProfile.userLocations
+                        if(!_.find(userProfile.userLocations, { 'type': "school", 'code': locationValue })) {
+                            updateUserProfileLocationInformation = true; // School does not exist in userProfile.userLocations, update entire userProfile.userLocations
+                            break;
+                        }
+                    } else { // Check if location type is there in userProfile.userLocations and has same value as userRoleInformation
+                        if(!_.find(userProfile.userLocations, { 'type': locationType, 'id': locationValue })) {
+                            updateUserProfileLocationInformation = true; // Location does not exist in userProfile.userLocations, update entire userProfile.userLocations
+                            break;
+                        }
+                    }
+                } else {
+                    updateUserProfileLocationInformation = true;
+                    break;
+                }
+            }
+
+            if(userProfile.userLocations && Array.isArray(userProfile.userLocations) && userProfile.userLocations.length >0) {
+                if(userProfile.userLocations.length != userRoleInfomrationLocationKeys.length) {
+                    updateUserProfileLocationInformation = true;
+                }
+            }
+
+            // If userProfile.userLocations has to be updated, get all values and set in userProfile.
+            if(updateUserProfileLocationInformation) {
+
+                //update userLocations in userProfile
+                let locationIds = [];
+                let locationCodes = [];
+                let userLocations = new Array;
+
+                userRoleInfomrationLocationKeys.forEach( requestedDataKey => {
+                    if (gen.utils.checkIfValidUUID(userRoleInformationLocationObject[requestedDataKey])) {
+                        locationIds.push(userRoleInformationLocationObject[requestedDataKey]);
+                    } else {
+                        locationCodes.push(userRoleInformationLocationObject[requestedDataKey]);
+                    }
+                })
+
+                //query for fetch location using id
+                if ( locationIds.length > 0 ) {
+                    let locationQuery = {
+                        "id" : locationIds
+                    }
+
+                    let entityData = await userProfileService.locationSearch(locationQuery);
+                    if ( entityData.success ) {
+                        userLocations = entityData.data;
+                    }
+                }
+
+                // query for fetch location using code
+                if ( locationCodes.length > 0 ) {
+                    let codeQuery = {
+                        "code" : locationCodes
+                    }
+
+                    let entityData = await userProfileService.locationSearch(codeQuery);
+                    if ( entityData.success ) {
+                        userLocations =  userLocations.concat(entityData.data);
+                    }
+                }
+
+                if ( userLocations.length > 0 ) {
+                    userProfile["userLocations"] = userLocations;
+                    userProfile.userLocationsMismatchFoundAndUpdated = true; // If userLocations in userProfile was wrong and is updated as per userRoleInformation
+                }
+            }
+
+            return resolve({
+                success: true,
+                profileMismatchFound : (updateUserProfileLocationInformation || updateUserProfileRoleInformation) ? true : false,
+                data: userProfile
+            });
+
+        } catch (error) {
+            return resolve({
+                status: error.status || httpStatusCode.internal_server_error.status,
+                message: error.message || httpStatusCode.internal_server_error.message,
+                data : false
+            });
+        }
+    })
+}
