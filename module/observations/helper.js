@@ -2266,14 +2266,14 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
                         if(currentProfileUserType.subType && currentProfileUserType.subType !== null) { // If the role has a subType
 
                             // Check if subType exists in userRoleInformation role, if not means profile data is old and should be reset.
-                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.subType.toUpperCase())) {
+                            if(!userRoleInformation.role.toUpperCase().includes(currentProfileUserType.subType.toUpperCase())) {
                                 resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
                                 break;
                             }
                         } else { // If the role subType is null or is not there
 
                             // Check if type exists in userRoleInformation role, if not means profile data is old and should be reset.
-                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.type.toUpperCase())) {
+                            if(!userRoleInformation.role.toUpperCase().includes(currentProfileUserType.type.toUpperCase())) {
                                 resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
                                 break;
                             }
