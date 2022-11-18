@@ -2112,7 +2112,7 @@ module.exports = class ObservationsHelper {
                 //check solution entity type is exist in allowed roles
                 if ( !allowedEntityTypes.length > 0 || 
                     !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 
-                    !(Object.keys(bodyData).includes(solutionDocument[0].entityType))) 
+                    !(Object.keys(bodyData).includes(allowedEntityTypes[0]))) 
                 {
                     throw {
                         status: httpStatusCode.bad_request.status,
