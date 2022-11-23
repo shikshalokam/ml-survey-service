@@ -1065,7 +1065,7 @@ module.exports = class QuestionsHelper {
                             $in : gen.utils.arrayIdsTobjectIds(questionIds)
                         }
                     }, [ 
-                        "options","externalId"
+                        "options","externalId", "question"
                     ]);
 
                     if ( questionDocuments.length > 0 ) {
@@ -1073,7 +1073,7 @@ module.exports = class QuestionsHelper {
                         for ( let pointerToQuestion = 0; pointerToQuestion < questionDocuments.length; pointerToQuestion++ ) {
                           let currentQuestion = questionDocuments[pointerToQuestion];
                           if ( submissionDocument.answers[currentQuestion._id] != undefined ) {
-                              Object.assign(submissionDocument.answers[currentQuestion._id], {options: currentQuestion.options, externalId: currentQuestion.externalId});
+                              Object.assign(submissionDocument.answers[currentQuestion._id], {options: currentQuestion.options, externalId: currentQuestion.externalId, question: currentQuestion.question});
                           }
                         }
                     }
