@@ -591,7 +591,7 @@ module.exports = class Observations extends Abstract {
                 let result;
 
                 let projection = [];
-
+               
                 if ( !req.query.observationId && !req.query.solutionId ) {
                     throw {
                         status: httpStatusCode.bad_request.status,
@@ -612,8 +612,10 @@ module.exports = class Observations extends Abstract {
 
                     let observationDocument = 
                     await observationsHelper.observationDocuments(findObject, projection);
+                    console.log("observationDocument",observationDocument)
                     result = observationDocument[0];
-                    
+                    console.log("result>>>>>>>>",result)
+
                 }
 
                 if ( req.query.solutionId ) {
@@ -626,6 +628,7 @@ module.exports = class Observations extends Abstract {
 
                     let solutionDocument = await solutionsHelper.solutionDocuments(findQuery, projection);
                     result = _.merge(solutionDocument[0]);
+                    console.log("result>>>>>>>>",result)
                 }
                
                 let userAllowedEntities = new Array;
@@ -652,14 +655,14 @@ module.exports = class Observations extends Abstract {
                             false,
                             formatForSearchEntities
                         );
-                    
+                
                     if ( !entitiesDocument.success ) {
                         return resolve({
                             "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
-                            "result" : {
-                                "count":0,
+                            "result" : [{
+                                "count":1,
                                 "data" : []
-                            }
+                            }]
                         })
                     }
 
@@ -699,14 +702,14 @@ module.exports = class Observations extends Abstract {
                                 req.searchText,
                                 fields
                             );
-
+                           
                             if( !subEntitiesCode.success ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
-                                    "result" : {
-                                        "count":0,
+                                    "result" : [{
+                                        "count":2,
                                         "data" : []
-                                    }
+                                    }]
                                 })
                             }
                         
@@ -730,14 +733,14 @@ module.exports = class Observations extends Abstract {
                                 false,
                                 formatForSearchEntities
                             );
-                        
+
                             if( !entitiesData.success ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
-                                    "result" : {
-                                        "count":0,
+                                    "result" : [{
+                                        "count":3,
                                         "data" : []
-                                    }
+                                    }]
                                 })
                             }
                             
@@ -765,10 +768,10 @@ module.exports = class Observations extends Abstract {
                             if( !subEntities.length > 0 ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
-                                    "result" : {
-                                        "count":0,
+                                    "result" : [{
+                                        "count":4,
                                         "data" : []
-                                    }
+                                    }]
                                 })
                             }
                             
@@ -785,26 +788,33 @@ module.exports = class Observations extends Abstract {
 
                             subEntities = [];
                             subEntities = entitiesDocument.data;
-                            
-                            let entityDocument = [];
-                            subEntities.map(entityData => {
-                                let data = {};
-                                data._id = entityData.id;
-                                data.name = entityData.name;
-                                data.externalId = entityData.code;
-                                entityDocument.push(data);
-                            });
+                            if(entitiesDocument.success){
+                                let entityDocument = [];
+                                subEntities.map(entityData => {
+                                    let data = {};
+                                    data._id = entityData.id;
+                                    data.name = entityData.name;
+                                    data.externalId = entityData.code;
+                                    entityDocument.push(data);
+                                });
 
-                            let data = await entitiesHelper.observationSearchEntitiesResponse(
-                                entityDocument,
-                                result.entities
-                            )
-                            
-                            response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
-                            response.result.push({
-                                "data" : data,
-                                "count" : entitiesDocument.count
-                            });
+                                let data = await entitiesHelper.observationSearchEntitiesResponse(
+                                    entityDocument,
+                                    result.entities
+                                )
+                                
+                                response["message"] = messageConstants.apiResponses.ENTITY_FETCHED;
+                                response.result.push({
+                                    "data" : data,
+                                    "count" : entitiesDocument.count
+                                });
+                            }else{
+                                response["message"] = messageConstants.apiResponses.ENTITY_NOT_FOUND;
+                                response.result.push({
+                                    "data" : [],
+                                    "count" : 0
+                                });
+                            }
                         }       
                     }
                     
