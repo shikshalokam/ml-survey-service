@@ -1201,7 +1201,8 @@ module.exports = class ObservationSubmissions extends Abstract {
          await observationSubmissionsHelper.list
           (
           req.query.entityId,
-          req.params._id
+          req.params._id,
+          req.userDetails.userId
           );
         return resolve(submissionDocument);
       } catch (error) {

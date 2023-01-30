@@ -17,7 +17,8 @@ const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
-
+const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper")
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper")
 /**
     * ObservationSubmissionsHelper
     * @class
@@ -407,12 +408,37 @@ module.exports = class ObservationSubmissionsHelper {
     * @param {String} - entityId
     * @param {String} - solutionId
     * @param {String} - observationId
+    * @param {String} - userId
     * @returns {Object} - list of submissions
     */
 
-   static list(entityId,observationId) {
+   static list(entityId,observationId,userId) {
     return new Promise(async (resolve, reject) => {
         try {
+            // get programId from observation
+            let observationDocument = await observationsHelper.observationDocuments({
+                _id: observationId
+            },["programId"])
+            observationDocument = observationDocument[0]
+            if (!observationDocument) {
+                return resolve({ 
+                    status: httpStatusCode.bad_request.status, 
+                    message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
+                });
+            }
+            const query = { 
+                programId: observationDocument.programId,
+                userId: userId
+            };
+      
+            //Check data present in programUsers collection.
+            const programUsers = await programUsersHelper.find(
+                query,
+                ["_id"]
+            );
+            let additionalDetails = {
+                programJoined : (programUsers.length > 0) ? true : false
+            }
             
             let queryObject = {
                 entityId: entityId,
@@ -441,7 +467,7 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.submissions",
                 "evidencesStatus.canBeNotApplicable",
                 "evidencesStatus.canBeNotAllowed",
-                "evidencesStatus.notApplicable",
+                "evidencesStatus.notApplicable"
             ];
             let result = await this.observationSubmissionsDocument
             (
@@ -456,7 +482,8 @@ module.exports = class ObservationSubmissionsHelper {
                 return resolve({
                     status : httpStatusCode.ok.status,
                     message : messageConstants.apiResponses.SUBMISSION_NOT_FOUND,
-                    result : []
+                    result : [],
+                    additionalDetails : additionalDetails
                 })
             }
 
@@ -496,7 +523,8 @@ module.exports = class ObservationSubmissionsHelper {
 
             return resolve({
                 message : messageConstants.apiResponses.OBSERVATION_SUBMISSIONS_LIST_FETCHED,
-                result : result
+                result : result,
+                additionalDetails : additionalDetails
             })
         } catch (error) {
             return reject(error);
