@@ -15,6 +15,7 @@ const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper")
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
+const coreService = require(ROOT_PATH + "/generics/services/core");
 
 /**
     * Observations
@@ -1065,6 +1066,7 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
+                let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
 
                 let response = {
                     message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
@@ -1085,7 +1087,25 @@ module.exports = class Observations extends Abstract {
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
+                // join observation's program. PII data consent is given via this api call.
+                if ( appVersion !== "" && appVersion < 5.2 ) {
+                    let programJoinData = {};
+                    programJoinData.userRoleInformation = req.body.userRoleInformation;
 
+                    let joinProgram = await coreService.joinProgram (
+                        req.userDetails.userToken,
+                        programJoinData,
+                        observationDocument.programId
+                    );
+                    
+                    if ( !joinProgram.success ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                        });
+                    }
+                }
+                
                 let filterData = {
                     "type" : observationDocument.entityType
                 };

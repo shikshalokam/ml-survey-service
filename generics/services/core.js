@@ -361,6 +361,62 @@ const downloadableUrls = function (bodyData) {
     })
 
 }
+
+/**
+  * Join program.
+  * @function
+  * @name joinProgram
+  * @param {String} token - User token.
+  * @param {Object} bodyData - Requested body data.
+  * @param {String} programId - program id.
+  * @returns {JSON} - Details of program join.
+*/
+
+const joinProgram = function ( token,bodyData,programId ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+            const url = 
+            coreServiceBaseURL + messageConstants.endpoints.JOIN_PROGRAM + "/" + programId;
+
+            const options = {
+                headers : {
+                    "content-type": "application/json",
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
+                    "x-authenticated-user-token" : token
+                },
+                json : bodyData
+            };
+
+            request.post(url,options,kendraCallback);
+
+            function kendraCallback(err, data) {
+
+                let result = {
+                    success : true
+                };
+
+                if (err) {
+                    result.success = false;
+                } else {
+                    
+                    let response = data.body;
+                    console.log("response :",response)
+                    if( response.status === httpStatusCode['ok'].status ) {
+                        result["data"] = response.result;
+                    } else {
+                        result.success = false;
+                    }
+                }
+
+                return resolve(result);
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
  
 module.exports = {
     getDownloadableUrl : getDownloadableUrl,
@@ -369,5 +425,6 @@ module.exports = {
     getUsersByEntityAndRole : getUsersByEntityAndRole,
     solutionBasedOnRoleAndLocation : solutionBasedOnRoleAndLocation,
     solutionDetailsBasedOnRoleAndLocation : solutionDetailsBasedOnRoleAndLocation,
-    downloadableUrls: downloadableUrls
+    downloadableUrls: downloadableUrls,
+    joinProgram: joinProgram
 };

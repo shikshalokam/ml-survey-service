@@ -21,5 +21,6 @@ module.exports = {
     USER_READ_V5 : "/v5/user/read",
     GET_LOCATION_DATA : "/v1/location/search",
     GET_FORM_DATA : "/plugin/v1/form/read",
-    GET_SCHOOL_DATA : "/v1/org/search"
+    GET_SCHOOL_DATA : "/v1/org/search",
+    JOIN_PROGRAM : "/v1/programs/join"
 }
