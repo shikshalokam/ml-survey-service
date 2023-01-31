@@ -1091,7 +1091,7 @@ module.exports = class Observations extends Abstract {
                 if ( appVersion !== "" && appVersion < 5.2 ) {
                     let programJoinData = {};
                     programJoinData.userRoleInformation = req.body.userRoleInformation;
-
+                    programJoinData.isResource = true;
                     let joinProgram = await coreService.joinProgram (
                         req.userDetails.userToken,
                         programJoinData,
