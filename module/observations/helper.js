@@ -23,6 +23,7 @@ const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const formService = require(ROOT_PATH + "/generics/services/form");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper")
 
 /**
     * ObservationsHelper
@@ -1772,7 +1773,7 @@ module.exports = class ObservationsHelper {
                 
                 let observationData = await this.observationDocuments({
                     _id : observationId,
-                },["_id","solutionId"]);
+                },["_id","solutionId","programId"]);
                 
                 let solutionData;
                 if(observationData[0]){
@@ -1786,7 +1787,18 @@ module.exports = class ObservationsHelper {
                     ]);
                     
                 }
+
+                const query = { 
+                    programId: observationData[0].programId,
+                    userId: userId
+                };
     
+                //Check data present in programUsers collection.
+                const programUsers = await programUsersHelper.find(
+                    query,
+                    ["_id"]
+                );
+                
                 return resolve({
                     success : true,
                     message : messageConstants.apiResponses.OBSERVATION_ENTITIES_FETCHED,
@@ -1795,7 +1807,8 @@ module.exports = class ObservationsHelper {
                         _id : observationId,
                         "entities" : entitiesList.data.entities,
                         entityType : entitiesList.data.entityType,
-                        "license" :  solutionData[0].license
+                        "license" :  solutionData[0].license,
+                        programJoined : (programUsers.length > 0) ? true : false
                     }
                 });
     
