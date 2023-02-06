@@ -1081,6 +1081,7 @@ module.exports = class Observations extends Abstract {
                 }
                 let observationDocument = await observationsHelper.observationDocuments( queryObject )
                 observationDocument = observationDocument[0]
+                
                 if (!observationDocument) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
@@ -1090,7 +1091,7 @@ module.exports = class Observations extends Abstract {
                 // join observation's program. PII data consent is given via this api call.
                 if ( appVersion !== "" && appVersion < 5.2 ) {
                     let programJoinData = {};
-                    programJoinData.userRoleInformation = req.body.userRoleInformation;
+                    programJoinData.userRoleInformation = req.body;
                     programJoinData.isResource = true;
                     let joinProgram = await coreService.joinProgram (
                         req.userDetails.userToken,
