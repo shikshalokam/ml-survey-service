@@ -437,7 +437,7 @@ module.exports = class ObservationSubmissionsHelper {
                 ["_id"]
             );
             let additionalDetails = {
-                programJoined : (programUsers.length > 0) ? true : false
+                isUserJoinedProgram : (programUsers.length > 0) ? true : false
             }
             
             let queryObject = {

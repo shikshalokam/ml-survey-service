@@ -1089,7 +1089,7 @@ module.exports = class Observations extends Abstract {
                     });
                 }
                 // join observation's program. PII data consent is given via this api call.
-                if ( appVersion !== "" && appVersion < 5.2 ) {
+                if ( appVersion === "" || appVersion < 5.2 ) {
                     let programJoinData = {};
                     programJoinData.userRoleInformation = req.body;
                     programJoinData.isResource = true;

@@ -1808,7 +1808,7 @@ module.exports = class ObservationsHelper {
                         "entities" : entitiesList.data.entities,
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
-                        programJoined : (programUsers.length > 0) ? true : false
+                        isUserJoinedProgram : (programUsers.length > 0) ? true : false
                     }
                 });
     

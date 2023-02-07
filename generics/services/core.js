@@ -401,7 +401,7 @@ const joinProgram = function ( token,bodyData,programId ) {
                 } else {
                     
                     let response = data.body;
-                    console.log("response :",response)
+                    
                     if( response.status === httpStatusCode['ok'].status ) {
                         result["data"] = response.result;
                     } else {
