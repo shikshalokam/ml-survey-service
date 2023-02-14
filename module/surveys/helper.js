@@ -891,7 +891,7 @@ module.exports = class SurveysHelper {
 
                     if (new Date() > new Date(solutionDocument.endDate)) {
                         if (solutionDocument.status == messageConstants.common.ACTIVE_STATUS) {
-                            await solutionHelper.updateSolutionDocument
+                            await solutionsHelper.updateSolutionDocument
                             (
                                 { _id : solutionDocument._id },
                                 { $set : { status: messageConstants.common.INACTIVE_STATUS } }
@@ -1054,6 +1054,7 @@ module.exports = class SurveysHelper {
                     submissionDocument.surveyInformation.startDate = new Date();
 
                     //Fetch user profile information by calling sunbird's user read api.
+                    let addReportInfoToSolution = false;
                     let userProfileData = {};
                     let userProfile = await userProfileService.profile(userToken, userId);
                     if ( userProfile.success && 
@@ -1061,6 +1062,7 @@ module.exports = class SurveysHelper {
                         userProfile.data.response
                     ) {
                         userProfileData = userProfile.data.response;
+                        addReportInfoToSolution = true;
                     } 
                     submissionDocument.userProfile = userProfileData;
                     
@@ -1089,6 +1091,14 @@ module.exports = class SurveysHelper {
                     
                     if (submissionDoc._id) {
                         assessment.submissionId = submissionDoc._id;
+                        //once survey submission created add reportInformation to survey solution
+                        if ( addReportInfoToSolution && submissionDoc.solutionId ) {
+                            let updateSolution = await solutionsHelper.addReportInformationInSolution(
+                                submissionDoc.solutionId,
+                                submissionDoc.userProfile
+                            );
+                        }
+        
                     }
                 }
                 
