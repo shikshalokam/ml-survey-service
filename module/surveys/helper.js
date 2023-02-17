@@ -1689,10 +1689,11 @@ module.exports = class SurveysHelper {
     * @param {String} pageNo - page number.
     * @param {String} search - search text.
     * @param {String} filter - filter text.
+    * @param {String} solutionId - survey solution Id.
     * @returns {Object}
    */
 
-   static userAssigned( userId,pageSize,pageNo,search = "",filter, surveyReportPage = "") {
+   static userAssigned( userId,pageSize,pageNo,search = "",filter, surveyReportPage = "" , solutionId = "") {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -1734,7 +1735,8 @@ module.exports = class SurveysHelper {
                 pageSize,
                 search,
                 filter,
-                surveyReportPage
+                surveyReportPage,
+                solutionId
             )
             
             if( surveySubmissions.success && surveySubmissions.data.data.length > 0 ) {
