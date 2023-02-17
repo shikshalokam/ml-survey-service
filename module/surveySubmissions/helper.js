@@ -462,7 +462,7 @@ module.exports = class SurveySubmissionsHelper {
                 }
                 // update match query if solutionId is providec 
                 if ( solutionId && solutionId !== "" ) {
-                    submissionMatchQuery["$match"]["solutionId"] = solutionId;
+                    submissionMatchQuery["$match"]["solutionId"] = ObjectId(solutionId);
                 }
                 
                 let surveySubmissions = await database.models.surveySubmissions.aggregate
