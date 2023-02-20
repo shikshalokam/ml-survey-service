@@ -791,7 +791,8 @@ module.exports = class Surveys extends Abstract {
                     req.pageNo,
                     req.searchText,
                     req.query.filter,
-                    req.query.surveyReportPage
+                    req.query.surveyReportPage,
+                    req.query.solutionId
                 );
 
                 return resolve({

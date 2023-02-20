@@ -421,10 +421,11 @@ module.exports = class SurveySubmissionsHelper {
     * @param {String} pageNo - page number
     * @param {String} pageSize - page size.
     * @param {String} filter - filter text.
+    * @param {String} solutionId - survey solution Id.
     * @returns {Json} - survey list.
     */
 
-    static surveyList(userId = "", pageNo, pageSize, search,filter, surveyReportPage = "") {
+    static surveyList(userId = "", pageNo, pageSize, search,filter, surveyReportPage = "", solutionId = "") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -459,7 +460,11 @@ module.exports = class SurveySubmissionsHelper {
                         submissionMatchQuery["$match"]["isAPrivateProgram"] = false;
                     }
                 }
-
+                // update match query if solutionId is providec 
+                if ( solutionId && solutionId !== "" ) {
+                    submissionMatchQuery["$match"]["solutionId"] = ObjectId(solutionId);
+                }
+                
                 let surveySubmissions = await database.models.surveySubmissions.aggregate
                 (
                     [
