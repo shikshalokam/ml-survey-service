@@ -369,17 +369,19 @@ const downloadableUrls = function (bodyData) {
   * @param {String} token - User token.
   * @param {Object} bodyData - Requested body data.
   * @param {String} programId - program id.
+  * @param {Number} appVersion - appVersion.
+  * @param {String} appName - appName.
   * @returns {JSON} - Details of program join.
 */
 
-const joinProgram = function ( token,bodyData,programId ) {
+const joinProgram = function ( token, bodyData, programId, appVersion = "", appName = "") {
     return new Promise(async (resolve, reject) => {
         try {
             
             const url = 
             coreServiceBaseURL + messageConstants.endpoints.JOIN_PROGRAM + "/" + programId;
-
-            const options = {
+            
+            let options = {
                 headers : {
                     "content-type": "application/json",
                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
@@ -387,7 +389,14 @@ const joinProgram = function ( token,bodyData,programId ) {
                 },
                 json : bodyData
             };
+            if ( appVersion !== "" ) {
+                options.headers.appversion = appVersion;
+            }
 
+            if ( appName !== "" ) {
+                options.headers.appname = appName;
+            } 
+            
             request.post(url,options,kendraCallback);
 
             function kendraCallback(err, data) {

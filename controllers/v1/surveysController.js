@@ -634,6 +634,7 @@ module.exports = class Surveys extends Abstract {
     return new Promise(async (resolve, reject) => {
         try {
             let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
+            let appName = req.headers["x-app-id"]  ? req.headers["x-app-id"]  : req.headers.appname ? req.headers.appname : "";
             let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
             let surveyDetails = {};
@@ -649,7 +650,8 @@ module.exports = class Surveys extends Abstract {
                     req.query.solutionId,
                     req.userDetails.userId,
                     req.userDetails.userToken,
-                    appVersion
+                    appVersion,
+                    appName
                 );
                 
             } else {
@@ -662,7 +664,8 @@ module.exports = class Surveys extends Abstract {
                     req.userDetails.userToken,
                     bodyData,
                     "",
-                    appVersion
+                    appVersion,
+                    appName
                 );
             }
 

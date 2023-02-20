@@ -16,6 +16,7 @@ const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * Observations
@@ -1067,7 +1068,7 @@ module.exports = class Observations extends Abstract {
 
             try {
                 let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
-
+                let appName = req.headers["x-app-id"]  ? req.headers["x-app-id"]  : req.headers.appname ? req.headers.appname : "";
                 let response = {
                     message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
                     result: {}
@@ -1089,14 +1090,26 @@ module.exports = class Observations extends Abstract {
                     });
                 }
                 // join observation's program. PII data consent is given via this api call.
-                if ( appVersion === "" || appVersion < 5.2 ) {
+                // check if already joined the program
+                //Check data present in programUsers collection.
+                const programUsers = await programUsersHelper.programUsersDocuments(
+                    {
+                        userId : req.userDetails.userId,
+                        programId : observationDocument.programId
+                    },
+                    ["_id"]
+                );
+                
+                if ( !programUsers.length > 0 && ( appVersion === "" || appVersion < 5.2 ) ) {
                     let programJoinData = {};
                     programJoinData.userRoleInformation = req.body;
                     programJoinData.isResource = true;
                     let joinProgram = await coreService.joinProgram (
                         req.userDetails.userToken,
                         programJoinData,
-                        observationDocument.programId
+                        observationDocument.programId,
+                        appVersion,
+                        appName
                     );
                     
                     if ( !joinProgram.success ) {
@@ -1105,6 +1118,11 @@ module.exports = class Observations extends Abstract {
                             message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
                         });
                     }
+                } else {
+                    await programUsersHelper.update(
+                        { _id : programUsers[0]._id },
+                        {  '$inc' : { noOfResourcesStarted : 1 } }
+                    );
                 }
                 
                 let filterData = {

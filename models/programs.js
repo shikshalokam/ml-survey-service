@@ -43,6 +43,10 @@ module.exports = {
           index : true
         }
       }]
+    },
+    programAuthorOrgId: {
+      type: String,
+      required: true
     }
   }
 };

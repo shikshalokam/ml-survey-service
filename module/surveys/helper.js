@@ -21,7 +21,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
-const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper")
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * SurveysHelper
@@ -685,10 +685,12 @@ module.exports = class SurveysHelper {
      * @param {String} link - link 
      * @param {String} userId - userId
      * @param {String} token  - user access token
+     * @param {Number} appVersion  - application version
+     * @param {String} appName  - App name
      * @returns {JSON} - returns survey solution,program and question details.
      */
 
-    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {}, version = "", appVersion = "") {
+    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {}, version = "", appVersion = "", appName = "" ) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -789,7 +791,8 @@ module.exports = class SurveysHelper {
                     validateSurvey.data.submissionId,
                     roleInformation,
                     token,
-                    appVersion
+                    appVersion,
+                    appName
                 )
 
                 if (!surveyDetails.success) {
@@ -822,10 +825,11 @@ module.exports = class SurveysHelper {
       * @param {String} userId - userId
       * @param {String} userToken - userToken.
       * @param {Number} appVersion - appVersion.
+      * @param {String} appName - app name.
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", appVersion = "") {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", appVersion = "", appName = "") {
         return new Promise(async (resolve, reject) => {
             try {
                 
@@ -937,17 +941,17 @@ module.exports = class SurveysHelper {
                     result.program = programDocument[0];
                     // check if user joined the program or not
                     const query = { 
-                        programId: programDocument[0]._id,
-                        userId: userId
+                        userId: userId,
+                        programId: programDocument[0]._id
                     };
         
                     //Check data present in programUsers collection.
-                    const programUsers = await programUsersHelper.find(
+                    const programUsers = await programUsersHelper.programUsersDocuments(
                         query,
                         ["_id"]
                     );
-                    // if isUserJoinedProgram key is false, user not joined the program.
-                    result.isUserJoinedProgram = (programUsers.length > 0) ? true : false
+                    // if programJoined key is false, user not joined the program.
+                    result.programJoined = (programUsers.length > 0) ? true : false
                 }
 
                 let assessment = {};
@@ -1053,21 +1057,40 @@ module.exports = class SurveysHelper {
 
                 } else {
                     // join survey's program. PII data consent is given via this api call.
-                    if ( solutionDocument.programId && ( appVersion === "" || appVersion < 5.2 ) && userToken !== "" && Object.keys(roleInformation).length > 0 ) {
-                        let programJoinData = {};
-                        programJoinData.userRoleInformation = roleInformation;
-                        programJoinData.isResource = true;
-                        let joinProgram = await coreService.joinProgram (
-                            userToken,
-                            programJoinData,
-                            solutionDocument.programId
+                    if ( solutionDocument.programId && userToken !== "" ) {
+                        // check if already joined the program
+                        //Check data present in programUsers collection.
+                        const programUsers = await programUsersHelper.programUsersDocuments(
+                            {
+                                userId : userId,
+                                programId : solutionDocument.programId
+                            },
+                            ["_id"]
                         );
                         
-                        if ( !joinProgram.success ) {
-                            return resolve({ 
-                                status: httpStatusCode.bad_request.status, 
-                                message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                            });
+                        if ( !programUsers.length > 0 && ( appVersion === "" || appVersion < 5.2 ) ) {
+                            let programJoinData = {};
+                            programJoinData.userRoleInformation = roleInformation;
+                            programJoinData.isResource = true;
+                            let joinProgram = await coreService.joinProgram (
+                                userToken,
+                                programJoinData,
+                                solutionDocument.programId,
+                                appVersion,
+                                appName
+                            );
+                            
+                            if ( !joinProgram.success ) {
+                                return resolve({ 
+                                    status: httpStatusCode.bad_request.status, 
+                                    message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                                });
+                            }
+                        } else {
+                            await programUsersHelper.update(
+                                { _id : programUsers[0]._id },
+                                {  '$inc' : { noOfResourcesStarted : 1 } }
+                            );
                         }
                     }
                     let submissionDocument = {
@@ -1612,8 +1635,7 @@ module.exports = class SurveysHelper {
                         userId,
                         solutionData.data,
                         token,
-                        bodyData,
-                        appVersion
+                        bodyData
                     )
 
                     if (!createSurveyDocument.success) {
@@ -1650,10 +1672,11 @@ module.exports = class SurveysHelper {
       * @param {String} userId - logged in userId
       * @param {String} token - logged in user token
       * @param {Number} appVersion - application version
+      * @param {String} appName - application name
       * @returns {JSON} - returns survey solution, program and questions.
     */
 
-   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "", appVersion = "") {
+   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "", appVersion = "", appName = "") {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -1687,7 +1710,8 @@ module.exports = class SurveysHelper {
                 validateSurvey.data.submissionId,
                 bodyData,
                 token,
-                appVersion
+                appVersion,
+                appName
             )
 
             if (!surveyDetails.success) {

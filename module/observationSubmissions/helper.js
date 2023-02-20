@@ -427,17 +427,17 @@ module.exports = class ObservationSubmissionsHelper {
                 });
             }
             const query = { 
-                programId: observationDocument.programId,
-                userId: userId
+                userId: userId,
+                programId: observationDocument.programId
             };
       
             //Check data present in programUsers collection.
-            const programUsers = await programUsersHelper.find(
+            const programUsers = await programUsersHelper.programUsersDocuments(
                 query,
                 ["_id"]
             );
             let additionalDetails = {
-                isUserJoinedProgram : (programUsers.length > 0) ? true : false
+                programJoined : (programUsers.length > 0) ? true : false
             }
             
             let queryObject = {

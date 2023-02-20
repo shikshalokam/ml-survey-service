@@ -23,7 +23,7 @@ const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const formService = require(ROOT_PATH + "/generics/services/form");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
-const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper")
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * ObservationsHelper
@@ -1789,12 +1789,12 @@ module.exports = class ObservationsHelper {
                 }
 
                 const query = { 
+                    userId: userId,
                     programId: observationData[0].programId,
-                    userId: userId
-                };
+                }
     
                 //Check data present in programUsers collection.
-                const programUsers = await programUsersHelper.find(
+                const programUsers = await programUsersHelper.programUsersDocuments(
                     query,
                     ["_id"]
                 );
@@ -1808,7 +1808,7 @@ module.exports = class ObservationsHelper {
                         "entities" : entitiesList.data.entities,
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
-                        isUserJoinedProgram : (programUsers.length > 0) ? true : false
+                        programJoined : (programUsers.length > 0) ? true : false
                     }
                 });
     
