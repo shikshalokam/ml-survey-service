@@ -792,7 +792,7 @@ module.exports = class Surveys extends Abstract {
                     req.searchText,
                     req.query.filter,
                     req.query.surveyReportPage,
-                    req.query.solutionId
+                    ( req.body && req.body.solutionIds ) ? req.body.solutionIds : []
                 );
 
                 return resolve({

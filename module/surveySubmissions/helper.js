@@ -421,11 +421,11 @@ module.exports = class SurveySubmissionsHelper {
     * @param {String} pageNo - page number
     * @param {String} pageSize - page size.
     * @param {String} filter - filter text.
-    * @param {String} solutionId - survey solution Id.
+    * @param {Array} solutionIds - survey solution Ids.
     * @returns {Json} - survey list.
     */
 
-    static surveyList(userId = "", pageNo, pageSize, search,filter, surveyReportPage = "", solutionId = "") {
+    static surveyList(userId = "", pageNo, pageSize, search,filter, surveyReportPage = "", solutionIds = []) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -460,9 +460,14 @@ module.exports = class SurveySubmissionsHelper {
                         submissionMatchQuery["$match"]["isAPrivateProgram"] = false;
                     }
                 }
+                
                 // update match query if solutionId is providec 
-                if ( solutionId && solutionId !== "" ) {
-                    submissionMatchQuery["$match"]["solutionId"] = ObjectId(solutionId);
+                if ( solutionIds.length > 0 ) {
+                    let solutionsMongoId = [];
+                    solutionIds.forEach(element => {
+                        solutionsMongoId.push(ObjectId(element))
+                    })
+                    submissionMatchQuery["$match"]["solutionId"] = {$in:solutionsMongoId};
                 }
                 
                 let surveySubmissions = await database.models.surveySubmissions.aggregate
@@ -502,7 +507,7 @@ module.exports = class SurveySubmissionsHelper {
                         }
                     ]
                 )
-
+                   
                 if (surveySubmissions[0].data && surveySubmissions[0].data.length > 0) {
                     await Promise.all(surveySubmissions[0].data.map( async surveySubmission => {
 
@@ -511,7 +516,7 @@ module.exports = class SurveySubmissionsHelper {
                           },[
                             "endDate"
                         ]);
-
+                        
                         let solutionEndDate;
                         if(solutionDetail && solutionDetail.length > 0){
                             solutionEndDate = solutionDetail[0].endDate;
