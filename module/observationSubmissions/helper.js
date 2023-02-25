@@ -426,6 +426,14 @@ module.exports = class ObservationSubmissionsHelper {
                     message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                 });
             }
+            //get rootOrganisations data from program 
+            let programDocument = 
+                await programsHelper.list(
+                    {
+                        _id: observationSubmissionsDocument.programId,
+                    },
+                    ["rootOrganisations"],
+                );
             const query = { 
                 userId: userId,
                 programId: observationDocument.programId
@@ -437,7 +445,8 @@ module.exports = class ObservationSubmissionsHelper {
                 ["_id"]
             );
             let additionalDetails = {
-                programJoined : (programUsers.length > 0) ? true : false
+                programJoined : (programUsers.length > 0) ? true : false,
+                rootOrganisations : ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
             }
             
             let queryObject = {

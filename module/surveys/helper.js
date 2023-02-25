@@ -926,7 +926,8 @@ module.exports = class SurveysHelper {
                             "name",
                             "description",
                             "imageCompression",
-                            "isAPrivateProgram"
+                            "isAPrivateProgram",
+                            "rootOrganisations"
                         ]
                     );
                 }
@@ -952,6 +953,7 @@ module.exports = class SurveysHelper {
                     );
                     // if programJoined key is false, user not joined the program.
                     result.programJoined = (programUsers.length > 0) ? true : false
+                    result.rootOrganisations = ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
                 }
 
                 let assessment = {};

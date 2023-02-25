@@ -44,9 +44,7 @@ module.exports = {
         }
       }]
     },
-    programAuthorOrgId: {
-      type: String,
-      required: true
-    }
+    rootOrganisations : Array,
+    createdFor : Array
   }
 };

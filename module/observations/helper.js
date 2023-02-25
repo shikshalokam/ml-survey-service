@@ -1776,6 +1776,8 @@ module.exports = class ObservationsHelper {
                 },["_id","solutionId","programId"]);
                 
                 let solutionData;
+                let programUsers;
+                let programDocument;
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1785,19 +1787,28 @@ module.exports = class ObservationsHelper {
                             "allowMultipleAssessemts",
                             "license"
                     ]);
+
+                    //get rootOrganisations data from program 
+                    programDocument = 
+                    await programsHelper.list(
+                        {
+                            _id: observationData[0].programId,
+                        },
+                        ["rootOrganisations"],
+                    );
+
+                    const query = { 
+                        userId: userId,
+                        programId: observationData[0].programId,
+                    }
+        
+                    //Check data present in programUsers collection.
+                    programUsers = await programUsersHelper.programUsersDocuments(
+                        query,
+                        ["_id"]
+                    );
                     
                 }
-
-                const query = { 
-                    userId: userId,
-                    programId: observationData[0].programId,
-                }
-    
-                //Check data present in programUsers collection.
-                const programUsers = await programUsersHelper.programUsersDocuments(
-                    query,
-                    ["_id"]
-                );
                 
                 return resolve({
                     success : true,
@@ -1808,7 +1819,8 @@ module.exports = class ObservationsHelper {
                         "entities" : entitiesList.data.entities,
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
-                        programJoined : (programUsers.length > 0) ? true : false
+                        programJoined : (programUsers.length > 0) ? true : false,
+                        rootOrganisations : ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
                     }
                 });
     
