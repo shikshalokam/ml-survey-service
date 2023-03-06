@@ -1,4 +1,5 @@
 const { default: axios } = require("axios");
+const { request } = require("chai");
 const { CONFIG } = require("../constant/config");
 const { getHeaders } = require("./headers");
 
@@ -18,7 +19,8 @@ const createProgram = async (templateData) => {
     data: data,
   };
 
-  const res = await axios(config);
+  const res = await axios(config).catch(err => {});
+
   return res?.data?.result?.program_id;
 };
 
@@ -56,7 +58,7 @@ const publishProgram = async (templateData) => {
   const res = await axios(config);
   return res.data;
 };
-const nominateProgram = async (program_id, author) => {
+const nominateProgram = async (program_id, orgAdmin) => {
   const url =
     CONFIG.HOST.creation_portal + CONFIG.APIS.add_program_nomination;
   const data = {
@@ -64,6 +66,7 @@ const nominateProgram = async (program_id, author) => {
       program_id: program_id,
       status: "Pending",
       collection_ids: [],
+      createdby: orgAdmin?.srcOrgAdminId,
       targetprimarycategories: [
         {
           name: "Observation",
@@ -77,8 +80,8 @@ const nominateProgram = async (program_id, author) => {
         },
       ],
       content_types: [],
-      organisation_id: process.env.DEFAULT_PROGRAM_CREATOR_ORGANISATION_ID,
-      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
+      organisation_id: orgAdmin?.org_id,
+      user_id: orgAdmin?.mappedUserId||  process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
     },
   };
   const config = {

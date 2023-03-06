@@ -17,8 +17,9 @@ const CONFIG = {
   },
   APIS: {
     token: process.env.GEN_TOKEN || "auth/realms/sunbird/protocol/openid-connect/token",
-    read_user: process.env.READ_USER || "api/user/v5/read/",
+    read_user: process.env.READ_USER || "api/user/v5/read",
     search_user: process.env.SEARCH_USER || "api/user/v3/search",
+    open_saber_user_org_search: process.env.OPEN_SABER_USER_ORG_SEARCH || "api/reg/search",
     create_questionset: process.env.CREATE_QUESTION_SET || "api/questionset/v1/create",
     update_hierarchy: process.env.UPDATE_QUESTION_SET_HIERARCHY || "api/questionset/v1/hierarchy/update",
     publish_questionset: process.env.PUBLISH_QUESTION_SET || "api/questionset/v1/publish",

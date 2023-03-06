@@ -36,7 +36,9 @@ const getDateTemplate = (question) => {
       };
     } else if (keyL === "interactions") {
       template[key] = {
-        validation: question["validation"],
+        validation: {
+          required: question["validation"]["required"] ? 'Yes' : 'No',
+        },
         response1: {
           validation: {
             pattern: question["dateFormat"],
@@ -80,7 +82,7 @@ const getSliderTemplate = (question) => {
     } else if (keyL === "interactions") {
       template[key] = {
         validation: {
-          required: question["validation"]["required"],
+          required: question["validation"]["required"] ? 'Yes' : 'No',
         },
         response1: {
           validation: {
@@ -150,7 +152,9 @@ const getMSMCQTemplate = (question) => {
       };
     } else if (keyL === "interactions") {
       template[key] = {
-        validation: question["validation"],
+        validation: {
+          required: question["validation"]["required"] ? 'Yes' : 'No',
+        },
         response1: {
           type: "choice",
           options: getOptions(question["options"]),
@@ -174,8 +178,9 @@ const getMSMCQTemplate = (question) => {
 
 const getMCQTemplate = (question) => {
   const template = {};
-  console.log("getMcq");
-
+  console.log();
+  console.log("getMcq", JSON.stringify(questionTemplate.mcq));
+  console.log();
 
   for (let key in questionTemplate.mcq) {
     const keyL = key.toLowerCase();
@@ -192,7 +197,9 @@ const getMCQTemplate = (question) => {
       };
     } else if (keyL === "interactions") {
       template[key] = {
-        validation: question["validation"],
+        validation: {
+          required: question["validation"]["required"] ? 'Yes' : 'No',
+        },
         response1: {
           type: "choice",
           options: getOptions(question["options"]),
@@ -234,7 +241,7 @@ const getTextTemplate = (question, type) => {
     } else if (keyL === "interactions") {
       template[key] = {
         validation: {
-          required: question["validation"]["required"],
+          required: question["validation"]["required"] ? 'Yes' : 'No',
         },
         response1: {
           validation: {
@@ -264,7 +271,6 @@ const getTextTemplate = (question, type) => {
       template[key] = question[questionTemplate.text[key]] || "";
     }
   }
-
   return template;
 };
 

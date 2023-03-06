@@ -12,35 +12,43 @@ const { createSection } = require("../migrate/matrix");
 const { getNonMatrixQuestions } = require("../migrate/nonmatrix");
 
 const getQuestionSetTemplates = async (solutions, migratedCount) => {
-  const data = Promise.all(
-    solutions.map(async (solution) => {
+  const data = [];
+    // solutions.map(async (solution) => {
+      for (let solution of solutions) {
       let programId = solution?.migrationReference?.sourcingProgramId;
-      programId = await createProgramTemplate(
+      const programData = await createProgramTemplate(
         solution,
         programId,
         migratedCount
-      );
+      ).catch(error => {
+        console.log("Errror", error);
+      });
+      programId = programData?.programId;
+      solution.author = programData?.contributor?.mappedUserId ? programData?.contributor?.mappedUserId : solution.author;
       logger.debug(
         `-----------------------sourcingProgramId----------------------
         ${programId}`
       );
-
-      if (!programId) {
-        return;
+      // if (!programId) {
+      //   return;
+      // }
+      // data.push(programId)
+      // return;
+      if (programId) {
+        data.push(await migrateQuestionset(solution, programId, migratedCount, programData?.contributor));
       }
-
-      return await migrateQuestionset(solution, programId, migratedCount);
-    })
-  );
+    // })
+  }
+  
   return data;
 };
 
-const migrateQuestionset = async (solution, programId, migratedCount) => {
+const migrateQuestionset = async (solution, programId, migratedCount, contributor) => {
   logger.debug(
     `-----------------------migrateQuestionset----------------------
     ${programId}`
   );
-  let templateData = setQuestionSetTemplate(solution, programId);
+  let templateData = setQuestionSetTemplate(solution, programId, contributor);
   const questionSetId = solution?._id.toString();
 
   let questionSetMigratedId = solution.referenceQuestionSetId;
@@ -50,11 +58,11 @@ const migrateQuestionset = async (solution, programId, migratedCount) => {
   } else {
     questionSetMigratedId = await createQuestionSet(templateData).catch(
       (err) => {
-        logger.error(`migrateQuestionset: Error while creating Questionset for solution_id: ${questionsetid} Error:
+        logger.error(`migrateQuestionset: Error while creating Questionset for solution_id: ${questionSetId} Error:
                         ${JSON.stringify(err?.response?.data)}`);
-        if (!migratedCount.failed.questionSet.migrated.ids.includes(id)) {
+        if (!migratedCount.failed.questionSet.migrated.ids.includes(questionSetId)) {
           migratedCount.failed.questionSet.migrated.count++;
-          migratedCount.failed.questionSet.migrated.ids.push(id);
+          migratedCount.failed.questionSet.migrated.ids.push(questionSetId);
         }
       }
     );

@@ -172,6 +172,7 @@ const questionTemplate = {
     name: "Migrated Question",
     code: "externalId",
     description: "",
+    showRemarks: "showRemarks",
     mimeType: "application/vnd.sunbird.question",
     primaryCategory: "Multiselect Multiple Choice Question",
     interactionTypes: ["choice"],

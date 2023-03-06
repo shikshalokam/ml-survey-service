@@ -5,11 +5,15 @@ var Logger = require("bunyan");
 const date =
   new Date().getDate() +
   "-" +
-  new Date().getMonth() +
+  (new Date().getMonth() + 1)  +
   "-" +
   new Date().getFullYear();
 
-fs.existsSync("logs") || fs.mkdirSync("logs");
+  var dir = __dirname + '/logs';
+  
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  } ;
 
 var logger = new Logger({
   name: "creation-portal-migration",

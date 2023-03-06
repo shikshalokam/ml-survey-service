@@ -1,4 +1,4 @@
-const { isEmpty } = require("lodash");
+const { isEmpty, pick, has } = require("lodash");
 const {
   createProgram,
   updateProgram,
@@ -6,8 +6,11 @@ const {
   nominateProgram,
   updateContributorToProgram,
 } = require("../../api-list/program");
-const { searchUser } = require("../../api-list/user");
 const logger = require("../../logger");
+const {
+  getContributorAndSrcAdminData,
+  updateCsvFile,
+} = require("../helpers/csvHelper");
 const { updateSolutionById } = require("../helpers/questionsetHelper");
 
 const getDate = (increment) => {
@@ -19,17 +22,34 @@ const getDate = (increment) => {
 };
 
 const createProgramTemplate = async (solution, program_id, migratedCount) => {
-  const userData = await searchUser(solution.author);
+  const userData = await getContributorAndSrcAdminData(solution, program_id);
 
-  const userId =
-    userData?.length > 0
-      ? solution.author
-      : process.env.DEFAULT_USER_ID_TO_CREATE_PROGRAM;
-  const rootOrgId =
-    userData?.length > 0 ? userData[0]?.rootOrgId : process.env.DEFAULT_CONTRIBUTOR_USER_CHANNEL_ID;
+  if (!userData?.srcOrgAdmin) {
+    return;
+  }
+  if (has(solution, 'migrationReference')) {
+    solution.migrationReference.sourcingProgramId = userData?.srcOrgAdmin?.programId.trim() ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
+  } else {
+    const programId = userData?.srcOrgAdmin?.programId.trim() ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
+    solution = {
+      ...solution,
+      migrationReference:{
+        sourcingProgramId: programId
+      }
+    }
+  }
 
+  const id = `${solution._id}`;
+  const userId = userData?.srcOrgAdmin
+    ? userData?.srcOrgAdmin?.srcOrgAdminId
+    : process.env.DEFAULT_SRC_ORG_ADMIN_TO_CREATE_PROGRAM;
+  const rootOrgId = userData?.srcOrgAdmin
+    ? userData?.srcOrgAdmin?.rootOrgId
+    : process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID;
+
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const template = {
-    name: `Migrated ${solution?.name} sourcing project`,
+    name: `MIGRATED ${months[new Date().getMonth()]} ${new Date().getDate()} ${new Date().getFullYear()} ${solution?.name} sourcing project`,
     description: `${solution?.name} sourcing project description`,
     nomination_enddate: `${getDate(1)}`,
     rewards: null,
@@ -40,7 +60,9 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     target_type: "searchCriteria",
     content_types: [],
     target_collection_category: [],
-    sourcing_org_name: process.env.DEFAULT_USER_SOURCING_ORG_NAME_TO_CREATE_PROGRAM,
+    sourcing_org_name:
+      userData?.srcOrgAdmin?.rootOrgName ||
+      process.env.DEFAULT_USER_SRC_ORG_NAME_TO_CREATE_PROGRAM,
     rootorg_id: rootOrgId,
     createdby: userId,
     createdOn: `${getDate(0)}`,
@@ -74,18 +96,29 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   let query = {};
 
   if (!program_id) {
-    programId = await createProgram(template).catch((err) => {
-      logger.error(`Error while creating program for solution_id: ${
-        solution?._id
-      } Error:
-     ${JSON.stringify(err.response.data)}`);
-      migratedCount.failed.program.migrated.count++;
-      if (!migratedCount.failed.program.migrated.ids.includes(id)) {
-        migratedCount.failed.program.migrated.ids.push(id);
-      }
-      // updateFailedCount(migratedCount, "migrated", solution?._id);
-    });
-    if (!programId) {
+    if (isEmpty(programId)) {
+      programId = await createProgram(template).catch((err) => {
+        logger.error(`Error while creating program for solution_id: ${
+          solution?._id
+        } Error:
+       ${JSON.stringify(err?.response?.data)}`);
+        migratedCount.failed.program.migrated.count++;
+        if (!migratedCount.failed.program.migrated.ids.includes(id)) {
+          migratedCount.failed.program.migrated.ids.push(id);
+        }
+      });
+      programName = ``
+      programId &&
+        (await updateCsvFile(
+          userData.csvData,
+          userData.srcOrgAdmin,
+          programId,
+          template?.name
+        ));
+    } else {
+      migratedCount.success.program.existing.migrated++;
+    }
+    if (isEmpty(programId)) {
       return;
     }
     logger.info(
@@ -119,7 +152,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   }
 
   if (!solution?.migrationReference?.isSrcProgramPublished) {
-    const pub_res = await publishProgramTemplate(programId, solution?._id);
+    const pub_res = await publishProgramTemplate(programId, solution?._id, userData.srcOrgAdmin);
 
     if (!pub_res) {
       migratedCount.failed.program.published.count++;
@@ -143,17 +176,20 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   }
 
   if (!solution?.migrationReference?.isNominated) {
-    const res = await nominateProgram(programId, userId).catch((err) => {
-      // updateFailedCount(migratedCount, "nominated",  solution?._id);
-      migratedCount.failed.program.nominated.count++;
-      if (!migratedCount.failed.program.nominated.ids.includes(id)) {
-        migratedCount.failed.program.nominated.ids.push(id);
+    console.log();
+    const res =  await nominateProgram(programId, userData?.srcOrgAdmin).catch(
+      (err) => {
+        // updateFailedCount(migratedCount, "nominated",  solution?._id);
+        migratedCount.failed.program.nominated.count++;
+        if (!migratedCount.failed.program.nominated.ids.includes(id)) {
+          migratedCount.failed.program.nominated.ids.push(id);
+        }
+        logger.error(`Error while nominating program for solution_id: ${
+          solution?._id
+        } Error:
+      ${JSON.stringify(err?.response?.data)}`);
       }
-      logger.error(`Error while nominating program for solution_id: ${
-        solution?._id
-      } Error:
-      ${JSON.stringify(err.response.data)}`);
-    });
+    );
     if (!res) {
       await updateSolutionDb(query, solution, migratedCount);
       return;
@@ -170,9 +206,14 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   if (!solution?.migrationReference?.isContributorAdded) {
     const add_contri = {
       program_id: programId,
-      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
+      user_id:
+        userData?.srcOrgAdmin?.contributorOrgAdminId ||
+        process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
       rolemapping: {
-        CONTRIBUTOR: [process.env.DEFAULT_CONTRIBUTOR_USER_ID],
+        CONTRIBUTOR: [
+          userData?.mappedUserId ||
+            process.env.DEFAULT_CONTRIBUTOR_USER_ID,
+        ],
       },
     };
 
@@ -186,7 +227,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
         logger.error(`Error while adding contributor program for solution_id: ${
           solution?._id
         } Error:
-        ${JSON.stringify(err.response.data)}`);
+        ${JSON.stringify(err?.response?.data)}`);
       }
     );
 
@@ -206,16 +247,18 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   if (!solution?.migrationReference?.isContributorAccepted) {
     const accept_contri = {
       program_id: programId,
-      user_id: process.env.DEFAULT_USER_ID_TO_ADD_CONTRIBUTOR,
+      user_id:
+        userData?.srcOrgAdmin?.mappedUserId ||
+        process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
       status: "Approved",
       updatedby: userId,
     };
-    const update_nom = await updateContributorToProgram(accept_contri).catch(
+    const update_nom =  await updateContributorToProgram(accept_contri).catch(
       (err) => {
         logger.error(`Error while accepting nomination to the program for solution_id: ${
           solution?._id
         } Error:
-        ${JSON.stringify(err.response.data)}`);
+        ${JSON.stringify(err?.response?.data)}`);
         migratedCount.failed.program.accepted.count++;
         if (!migratedCount.failed.program.accepted.ids.includes(id)) {
           migratedCount.failed.program.accepted.ids.push(id);
@@ -240,8 +283,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
   if (!isEmpty(query)) {
     await updateSolutionDb(query, solution, migratedCount);
   }
-
-  return programId;
+  return { programId, contributor: userData?.srcOrgAdmin };
 };
 
 const updateSolutionDb = async (query, solution, migratedCount) => {
@@ -274,7 +316,6 @@ const updateSolutionDb = async (query, solution, migratedCount) => {
   }
 };
 
-
 const updateProgramTemplate = async (program_id, solution) => {
   const template = {
     config: {
@@ -297,9 +338,9 @@ const updateProgramTemplate = async (program_id, solution) => {
       framework: [process.env.DEFAULT_FRAMEWORK_ID],
       frameworkObj: {
         code: process.env.DEFAULT_FRAMEWORK_ID,
-        name: process.env.DEFAULT_FRAMEWORK_ID,
+        name: process.env.DEFAULT_FRAMEWORK_NAME,
         type: process.env.DEFAULT_FRAMEWORK_TYPE,
-        identifier: process.env.DEFAULT_FRAMEWORK,
+        identifier: process.env.DEFAULT_FRAMEWORK_ID,
       },
       sharedContext: [],
     },
@@ -323,20 +364,19 @@ const updateProgramTemplate = async (program_id, solution) => {
     logger.error(`Error while updating program for solution_id: ${
       solution?._id
     } Error:
-      ${JSON.stringify(err.response.data)}`);
+      ${JSON.stringify(err?.response?.data)}`);
   });
   return upd_res;
 };
 
-const publishProgramTemplate = async (program_id, id) => {
+const publishProgramTemplate = async (program_id, id, contributor) => {
   const template = {
-    channel: "sunbird",
+    channel: process.env.DEFAULT_SLUG,
     program_id: program_id,
   };
-
   return await publishProgram(template).catch((err) => {
     logger.error(`Error while publishing program for solution_id: ${id} Error:
-    ${JSON.stringify(err.response.data)}`);
+    ${JSON.stringify(err?.response?.data)}`);
   });
 };
 

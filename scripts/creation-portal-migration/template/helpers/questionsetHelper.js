@@ -5,10 +5,6 @@ const { CONFIG } = require("./../../constant/config");
 const { updateById, findAll } = require("../../db");
 const logger = require("../../logger");
 const {
-  questionSetTemplate,
-  questionSetTemplateStatic,
-} = require("../config/questionSet");
-const {
   getDateTemplate,
   getSliderTemplate,
   getMSMCQTemplate,
@@ -16,28 +12,33 @@ const {
   getTextTemplate,
 } = require("../generate/gQuestion");
 
-const setQuestionSetTemplate = (solution, programId) => {
-  let templateData = {};
-  for (let key in questionSetTemplate) {
-    if (key === "programId") {
-      templateData[key] = programId;
-    } else if (questionSetTemplateStatic.includes(key)) {
-      templateData[key] = questionSetTemplate[key];
-    } else if (key === "organisationId") {
-      if (
-        solution[questionSetTemplate[key]] &&
-        solution[questionSetTemplate[key]].length >= 1
-      ) {
-        templateData[key] = solution[questionSetTemplate[key]][0];
-      } else {
-        templateData[key] = solution[questionSetTemplate[key]];
-      }
-    } else if (key.toLowerCase() === "entitytype") {
-      templateData[key] = capitalize(solution[questionSetTemplate[key]]) || "";
-    } else {
-      templateData[key] = solution[questionSetTemplate[key]] || "";
-    }
-  }
+const setQuestionSetTemplate = (solution, programId, contributor) => {
+  let templateData = {
+    name: solution?.name,
+    description: solution?.description,
+    code: solution?.externalId,
+    mimeType: "application/vnd.sunbird.questionset",
+    primaryCategory: solution?.type,
+    entityType: capitalize(solution?.entityType),
+    language: solution?.language,
+    keywords: solution?.keywords,
+    startDate: solution?.startDate,
+    endDate: solution?.endDate,
+    createdBy:
+      solution?.author || process.env.DEFAULT_CONTRIBUTOR_USER_ID,
+    organisationId:
+      contributor?.org_id || process.env.DEFAULT_SRC_ORG_ADMIN_ORG_ID,
+    creator: contributor?.userName || process.env.DEFAULT_CONTRIBUTOR_USER_NAME,
+    createdFor: [
+      contributor?.rootOrgId || process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID,
+    ],
+    channel:
+      contributor?.rootOrgId || process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID,
+    programId: programId,
+    author: contributor?.userName || process.env.DEFAULT_CONTRIBUTOR_USER_NAME,
+    framework: process.env.DEFAULT_FRAMEWORK_ID,
+  };
+
   return templateData;
 };
 
@@ -68,10 +69,11 @@ const createQuestionTemplate = async (question, migratedCount) => {
     }
 
     if (!isEmpty(questionToMigrate)) {
-
-      referenceQuestionId = await createQuestions(questionToMigrate, question._id);
+      referenceQuestionId = await createQuestions(
+        questionToMigrate,
+        question._id
+      );
       question.referenceQuestionId = referenceQuestionId;
-
     }
   }
 

@@ -6,6 +6,7 @@ const {
   find,
   omit,
   isArray,
+  uniq,
 } = require("lodash");
 const {
   publishQuestionSet,
@@ -82,9 +83,9 @@ const getPrecondition = (visible, parentId, parentQuestion) => {
             var: `${parentId}.response1.value`,
             type: "interactions",
           },
-          findIndex(parentQuestion.options, {
+          [findIndex(parentQuestion.options, {
             value: isArray(visible?.value) ? visible?.value[0] : visible?.value,
-          }),
+          })],
         ],
       },
     ],
@@ -103,7 +104,8 @@ const updateHierarchyTemplate = async (
 
 const branchingQuestionSetHierarchy = async (hierarchy, newCriterias) => {
 
-  logger.debug("branchingQuestionSetHierarchy", hierarchy)
+  logger.debug("branchingQuestionSetHierarchy", JSON.stringify(hierarchy));
+
 
   let questionSetHierarchy = {};
   if (hierarchy.questionset && hierarchy.isHierarchyUpdated) {
@@ -176,8 +178,8 @@ const branchingQuestionSetHierarchy = async (hierarchy, newCriterias) => {
     }
   }
 
-  console.log("branchingLogic", JSON.stringify(updateHierarchyData))
 
+  updateHierarchyData.request.data.hierarchy[hierarchy.questionset].children = uniq(updateHierarchyData.request.data.hierarchy[hierarchy.questionset].children);
   return updateHierarchyData;
 };
 
@@ -230,9 +232,6 @@ const updateCriteriasList = async (
     },
   };
 
-  console.log();
-  console.log("5f3fcd6daf0a4decfa9a10bd5f3fcd6daf0a4decfa9a10bd", JSON.stringify(hierarchy));
-  console.log();
 
   let pageSections = {};
   const newCriterias = [];
@@ -352,13 +351,10 @@ const updateCriteriasList = async (
     )}`
   );
 
-  console.log();
-  console.log("updateHierarchyTemplate", JSON.stringify(updateHierarchyData));
-  console.log();
-
   const questionsetId = hierarchy.questionsetDbId;
   let query = {};
   if (!hierarchy.isHierarchyUpdated) {
+    updateHierarchyData.request.data.hierarchy[hierarchy.questionset].children = uniq(updateHierarchyData.request.data.hierarchy[hierarchy.questionset].children);
     const result = await updateQuestionSetHierarchy(updateHierarchyData).catch(
       (err) => {
         logger.error(`Error while updating the questionset for solution_id: ${questionsetId} Error:
@@ -418,7 +414,6 @@ const updateCriteriasList = async (
       }
     );
 
-    console.log("Branchinfnfnfnffn", result)
     if (!result) {
       await updateSolutionsDb(query, questionsetId, migratedCount);
       return;
@@ -506,7 +501,6 @@ const updatePageData = (
 
   if (pageName && isBranching) {
     const branching = criteria.branchingLogic[idToAdd];
-    console.log("idtoAdddd", idToAdd, criteria?.name, criteria?.isMatrix, criteria.branchingLogic);
 
     if (!pageSections[pageName].branchingLogic.hasOwnProperty(idToAdd)) {
       pageSections[pageName].branchingLogic = {

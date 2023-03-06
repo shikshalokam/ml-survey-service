@@ -233,6 +233,18 @@ const nonMatrixChildrenAndNoVisibleIf = async (
       matrixHierarchy = data.matrixHierarchy;
       questions = data.questions;
     } else {
+      const childWithHierarchy = updateNonMatrixHierarchyChildren(
+        child,
+        nonMatrixQuestions,
+        matrixQuestions,
+        hierarchy,
+        index,
+        criteriaId,
+        questions,
+        matrixHierarchy
+      );
+      nonMatrixQuestions = childWithHierarchy.nonMatrixQuestions;
+      hierarchy = childWithHierarchy.hierarchy;
 
       hierarchy = updateHierarchyBranching(
         hierarchy,
