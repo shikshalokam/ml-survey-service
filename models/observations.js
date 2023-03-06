@@ -39,10 +39,6 @@ module.exports = {
       type : String,
       index : true
     },
-    entityTypeId: {
-      type : "ObjectId",
-      index : true
-    },
     entityType : String,
     entities: Array,
     isAPrivateProgram : {
