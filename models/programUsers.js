@@ -17,7 +17,7 @@ module.exports = {
       default: 0
     },
     userProfile: {
-      type : "ObjectId",
+      type : Object,
       required: true
     },
     userRoleInformation: Object,
