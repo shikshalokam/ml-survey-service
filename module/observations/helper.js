@@ -1777,7 +1777,7 @@ module.exports = class ObservationsHelper {
                 
                 let solutionData;
                 let programUsers;
-                let programDocument;
+                
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1785,17 +1785,9 @@ module.exports = class ObservationsHelper {
 
                         },[
                             "allowMultipleAssessemts",
-                            "license"
+                            "license",
+                            "rootOrganisations"
                     ]);
-
-                    //get rootOrganisations data from program 
-                    programDocument = 
-                    await programsHelper.list(
-                        {
-                            _id: observationData[0].programId,
-                        },
-                        ["rootOrganisations"],
-                    );
 
                     const query = { 
                         userId: userId,
@@ -1820,7 +1812,7 @@ module.exports = class ObservationsHelper {
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
                         programJoined : (programUsers.length > 0) ? true : false,
-                        rootOrganisations : ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
+                        rootOrganisations : ( solutionData[0].rootOrganisations && solutionData[0].rootOrganisations.length > 0 ) ? solutionData[0].rootOrganisations : []
                     }
                 });
     
