@@ -415,39 +415,6 @@ module.exports = class ObservationSubmissionsHelper {
    static list(entityId,observationId,userId) {
     return new Promise(async (resolve, reject) => {
         try {
-            // get programId from observation
-            let observationDocument = await observationsHelper.observationDocuments({
-                _id: observationId
-            },["programId"])
-            observationDocument = observationDocument[0]
-            if (!observationDocument) {
-                return resolve({ 
-                    status: httpStatusCode.bad_request.status, 
-                    message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
-                });
-            }
-            //get rootOrganisations data from program 
-            let programDocument = 
-                await programsHelper.list(
-                    {
-                        _id: observationSubmissionsDocument.programId,
-                    },
-                    ["rootOrganisations"],
-                );
-            const query = { 
-                userId: userId,
-                programId: observationDocument.programId
-            };
-      
-            //Check data present in programUsers collection.
-            const programUsers = await programUsersHelper.programUsersDocuments(
-                query,
-                ["_id"]
-            );
-            let additionalDetails = {
-                programJoined : (programUsers.length > 0) ? true : false,
-                rootOrganisations : ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
-            }
             
             let queryObject = {
                 entityId: entityId,
@@ -532,8 +499,7 @@ module.exports = class ObservationSubmissionsHelper {
 
             return resolve({
                 message : messageConstants.apiResponses.OBSERVATION_SUBMISSIONS_LIST_FETCHED,
-                result : result,
-                additionalDetails : additionalDetails
+                result : result
             })
         } catch (error) {
             return reject(error);
