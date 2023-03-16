@@ -58,37 +58,4 @@ module.exports = class ProgramUsersHelper {
             }
         });
     }
-
-    /**
-     * Update program users
-     * @method
-     * @name update
-     * @param {Object} query 
-     * @param {Object} update 
-     * @param {Object} options 
-     * @returns {JSON} - create programUsers.
-    */
-
-    static update(query, update, options = {}) {
-        return new Promise(async (resolve, reject) => {
-            try {
-            
-                let programUsers = await database.models.programUsers.findOneAndUpdate(
-                    query, 
-                    update,
-                    options
-                );
-                if( !programUsers._id ) {
-                    throw {
-                        message : constants.apiResponses.PROGRAM_USERS_NOT_UPDATED
-                    };
-                }
-                return resolve(programUsers);
-
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
-
 }
