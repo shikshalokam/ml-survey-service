@@ -1089,41 +1089,6 @@ module.exports = class Observations extends Abstract {
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-                // join observation's program. PII data consent is given via this api call.
-                // check if already joined the program
-                //Check data present in programUsers collection.
-                const programUsers = await programUsersHelper.programUsersDocuments(
-                    {
-                        userId : req.userDetails.userId,
-                        programId : observationDocument.programId
-                    },
-                    ["_id"]
-                );
-                
-                if ( !programUsers.length > 0 && ( appVersion === "" || appVersion < 5.2 ) ) {
-                    let programJoinData = {};
-                    programJoinData.userRoleInformation = req.body;
-                    programJoinData.isResource = true;
-                    let joinProgram = await coreService.joinProgram (
-                        req.userDetails.userToken,
-                        programJoinData,
-                        observationDocument.programId,
-                        appVersion,
-                        appName
-                    );
-                    
-                    if ( !joinProgram.success ) {
-                        return resolve({ 
-                            status: httpStatusCode.bad_request.status, 
-                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                        });
-                    }
-                } else {
-                    await programUsersHelper.update(
-                        { _id : programUsers[0]._id },
-                        {  '$inc' : { noOfResourcesStarted : 1 } }
-                    );
-                }
                 
                 let filterData = {
                     "type" : observationDocument.entityType
@@ -1195,13 +1160,37 @@ module.exports = class Observations extends Abstract {
                         "name",
                         "description",
                         "imageCompression",
-                        "isAPrivateProgram"
+                        "isAPrivateProgram",
+                        "requestForPIIConsent"
                     ]
                 );
 
                 if ( !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
+
+                // join observation's program. PII data consent is given via this api call.
+                // no need to check if usr already joined the program or not it is managed in ml-core service. 
+                
+                if ( programDocument.length > 0 && programDocument[0].hasOwnProperty('requestForPIIConsent') && programDocument[0].requestForPIIConsent == true ) {
+                    let programJoinData = {};
+                    programJoinData.userRoleInformation = req.body;
+                    programJoinData.isResource = true;
+                    let joinProgram = await coreService.joinProgram (
+                        req.userDetails.userToken,
+                        programJoinData,
+                        observationDocument.programId,
+                        appVersion,
+                        appName
+                    );
+                    
+                    if ( !joinProgram.success ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                        });
+                    }
+                } 
 
                 /*
                 <- Currently not required for bodh-2:10 as roles is not given in user 

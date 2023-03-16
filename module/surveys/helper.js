@@ -927,7 +927,8 @@ module.exports = class SurveysHelper {
                             "description",
                             "imageCompression",
                             "isAPrivateProgram",
-                            "rootOrganisations"
+                            "rootOrganisations",
+                            "requestForPIIConsent"
                         ]
                     );
                 }
@@ -1060,17 +1061,9 @@ module.exports = class SurveysHelper {
                 } else {
                     // join survey's program. PII data consent is given via this api call.
                     if ( solutionDocument.programId && userToken !== "" ) {
-                        // check if already joined the program
-                        //Check data present in programUsers collection.
-                        const programUsers = await programUsersHelper.programUsersDocuments(
-                            {
-                                userId : userId,
-                                programId : solutionDocument.programId
-                            },
-                            ["_id"]
-                        );
+                        // not checking if already joined the program. it is handled in ml-core joinProgram fn.
                         
-                        if ( !programUsers.length > 0 && ( appVersion === "" || appVersion < 5.2 ) ) {
+                        if ( programDocument.length > 0 && programDocument[0].hasOwnProperty('requestForPIIConsent') && programDocument[0].requestForPIIConsent == true ) {
                             let programJoinData = {};
                             programJoinData.userRoleInformation = roleInformation;
                             programJoinData.isResource = true;
@@ -1088,12 +1081,7 @@ module.exports = class SurveysHelper {
                                     message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
                                 });
                             }
-                        } else {
-                            await programUsersHelper.update(
-                                { _id : programUsers[0]._id },
-                                {  '$inc' : { noOfResourcesStarted : 1 } }
-                            );
-                        }
+                        } 
                     }
                     let submissionDocument = {
                         solutionId: solutionDocument._id,
