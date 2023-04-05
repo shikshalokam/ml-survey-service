@@ -953,8 +953,9 @@ module.exports = class SurveysHelper {
                         ["_id"]
                     );
                     // if programJoined key is false, user not joined the program.
-                    result.programJoined = (programUsers.length > 0) ? true : false
-                    result.rootOrganisations = ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : []
+                    result.programJoined = (programUsers.length > 0) ? true : false;
+                    result.rootOrganisations = ( programDocument[0].rootOrganisations && programDocument[0].rootOrganisations.length > 0 ) ? programDocument[0].rootOrganisations : [];
+                    result.requestForPIIConsent = ( programDocument[0].requestForPIIConsent && programDocument[0].requestForPIIConsent === true ) ? true : false;
                 }
 
                 let assessment = {};
@@ -1063,7 +1064,7 @@ module.exports = class SurveysHelper {
                     if ( solutionDocument.programId && userToken !== "" ) {
                         // not checking if already joined the program. it is handled in ml-core joinProgram fn.
                         
-                        if ( programDocument.length > 0 && programDocument[0].hasOwnProperty('requestForPIIConsent') && programDocument[0].requestForPIIConsent == true ) {
+                        if ( programDocument.length > 0 ) {
                             let programJoinData = {};
                             programJoinData.userRoleInformation = roleInformation;
                             programJoinData.isResource = true;

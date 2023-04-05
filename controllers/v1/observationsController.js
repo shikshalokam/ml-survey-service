@@ -1160,8 +1160,7 @@ module.exports = class Observations extends Abstract {
                         "name",
                         "description",
                         "imageCompression",
-                        "isAPrivateProgram",
-                        "requestForPIIConsent"
+                        "isAPrivateProgram"
                     ]
                 );
 
@@ -1172,7 +1171,7 @@ module.exports = class Observations extends Abstract {
                 // join observation's program. PII data consent is given via this api call.
                 // no need to check if usr already joined the program or not it is managed in ml-core service. 
                 
-                if ( programDocument.length > 0 && programDocument[0].hasOwnProperty('requestForPIIConsent') && programDocument[0].requestForPIIConsent == true ) {
+                if ( programDocument.length > 0 ) {
                     let programJoinData = {};
                     programJoinData.userRoleInformation = req.body;
                     programJoinData.isResource = true;
