@@ -1804,7 +1804,7 @@ module.exports = class ObservationsHelper {
                         _id : observationData[0].programId
                     },["requestForPIIConsent"]);
 
-                    requestForPIIConsent = ( programsData.length > 0 && programsData[0].requestForPIIConsent && programsData[0].requestForPIIConsent === true) ? true : false;
+                    requestForPIIConsent = ( programsData.length > 0 && programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
                     
                 }
                 
@@ -1818,7 +1818,7 @@ module.exports = class ObservationsHelper {
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
                         programJoined : (programUsers.length > 0) ? true : false,
-                        rootOrganisations : ( solutionData[0].rootOrganisations && solutionData[0].rootOrganisations.length > 0 ) ? solutionData[0].rootOrganisations : [],
+                        rootOrganisations : ( solutionData[0].rootOrganisations ) ? solutionData[0].rootOrganisations : [],
                         "requestForPIIConsent" : requestForPIIConsent
                     }
                 });
