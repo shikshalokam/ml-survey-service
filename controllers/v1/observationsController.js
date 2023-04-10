@@ -16,7 +16,6 @@ const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
-const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * Observations
@@ -1171,25 +1170,23 @@ module.exports = class Observations extends Abstract {
                 // join observation's program. PII data consent is given via this api call.
                 // no need to check if usr already joined the program or not it is managed in ml-core service. 
                 
-                if ( programDocument.length > 0 ) {
-                    let programJoinData = {};
-                    programJoinData.userRoleInformation = req.body;
-                    programJoinData.isResource = true;
-                    let joinProgram = await coreService.joinProgram (
-                        req.userDetails.userToken,
-                        programJoinData,
-                        observationDocument.programId,
-                        appVersion,
-                        appName
-                    );
-                    
-                    if ( !joinProgram.success ) {
-                        return resolve({ 
-                            status: httpStatusCode.bad_request.status, 
-                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                        });
-                    }
-                } 
+                let programJoinData = {};
+                programJoinData.userRoleInformation = req.body;
+                programJoinData.isResource = true;
+                let joinProgram = await coreService.joinProgram (
+                    req.userDetails.userToken,
+                    programJoinData,
+                    observationDocument.programId,
+                    appVersion,
+                    appName
+                );
+                
+                if ( !joinProgram.success ) {
+                    return resolve({ 
+                        status: httpStatusCode.bad_request.status, 
+                        message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                    });
+                }
 
                 /*
                 <- Currently not required for bodh-2:10 as roles is not given in user 

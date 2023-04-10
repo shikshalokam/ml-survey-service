@@ -12,13 +12,10 @@ const emailClient = require(ROOT_PATH + "/generics/helpers/emailCommunications")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
-const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
-const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper")
-const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper")
 /**
     * ObservationSubmissionsHelper
     * @class
@@ -408,11 +405,10 @@ module.exports = class ObservationSubmissionsHelper {
     * @param {String} - entityId
     * @param {String} - solutionId
     * @param {String} - observationId
-    * @param {String} - userId
     * @returns {Object} - list of submissions
     */
 
-   static list(entityId,observationId,userId) {
+   static list(entityId,observationId) {
     return new Promise(async (resolve, reject) => {
         try {
             
