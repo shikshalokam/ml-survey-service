@@ -1778,6 +1778,7 @@ module.exports = class ObservationsHelper {
                 let solutionData;
                 let programUsers;
                 let requestForPIIConsent;
+                let rootOrganisations;
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1785,8 +1786,7 @@ module.exports = class ObservationsHelper {
 
                         },[
                             "allowMultipleAssessemts",
-                            "license",
-                            "rootOrganisations"
+                            "license"
                     ]);
 
                     const query = { 
@@ -1799,13 +1799,13 @@ module.exports = class ObservationsHelper {
                         query,
                         ["_id"]
                     );
-                    // get requestForPIIconsent value of program 
+                    // get requestForPIIconsent value and rootOrganisations of program. rootOrganisations added by programs team
                     let programsData = await programsHelper.list({
                         _id : observationData[0].programId
-                    },["requestForPIIConsent"]);
+                    },["requestForPIIConsent", "rootOrganisations"]);
 
                     requestForPIIConsent = ( programsData.length > 0 && programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
-                    
+                    rootOrganisations = ( programsData.length > 0 && programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations : [];
                 }
                 
                 return resolve({
@@ -1818,7 +1818,7 @@ module.exports = class ObservationsHelper {
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
                         programJoined : (programUsers.length > 0) ? true : false,
-                        rootOrganisations : ( solutionData[0].rootOrganisations ) ? solutionData[0].rootOrganisations : [],
+                        "rootOrganisations" : rootOrganisations,
                         "requestForPIIConsent" : requestForPIIConsent
                     }
                 });
