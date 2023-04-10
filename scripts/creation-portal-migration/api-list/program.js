@@ -19,7 +19,7 @@ const createProgram = async (templateData) => {
     data: data,
   };
 
-  const res = await axios(config).catch(err => {});
+  const res = await axios(config);
 
   return res?.data?.result?.program_id;
 };

@@ -1,4 +1,4 @@
-const { isEmpty, pick, has } = require("lodash");
+const { isEmpty, has } = require("lodash");
 const {
   createProgram,
   updateProgram,
@@ -22,15 +22,28 @@ const getDate = (increment) => {
 };
 
 const createProgramTemplate = async (solution, program_id, migratedCount) => {
-  const userData = await getContributorAndSrcAdminData(solution, program_id);
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const month = months[new Date().getMonth()];
+  const day = new Date().getDate();
+  const year = new Date().getFullYear();
+  let userData = await getContributorAndSrcAdminData(solution, program_id);
+
+  userData = {
+    ...userData,
+    srcOrgAdmin: {
+      ...userData?.srcOrgAdmin,
+      solutionId: solution?._id.toString(),
+      solutionName: solution?.name
+    }
+  }
 
   if (!userData?.srcOrgAdmin) {
     return;
   }
   if (has(solution, 'migrationReference')) {
-    solution.migrationReference.sourcingProgramId = userData?.srcOrgAdmin?.programId.trim() ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
+    solution.migrationReference.sourcingProgramId = !isEmpty(userData?.srcOrgAdmin?.programId) ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
   } else {
-    const programId = userData?.srcOrgAdmin?.programId.trim() ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
+    const programId = userData?.srcOrgAdmin?.programId  ? userData?.srcOrgAdmin?.programId.trim() : solution?.migrationReference?.sourcingProgramId;
     solution = {
       ...solution,
       migrationReference:{
@@ -47,9 +60,8 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     ? userData?.srcOrgAdmin?.rootOrgId
     : process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID;
 
-  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const template = {
-    name: `MIGRATED ${months[new Date().getMonth()]} ${new Date().getDate()} ${new Date().getFullYear()} ${solution?.name} sourcing project`,
+    name: `MIGRATED ${month} ${day} ${year} ${solution?.name} sourcing project`,
     description: `${solution?.name} sourcing project description`,
     nomination_enddate: `${getDate(1)}`,
     rewards: null,

@@ -2,15 +2,13 @@ require("dotenv").config({ path: "./../../.env" });
 const { createDBInstance } = require("./db/dbConfig");
 const { findAll } = require("./db");
 const { CONFIG } = require("./constant/config");
-const { compact, uniq } = require("lodash");
+const { compact, uniq, uniqBy } = require("lodash");
 const fs = require("fs");
 const { searchUser, getOpenSaberUserOrgId } = require("./api-list/user");
 
 const getUserIds = async () => {
   try {
     const db = await createDBInstance();
-
-    console.log("./../creation-portal-migration", db);
     const data = await findAll(CONFIG.DB.TABLES.solutions, {
       programId: { $exists: true },
       type: { $in: ["observation", "survey"] },
@@ -18,15 +16,21 @@ const getUserIds = async () => {
 
     const userIds = data.map((solution) => solution.author);
     const solutions = data.map((solution) => {
+      const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
+      const month = months[new Date().getMonth()];
+      const day = new Date().getDate();
+      const year = new Date().getFullYear();
+      const programName = `Migrated ${month}_${day}_${year} ${solution.name}`
       return {
         userId: solution.author,
         solutionId: solution._id,
         solutionName: solution.name,
         programId: solution?.migrationReference?.sourcingProgramId || "",
-        programName: `Migrated ${solution.name}`,
+        programName: programName,
       };
     });
-    const uniqUsers = compact([...new Set(userIds)]);
+    let uniqUsers = uniq(userIds);
+    uniqUsers = compact(uniqUsers);
     const usersList = await searchUser(uniqUsers);
     const openSaberOrg = await getOpenSaberUserOrgId();
     const d = writeToCSVFile(usersList, uniqUsers, openSaberOrg, solutions);
@@ -47,6 +51,7 @@ writeToCSVFile = (users, usersIdsInDb, openSaberOrg, solutions) => {
         console.log("Error writing to csv file", err);
       } else {
         console.log(`saved as ${filename}`);
+        process.exit();
       }
     }
   );

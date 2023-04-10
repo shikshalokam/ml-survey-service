@@ -13,6 +13,12 @@ const {
 } = require("../generate/gQuestion");
 
 const setQuestionSetTemplate = (solution, programId, contributor) => {
+
+  const languages = {
+    "English": "English",
+    "हिन्दी": "Hindi",
+  }
+
   let templateData = {
     name: solution?.name,
     description: solution?.description,
@@ -20,7 +26,7 @@ const setQuestionSetTemplate = (solution, programId, contributor) => {
     mimeType: "application/vnd.sunbird.questionset",
     primaryCategory: solution?.type,
     entityType: capitalize(solution?.entityType),
-    language: solution?.language,
+    language: solution?.language?.length > 0 ? solution?.language.map(lan => languages[lan]) : solution?.language,
     keywords: solution?.keywords,
     startDate: solution?.startDate,
     endDate: solution?.endDate,
@@ -44,6 +50,14 @@ const setQuestionSetTemplate = (solution, programId, contributor) => {
 
 const createQuestionTemplate = async (question, migratedCount) => {
 
+  const migratedQuestion = await findAll(CONFIG.DB.TABLES.questions, {
+    _id: question?._id,
+  }).catch((err) => {});
+  
+  if (migratedQuestion?.length > 0) {
+    question = migratedQuestion[0];
+  }
+
   const type = question?.responseType;
   let referenceQuestionId = question?.referenceQuestionId;
   let query = {};
@@ -51,7 +65,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
 
   let isPublished = question?.migrationReference?.isPublished;
 
-  if (type && !referenceQuestionId) {
+  if (type) {
     if (type.toLowerCase() === "date") {
       questionToMigrate = getDateTemplate(question);
     }
@@ -68,7 +82,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
       questionToMigrate = getTextTemplate(question, type);
     }
 
-    if (!isEmpty(questionToMigrate)) {
+    if (!isEmpty(questionToMigrate) && !referenceQuestionId) {
       referenceQuestionId = await createQuestions(
         questionToMigrate,
         question._id
@@ -121,7 +135,12 @@ const createQuestionTemplate = async (question, migratedCount) => {
       ...query,
     });
   }
-  return question;
+
+  questionToMigrate = {
+    ...questionToMigrate,
+    referenceQuestionId
+  }
+  return questionToMigrate;
 };
 
 const updateSolutionById = async ({ id, query }) => {

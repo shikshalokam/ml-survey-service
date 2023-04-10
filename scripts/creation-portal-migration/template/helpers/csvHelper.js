@@ -10,8 +10,8 @@ const { dirname } = require("path");
 
 
 const getCsvData = async (solution) => {
-  const filename = path.resolve(dirname("creation-portal-migration")) + "/SL-DataMapping.csv";
-  console.log("fulasvnbsvfbndvfd", filename);
+  const filePath = __dirname.split("/creation-portal-migration/template");
+  const filename = path.resolve(filePath[0]) + "/creation-portal-migration/SL-DataMapping.csv";
   let srcOrgAdmin = [];
   return new Promise(async (resolve, reject) => {
     const data = [];

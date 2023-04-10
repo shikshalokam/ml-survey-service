@@ -1,6 +1,6 @@
 const questionTemplate = {
   date: {
-    name: "Migrated Question",
+    name: "question",
     code: "externalId",
     mimeType: "application/vnd.sunbird.question",
     primaryCategory: "responseType",
@@ -33,7 +33,7 @@ const questionTemplate = {
     },
   },
   slider: {
-    name: "Migrated Question-Slider Type",
+    name: "question",
     code: "externalId",
     mimeType: "application/vnd.sunbird.question",
     primaryCategory: "responseType",
@@ -72,7 +72,7 @@ const questionTemplate = {
     },
   },
   multiselect: {
-    name: "Migrated Question",
+    name: "question",
     code: "externalId",
     mimeType: "application/vnd.sunbird.question",
     primaryCategory: "Multiselect Multiple Choice Question",
@@ -169,7 +169,7 @@ const questionTemplate = {
     },
   },
   mcq: {
-    name: "Migrated Question",
+    name: "question",
     code: "externalId",
     description: "",
     showRemarks: "showRemarks",
@@ -233,7 +233,7 @@ const questionTemplate = {
     },
   },
   text: {
-    name: "Migrated Question",
+    name: "question",
     code: "externalId",
     mimeType: "application/vnd.sunbird.question",
     primaryCategory: "Text",
@@ -276,24 +276,21 @@ const questionTemplate = {
 };
 
 const questionStatic = {
-  date: ["name", "mimeType", "responseDeclaration"],
-  slider: ["name", "mimeType", "responseDeclaration"],
+  date: [ "mimeType", "responseDeclaration"],
+  slider: [ "mimeType", "responseDeclaration"],
   multiselect: [
-    "name",
     "mimeType",
     "primaryCategory",
     "interactionTypes",
     "responseDeclaration",
   ],
   mcq: [
-    "name",
     "mimeType",
     "primaryCategory",
     "interactionTypes",
     "responseDeclaration",
   ],
   text: [
-    "name",
     "mimeType",
     "primaryCategory",
     "interactionTypes",
