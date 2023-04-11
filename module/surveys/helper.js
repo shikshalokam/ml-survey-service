@@ -21,6 +21,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * SurveysHelper
@@ -538,7 +539,7 @@ module.exports = class SurveysHelper {
      * Create survey document. 
      * @method
      * @name createSurveyDocument
-     * @param {String} userId =  - logged in user id.    
+     * @param {String} userId - logged in user id.    
      * @param {Object} solution - solution document . 
      * @returns {Object} status and survey id.
      */
@@ -684,10 +685,12 @@ module.exports = class SurveysHelper {
      * @param {String} link - link 
      * @param {String} userId - userId
      * @param {String} token  - user access token
+     * @param {Number} appVersion  - application version
+     * @param {String} appName  - App name
      * @returns {JSON} - returns survey solution,program and question details.
      */
 
-    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {},version = "") {
+    static getDetailsByLink(link= "", userId= "", token= "", roleInformation= {}, version = "", appVersion = "", appName = "" ) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -787,7 +790,9 @@ module.exports = class SurveysHelper {
                     userId,
                     validateSurvey.data.submissionId,
                     roleInformation,
-                    token
+                    token,
+                    appVersion,
+                    appName
                 )
 
                 if (!surveyDetails.success) {
@@ -819,10 +824,12 @@ module.exports = class SurveysHelper {
       * @param  {String} surveyId - survey id.
       * @param {String} userId - userId
       * @param {String} userToken - userToken.
+      * @param {Number} appVersion - appVersion.
+      * @param {String} appName - app name.
       * @returns {JSON} - returns survey solution, program and questions.
      */
 
-    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="") {
+    static details(surveyId = "", userId= "", submissionId = "", roleInformation = {}, userToken ="", appVersion = "", appName = "") {
         return new Promise(async (resolve, reject) => {
             try {
                 
@@ -919,7 +926,9 @@ module.exports = class SurveysHelper {
                             "name",
                             "description",
                             "imageCompression",
-                            "isAPrivateProgram"
+                            "isAPrivateProgram",
+                            "rootOrganisations",
+                            "requestForPIIConsent"
                         ]
                     );
                 }
@@ -931,7 +940,16 @@ module.exports = class SurveysHelper {
                 result.solution = await _.pick(solutionDocument, solutionDocumentFieldList);
 
                 if (programDocument.length > 0) {
-                  result.program = programDocument[0];
+                    result.program = programDocument[0];
+
+                    //Check data present in programUsers collection.
+                    //checkForUserJoinedProgram will check for data and if its present return true else false.
+                    let programJoined = await programUsersHelper.checkForUserJoinedProgram(programDocument[0]._id,userId);
+                    
+                    // if programJoined key is false, user not joined the program.
+                    result.programJoined = programJoined;
+                    result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations : [];
+                    result.requestForPIIConsent = ( programDocument[0].requestForPIIConsent ) ? programDocument[0].requestForPIIConsent : false;
                 }
 
                 let assessment = {};
@@ -1036,6 +1054,30 @@ module.exports = class SurveysHelper {
                     submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
 
                 } else {
+                    // join survey's program. PII data consent is given via this api call.
+                    if ( solutionDocument.programId && userToken !== "" ) {
+                        // not checking if already joined the program. it is handled in ml-core joinProgram fn.
+                        
+                        if ( programDocument.length > 0 ) {
+                            let programJoinData = {};
+                            programJoinData.userRoleInformation = roleInformation;
+                            programJoinData.isResource = true;
+                            let joinProgram = await coreService.joinProgram (
+                                userToken,
+                                programJoinData,
+                                solutionDocument.programId,
+                                appVersion,
+                                appName
+                            );
+                            
+                            if ( !joinProgram.success ) {
+                                return resolve({ 
+                                    status: httpStatusCode.bad_request.status, 
+                                    message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                                });
+                            }
+                        } 
+                    }
                     let submissionDocument = {
                         solutionId: solutionDocument._id,
                         solutionExternalId: solutionDocument.externalId,
@@ -1116,6 +1158,8 @@ module.exports = class SurveysHelper {
                 }
 
                 result.assessment = assessment;
+
+
 
                 return resolve({
                     success: true,
@@ -1584,7 +1628,9 @@ module.exports = class SurveysHelper {
                     let createSurveyDocument = await this.createSurveyDocument
                     (
                         userId,
-                        solutionData.data
+                        solutionData.data,
+                        token,
+                        bodyData
                     )
 
                     if (!createSurveyDocument.success) {
@@ -1620,10 +1666,12 @@ module.exports = class SurveysHelper {
       * @param {String} solutionId - solutionId
       * @param {String} userId - logged in userId
       * @param {String} token - logged in user token
+      * @param {Number} appVersion - application version
+      * @param {String} appName - application name
       * @returns {JSON} - returns survey solution, program and questions.
     */
 
-   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "") {
+   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "", appVersion = "", appName = "") {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -1656,7 +1704,9 @@ module.exports = class SurveysHelper {
                 userId,
                 validateSurvey.data.submissionId,
                 bodyData,
-                token
+                token,
+                appVersion,
+                appName
             )
 
             if (!surveyDetails.success) {

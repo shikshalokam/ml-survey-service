@@ -12,12 +12,10 @@ const emailClient = require(ROOT_PATH + "/generics/helpers/emailCommunications")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
-const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 const criteriaQuestionHelper = require(MODULES_BASE_PATH + "/criteriaQuestions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
-
 /**
     * ObservationSubmissionsHelper
     * @class
@@ -441,7 +439,7 @@ module.exports = class ObservationSubmissionsHelper {
                 "evidencesStatus.submissions",
                 "evidencesStatus.canBeNotApplicable",
                 "evidencesStatus.canBeNotAllowed",
-                "evidencesStatus.notApplicable",
+                "evidencesStatus.notApplicable"
             ];
             let result = await this.observationSubmissionsDocument
             (
