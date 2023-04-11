@@ -16,6 +16,7 @@ const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * Observations
@@ -1167,25 +1168,39 @@ module.exports = class Observations extends Abstract {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
 
-                // join observation's program. PII data consent is given via this api call.
-                // no need to check if usr already joined the program or not it is managed in ml-core service. 
-                
-                let programJoinData = {};
-                programJoinData.userRoleInformation = req.body;
-                programJoinData.isResource = true;
-                let joinProgram = await coreService.joinProgram (
-                    req.userDetails.userToken,
-                    programJoinData,
-                    observationDocument.programId,
-                    appVersion,
-                    appName
+                //fetch programUsers data
+                let programUsers = await programUsersHelper.programUsersDocuments(
+                    {
+                        userId : req.userDetails.userId,
+                        programId : observationDocument.programId
+                    },
+                    [
+                        "_id",
+                        "resourcesStarted"
+                    ]
                 );
-                
-                if ( !joinProgram.success ) {
-                    return resolve({ 
-                        status: httpStatusCode.bad_request.status, 
-                        message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                    });
+
+                if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+                    // join observation's program. PII data consent is given via this api call.
+                    // no need to check if usr already joined the program or not it is managed in ml-core service. 
+                    
+                    let programJoinData = {};
+                    programJoinData.userRoleInformation = req.body;
+                    programJoinData.isResource = true;
+                    let joinProgram = await coreService.joinProgram (
+                        req.userDetails.userToken,
+                        programJoinData,
+                        observationDocument.programId,
+                        appVersion,
+                        appName
+                    );
+                    
+                    if ( !joinProgram.success ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                        });
+                    }
                 }
 
                 /*

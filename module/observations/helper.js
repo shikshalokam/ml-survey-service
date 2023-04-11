@@ -1775,7 +1775,6 @@ module.exports = class ObservationsHelper {
                 },["_id","solutionId","programId"]);
                 
                 let solutionData;
-                let programUsers;
                 let requestForPIIConsent;
                 let rootOrganisations;
                 let programJoined;
@@ -1788,7 +1787,7 @@ module.exports = class ObservationsHelper {
                             "allowMultipleAssessemts",
                             "license"
                     ]);
-                    
+
                     //Check data present in programUsers collection.
                     //checkForUserJoinedProgram will check for data and if its present return true else false.
                     programJoined = await programUsersHelper.checkForUserJoinedProgram(observationData[0].programId,userId);
