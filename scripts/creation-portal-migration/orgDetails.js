@@ -16,11 +16,11 @@ const getUserIds = async () => {
 
     const userIds = data.map((solution) => solution.author);
     const solutions = data.map((solution) => {
-      const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
-      const month = months[new Date().getMonth()];
-      const day = new Date().getDate();
-      const year = new Date().getFullYear();
-      const programName = `Migrated ${month}_${day}_${year} ${solution.name}`
+      // const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
+      // const month = months[new Date().getMonth()];
+      // const day = new Date().getDate();
+      // const year = new Date().getFullYear();
+      const programName = `${solution.name} sourcing project`
       return {
         userId: solution.author,
         solutionId: solution._id,
@@ -59,7 +59,7 @@ writeToCSVFile = (users, usersIdsInDb, openSaberOrg, solutions) => {
 
 const extractAsCSV = (users, usersIdsInDb, openSaberOrg, solutions) => {
   const header = [
-    `ENV,authorId,mappedUserId,userName,rootOrgId,rootOrgName,org_id,srcOrgAdminId,srcOrgAdminUserName,contributorOrgAdminId,contributorOrgAdminUserName,solutionId,solutionName,programId,programName`,
+    `authorId,mappedUserId,userName,rootOrgId,rootOrgName,org_id,srcOrgAdminId,srcOrgAdminUserName,contributorOrgAdminId,contributorOrgAdminUserName,programId,programName`,
   ];
 
   let rows = usersIdsInDb.map((id) => {
@@ -67,11 +67,9 @@ const extractAsCSV = (users, usersIdsInDb, openSaberOrg, solutions) => {
     const solution = solutions.find((s) => s.userId === id);
     console.log("solutionsolution", solution);
     const org = openSaberOrg.find((o) => o.createdBy === id);
-    return `STAGE,${id},${match?.userId || ""},${match?.userName || ""},${
+    return `${id},${match?.userId || ""},${match?.userName || ""},${
       match?.rootOrgId || ""
-    },${match?.rootOrgName || ""},${org?.orgId || ""},${""},${""},${""},${""},${
-      solution?.solutionId || ""
-    },${solution?.solutionName || ""},${solution?.programId || ""},${
+    },${match?.rootOrgName || ""},${org?.orgId || ""},${""},${""},${""},${""},,${solution?.programId || ""},${
       solution?.programName || ""
     }`;
   });

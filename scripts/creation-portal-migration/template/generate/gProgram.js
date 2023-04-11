@@ -61,7 +61,7 @@ const createProgramTemplate = async (solution, program_id, migratedCount) => {
     : process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID;
 
   const template = {
-    name: `MIGRATED ${month} ${day} ${year} ${solution?.name} sourcing project`,
+    name: `${solution?.name} sourcing project`,
     description: `${solution?.name} sourcing project description`,
     nomination_enddate: `${getDate(1)}`,
     rewards: null,
