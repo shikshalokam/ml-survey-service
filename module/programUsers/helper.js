@@ -58,4 +58,38 @@ module.exports = class ProgramUsersHelper {
             }
         });
     }
+
+    /**
+     * check if user joined a program or not
+     * @method
+     * @name checkForUserJoinedProgram
+     * @param {String} programId
+     * @param {String} userId 
+     * @returns {Boolean} - true/false.
+    */
+
+    static checkForUserJoinedProgram(
+        programId, 
+        userId
+    ) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const query = { 
+                    userId: userId,
+                    programId: programId
+                }
+    
+                //Check data present in programUsers collection.
+                let programUsers = await this.programUsersDocuments(
+                    query,
+                    ["_id"]
+                );
+                let joinedProgram = programUsers.length > 0 ? true :false
+                return resolve(joinedProgram);
+            
+            } catch (error) {
+                return reject(error);
+            }
+        });
+    }
 }

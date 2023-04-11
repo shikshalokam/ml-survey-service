@@ -1698,7 +1698,6 @@ module.exports = class ObservationsHelper {
     static entities( userId,token,observationId,solutionId,bodyData) {
         return new Promise(async (resolve, reject) => {
             try {
-
                 if( observationId === "" ) {
                     
                     let observationData = await this.observationDocuments({
@@ -1779,6 +1778,7 @@ module.exports = class ObservationsHelper {
                 let programUsers;
                 let requestForPIIConsent;
                 let rootOrganisations;
+                let programJoined;
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1788,24 +1788,18 @@ module.exports = class ObservationsHelper {
                             "allowMultipleAssessemts",
                             "license"
                     ]);
-
-                    const query = { 
-                        userId: userId,
-                        programId: observationData[0].programId,
-                    }
-        
+                    
                     //Check data present in programUsers collection.
-                    programUsers = await programUsersHelper.programUsersDocuments(
-                        query,
-                        ["_id"]
-                    );
+                    //checkForUserJoinedProgram will check for data and if its present return true else false.
+                    programJoined = await programUsersHelper.checkForUserJoinedProgram(observationData[0].programId,userId);
+                    
                     // get requestForPIIconsent value and rootOrganisations of program. rootOrganisations added by programs team
                     let programsData = await programsHelper.list({
                         _id : observationData[0].programId
                     },["requestForPIIConsent", "rootOrganisations"]);
 
-                    requestForPIIConsent = ( programsData.length > 0 && programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
-                    rootOrganisations = ( programsData.length > 0 && programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations : [];
+                    requestForPIIConsent = ( programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
+                    rootOrganisations = ( programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations : [];
                 }
                 
                 return resolve({
@@ -1817,7 +1811,7 @@ module.exports = class ObservationsHelper {
                         "entities" : entitiesList.data.entities,
                         entityType : entitiesList.data.entityType,
                         "license" :  solutionData[0].license,
-                        programJoined : (programUsers.length > 0) ? true : false,
+                        programJoined : programJoined,
                         "rootOrganisations" : rootOrganisations,
                         "requestForPIIConsent" : requestForPIIConsent
                     }

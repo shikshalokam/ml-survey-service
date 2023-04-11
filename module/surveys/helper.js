@@ -941,19 +941,13 @@ module.exports = class SurveysHelper {
 
                 if (programDocument.length > 0) {
                     result.program = programDocument[0];
-                    // check if user joined the program or not
-                    const query = { 
-                        userId: userId,
-                        programId: programDocument[0]._id
-                    };
-        
+
                     //Check data present in programUsers collection.
-                    const programUsers = await programUsersHelper.programUsersDocuments(
-                        query,
-                        ["_id"]
-                    );
+                    //checkForUserJoinedProgram will check for data and if its present return true else false.
+                    let programJoined = await programUsersHelper.checkForUserJoinedProgram(programDocument[0]._id,userId);
+                    
                     // if programJoined key is false, user not joined the program.
-                    result.programJoined = (programUsers.length > 0) ? true : false;
+                    result.programJoined = programJoined;
                     result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations : [];
                     result.requestForPIIConsent = ( programDocument[0].requestForPIIConsent ) ? programDocument[0].requestForPIIConsent : false;
                 }
