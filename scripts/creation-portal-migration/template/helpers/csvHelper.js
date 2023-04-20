@@ -1,14 +1,16 @@
-const { pick } = require("lodash");
-
-const { searchUser } = require("../../api-list/user");
-
 const fs = require("fs");
 let { parse } = require("csv-parse");
 const csvtojson = require("csvtojson");
 const path = require("path");
-const { dirname } = require("path");
+const logger = require("../../logger");
 
-
+/**
+* To get solution author and org details
+* @method
+* @name getCsvData
+* @param {Object} solution - question
+* @returns {Object} - returns csv data
+**/
 const getCsvData = async (solution) => {
   const filePath = __dirname.split("/creation-portal-migration/template");
   const filename = path.resolve(filePath[0]) + "/creation-portal-migration/SL-DataMapping.csv";
@@ -28,7 +30,7 @@ const getCsvData = async (solution) => {
         const csvUserIndex = data[0].indexOf("authorId");
         const csvUserId = row[csvUserIndex];
         const pIndex = data[0].indexOf("programId");
-
+        // check if solution.author is present is csv
         if (index > 0) {
           if (solution.author === csvUserId) {
             srcOrgAdmin.push(row);
@@ -48,11 +50,22 @@ const getCsvData = async (solution) => {
             reject(err);
           }
         });
+        // return if the csv data if solution.author is present in csv, where d is headers and srcOrgAdmin is csv data
         resolve({ data: d, srcOrgAdmin });
       });
   });
 };
 
+/**
+* To update csv file with solution programId
+* @method
+* @name updateCsvFile
+* @param {any[]} csvData - csvData
+* @param {Object} columnToUpdate - columnToUpdate
+* @param {String} programId - programId
+* @param {String} programName - programName
+* @returns {Object} - returns csv data
+**/
 const updateCsvFile = async (csvData = [], columnToUpdate, programId, programName) => {
   const filename = __dirname + "/SL-DataMapping.csv";
   const data = await csvtojson().fromString(csvData);
@@ -66,24 +79,27 @@ const updateCsvFile = async (csvData = [], columnToUpdate, programId, programNam
 
   csvD.unshift(header);
   const d = csvD.join("\n");
-  console.log();
-  console.log();
 
   fs.writeFileSync(filename, d, (err) => {
     if (err) {
-      console.log("errororor", err);
+      logger.error("Error while writing to file", err);
     }
   });
 };
 
-const getContributorAndSrcAdminData = async (solution, program_id) => {
-  // const userData = await searchUser(solution.author).catch((error) => {
-  //   console.log("Error", error);
-  // });
-  // const contributor = pick(userData[0], ["userId", "userName", "rootOrgId"]);
-  // contributor.rootOrgId = "01329314824202649627";
-  // const csv = await getCsvData(solution, contributor?.rootOrgId);
+/**
+* To get solution author details from csv
+* @method
+* @name getContributorAndSrcAdminData
+* @param {Object} solution - solution
+* @returns {Object} - returns csv data
+**/
+const getContributorAndSrcAdminData = async (solution) => {
+
+  // get csv data for the solution
   const csv = await getCsvData(solution);
+
+  // convert csv to json format
   const srcOrgAdmin = await csvtojson().fromString(csv.srcOrgAdmin);
   return { csvData: csv.data, srcOrgAdmin: srcOrgAdmin[0] };
 };

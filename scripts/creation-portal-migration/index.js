@@ -2,7 +2,7 @@ require("dotenv").config({path: "./../../.env"});
 const { createDBInstance } = require("./db/dbConfig");
 const { findAll } = require("./db");
 const {
-  getQuestionSetTemplates,
+  createProgramAndQuestionsets,
 } = require("./template/generate/gQuestionSet.js");
 
 const logger = require("./logger");
@@ -26,6 +26,7 @@ const migrateData = async (req, res) => {
       published: 0,
     };
 
+// This migratedCount object is to keep track of the migration count
     const migratedCount = {
       totalCount: 0,
       success: {
@@ -64,16 +65,19 @@ const migrateData = async (req, res) => {
         question: { count: 0, ids: [] }
       },
     };
+
+    // connect to db
     const db = await createDBInstance();
 
-    const data = await findAll(CONFIG.DB.TABLES.solutions, {
+    // get solutions from mongo 
+    let data = await findAll(CONFIG.DB.TABLES.solutions, {
       programId: { $exists: true },
-      type: { $in: ["observation", "survey"] },
-    });
-
+      isRubricDriven: false,
+      type: { $in: ["observation", "survey"] }    });
     migratedCount.totalCount = data.length;
 
-    const template = await getQuestionSetTemplates(
+    // To create the program and the questionsets
+    const template = await createProgramAndQuestionsets(
       data,
       migratedCount
     );

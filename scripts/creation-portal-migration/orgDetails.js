@@ -2,10 +2,15 @@ require("dotenv").config({ path: "./../../.env" });
 const { createDBInstance } = require("./db/dbConfig");
 const { findAll } = require("./db");
 const { CONFIG } = require("./constant/config");
-const { compact, uniq, uniqBy } = require("lodash");
+const { compact, uniq } = require("lodash");
 const fs = require("fs");
 const { searchUser, getOpenSaberUserOrgId } = require("./api-list/user");
 
+/**
+* To get the userdata from creation portal
+* @method
+* @name getUserIds
+**/
 const getUserIds = async () => {
   try {
     const db = await createDBInstance();
@@ -16,10 +21,6 @@ const getUserIds = async () => {
 
     const userIds = data.map((solution) => solution.author);
     const solutions = data.map((solution) => {
-      // const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"];
-      // const month = months[new Date().getMonth()];
-      // const day = new Date().getDate();
-      // const year = new Date().getFullYear();
       const programName = `${solution.name} sourcing project`
       return {
         userId: solution.author,
@@ -41,6 +42,29 @@ const getUserIds = async () => {
   }
 };
 
+/**
+* Write the data to csv file
+* @method
+* @name writeToCSVFile
+* @param {Object[]} users - users
+* @param {String[]} usersIdsInDb - usersIdsInDb
+* @param {Object[]} openSaberOrg - 
+"User_Org": [
+  {
+      "osUpdatedAt": "2021-05-11T06:07:45.534Z",
+      "osCreatedAt": "2021-05-11T06:07:45.534Z",
+      "@type": "User_Org",
+      "roles": [
+          "user",
+          "sourcing_reviewer"
+        ],
+      "osid": "0933fa92-729f-4a77-b5d7-cba40f68b4eb",
+      "userId": "d59873a0-40ea-461b-9402-ab090932f92d",
+      "orgId": "7c5a96ca-bef8-4027-8736-4fa1ae6f9180"
+    }
+  ]
+* @param {Object[]} solutions - solutions
+**/
 writeToCSVFile = (users, usersIdsInDb, openSaberOrg, solutions) => {
   const filename = __dirname + "/SL-DataMapping.csv";
   fs.writeFile(
@@ -57,6 +81,29 @@ writeToCSVFile = (users, usersIdsInDb, openSaberOrg, solutions) => {
   );
 };
 
+/**
+* Extract the data in csv format
+* @method
+* @name extractAsCSV
+* @param {Object[]} users - users
+* @param {String[]} usersIdsInDb - usersIdsInDb
+* @param {Object[]} openSaberOrg - 
+"User_Org": [
+  {
+      "osUpdatedAt": "2021-05-11T06:07:45.534Z",
+      "osCreatedAt": "2021-05-11T06:07:45.534Z",
+      "@type": "User_Org",
+      "roles": [
+          "user",
+          "sourcing_reviewer"
+        ],
+      "osid": "0933fa92-729f-4a77-b5d7-cba40f68b4eb",
+      "userId": "d59873a0-40ea-461b-9402-ab090932f92d",
+      "orgId": "7c5a96ca-bef8-4027-8736-4fa1ae6f9180"
+    }
+  ]
+* @param {Object[]} solutions - solutions
+**/
 const extractAsCSV = (users, usersIdsInDb, openSaberOrg, solutions) => {
   const header = [
     `authorId,mappedUserId,userName,rootOrgId,rootOrgName,org_id,srcOrgAdminId,srcOrgAdminUserName,contributorOrgAdminId,contributorOrgAdminUserName,programId,programName`,
@@ -65,7 +112,6 @@ const extractAsCSV = (users, usersIdsInDb, openSaberOrg, solutions) => {
   let rows = usersIdsInDb.map((id) => {
     const match = users.find((user) => user.userId === id);
     const solution = solutions.find((s) => s.userId === id);
-    console.log("solutionsolution", solution);
     const org = openSaberOrg.find((o) => o.createdBy === id);
     return `${id},${match?.userId || ""},${match?.userName || ""},${
       match?.rootOrgId || ""

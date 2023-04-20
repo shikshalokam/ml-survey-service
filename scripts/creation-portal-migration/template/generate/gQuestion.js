@@ -1,5 +1,12 @@
 const { questionTemplate, questionStatic } = require("../config/question");
 
+/**
+* To map the body field data 
+* @method
+* @name getQBodyParagraph
+* @param {Object} questionData - questionData
+* @returns {String} - returns mapped body field data with p tag
+**/
 const getQBodyParagraph = (questionData) => {
   return questionData
     .map((data) => {
@@ -8,6 +15,13 @@ const getQBodyParagraph = (questionData) => {
     .join("");
 };
 
+/**
+* To map the body field data  with div tag
+* @method
+* @name getQBodyDiv
+* @param {Object} questionData - questionData
+* @returns {String} - returns mapped body field data with div tag
+**/
 const getQBodyDiv = (questionData) => {
   const divs = questionData
     .map((data) => {
@@ -18,6 +32,13 @@ const getQBodyDiv = (questionData) => {
   return div;
 };
 
+/**
+* To map the question type date
+* @method
+* @name getDateTemplate
+* @param {Object} question - question
+* @returns {Object} - returns mapped date type question
+**/
 const getDateTemplate = (question) => {
   const template = {};
   console.log("getDate");
@@ -69,6 +90,13 @@ const getDateTemplate = (question) => {
   return template;
 };
 
+/**
+* To map the question type slider
+* @method
+* @name getDateTemplate
+* @param {Object} question - question
+* @returns {Object} - returns mapped slider type question
+**/
 const getSliderTemplate = (question) => {
   const template = {};
   console.log("getSlider");
@@ -120,15 +148,29 @@ const getSliderTemplate = (question) => {
   return template;
 };
 
+/**
+* To get question options and update the object values as strings
+* @method
+* @name getOptions
+* @param {Object[]} options - options
+* @returns {Object[]} - returns options
+**/
+
 const getOptions = (options) => {
   options.map((values, index) => {
-
     values.value = `${values?.value}`;
     values.label = `${values.label}`;
   });
   return options;
 };
 
+/**
+* To get question options and update the object values
+* @method
+* @name getEditorOptions
+* @param {Object[]} options - options
+* @returns {Object[]} - returns options
+**/
 const getEditorOptions = (options) => {
   const data = options.map((values, index) => {
     return {
@@ -142,6 +184,13 @@ const getEditorOptions = (options) => {
   return data;
 };
 
+/**
+* To map the question type multiselect mcq
+* @method
+* @name getMSMCQTemplate
+* @param {Object} question - question
+* @returns {Object} - returns mapped multiselect mcq type question
+**/
 const getMSMCQTemplate = (question) => {
   const template = {};
 
@@ -192,6 +241,13 @@ const getMSMCQTemplate = (question) => {
   return template;
 };
 
+/**
+* To map the question type mcq
+* @method
+* @name getMCQTemplate
+* @param {Object} question - question
+* @returns {Object} - returns mapped mcq type question
+**/
 const getMCQTemplate = (question) => {
   const template = {};
   console.log();
@@ -242,6 +298,13 @@ const getMCQTemplate = (question) => {
   return template;
 };
 
+/**
+* To map the question type text
+* @method
+* @name getTextTemplate
+* @param {Object} question - question
+* @returns {Object} - returns mapped text type question
+**/
 const getTextTemplate = (question, type) => {
   const template = {};
   console.log("getText");

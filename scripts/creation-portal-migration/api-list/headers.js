@@ -4,6 +4,16 @@ const querystring = require("query-string");
 const jwt = require("jsonwebtoken");
 const logger = require("../logger");
 
+/**
+* To generate the user token
+* @method
+* @name genToken
+* @param {String} url - url 
+* @param {querystring} body - body 
+* @param {String} type - type
+* 
+  * @returns {string} - Generates the user token
+*/
 const genToken = async (url, body, type) => {
   const isValid = await validateToken(type);
 
@@ -19,13 +29,21 @@ const genToken = async (url, body, type) => {
     return res ? res?.data?.access_token : "";
   } else {
     const token = this.ed_token;
-    // console.log("rbdsnbnsf", this.ed_token);
     // type === "ed" ? this.ed_token : this.ed_token
     // this.creation_portal_token;
 
     return token;
   }
 };
+
+/**
+* To validate the user token
+* @method
+* @name validateToken
+* @param {String} type - type
+* 
+  * @returns {Boolean} - Returns the boolean response  
+*/
 
 const validateToken = (type) => {
   const token = type === "ed" ? this.ed_token : this.ed_token;
@@ -45,6 +63,15 @@ const validateToken = (type) => {
   }
 };
 
+/**
+* prepare the reqbody and calls the generate token  
+* @method
+* @name generateToken
+* @param {String} type - type
+* 
+  * @returns {string} - Returns the user token
+*/
+
 const generateToken = async (type) => {
   let url = "";
   let body = {};
@@ -62,6 +89,16 @@ const generateToken = async (type) => {
       return this.creation_portal_token;
   }
 };
+
+/**
+* get headers based on the environment
+* @method
+* @name getHeaders
+* @param {String} type - type
+* @param {Boolean} isTokenReq - isTokenReq
+* 
+  * @returns {Object} - Returns the headers
+*/
 
 const getHeaders = async (isTokenReq, type) => {
   let headers = {};

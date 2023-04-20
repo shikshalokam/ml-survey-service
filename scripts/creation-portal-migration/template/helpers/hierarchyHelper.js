@@ -14,6 +14,14 @@ const { CONFIG } = require("../../constant/config");
 const { updateById } = require("../../db");
 const logger = require("../../logger");
 
+/**
+* Update the query fields in solutions collections
+* @method
+* @name updateSolutionsDb
+* @param {Object} query - fields to update in mongodb.
+* @param {String} referenceQuestionsetId - referenceQuestionsetId.
+* @param {Object} migratedCount - migratedCount to increment the count.
+*/
 const updateSolutionsDb = async (
   query,
   referenceQuestionsetId,
@@ -40,6 +48,15 @@ const updateSolutionsDb = async (
   }
 };
 
+/**
+* Update the questionset hierarchy and branching logic
+* @method
+* @name updateHierarchyTemplate
+* @param {Object[]} sectionsList - sectionsList.
+* @param {Object} solution - solution.
+* @param {String} programId - programId.
+* @param {Object} migratedCount - migratedCount to increment the count.
+*/
 const updateHierarchyTemplate = async (
   sectionsList,
   solution,
@@ -55,9 +72,10 @@ const updateHierarchyTemplate = async (
     updateHierarchyData = getHierarchyData(sectionsList, solution);
     const result = await updateQuestionSetHierarchy(updateHierarchyData).catch(
       (err) => {
-        console.log("updateQuestionSetHierarchy Err", err?.response?.data);
         logger.error(`Error while updating the questionset for solution_id: ${solution?._id} Error:
           ${JSON.stringify(err.response.data)}`);
+        // increment questionSet hierarchy failed count and store the id
+
         if (
           !migratedCount.failed.questionSet.hierarchy.ids.includes(
             solution?.referenceQuestionSetId
@@ -85,6 +103,7 @@ const updateHierarchyTemplate = async (
     updateHierarchyData = getHierarchyData(sectionsList,solution, result);
 
   } else {
+    // increment questionSet hierarchy success count
     migratedCount.success.questionSet.existing.hierarchy++;
   }
   
@@ -117,6 +136,7 @@ const updateHierarchyTemplate = async (
       );
   
       if (!result) {
+        // Update the solutions collection with hierarchy update  status 
         await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
         return;
       }
@@ -125,6 +145,7 @@ const updateHierarchyTemplate = async (
         "migrationReference.isBranchingUpdated": true,
       };
     } else {
+      // increment questionSet branching failed count and store the id
       if (
         !migratedCount.failed.questionSet.branching.ids.includes(
           solution?.referenceQuestionSetId
@@ -137,6 +158,7 @@ const updateHierarchyTemplate = async (
       }
     }
   } else {
+    // increment questionSet branching success count
     migratedCount.success.questionSet.existing.branching++;
   }
   if (!solution.migrationReference?.isPublished) {
@@ -145,6 +167,7 @@ const updateHierarchyTemplate = async (
         solution?.referenceQuestionSetId
       } Error:
           ${JSON.stringify(err.response.data)}`);
+      // increment questionSet published failed count and store the id
 
       if (
         !migratedCount.failed.questionSet.published.ids.includes(
@@ -159,6 +182,7 @@ const updateHierarchyTemplate = async (
       }
     });
     if (!res) {
+      // Update the solutions collection with hierarchy update and branching update status 
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
     }
@@ -167,16 +191,31 @@ const updateHierarchyTemplate = async (
       "migrationReference.isPublished": true,
     };
   } else {
+    // increment questionSet published success count
     migratedCount.success.questionSet.existing.published++;
   }
+
+  // Update the solutions collection with hierarchy update and branching update and published status 
   const res = await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
 };
 
 
+/**
+* To form the request data to the required hierarchy format
+* @method
+* @name getHierarchyData
+* @param {Object[]} sectionsList - sectionsList.
+* @param {Object} solution - solution.
+* @param {Object} result -
+    {
+      "Comments and Reflection:": "do_21377895770669056011493",
+      "Comments and Reflection: 2": "do_21377895770669056011495"
+    }
+* @returns {JSON} - returns the formatted request hierarchy
+**/
+
 const getHierarchyData = (sectionsList, solution, result={}) => {
-
   const sectionKeys = Object.keys(sectionsList);
-
   const hierarchyData = {
     request: {
       data: {
@@ -246,10 +285,20 @@ const getHierarchyData = (sectionsList, solution, result={}) => {
 }
 
 
+/**
+* To get the branchingLogic request for the questionset
+* @method
+* @name branchingQuestionSetHierarchy
+* @param {Object} solution - solution.
+* @param {Object[]} sectionsList - sectionsList.
+* @returns {JSON} - returns the formatted request hierarchy with branching Logic
+**/
+
 const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
   logger.debug("branchingQuestionSetHierarchy", JSON.stringify(sectionsList));
   let questionSetHierarchy = {};
   if (solution.referenceQuestionSetId && solution?.migrationReference?.isHierarchyUpdated) {
+    // Called If the questionset hierarchy is but updated fails to update the branchig Logic
     questionSetHierarchy = await readQuestionSetHierarchy(
       solution?.referenceQuestionSetId
     ).catch(err => {
@@ -259,6 +308,13 @@ const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
   }
 
   const result = {};
+  /** create the result object with child name: identifier
+   Ex: 
+   {
+    "Comments and Reflection:": "do_21377895770669056011493",
+    "Comments and Reflection: 2": "do_21377895770669056011495"
+   }
+  **/
   questionSetHierarchy?.children?.map(child => {
     result[child?.name] =  child?.identifier
   });
@@ -271,6 +327,13 @@ const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
 
 };
 
+/**
+* To get the child condition operator
+* @method
+* @name getOperator
+* @param {Object} visibleIf - visibleIf.
+* @returns {JSON} - operator
+**/
 const getOperator = (visibleIf) => {
   const operator =
     visibleIf.operator === "==="
@@ -282,6 +345,15 @@ const getOperator = (visibleIf) => {
   return operator;
 };
 
+/**
+* Forms and returns the child precondition
+* @method
+* @name getPrecondition
+* @param {Object} visible - visible.
+* @param {String} parentId - parentId.
+* @param {Object} visible - visible.
+* @returns {JSON} - returns the precondition
+**/
 const getPrecondition = (visible, parentId, parentQuestion) => {
   logger.debug(
     `getPrecondition: parentId = ${parentId}; visible: ${JSON.stringify(

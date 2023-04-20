@@ -1,5 +1,4 @@
-const { capitalize, isEmpty, get } = require("lodash");
-const { ObjectId } = require("mongodb");
+const { capitalize, isEmpty } = require("lodash");
 const { createQuestions, publishQuestion } = require("../../api-list/question");
 const { CONFIG } = require("./../../constant/config");
 const { updateById, findAll } = require("../../db");
@@ -12,6 +11,15 @@ const {
   getTextTemplate,
 } = require("../generate/gQuestion");
 
+/**
+* Create the mapping for questionset to add in creation poral
+* @method
+* @name setQuestionSetTemplate
+* @param {Object} solution - solution
+* @param {String} programId - programId
+* @param {Object} contributor - contributor
+* @returns {JSON} - return the mapped template data
+**/
 const setQuestionSetTemplate = (solution, programId, contributor) => {
 
   const languages = {
@@ -48,6 +56,14 @@ const setQuestionSetTemplate = (solution, programId, contributor) => {
   return templateData;
 };
 
+/**
+* Based on question type create the question in creation portal
+* @method
+* @name createQuestionTemplate
+* @param {Object} question - question
+* @param {Object} migratedCount - migratedCount
+* @returns {JSON} - return the mapped migrated question
+**/
 const createQuestionTemplate = async (question, migratedCount) => {
 
   const migratedQuestion = await findAll(CONFIG.DB.TABLES.questions, {
@@ -83,6 +99,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
     }
 
     if (!isEmpty(questionToMigrate) && !referenceQuestionId) {
+      // call the api to create the question
       referenceQuestionId = await createQuestions(
         questionToMigrate,
         question._id
@@ -92,12 +109,13 @@ const createQuestionTemplate = async (question, migratedCount) => {
   }
 
   if (referenceQuestionId && !isPublished) {
+    // call the api to publish the question in creation portal
     const res = await publishQuestion(referenceQuestionId).catch((err) => {
+      // increment question publish failed count and store the id
       if (!migratedCount.failed.question.ids.includes(referenceQuestionId)) {
         migratedCount.failed.question.count++;
         migratedCount.failed.question.ids.push(referenceQuestionId);
       }
-
       logger.error(`Error while publishing the question for referenceQuestionId: ${referenceQuestionId} Error:
       ${JSON.stringify(err.response.data)}`);
     });
@@ -118,7 +136,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
 
   if (referenceQuestionId) {
     question.referenceQuestionId = referenceQuestionId;
-
+    // update the query with referenceQuestionId and migrationReference isPublished status
     query = {
       referenceQuestionId,
       "migrationReference.isPublished": isPublished,
@@ -131,6 +149,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
   }
 
   if (!isEmpty(query) && question) {
+    // update the questionid and published status in db
     await updateById(CONFIG.DB.TABLES.questions, question._id, {
       ...query,
     });
@@ -143,35 +162,19 @@ const createQuestionTemplate = async (question, migratedCount) => {
   return questionToMigrate;
 };
 
+/**
+* Update the solution db by solution id
+* @method
+* @name updateSolutionById
+* @param {Object} {id: Strig, query: Object} - {id, query}
+* @returns  - Updates the solution in mongo
+**/
 const updateSolutionById = async ({ id, query }) => {
   return await updateById(CONFIG.DB.TABLES.solutions, id, query);
-};
-
-const getQuestionFromDB = async (questionId) => {
-  const readQuestion = await findAll(CONFIG.DB.TABLES.questions, {
-    _id: ObjectId(questionId),
-  });
-  return readQuestion[0];
-};
-
-const isVisibleIfPresent = (question) => {
-  return !isEmpty(get(question, "visibleIf"));
-};
-
-const isChildrenPresent = (question) => {
-  return !isEmpty(get(question, "children"));
-};
-
-const isInstanceQuestionsPresent = (question) => {
-  return !isEmpty(get(question, "instanceQuestions"));
 };
 
 module.exports = {
   setQuestionSetTemplate,
   createQuestionTemplate,
-  updateSolutionById,
-  getQuestionFromDB,
-  isVisibleIfPresent,
-  isChildrenPresent,
-  isInstanceQuestionsPresent,
+  updateSolutionById
 };
