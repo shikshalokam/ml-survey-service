@@ -15,6 +15,8 @@ const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper")
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
+const coreService = require(ROOT_PATH + "/generics/services/core");
+const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
 
 /**
     * Observations
@@ -1065,7 +1067,8 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
-
+                let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
+                let appName = req.headers["x-app-id"]  ? req.headers["x-app-id"]  : req.headers.appname ? req.headers.appname : "";
                 let response = {
                     message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
                     result: {}
@@ -1079,13 +1082,14 @@ module.exports = class Observations extends Abstract {
                 }
                 let observationDocument = await observationsHelper.observationDocuments( queryObject )
                 observationDocument = observationDocument[0]
+                
                 if (!observationDocument) {
                     return resolve({ 
                         status: httpStatusCode.bad_request.status, 
                         message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND
                     });
                 }
-
+                
                 let filterData = {
                     "type" : observationDocument.entityType
                 };
@@ -1162,6 +1166,41 @@ module.exports = class Observations extends Abstract {
 
                 if ( !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
+                }
+
+                //fetch programUsers data
+                let programUsers = await programUsersHelper.programUsersDocuments(
+                    {
+                        userId : req.userDetails.userId,
+                        programId : observationDocument.programId
+                    },
+                    [
+                        "_id",
+                        "resourcesStarted"
+                    ]
+                );
+
+                if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+                    // join observation's program. PII data consent is given via this api call.
+                    // no need to check if usr already joined the program or not it is managed in ml-core service. 
+                    
+                    let programJoinData = {};
+                    programJoinData.userRoleInformation = req.body;
+                    programJoinData.isResource = true;
+                    let joinProgram = await coreService.joinProgram (
+                        req.userDetails.userToken,
+                        programJoinData,
+                        observationDocument.programId,
+                        appVersion,
+                        appName
+                    );
+                    
+                    if ( !joinProgram.success ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                        });
+                    }
                 }
 
                 /*

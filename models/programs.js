@@ -43,6 +43,8 @@ module.exports = {
           index : true
         }
       }]
-    }
+    },
+    rootOrganisations : Array,
+    createdFor : Array
   }
 };
