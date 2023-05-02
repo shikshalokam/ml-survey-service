@@ -244,9 +244,9 @@ module.exports = class Surveys extends Abstract {
                     req.body,
                     surveyId,
                     req.query.solutionId,
-                    // req.userDetails.userId,
-                    // req.userDetails.userToken,
-                    // true
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
+                    true
                 );
                 console.log("surveyDetails", surveyDetails )
 
@@ -256,8 +256,8 @@ module.exports = class Surveys extends Abstract {
 
                 surveyDetails = await surveysHelper.getDetailsByLink(
                     req.params._id,
-                    // req.userDetails.userId,
-                    // req.userDetails.userToken,
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
                     bodyData,
                     true
                 );

@@ -100,8 +100,8 @@ module.exports = class ObservationSubmissions extends Abstract {
         try {
           let observationDocument = await observationsHelper.observationDocuments({
             _id: req.params._id,
-            // createdBy: req.userDetails.userId,
-            // status: {$ne:"inactive"},
+            createdBy: req.userDetails.userId,
+            status: {$ne:"inactive"},
             entities: ObjectId(req.query.entityId)
           });
 
