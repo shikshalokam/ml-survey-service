@@ -66,7 +66,7 @@ let azureDbName = "sl-prod-old";
                 missingSurveySubmissions = missingDataIds;
             }
         }
-
+        // check for missing ids and if present create doc and call kafka events
         if ( missingObservations.length > 0 ){
             await createDataInOCIdatabaseCollection(missingObservations,"observations");
         }
@@ -95,7 +95,6 @@ let azureDbName = "sl-prod-old";
                 }).project().toArray();
     
                 let chunkOfDocument = _.chunk(collectionDetailsFromAzureDb, 10);
-                // console.log("chunkOfDocument",chunkOfDocument)
                 for ( let chunkOfDocumentIndex = 0; chunkOfDocumentIndex < chunkOfDocument.length; chunkOfDocumentIndex++ ) {
                     await insertIntoOCIDatabase(chunkOfDocument[chunkOfDocumentIndex],collectionName);
                 }
@@ -112,8 +111,8 @@ let azureDbName = "sl-prod-old";
         */
         async function insertIntoOCIDatabase (data,collectionName) {
             try{
+                // create doc
                 let createDoc = await db_OCI.collection(collectionName).insertMany(data);
-                console.log("yeahh :",createDoc)
                 if(createDoc.ops && createDoc.ops.length > 0 && (collectionName === "observationSubmissions" || collectionName === "surveySubmissions")) {
                     for (let index=0; index < createDoc.ops.length; index++) {
                         await callKafkaEvents(createDoc.ops[index],collectionName);
