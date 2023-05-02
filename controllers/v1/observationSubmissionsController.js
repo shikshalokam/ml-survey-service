@@ -15,7 +15,6 @@ const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
-const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
 
 /**
     * ObservationSubmissions
@@ -99,8 +98,7 @@ module.exports = class ObservationSubmissions extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
-            let observationDocument =
- await observationsHelper.observationDocuments({
+        let observationDocument = await observationsHelper.observationDocuments({
           _id: req.params._id,
           createdBy: req.userDetails.userId,
           status: {$ne:"inactive"},
@@ -157,11 +155,8 @@ module.exports = class ObservationSubmissions extends Abstract {
           "isRubricDriven",
           "project",
           "referenceFrom",
-          "criteriaLevelReport",
-          "referenceQuestionSetId",
-          "type",
-        ]
-);
+          "criteriaLevelReport"
+        ]);
 
         if (!solutionDocument[0]) {
           return resolve({ 
@@ -172,17 +167,6 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         solutionDocument = solutionDocument[0];
 
-        const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
-
-        if (!referenceQuestionSetId) {
-          let responseMessage = messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
-            return resolve({
-              status: httpStatusCode.bad_request.status,
-              message: responseMessage,
-          });
-        }
-
-  
         let entityProfileForm = await database.models.entityTypes.findOne(
             solutionDocument.entityTypeId,
             {
@@ -257,6 +241,32 @@ module.exports = class ObservationSubmissions extends Abstract {
         submissionDocument["project"] = solutionDocument.project;
       }
 
+      let criteriaId = new Array;
+      let criteriaObject = {};
+      let criteriaIdArray = gen.utils.getCriteriaIdsAndWeightage(solutionDocument.themes);
+
+      criteriaIdArray.forEach(eachCriteriaId => {
+          criteriaId.push(eachCriteriaId.criteriaId);
+          criteriaObject[eachCriteriaId.criteriaId.toString()] = {
+              weightage: eachCriteriaId.weightage
+          };
+      })
+
+      let criteriaDocuments = await database.models.criteria.find(
+          { _id: { $in: criteriaId } },
+          {
+              evidences : 0,
+              resourceType: 0,
+              language: 0,
+              keywords: 0,
+              concepts: 0,
+              updatedAt : 0,
+              createdAt : 0,
+              frameworkCriteriaId : 0,
+              __v : 0
+          }
+      ).lean();
+
       let submissionDocumentEvidences = {};
       let submissionDocumentCriterias = [];
       Object.keys(solutionDocument.evidenceMethods).forEach(solutionEcm => {
@@ -271,19 +281,22 @@ module.exports = class ObservationSubmissions extends Abstract {
       })
       submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
-      let evidences = {};
-          if (referenceQuestionSetId) {
-            evidences = await transFormationHelper.getQuestionSetHierarchy(
-                submissionDocumentCriterias,
-                solutionDocument,
-                false
-              );
-          }
+      criteriaDocuments.forEach(criteria => {
+
+          criteria.weightage = criteriaObject[criteria._id.toString()].weightage;
+
+          submissionDocumentCriterias.push(
+              _.omit(criteria, [
+                  "evidences"
+              ])
+          );
+
+      });
+
 
       submissionDocument.evidences = submissionDocumentEvidences;
       submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
-      submissionDocument.criteria = evidences.submissionDocumentCriterias || {};
-
+      submissionDocument.criteria = submissionDocumentCriterias;
       submissionDocument.submissionNumber = lastSubmissionNumber;
 
       submissionDocument["appInformation"] = {};

@@ -630,15 +630,17 @@ module.exports = class Surveys extends Abstract {
     */
 
     async details(req) {
-        return new Promise(async (resolve, reject) => {
-          try {
+    return new Promise(async (resolve, reject) => {
+        try {
+
             let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
             let surveyDetails = {};
 
             if( validateSurveyId || req.query.solutionId ) {
+   
                 let surveyId = req.params._id ? req.params._id : "";
-    
+       
                 surveyDetails = await surveysHelper.detailsV3
                 (   
                     req.body,
@@ -656,15 +658,15 @@ module.exports = class Surveys extends Abstract {
                     req.params._id,
                     req.userDetails.userId,
                     req.userDetails.userToken,
-                    bodyData,
-                    true
+                    bodyData
                 );
             }
 
             return resolve({
                 message: surveyDetails.message,
-                result: surveyDetails.data,
+                result: surveyDetails.data
             });
+
         } catch (error) {
             return reject({
                 status: error.status || httpStatusCode.internal_server_error.status,

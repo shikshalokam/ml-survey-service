@@ -988,7 +988,7 @@ module.exports = class SurveysHelper {
                   
                 if (isTransformationRequired && referenceQuestionSetId) {
                     solutionDocument._id = referenceQuestionSetId;
-                    evidences = await transFormationHelper.getQuestionSetHierarchy(referenceQuestionSetId, submissionDocumentCriterias, solutionDocument);
+                    evidences = await transFormationHelper.getQuestionSetHierarchy(submissionDocumentCriterias, solutionDocument);
                 }
 
                 let criteria = criteriaQuestionDocument[0];
@@ -1636,7 +1636,7 @@ module.exports = class SurveysHelper {
       * @returns {JSON} - returns survey solution, program and questions.
     */
 
-   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "") {
+   static detailsV3(bodyData, surveyId = "", solutionId= "",userId= "", token= "", isTransformationRequired=true) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -1669,7 +1669,8 @@ module.exports = class SurveysHelper {
                 userId,
                 validateSurvey.data.submissionId,
                 bodyData,
-                token
+                token,
+                isTransformationRequired
             )
 
             if (!surveyDetails.success) {

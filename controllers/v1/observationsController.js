@@ -14,7 +14,6 @@ const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
-const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
 
 /**
     * Observations
@@ -1028,12 +1027,10 @@ module.exports = class Observations extends Abstract {
                 let solutionDocumentProjectionFields = await observationsHelper.solutionDocumentProjectionFieldsForDetailsAPI()
 
                 let solutionDocument = await database.models.solutions.findOne(
-                    solutionQueryObject, {
-                    ...solutionDocumentProjectionFields,
-                    referenceQuestionSetId: 1,
-                    type: 1
-                }).lean();
-    
+                    solutionQueryObject,
+                    solutionDocumentProjectionFields
+                ).lean();
+
                 if (!solutionDocument) {
                     let responseMessage = messageConstants.apiResponses.SOLUTION_NOT_FOUND;
                     return resolve({ 
@@ -1042,16 +1039,6 @@ module.exports = class Observations extends Abstract {
                     });
                 }
 
-              const referenceQuestionSetId = solutionDocument.referenceQuestionSetId;
-
-              if (!referenceQuestionSetId) {
-                let responseMessage =
-                messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED;
-              return resolve({
-                status: httpStatusCode.bad_request.status,
-                message: responseMessage,
-              });
-              }
                 
                 if( req.query.ecmMethod && req.query.ecmMethod !== "" ) {
                     if(!solutionDocument.evidenceMethods[req.query.ecmMethod] ) {
@@ -1082,18 +1069,59 @@ module.exports = class Observations extends Abstract {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
 
-              let entityDocumentQuestionGroup = entityDocument.metaInformation
-                .questionGroup
-                ? entityDocument.metaInformation.questionGroup
-                : ["A1"];
-    
-              response.result.entityProfile = {
-                _id: entityDocument._id,
-                entityTypeId: entityDocument.entityTypeId,
-                entityType: entityDocument.entityType,
-                // form: form
-              };
-    
+                /*
+                <- Currently not required for bodh-2:10 as roles is not given in user 
+                */
+
+                // let currentUserAssessmentRole = await assessmentsHelper.getUserRole(req.userDetails.allRoles);
+                // let profileFieldAccessibility = (solutionDocument.roles && solutionDocument.roles[currentUserAssessmentRole] && solutionDocument.roles[currentUserAssessmentRole].acl && solutionDocument.roles[currentUserAssessmentRole].acl.entityProfile) ? solutionDocument.roles[currentUserAssessmentRole].acl.entityProfile : "";
+
+                // let entityProfileForm = await database.models.entityTypes.findOne(
+                //     solutionDocument.entityTypeId,
+                //     {
+                //         profileForm: 1
+                //     }
+                // ).lean();
+
+                // if (!entityProfileForm) {
+                //     let responseMessage = messageConstants.apiResponses.ENTITY_PROFILE_FORM_NOT_FOUND;
+                //     return resolve({ 
+                //         status: httpStatusCode.bad_request.status, 
+                //         message: responseMessage 
+                //     });
+                // }
+
+                // let form = [];
+                // let entityDocumentTypes = (entityDocument.metaInformation.types) ? entityDocument.metaInformation.types : ["A1"];
+                let entityDocumentQuestionGroup = (entityDocument.metaInformation.questionGroup) ? entityDocument.metaInformation.questionGroup : ["A1"];
+                // let entityProfileFieldsPerEntityTypes = solutionDocument.entityProfileFieldsPerEntityTypes;
+                // let filteredFieldsToBeShown = [];
+
+                // if (entityProfileFieldsPerEntityTypes) {
+                //     entityDocumentTypes.forEach(entityType => {
+                //         if (entityProfileFieldsPerEntityTypes[entityType]) {
+                //             filteredFieldsToBeShown.push(...entityProfileFieldsPerEntityTypes[entityType]);
+                //         }
+                //     })
+                // }
+
+                // entityProfileForm.profileForm.forEach(profileFormField => {
+                //     if (filteredFieldsToBeShown.includes(profileFormField.field)) {
+                //         profileFormField.value = (entityDocument.metaInformation[profileFormField.field]) ? entityDocument.metaInformation[profileFormField.field] : "";
+                //         profileFormField.visible = profileFieldAccessibility ? (profileFieldAccessibility.visible.indexOf("all") > -1 || profileFieldAccessibility.visible.indexOf(profileFormField.field) > -1) : true;
+                //         profileFormField.editable = profileFieldAccessibility ? (profileFieldAccessibility.editable.indexOf("all") > -1 || profileFieldAccessibility.editable.indexOf(profileFormField.field) > -1) : true;
+                //         form.push(profileFormField);
+                //     }
+                // })
+
+                response.result.entityProfile = {
+                    _id: entityDocument._id,
+                    entityTypeId: entityDocument.entityTypeId,
+                    entityType: entityDocument.entityType,
+                    // form: form
+                };
+
+
                 let solutionDocumentFieldList = await observationsHelper.solutionDocumentFieldListInResponse()
 
                 response.result.solution = await _.pick(solutionDocument, solutionDocumentFieldList);
@@ -1170,6 +1198,27 @@ module.exports = class Observations extends Abstract {
                 assessment.externalId = solutionDocument.externalId;
                 assessment.pageHeading = solutionDocument.pageHeading;
 
+                let criteriaId = new Array;
+                let criteriaObject = {};
+                let criteriaIdArray = gen.utils.getCriteriaIdsAndWeightage(solutionDocument.themes);
+
+                criteriaIdArray.forEach(eachCriteriaId => {
+                    criteriaId.push(eachCriteriaId.criteriaId);
+                    criteriaObject[eachCriteriaId.criteriaId.toString()] = {
+                        weightage: eachCriteriaId.weightage
+                    };
+                })
+
+                let criteriaQuestionDocument = await database.models.criteriaQuestions.find(
+                    { _id: { $in: criteriaId } },
+                    {
+                        resourceType: 0,
+                        language: 0,
+                        keywords: 0,
+                        concepts: 0
+                    }
+                ).lean();
+
                 let evidenceMethodArray = {};
                 let submissionDocumentEvidences = {};
                 let submissionDocumentCriterias = [];
@@ -1181,18 +1230,68 @@ module.exports = class Observations extends Abstract {
                 })
                 submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
-              let evidences = {};
-              if (referenceQuestionSetId) {
-                response.result.solution._id = referenceQuestionSetId;
-                evidences = await transFormationHelper.getQuestionSetHierarchy(
-                  submissionDocumentCriterias,
-                  solutionDocument
-                );
-                }
+                criteriaQuestionDocument.forEach(criteria => {
+
+                    criteria.weightage = criteriaObject[criteria._id.toString()].weightage;
+
+                    submissionDocumentCriterias.push(
+                        _.omit(criteria, [
+                            "evidences"
+                        ])
+                    );
+
+                    criteria.evidences.forEach(evidenceMethod => {
+
+                        if (evidenceMethod.code) {
+
+                            if (!evidenceMethodArray[evidenceMethod.code]) {
+
+                                evidenceMethod.sections.forEach(ecmSection => {
+                                    ecmSection.name = solutionDocument.sections[ecmSection.code];
+                                })
+                                _.merge(evidenceMethod, submissionDocumentEvidences[evidenceMethod.code]);
+                                evidenceMethodArray[evidenceMethod.code] = evidenceMethod;
+
+                            } else {
+
+                                evidenceMethod.sections.forEach(evidenceMethodSection => {
+
+                                    let sectionExisitsInEvidenceMethod = 0;
+                                    let existingSectionQuestionsArrayInEvidenceMethod = [];
+
+                                    evidenceMethodArray[evidenceMethod.code].sections.forEach(exisitingSectionInEvidenceMethod => {
+
+                                        if (exisitingSectionInEvidenceMethod.code == evidenceMethodSection.code) {
+                                            sectionExisitsInEvidenceMethod = 1;
+                                            existingSectionQuestionsArrayInEvidenceMethod = exisitingSectionInEvidenceMethod.questions;
+                                        }
+
+                                    });
+
+                                    if (!sectionExisitsInEvidenceMethod) {
+                                        evidenceMethodSection.name = solutionDocument.sections[evidenceMethodSection.code];
+                                        evidenceMethodArray[evidenceMethod.code].sections.push(evidenceMethodSection);
+                                    } else {
+                                        evidenceMethodSection.questions.forEach(questionInEvidenceMethodSection => {
+                                            existingSectionQuestionsArrayInEvidenceMethod.push(
+                                                questionInEvidenceMethodSection
+                                            );
+                                        });
+                                    }
+
+                                });
+
+                            }
+
+                        }
+
+                    });
+
+                });
 
                 submissionDocument.evidences = submissionDocumentEvidences;
                 submissionDocument.evidencesStatus = Object.values(submissionDocumentEvidences);
-                submissionDocument.criteria = evidences.submissionDocumentCriterias || {};
+                submissionDocument.criteria = submissionDocumentCriterias;
                 submissionDocument.submissionNumber = submissionNumber;
 
                 submissionDocument["appInformation"] = {};
@@ -1231,17 +1330,15 @@ module.exports = class Observations extends Abstract {
                     entityDocument.metaInformation
                 );
 
-                assessment.evidences = evidences.evidences;
+                assessment.evidences = parsedAssessment.evidences;
                 assessment.submissions = parsedAssessment.submissions;
                 if (parsedAssessment.generalQuestions && parsedAssessment.generalQuestions.length > 0) {
                     assessment.generalQuestions = parsedAssessment.generalQuestions;
                 }
 
-              response.result.assessment = assessment;
-    
+                response.result.assessment = assessment;
 
-              return resolve(response);
-            
+                return resolve(response);
             } catch (error) {
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,
