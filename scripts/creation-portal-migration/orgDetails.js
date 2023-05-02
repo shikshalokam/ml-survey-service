@@ -16,6 +16,7 @@ const getUserIds = async () => {
     const db = await createDBInstance();
     const data = await findAll(CONFIG.DB.TABLES.solutions, {
       programId: { $exists: true },
+      isRubricDriven: false,
       type: { $in: ["observation", "survey"] },
     });
 
@@ -33,7 +34,7 @@ const getUserIds = async () => {
     let uniqUsers = uniq(userIds);
     uniqUsers = compact(uniqUsers);
     const usersList = await searchUser(uniqUsers);
-    const openSaberOrg = await getOpenSaberUserOrgId();
+    const openSaberOrg = await getOpenSaberUserOrgId(uniqUsers);
     const d = writeToCSVFile(usersList, uniqUsers, openSaberOrg, solutions);
     console.log(`\n migratedCount userIds`, d);
   } catch (err) {

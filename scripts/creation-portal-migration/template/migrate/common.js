@@ -1,5 +1,4 @@
 const { isEmpty } = require("lodash");
-const logger = require("../../logger");
 
 /**
 * Map section data
