@@ -18,9 +18,13 @@ const kafkaClient = require(ROOT_PATH + "generics/helpers/kafkaCommunications");
 let mongoUrlOfOCIDb = process.env.MONGODB_URL;
 let ociDbName = mongoUrlOfOCIDb.split("/").pop();
 let DbUrl = mongoUrlOfOCIDb.split(ociDbName)[0];
-let azureDbName = "sl-prod-old";
+let azureDbName = process.argv[2];
 
 (async () => {
+    if ( azureDbName === undefined ) {
+        console.log("Sorry! Please pass Azure Database name with node command.")
+        process.exit();
+    }
     // Azure DB connection && OCI db connection
     let connection = await MongoClient.connect(DbUrl, { useNewUrlParser: true });
     let db_Azure = connection.db(azureDbName);
