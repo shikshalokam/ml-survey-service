@@ -1798,7 +1798,7 @@ module.exports = class ObservationsHelper {
                     },["requestForPIIConsent", "rootOrganisations"]);
 
                     requestForPIIConsent = ( programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
-                    rootOrganisations = ( programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations : [];
+                    rootOrganisations = ( programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations[0] : "";
                 }
                 
                 return resolve({

@@ -948,7 +948,7 @@ module.exports = class SurveysHelper {
                     
                     // if programJoined key is false, user not joined the program.
                     result.programJoined = programJoined;
-                    result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations : [];
+                    result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations[0] : "";
                     result.requestForPIIConsent = ( programDocument[0].requestForPIIConsent ) ? programDocument[0].requestForPIIConsent : false;
                 }
 
