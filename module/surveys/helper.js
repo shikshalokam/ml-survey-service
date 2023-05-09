@@ -949,7 +949,9 @@ module.exports = class SurveysHelper {
                     // if programJoined key is false, user not joined the program.
                     result.programJoined = programJoined;
                     result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations[0] : "";
-                    result.requestForPIIConsent = ( programDocument[0].requestForPIIConsent ) ? programDocument[0].requestForPIIConsent : false;
+                    if ( programDocument[0].hasOwnProperty('requestForPIIConsent')) {
+                        result.requestForPIIConsent = programDocument[0].requestForPIIConsent;
+                    }
                 }
 
                 let assessment = {};
@@ -1056,25 +1058,39 @@ module.exports = class SurveysHelper {
                 } else {
                     // join survey's program. PII data consent is given via this api call.
                     if ( solutionDocument.programId && userToken !== "" ) {
-                        // not checking if already joined the program. it is handled in ml-core joinProgram fn.
                         
-                        if ( programDocument.length > 0 ) {
-                            let programJoinData = {};
-                            programJoinData.userRoleInformation = roleInformation;
-                            programJoinData.isResource = true;
-                            let joinProgram = await coreService.joinProgram (
-                                userToken,
-                                programJoinData,
-                                solutionDocument.programId,
-                                appVersion,
-                                appName
+                        if ( programDocument.length > 0  && programDocument[0].hasOwnProperty('requestForPIIConsent') ) {
+                            //fetch programUsers data
+                            let programUsers = await programUsersHelper.programUsersDocuments(
+                                {
+                                    userId : userId,
+                                    programId : solutionDocument.programId
+                                },
+                                [
+                                    "_id",
+                                    "resourcesStarted"
+                                ]
                             );
-                            
-                            if ( !joinProgram.success ) {
-                                return resolve({ 
-                                    status: httpStatusCode.bad_request.status, 
-                                    message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                                });
+                            if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+
+                                let programJoinData = {};
+                                programJoinData.userRoleInformation = roleInformation;
+                                programJoinData.isResource = true;
+                                let joinProgram = await coreService.joinProgram (
+                                    userToken,
+                                    programJoinData,
+                                    solutionDocument.programId,
+                                    appVersion,
+                                    appName
+                                );
+                                
+                                if ( !joinProgram.success ) {
+                                    return resolve({ 
+                                        status: httpStatusCode.bad_request.status, 
+                                        message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                                    });
+                                }
+
                             }
                         } 
                     }

@@ -1160,7 +1160,8 @@ module.exports = class Observations extends Abstract {
                         "name",
                         "description",
                         "imageCompression",
-                        "isAPrivateProgram"
+                        "isAPrivateProgram",
+                        "requestForPIIConsent"
                     ]
                 );
 
@@ -1168,41 +1169,42 @@ module.exports = class Observations extends Abstract {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
 
-                //fetch programUsers data
-                let programUsers = await programUsersHelper.programUsersDocuments(
-                    {
-                        userId : req.userDetails.userId,
-                        programId : observationDocument.programId
-                    },
-                    [
-                        "_id",
-                        "resourcesStarted"
-                    ]
-                );
-
-                if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
-                    // join observation's program. PII data consent is given via this api call.
-                    // no need to check if usr already joined the program or not it is managed in ml-core service. 
-                    
-                    let programJoinData = {};
-                    programJoinData.userRoleInformation = req.body;
-                    programJoinData.isResource = true;
-                    let joinProgram = await coreService.joinProgram (
-                        req.userDetails.userToken,
-                        programJoinData,
-                        observationDocument.programId,
-                        appVersion,
-                        appName
+                if (programDocument[0].hasOwnProperty('requestForPIIConsent')) {
+                    //fetch programUsers data
+                    let programUsers = await programUsersHelper.programUsersDocuments(
+                        {
+                            userId : req.userDetails.userId,
+                            programId : observationDocument.programId
+                        },
+                        [
+                            "_id",
+                            "resourcesStarted"
+                        ]
                     );
-                    
-                    if ( !joinProgram.success ) {
-                        return resolve({ 
-                            status: httpStatusCode.bad_request.status, 
-                            message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                        });
+
+                    if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+                        // join observation's program. PII data consent is given via this api call.
+                        // no need to check if usr already joined the program or not it is managed in ml-core service. 
+                        
+                        let programJoinData = {};
+                        programJoinData.userRoleInformation = req.body;
+                        programJoinData.isResource = true;
+                        let joinProgram = await coreService.joinProgram (
+                            req.userDetails.userToken,
+                            programJoinData,
+                            observationDocument.programId,
+                            appVersion,
+                            appName
+                        );
+                        
+                        if ( !joinProgram.success ) {
+                            return resolve({ 
+                                status: httpStatusCode.bad_request.status, 
+                                message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                            });
+                        }
                     }
                 }
-
                 /*
                 <- Currently not required for bodh-2:10 as roles is not given in user 
                 */

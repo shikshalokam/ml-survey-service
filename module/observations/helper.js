@@ -1775,9 +1775,9 @@ module.exports = class ObservationsHelper {
                 },["_id","solutionId","programId"]);
                 
                 let solutionData;
-                let requestForPIIConsent;
                 let rootOrganisations;
                 let programJoined;
+                let programsData;
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1793,27 +1793,30 @@ module.exports = class ObservationsHelper {
                     programJoined = await programUsersHelper.checkForUserJoinedProgram(observationData[0].programId,userId);
                     
                     // get requestForPIIconsent value and rootOrganisations of program. rootOrganisations added by programs team
-                    let programsData = await programsHelper.list({
+                    programsData = await programsHelper.list({
                         _id : observationData[0].programId
                     },["requestForPIIConsent", "rootOrganisations"]);
 
-                    requestForPIIConsent = ( programsData[0].requestForPIIConsent ) ? programsData[0].requestForPIIConsent : false;
                     rootOrganisations = ( programsData[0].rootOrganisations ) ? programsData[0].rootOrganisations[0] : "";
                 }
-                
+
+                let data = {
+                    "allowMultipleAssessemts" : solutionData[0].allowMultipleAssessemts,
+                    _id : observationId,
+                    "entities" : entitiesList.data.entities,
+                    entityType : entitiesList.data.entityType,
+                    "license" :  solutionData[0].license,
+                    programJoined : programJoined,
+                    "rootOrganisations" : rootOrganisations
+                }
+                // add requestForPIIConsent if key present in programs data
+                if ( programsData[0].hasOwnProperty('requestForPIIConsent')) {
+                    data.requestForPIIConsent = programsData[0].requestForPIIConsent;
+                }
                 return resolve({
                     success : true,
                     message : messageConstants.apiResponses.OBSERVATION_ENTITIES_FETCHED,
-                    data : {
-                        "allowMultipleAssessemts" : solutionData[0].allowMultipleAssessemts,
-                        _id : observationId,
-                        "entities" : entitiesList.data.entities,
-                        entityType : entitiesList.data.entityType,
-                        "license" :  solutionData[0].license,
-                        programJoined : programJoined,
-                        "rootOrganisations" : rootOrganisations,
-                        "requestForPIIConsent" : requestForPIIConsent
-                    }
+                    data : data
                 });
     
             } catch (error) {
