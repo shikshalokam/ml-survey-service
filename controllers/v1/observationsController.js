@@ -1168,7 +1168,7 @@ module.exports = class Observations extends Abstract {
                 if ( !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
-
+                // if requestForPIIConsent is not present program is old
                 if (programDocument[0].hasOwnProperty('requestForPIIConsent')) {
                     //fetch programUsers data
                     let programUsers = await programUsersHelper.programUsersDocuments(
@@ -1181,7 +1181,7 @@ module.exports = class Observations extends Abstract {
                             "resourcesStarted"
                         ]
                     );
-
+                    
                     if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
                         // join observation's program. PII data consent is given via this api call.
                         // no need to check if usr already joined the program or not it is managed in ml-core service. 
