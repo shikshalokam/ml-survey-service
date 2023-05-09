@@ -45,6 +45,7 @@ module.exports = {
       }]
     },
     rootOrganisations : Array,
-    createdFor : Array
+    createdFor : Array,
+    requestForPIIConsent: Boolean
   }
 };
