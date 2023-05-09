@@ -46,7 +46,7 @@ module.exports = {
     },
     rootOrganisations : {
       type : Array,
-      require: true
+      require : true
     },
     createdFor : Array,
     requestForPIIConsent: Boolean
