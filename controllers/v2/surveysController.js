@@ -6,11 +6,7 @@
  */
 
 // Dependencies
-const csv = require("csvtojson");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
-const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
-const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
 /**
     * Surveys
@@ -27,12 +23,12 @@ module.exports = class Surveys extends Abstract {
     }
 
     /**
-    * @api {post} /assessment/api/v1/surveys/details/:(surveyId/Link)?solutionId=:solutionId Get the survey details by link or Survey Id  
+    * @api {post} /assessment/api/v2/surveys/details/:(surveyId/Link)?solutionId=:solutionId Get the survey details by link or Survey Id  
     * Survey details.
     * @apiVersion 2.0.0
     * @apiGroup Surveys
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /assessment/api/v1/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
+    * @apiSampleRequest /assessment/api/v2/surveys/details/(5de8a220c210d4700813e695/0192e3129e884a86eae03163fffe471e)?solutionId=5f5b38ec45365677f64b2843
     * @apiParamExample {json}  Request-Body:
     * {
     *   "role" : "HM,DEO",
@@ -248,8 +244,6 @@ module.exports = class Surveys extends Abstract {
                     req.userDetails.userToken,
                     true
                 );
-                console.log("surveyDetails", surveyDetails )
-
             } else {
 
                 let bodyData = req.body ? req.body : {};

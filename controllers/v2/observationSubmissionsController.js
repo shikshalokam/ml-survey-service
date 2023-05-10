@@ -10,7 +10,6 @@
 const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
-const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper")
 const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper")
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
@@ -31,13 +30,13 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
     /**
-  * @api {post} /assessment/api/v1/observationSubmissions/create/:observationId?entityId=:entityId Create A New Observation Submission
+  * @api {post} /assessment/api/v2/observationSubmissions/create/:observationId?entityId=:entityId Create A New Observation Submission
   * @apiVersion 1.0.0
   * @apiName Create A New Observation Submission
   * @apiGroup Observation Submissions
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiParam {String} entityId Entity ID.
-  * @apiSampleRequest /assessment/api/v1/observationSubmissions/create/5d2c1c57037306041ef0c7ea?entityId=5d2c1c57037306041ef0c8fa
+  * @apiSampleRequest /assessment/api/v2/observationSubmissions/create/5d2c1c57037306041ef0c7ea?entityId=5d2c1c57037306041ef0c8fa
   * @apiParamExample {json} Request:
   * {
   *   "role" : "HM,DEO",
@@ -104,8 +103,6 @@ module.exports = class ObservationSubmissions extends Abstract {
             status: {$ne:"inactive"},
             entities: ObjectId(req.query.entityId)
           });
-
-          console.log("observationDocument", observationDocument)
   
           if (!observationDocument[0]) {
             return resolve({ 
@@ -328,181 +325,4 @@ module.exports = class ObservationSubmissions extends Abstract {
   
       })
     }
-  
-      /**
-  * @api {get} /assessment/api/v1/observationSubmissions/rate/:entityExternalId?solutionId=:solutionExternalId&createdBy=:keycloakUserId&submissionNumber=:submissionInstanceNumber Rate a Single Entity of Observation
-  * @apiVersion 1.0.0
-  * @apiName Rate a Single Entity of Observation
-  * @apiGroup Observation Submissions
-  * @apiParam {String} solutionId Solution External ID.
-  * @apiParam {String} createdBy Keycloak user ID.
-  * @apiParam {String} submissionNumber Submission Number.
-  * @apiSampleRequest /assessment/api/v1/observationSubmissions/rate/1002036?solutionId=EF-DCPCR-2018-001&createdBy=e97b5582-471c-4649-8401-3cc4249359bb&submissionNumber=2
-  * @apiUse successBody
-  * @apiUse errorBody
-  */
-
-  /**
-   * Rate observation
-   * @method
-   * @name rate
-   * @param {Object} req -request data.  
-   * @param {String} req.params._id -entity id.
-   * @param {String} req.query.solutionId -solution id.
-   * @param {String} req.query.createdBy -observation submission created user.  
-   * @param {String} req.query.submissionNumber -observation submission number. 
-   * @returns {JSON} 
-   */
-
-  async rate(req) {
-    return new Promise(async (resolve, reject) => {
-
-      try {
-
-        req.body = req.body || {};
-        let message = messageConstants.apiResponses.CRITERIA_RATING;
-
-        let createdBy = req.query.createdBy;
-        let solutionId = req.query.solutionId;
-        let entityId = req.params._id;
-        let submissionNumber = (req.query.submissionNumber) ? parseInt(req.query.submissionNumber) : 1;
-
-        if (!createdBy) {
-          throw messageConstants.apiResponses.CREATED_BY_NOT_FOUND;
-        }
-
-        if (!solutionId) {
-          throw messageConstants.apiResponses.SOLUTION_ID_NOT_FOUND;
-        }
-
-        if (!entityId) {
-          throw messageConstants.apiResponses.ENTITY_ID_NOT_FOUND;
-        }
-
-
-        let solutionDocument = await database.models.solutions.findOne({
-          externalId: solutionId,
-          type : "observation",
-         // scoringSystem : "pointsBasedScoring"
-        }, { themes: 1, levelToScoreMapping: 1, scoringSystem : 1, flattenedThemes : 1}).lean()
- 
-        if (!solutionDocument) {
-          return resolve({
-            status: httpStatusCode.bad_request.status,
-            message: messageConstants.apiResponses.SOLUTION_NOT_FOUND
-          });
-        }
-
-        let queryObject = {
-          "createdBy": createdBy,
-          "entityExternalId": entityId,
-          "solutionExternalId": solutionId,
-          "submissionNumber" : (submissionNumber) ? submissionNumber : 1
-        }
-
-        let submissionDocument = await database.models.observationSubmissions.findOne(
-          queryObject,
-          { "answers": 1, "criteria": 1, "evidencesStatus": 1, "entityInformation": 1, "entityProfile": 1, "solutionExternalId": 1 , "scoringSystem" : 1}
-        ).lean();
-
-        if (!submissionDocument._id) {
-          throw messageConstants.apiResponses.SUBMISSION_NOT_FOUND
-        }
-
-        submissionDocument.submissionCollection = "observationSubmissions"
-        submissionDocument.scoringSystem = submissionDocument.scoringSystem;
-
-        let allCriteriaInSolution = new Array
-        let allQuestionIdInSolution = new Array
-        let solutionQuestions = new Array
-
-        allCriteriaInSolution = gen.utils.getCriteriaIds(solutionDocument.themes);
-
-        if(allCriteriaInSolution.length > 0) {
-          
-          submissionDocument.themes = solutionDocument.flattenedThemes
-
-          let allCriteriaDocument = await criteriaHelper.criteriaDocument({
-            _id : {
-              $in : allCriteriaInSolution
-            }
-          }, [
-            "evidences"
-          ])
-
-          allQuestionIdInSolution = gen.utils.getAllQuestionId(allCriteriaDocument);
-        }
-        
-        if (submissionDocument.scoringSystem == "pointsBasedScoring") {
-          if (allQuestionIdInSolution.length > 0) {
-
-            solutionQuestions = await questionsHelper.questionDocument({
-              _id: {
-                $in: allQuestionIdInSolution
-              },
-              responseType: {
-                $in: [
-                  "radio",
-                  "multiselect",
-                  "slider"
-                ]
-              }
-            }, [
-                "weightage",
-                "options",
-                "sliderOptions",
-                "responseType"
-              ])
-
-          }
-
-          if (solutionQuestions.length > 0) {
-            submissionDocument.questionDocuments = {}
-            solutionQuestions.forEach(question => {
-              submissionDocument.questionDocuments[question._id.toString()] = {
-                _id: question._id,
-                weightage: question.weightage
-              }
-              let questionMaxScore = 0
-              if (question.options && question.options.length > 0) {
-                if (question.responseType != "multiselect") {
-                  questionMaxScore = _.maxBy(question.options, 'score').score;
-                }
-                question.options.forEach(option => {
-                  if (question.responseType == "multiselect") {
-                    questionMaxScore += option.score
-                  }
-                  if ("score" in option) {
-                    option.score >= 0 ?
-                      submissionDocument.questionDocuments[question._id.toString()][`${option.value}-score`] =
-                      option.score : "";
-                  }
-                })
-              }
-              if (question.sliderOptions && question.sliderOptions.length > 0) {
-                questionMaxScore = _.maxBy(question.sliderOptions, 'score').score;
-                submissionDocument.questionDocuments[question._id.toString()].sliderOptions = question.sliderOptions
-              }
-              submissionDocument.questionDocuments[question._id.toString()].maxScore = (typeof questionMaxScore === "number") ? questionMaxScore : 0;
-            })
-          }
-        }
-
-
-        let resultingArray = await scoringHelper.rateEntities([submissionDocument], "singleRateApi")
-        if(resultingArray.result.runUpdateQuery) {
-          await observationSubmissionsHelper.markCompleteAndPushForReporting(submissionDocument._id)
-        }
-        return resolve(resultingArray)
-
-      } catch (error) {
-        return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
-          errorObject: error
-        });
-      }
-
-    })
-  }
 };

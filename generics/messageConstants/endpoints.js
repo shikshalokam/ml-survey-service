@@ -19,11 +19,11 @@ module.exports = {
     DOWNLOADABLE_FILE_URL: "/v1/cloud-services/files/getDownloadableUrl",
     USER_READ : "/user/v1/read",
     USER_READ_V5 : "/v5/user/read",
-    COPY_QUESTION_SET: process.env.COPY_QUESTION_SET || "/api/questionset/v1/copy",
-    READ_QUESTION_SET: '/action/' + process.env.READ_QUESTION_SET || "/action/questionset/v1/hierarchy",
-    UPDATE_QUESTION_SET_HIERARCHY: process.env.UPDATE_QUESTION_SET_HIERARCHY || "/api/questionset/v1/hierarchy/update",
-    PUBLISH_QUESTION_SET: process.env.PUBLISH_QUESTION_SET || "/api/questionset/v1/publish",
-    UPDATE_QUESTION_SET: process.env.UPDATE_QUESTION_SET || "/api/questionset/v1/update",
-    READ_QUESTION: process.env.READ_QUESTION || "api/question/v1/read",
+    COPY_QUESTION_SET: "/api/questionset/v1/copy",
+    READ_QUESTION_SET:  "/action/questionset/v1/hierarchy",
+    UPDATE_QUESTION_SET_HIERARCHY: "/api/questionset/v1/hierarchy/update",
+    PUBLISH_QUESTION_SET: "/api/questionset/v1/publish",
+    UPDATE_QUESTION_SET: "/api/questionset/v1/update",
+    READ_QUESTION: "api/question/v1/read",
 
 }

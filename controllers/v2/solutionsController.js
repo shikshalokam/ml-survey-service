@@ -6,11 +6,6 @@
  */
 
 // Dependencies
-const csv = require("csvtojson");
-const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
-const criteriaHelper = require(MODULES_BASE_PATH + "/criteria/helper");
-const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper");
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
 const transFormationHelper = require(MODULES_BASE_PATH + "/questions/transformationHelper");
@@ -31,169 +26,13 @@ module.exports = class Solutions extends Abstract {
   }
 
   /**
-  * @api {get} /assessment/api/v1/solutions/details/:solutionInternalId Framework & Rubric Details
-  * @apiVersion 1.0.0
-  * @apiName Framework & Rubric Details of a Solution
-  * @apiGroup Solutions
-  * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /assessment/api/v1/solutions/details/5b98fa069f664f7e1ae7498c
-  * @apiUse successBody
-  * @apiUse errorBody
-  * @apiParamExample {json} Response:
-  * {
-  * "result":{
-  * "heading":"Solution Framework + rubric for - DCPCR Assessment Framework 2018",
-  * "sections": [
-  * {
-  *  "table": true,
-  * "data": [
-  * {
-  * "criteriaName": "Availability of School Leadership",
-  * "L1": "School does not have a principal or vice-principal; there is  a teacher in-charge of the post",
-  * "L2": "The school principal is not available only vice principal is available or vice principal has assumed charge as principal.  Most teachers are involved in administrative work along with principal / vice principal",
-  * "L3": "The school has full time principal but no vice principal and some teachers are involved in administrative work along with principal / vice principal.",
-  * "L4": "School has a full-time principal and vice principal as per norms (if applicable) or in case where vice principal is not mandated, Only principal and vice principal are involved in administrative work."
-  * }
-  * ]
-  * }
-  * ]
-  * }
-  * }
-  */
-
-    /**
-   * Solution details
-   * @method
-   * @name details
-   * @param {Object} req - requested data.
-   * @param {String} req.params._id - solution external id.
-   * @returns {JSON} consists of criteriaName and rubric levels. 
-   */
-
-  async details(req) {
-    return new Promise(async (resolve, reject) => {
-      try {
-
-        let findQuery = {
-          _id: req.params._id
-        };
-
-        let solutionDocument = await database.models.solutions.findOne(findQuery, { themes: 1, levelToScoreMapping: 1, name: 1 }).lean();
-
-        let criteriasIdArray = gen.utils.getCriteriaIds(solutionDocument.themes);
-        let criteriaDocument = await database.models.criteria.find({ _id: { $in: criteriasIdArray } }, { "name": 1, "rubric.levels": 1 }).lean();
-
-        let criteriaObject = {};
-
-        criteriaDocument.forEach(eachCriteria => {
-          let levelsDescription = {};
-
-          if (eachCriteria?.rubric?.levels) {
-            for (let k in eachCriteria.rubric.levels) {
-              levelsDescription[k] = eachCriteria.rubric.levels[k].description;
-            }
-          }
-
-          criteriaObject[eachCriteria._id.toString()] = _.merge({
-            name: eachCriteria.name
-          }, levelsDescription);
-        })
-
-        let responseObject = {};
-        responseObject.heading = "Solution Framework + rubric for - " + solutionDocument.name;
-
-        responseObject.sections = new Array;
-
-        let levelValue = {};
-
-        let sectionHeaders = new Array;
-
-        sectionHeaders.push({
-          name: "criteriaName",
-          value: "Domain"
-        });
-
-        for (let k in solutionDocument.levelToScoreMapping) {
-          levelValue[k] = "";
-          sectionHeaders.push({ name: k, value: solutionDocument.levelToScoreMapping[k].label });
-        }
-
-        let generateCriteriaThemes = function (themes, parentData = []) {
-
-          themes.forEach(theme => {
-
-            if (theme.children) {
-              let hierarchyTrackToUpdate = [...parentData];
-              hierarchyTrackToUpdate.push(_.pick(theme, ["type", "label", "externalId", "name"]));
-
-              generateCriteriaThemes(theme.children, hierarchyTrackToUpdate);
-
-            } else {
-
-              let tableData = new Array;
-              let levelObjectFromCriteria = {};
-
-              let hierarchyTrackToUpdate = [...parentData];
-              hierarchyTrackToUpdate.push(_.pick(theme, ["type", "label", "externalId", "name"]));
-
-              theme.criteria.forEach(criteria => {
-
-                if (criteriaObject[criteria.criteriaId.toString()]) {
-
-                  Object.keys(levelValue).forEach(eachLevel => {
-                    levelObjectFromCriteria[eachLevel] = criteriaObject[criteria.criteriaId.toString()][eachLevel];
-                  })
-
-                  tableData.push(_.merge({
-                    criteriaName: criteriaObject[criteria.criteriaId.toString()].name,
-                  }, levelObjectFromCriteria));
-                }
-
-              })
-
-              let eachSection = {
-                table: true,
-                data: tableData,
-                tabularData: {
-                  headers: sectionHeaders
-                },
-                summary: hierarchyTrackToUpdate
-              };
-
-              responseObject.sections.push(eachSection);
-            }
-          })
-
-        }
-
-        generateCriteriaThemes(solutionDocument.themes);
-
-        let response = {
-          message: "Solution framework + rubric fetched successfully.",
-          result: responseObject
-        };
-
-        return resolve(response);
-
-      } catch (error) {
-        return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
-          errorObject: error
-        });
-      }
-    });
-  }
-  
-
-  /**
-  * @api {get} /assessment/api/v1/solutions/questions/{{solutionId}} Get Questions in solution .
+  * @api {get} /assessment/api/v2/solutions/questions/{{solutionId}} Get Questions in solution .
   * @apiVersion 1.0.0
   * @apiName Get Questions in solution.
   * @apiGroup Solutions
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiParam {String} solutionId Solution Internal ID.
-  * @apiSampleRequest /assessment/api/v1/solutions/questions/5f64601df5f6e432fe0f0575
+  * @apiSampleRequest /assessment/api/v2/solutions/questions/5f64601df5f6e432fe0f0575
   * @apiUse successBody
   * @apiUse errorBody
   * @apiParamExample {json} Response:
