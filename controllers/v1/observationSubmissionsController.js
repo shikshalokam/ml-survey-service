@@ -16,7 +16,6 @@ const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper")
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper")
 const scoringHelper = require(MODULES_BASE_PATH + "/scoring/helper")
 
-
 /**
     * ObservationSubmissions
     * @class
@@ -331,11 +330,11 @@ module.exports = class ObservationSubmissions extends Abstract {
       
       let responseMessage = messageConstants.apiResponses.OBSERVATION_SUBMISSION_CREATED;
 
+  
       return resolve({
           message: responseMessage,
           result: observations
       });
-
       } catch (error) {
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,
@@ -1178,7 +1177,6 @@ module.exports = class ObservationSubmissions extends Abstract {
         }
     ]
   }
-
   */
    /**
    * List observation submissions
@@ -1226,7 +1224,6 @@ module.exports = class ObservationSubmissions extends Abstract {
           "status": "completed"
         }
   }
-
   */
    /**
    * Get observation submission status
@@ -1275,7 +1272,6 @@ module.exports = class ObservationSubmissions extends Abstract {
     "status": 200,
     "result": false
   }
-
   */
    /**
    * Disable Observation Submission Based on Solution Id
@@ -1540,4 +1536,3 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
 };
-

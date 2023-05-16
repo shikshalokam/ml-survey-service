@@ -47,6 +47,7 @@ module.exports = {
     entityFieldName : { type : String, default : "" } ,
     isEditable : { type : Boolean, default : true },
     showQuestionInPreview : { type : Boolean, default : false },
-    createdFromQuestionId : "ObjectId"
+    createdFromQuestionId : "ObjectId",
+    referenceQuestionId: String,
   }
 };

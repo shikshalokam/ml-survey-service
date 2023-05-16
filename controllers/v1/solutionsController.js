@@ -86,8 +86,10 @@ module.exports = class Solutions extends Abstract {
         criteriaDocument.forEach(eachCriteria => {
           let levelsDescription = {};
 
-          for (let k in eachCriteria.rubric.levels) {
-            levelsDescription[k] = eachCriteria.rubric.levels[k].description;
+          if (eachCriteria?.rubric?.levels) {
+            for (let k in eachCriteria.rubric.levels) {
+              levelsDescription[k] = eachCriteria.rubric.levels[k].description;
+            }
           }
 
           criteriaObject[eachCriteria._id.toString()] = _.merge({
@@ -2396,7 +2398,7 @@ module.exports = class Solutions extends Abstract {
 
         response.result.assessment = assessment;
         return resolve(response);
-      
+
       } catch (error) {
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,

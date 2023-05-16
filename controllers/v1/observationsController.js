@@ -976,11 +976,10 @@ module.exports = class Observations extends Abstract {
         return new Promise(async (resolve, reject) => {
 
             try {
-
-                let response = {
-                    message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
-                    result: {}
-                };
+              let response = {
+                message: messageConstants.apiResponses.ASSESSMENT_FETCHED,
+                result: {},
+              };
 
                 let observationDocument = await database.models.observations.findOne({ 
                     _id: req.params._id, 
@@ -1340,8 +1339,6 @@ module.exports = class Observations extends Abstract {
                 response.result.assessment = assessment;
 
                 return resolve(response);
-
-
             } catch (error) {
                 return reject({
                     status: error.status || httpStatusCode.internal_server_error.status,

@@ -12,7 +12,6 @@ const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
 const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
-
 /**
     * Surveys
     * @class
@@ -639,7 +638,7 @@ module.exports = class Surveys extends Abstract {
             let surveyDetails = {};
 
             if( validateSurveyId || req.query.solutionId ) {
-                
+   
                 let surveyId = req.params._id ? req.params._id : "";
        
                 surveyDetails = await surveysHelper.detailsV3
