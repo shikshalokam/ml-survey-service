@@ -64,4 +64,3 @@ public/assessment/web2
 # Ignore all credentials
 generics/helpers/credentials/*
 
-keycloak-public-keys/
