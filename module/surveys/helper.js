@@ -1076,6 +1076,7 @@ module.exports = class SurveysHelper {
                                 let programJoinData = {};
                                 programJoinData.userRoleInformation = roleInformation;
                                 programJoinData.isResource = true;
+                                programJoinData.consentShared = true;
                                 let joinProgram = await coreService.joinProgram (
                                     userToken,
                                     programJoinData,

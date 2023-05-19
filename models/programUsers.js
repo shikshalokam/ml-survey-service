@@ -21,7 +21,11 @@ module.exports = {
       required: true
     },
     userRoleInformation: Object,
-    appInformation: Object
+    appInformation: Object,
+    consentShared: {
+      type: Boolean,
+      default: false
+    }
   },
   compoundIndex: [
       {
