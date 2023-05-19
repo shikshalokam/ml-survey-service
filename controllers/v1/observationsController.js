@@ -1189,6 +1189,7 @@ module.exports = class Observations extends Abstract {
                         let programJoinData = {};
                         programJoinData.userRoleInformation = req.body;
                         programJoinData.isResource = true;
+                        programJoinData.consentShared = true;
                         let joinProgram = await coreService.joinProgram (
                             req.userDetails.userToken,
                             programJoinData,
