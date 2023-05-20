@@ -62,18 +62,19 @@ module.exports = class ProgramUsersHelper {
     /**
      * check if user joined a program or not
      * @method
-     * @name checkForUserJoinedProgram
+     * @name checkForUserJoinedProgramAndConsentShared
      * @param {String} programId
      * @param {String} userId 
-     * @returns {Boolean} - true/false.
+     * @returns {Object} - result
     */
 
-    static checkForUserJoinedProgram(
+    static checkForUserJoinedProgramAndConsentShared(
         programId, 
         userId
     ) {
         return new Promise(async (resolve, reject) => {
             try {
+                let result = {};
                 const query = { 
                     userId: userId,
                     programId: programId
@@ -82,10 +83,11 @@ module.exports = class ProgramUsersHelper {
                 //Check data present in programUsers collection.
                 let programUsers = await this.programUsersDocuments(
                     query,
-                    ["_id"]
+                    ["_id","consentShared"]
                 );
-                let joinedProgram = programUsers.length > 0 ? true :false
-                return resolve(joinedProgram);
+                result.joinProgram = programUsers.length > 0 ? true : false;
+                result.consentShared = programUsers.length > 0 ? programUsers[0].consentShared : false;
+                return resolve(result);
             
             } catch (error) {
                 return reject(error);
