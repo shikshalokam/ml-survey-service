@@ -1776,8 +1776,8 @@ module.exports = class ObservationsHelper {
                 
                 let solutionData;
                 let rootOrganisations;
-                let programJoined;
                 let programsData;
+                let programJoinStatus
                 if(observationData[0]){
 
                     solutionData = await solutionHelper.solutionDocuments({
@@ -1789,8 +1789,8 @@ module.exports = class ObservationsHelper {
                     ]);
 
                     //Check data present in programUsers collection.
-                    //checkForUserJoinedProgram will check for data and if its present return true else false.
-                    programJoined = await programUsersHelper.checkForUserJoinedProgram(observationData[0].programId,userId);
+                    //checkForUserJoinedProgramAndConsentShared will returns an object which contain joinProgram and consentShared status.
+                    programJoinStatus = await programUsersHelper.checkForUserJoinedProgramAndConsentShared(observationData[0].programId,userId);
                     
                     // get requestForPIIconsent value and rootOrganisations of program. rootOrganisations added by programs team
                     programsData = await programsHelper.list({
@@ -1806,7 +1806,8 @@ module.exports = class ObservationsHelper {
                     "entities" : entitiesList.data.entities,
                     entityType : entitiesList.data.entityType,
                     "license" :  solutionData[0].license,
-                    programJoined : programJoined,
+                    programJoined : programJoinStatus.joinProgram,
+                    consentShared : programJoinStatus.consentShared,
                     "rootOrganisations" : rootOrganisations
                 }
                 // add requestForPIIConsent if key present in programs data
