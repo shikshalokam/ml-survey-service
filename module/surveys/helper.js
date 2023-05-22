@@ -943,11 +943,12 @@ module.exports = class SurveysHelper {
                     result.program = programDocument[0];
 
                     //Check data present in programUsers collection.
-                    //checkForUserJoinedProgram will check for data and if its present return true else false.
-                    let programJoined = await programUsersHelper.checkForUserJoinedProgram(programDocument[0]._id,userId);
+                    //checkForUserJoinedProgramAndConsentShared will returns an object which contain joinProgram and consentShared status.
+                    let programJoinStatus = await programUsersHelper.checkForUserJoinedProgramAndConsentShared(programDocument[0]._id,userId);
                     
                     // if programJoined key is false, user not joined the program.
-                    result.programJoined = programJoined;
+                    result.programJoined = programJoinStatus.joinProgram;
+                    result.consentShared = programJoinStatus.consentShared;
                     result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations[0] : "";
                     if ( programDocument[0].hasOwnProperty('requestForPIIConsent')) {
                         result.requestForPIIConsent = programDocument[0].requestForPIIConsent;
@@ -1076,6 +1077,7 @@ module.exports = class SurveysHelper {
                                 let programJoinData = {};
                                 programJoinData.userRoleInformation = roleInformation;
                                 programJoinData.isResource = true;
+                                programJoinData.consentShared = true;
                                 let joinProgram = await coreService.joinProgram (
                                     userToken,
                                     programJoinData,
