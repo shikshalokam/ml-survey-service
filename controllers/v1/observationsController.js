@@ -1165,7 +1165,7 @@ module.exports = class Observations extends Abstract {
                     ]
                 );
 
-                if ( !programDocument[0]._id ) {
+                if ( !programDocument.length > 0 || !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
 
