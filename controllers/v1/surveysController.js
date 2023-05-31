@@ -870,13 +870,13 @@ module.exports = class Surveys extends Abstract {
 
 
 /**
-    * @api {get} /surveys/getImportedSurveys/{{programId}}
+    * @api {get} /surveys/getStartedSurveys/{{programId}}
     * @apiVersion 1.0.0
     * @apiName Get survey and observation documents in program
     * @apiGroup Internal API
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiParam {String} programId.
-    * @apiSampleRequest /surveys/getImportedSurveys/63a42786c0b15a0009f0505e
+    * @apiSampleRequest /surveys/getStartedSurveys/63a42786c0b15a0009f0505e
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -905,20 +905,20 @@ module.exports = class Surveys extends Abstract {
     /**
    * Get survey documents for program.
    * @method
-   * @name getImportedSurveys
+   * @name getStartedSurveys
    * @param {Object} req -request Data.
    * @param {String} req.params._id - programId.
    * @returns {JSON} 
    */
 
-    async getImportedSurveys(req,res){
+    async getStartedSurveys(req,res){
 
         return new Promise(async (resolve, reject) => {
 
             try {
 
                
-                let surveyDetails = await surveysHelper.getImportedSurveys(
+                let surveyDetails = await surveysHelper.getStartedSurveys(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
                 );

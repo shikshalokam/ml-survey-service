@@ -2288,13 +2288,13 @@ module.exports = class Observations extends Abstract {
     }
 
     /**
-    * @api {get} /observation/getImportedObservations/{{programId}}
+    * @api {get} /observation/getStartedObservations/{{programId}}
     * @apiVersion 1.0.0
     * @apiName Get survey and observation documents in program
     * @apiGroup Internal API
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiParam {String} programId.
-    * @apiSampleRequest /observation/getImportedObservations/63a42786c0b15a0009f0505e
+    * @apiSampleRequest /observation/getStartedObservations/63a42786c0b15a0009f0505e
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -2324,18 +2324,18 @@ module.exports = class Observations extends Abstract {
     /**
    * Get observation documents for program.
    * @method
-   * @name getImportedObservations
+   * @name getStartedObservations
    * @param {Object} req -request Data.
    * @param {String} req.params._id - programId.
    * @returns {JSON} 
    */
 
-    async getImportedObservations(req,res){
+    async getStartedObservations(req,res){
 
         return new Promise(async (resolve, reject) => {
 
             try {
-                let observationDetails = await observationsHelper.getImportedObservations(
+                let observationDetails = await observationsHelper.getStartedObservations(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
                 );
