@@ -11,9 +11,7 @@ const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
-const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
-const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
@@ -2288,6 +2286,78 @@ module.exports = class Observations extends Abstract {
             }
         })
     }
+
+    /**
+    * @api {get} /observation/getImportedObservations/{{programId}}
+    * @apiVersion 1.0.0
+    * @apiName Get survey and observation documents in program
+    * @apiGroup Internal API
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiParam {String} programId.
+    * @apiSampleRequest /observation/getImportedObservations/63a42786c0b15a0009f0505e
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    {
+   "success":true,
+   "message":"Observation fetched successfully",
+   "status":200,
+   "result":[
+         {
+            "_id":"64639270a0efdd0008575952",
+            "solutionId":"63690d9e743f760009155f6b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667829150737",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         {
+            "_id":"64639279a0efdd000857595a",
+            "solutionId":"6369011a743f760009155e9b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667825946531",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         
+      ],
+}
+    */
+    /**
+   * Get observation documents for program.
+   * @method
+   * @name getImportedObservations
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - programId.
+   * @returns {JSON} 
+   */
+
+    async getImportedObservations(req,res){
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+                let observationDetails = await observationsHelper.getImportedObservations(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                return resolve({
+                    message: observationDetails.message,
+                    result: observationDetails.data
+                })
+
+            } catch (error) {
+        
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+
+        });
+    }
+
+
 
 
 }

@@ -9,14 +9,12 @@
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper");
 const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const observationSubmissionsHelper = require(MODULES_BASE_PATH + "/observationSubmissions/helper");
-const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
 const kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 const chunkOfObservationSubmissionsLength = 500;
 const coreService = require(ROOT_PATH + "/generics/services/core");
 const moment = require("moment-timezone");
 const { ObjectId } = require("mongodb");
 const appsPortalBaseUrl = (process.env.APP_PORTAL_BASE_URL && process.env.APP_PORTAL_BASE_URL !== "") ? process.env.APP_PORTAL_BASE_URL + "/" : "https://apps.shikshalokam.org/";
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
 const submissionsHelper = require(MODULES_BASE_PATH + "/submissions/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const solutionHelper = require(MODULES_BASE_PATH + "/solutions/helper");
@@ -2269,9 +2267,9 @@ module.exports = class ObservationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 
-                let surveyData = await this.observationDocuments({
-                    programId : programId,
+                let observationData = await this.observationDocuments({
                     createdBy : userId,
+                    programId : programId,
                     },[
                         "solutionId",
                         "solutionExternalId",
@@ -2283,7 +2281,7 @@ module.exports = class ObservationsHelper {
                 return resolve({
                     success: true,
                     message: messageConstants.apiResponses.OBSERVATION_FETCHED,
-                    data: surveyData
+                    data: observationData
                 });
 
             }

@@ -8,7 +8,6 @@
 // Dependencies
 
 const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
-const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper");
 
 
 /**
@@ -871,13 +870,13 @@ module.exports = class Surveys extends Abstract {
 
 
 /**
-    * @api {get} /surveys/getImportedSurveysAndObservations/{{programId}}
+    * @api {get} /surveys/getImportedSurveys/{{programId}}
     * @apiVersion 1.0.0
     * @apiName Get survey and observation documents in program
     * @apiGroup Internal API
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiParam {String} programId Survey Solution External ID.
-    * @apiSampleRequest /assessment/api/v1/surveys/getLink/63a42786c0b15a0009f0505e
+    * @apiParam {String} programId.
+    * @apiSampleRequest /surveys/getImportedSurveys/63a42786c0b15a0009f0505e
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -885,8 +884,7 @@ module.exports = class Surveys extends Abstract {
    "success":true,
    "message":"Surveys fetched successfully",
    "status":200,
-   "result":{
-      "survey":[
+   "result":[
          {
             "_id":"64639270a0efdd0008575952",
             "solutionId":"63690d9e743f760009155f6b",
@@ -901,37 +899,19 @@ module.exports = class Surveys extends Abstract {
             "programId":"6319a4d53c40dd000978dacb",
             "programExternalId":"PGM-FD558-testing_program-5.0"
          },
-         
       ],
-      "observation":[
-         {
-            "_id":"646392b1a0efdd000857596c",
-            "solutionId":"6319a591550de9000bcfb32b",
-            "solutionExternalId":"526cc864-6549-11eb-81da-a08cfd79f8b7-1662625169783",
-            "programId":"6319a4d53c40dd000978dacb",
-            "programExternalId":"PGM-FD558-testing_program-5.0"
-         },
-         {
-            "_id":"646392b5a0efdd0008575974",
-            "solutionId":"6319b678550de9000bcfb70c",
-            "solutionExternalId":"526cc864-6549-11eb-81da-a08cfd79f8b7-1662629496683",
-            "programId":"6319a4d53c40dd000978dacb",
-            "programExternalId":"PGM-FD558-testing_program-5.0"
-         }
-      ]
-   }
 }
     */
     /**
-   * Get survey and observation documents for program.
+   * Get survey documents for program.
    * @method
-   * @name getImportedSurveysAndObservations
+   * @name getImportedSurveys
    * @param {Object} req -request Data.
    * @param {String} req.params._id - programId.
    * @returns {JSON} 
    */
 
-    async getImportedSurveysAndObservations(req,res){
+    async getImportedSurveys(req,res){
 
         return new Promise(async (resolve, reject) => {
 
@@ -943,14 +923,9 @@ module.exports = class Surveys extends Abstract {
                     req.params._id ? req.params._id : ""
                 );
 
-                let observationDetails = await observationsHelper.getImportedObservations(
-                    req.userDetails.userId,
-                    req.params._id ? req.params._id : ""
-                );
-
                 return resolve({
                     message: surveyDetails.message,
-                    result: {survey:surveyDetails.data, observation:observationDetails.data}
+                    result: surveyDetails.data
                 })
 
             } catch (error) {
