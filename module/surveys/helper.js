@@ -1888,4 +1888,35 @@ module.exports = class SurveysHelper {
         })
     }
 
+    static getImportedSurveys(userId, programId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveyData = await this.surveyDocuments({
+                    programId : programId,
+                    createdBy : userId,
+                    },[
+                        "solutionId",
+                        "solutionExternalId",
+                        "programId",
+                        "programExternalId",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.SURVEYS_FETCHED,
+                    data: surveyData
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
 }

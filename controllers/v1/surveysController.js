@@ -6,11 +6,9 @@
  */
 
 // Dependencies
-const csv = require("csvtojson");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
+
 const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
-const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
-const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
+const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper");
 
 
 /**
@@ -870,5 +868,40 @@ module.exports = class Surveys extends Abstract {
     });
 
 }
+
+    async getImportedSurveysAndObservations(req,res){
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+               
+                let surveyDetails = await surveysHelper.getImportedSurveys(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                let observationDetails = await observationsHelper.getImportedObservations(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                return resolve({
+                    message: surveyDetails.message,
+                    result: {survey:surveyDetails.data, observation:observationDetails.data}
+                })
+
+            } catch (error) {
+        
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+
+        });
+    }
+
 
 }

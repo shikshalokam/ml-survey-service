@@ -2255,6 +2255,40 @@ module.exports = class ObservationsHelper {
         })
     }
 
+
+
+    static getImportedObservations(userId, programId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveyData = await this.observationDocuments({
+                    programId : programId,
+                    createdBy : userId,
+                    },[
+                        "solutionId",
+                        "solutionExternalId",
+                        "programId",
+                        "programExternalId",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.OBSERVATION_FETCHED,
+                    data: surveyData
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+
 };
 
 /**
