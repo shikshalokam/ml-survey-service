@@ -742,6 +742,87 @@ module.exports = class UserHelper {
     })
   }
 
+  /**
+      * Get surveys documents started by user.
+      * @method
+      * @name surveys
+      * @param  {String} userId - userId of user.
+      * @param  {String} programId - program Id.
+      * @returns {result} - all the survey which user has started in that program. 
+     */
+    static surveys(userId, programId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveyData = await surveysHelper.surveyDocuments({
+                    createdBy : userId,
+                    programId : programId,
+                    },[
+                        "solutionId",
+                        "solutionExternalId",
+                        "programId",
+                        "programExternalId",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.SURVEYS_FETCHED,
+                    data: surveyData
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+
+    /**
+      * get observation documents started by user.
+      * @method
+      * @name observations
+      * @param  {String} userId - userId of user.
+      * @param  {String} programId - program Id.
+      * @returns {result} - all the observation which user has started in that program. 
+     */
+
+     static observations(userId, programId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let observationData = await observationsHelper.observationDocuments({
+                    createdBy : userId,
+                    programId : programId,
+                    },[
+                        "solutionId",
+                        "solutionExternalId",
+                        "programId",
+                        "programExternalId",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.OBSERVATION_FETCHED,
+                    data: observationData
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+
 };
 
   /**

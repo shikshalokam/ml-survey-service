@@ -1887,43 +1887,5 @@ module.exports = class SurveysHelper {
     }
 
 
- /**
-      * Get imported surveys documents.
-      * @method
-      * @name getStartedSurveys
-      * @param  {String} userId - userId of user.
-      * @param  {String} programId - program Id.
-      * @returns {result} - all the survey which user has started in that program. 
-     */
-    static getStartedSurveys(userId, programId){
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                let surveyData = await this.surveyDocuments({
-                    createdBy : userId,
-                    programId : programId,
-                    },[
-                        "solutionId",
-                        "solutionExternalId",
-                        "programId",
-                        "programExternalId",
-                    ]
-                );
-
-                return resolve({
-                    success: true,
-                    message: messageConstants.apiResponses.SURVEYS_FETCHED,
-                    data: surveyData
-                });
-
-            }
-            catch (err) {
-                return resolve({
-                    success: false,
-                    message: err.message,
-                    data: false
-                });
-            }
-        })
-    }
+ 
 }

@@ -2253,48 +2253,6 @@ module.exports = class ObservationsHelper {
         })
     }
 
-
- /**
-      * Get imported observation documents.
-      * @method
-      * @name getStartedObservations
-      * @param  {String} userId - userId of user.
-      * @param  {String} programId - program Id.
-      * @returns {result} - all the observation which user has started in that program. 
-     */
-
-    static getStartedObservations(userId, programId){
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                let observationData = await this.observationDocuments({
-                    createdBy : userId,
-                    programId : programId,
-                    },[
-                        "solutionId",
-                        "solutionExternalId",
-                        "programId",
-                        "programExternalId",
-                    ]
-                );
-
-                return resolve({
-                    success: true,
-                    message: messageConstants.apiResponses.OBSERVATION_FETCHED,
-                    data: observationData
-                });
-
-            }
-            catch (err) {
-                return resolve({
-                    success: false,
-                    message: err.message,
-                    data: false
-                });
-            }
-        })
-    }
-
 };
 
 /**
