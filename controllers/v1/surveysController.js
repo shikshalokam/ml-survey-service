@@ -869,6 +869,68 @@ module.exports = class Surveys extends Abstract {
 
 }
 
+
+/**
+    * @api {get} /surveys/getImportedSurveysAndObservations/{{programId}}
+    * @apiVersion 1.0.0
+    * @apiName Get survey and observation documents in program
+    * @apiGroup Internal API
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiParam {String} programId Survey Solution External ID.
+    * @apiSampleRequest /assessment/api/v1/surveys/getLink/63a42786c0b15a0009f0505e
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    {
+   "success":true,
+   "message":"Surveys fetched successfully",
+   "status":200,
+   "result":{
+      "survey":[
+         {
+            "_id":"64639270a0efdd0008575952",
+            "solutionId":"63690d9e743f760009155f6b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667829150737",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         {
+            "_id":"64639279a0efdd000857595a",
+            "solutionId":"6369011a743f760009155e9b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667825946531",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         
+      ],
+      "observation":[
+         {
+            "_id":"646392b1a0efdd000857596c",
+            "solutionId":"6319a591550de9000bcfb32b",
+            "solutionExternalId":"526cc864-6549-11eb-81da-a08cfd79f8b7-1662625169783",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         {
+            "_id":"646392b5a0efdd0008575974",
+            "solutionId":"6319b678550de9000bcfb70c",
+            "solutionExternalId":"526cc864-6549-11eb-81da-a08cfd79f8b7-1662629496683",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         }
+      ]
+   }
+}
+    */
+    /**
+   * Get survey and observation documents for program.
+   * @method
+   * @name getImportedSurveysAndObservations
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - programId.
+   * @returns {JSON} 
+   */
+
     async getImportedSurveysAndObservations(req,res){
 
         return new Promise(async (resolve, reject) => {

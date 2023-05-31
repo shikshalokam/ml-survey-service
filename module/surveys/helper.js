@@ -1888,6 +1888,15 @@ module.exports = class SurveysHelper {
         })
     }
 
+
+ /**
+      * Get imported surveys documents.
+      * @method
+      * @name getImportedSurveys
+      * @param  {String} userId - userId of user.
+      * @param  {String} programId - program Id.
+      * @returns {result} - all the survey which user has started in that program. 
+     */
     static getImportedSurveys(userId, programId){
         return new Promise(async (resolve, reject) => {
             try {

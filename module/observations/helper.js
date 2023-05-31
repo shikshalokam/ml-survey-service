@@ -2256,6 +2256,14 @@ module.exports = class ObservationsHelper {
     }
 
 
+ /**
+      * Get imported observation documents.
+      * @method
+      * @name getImportedObservations
+      * @param  {String} userId - userId of user.
+      * @param  {String} programId - program Id.
+      * @returns {result} - all the observation which user has started in that program. 
+     */
 
     static getImportedObservations(userId, programId){
         return new Promise(async (resolve, reject) => {
