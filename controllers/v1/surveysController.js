@@ -6,11 +6,8 @@
  */
 
 // Dependencies
-const csv = require("csvtojson");
-const FileStream = require(ROOT_PATH + "/generics/fileStream");
+
 const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
-const assessorsHelper = require(MODULES_BASE_PATH + "/entityAssessors/helper");
-const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper");
 
 
 /**

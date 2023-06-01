@@ -371,4 +371,146 @@ module.exports = class Users {
     });
   }
 
+
+   /**
+    * @api {get} /user/observations/{{programId}}
+    * @apiVersion 1.0.0
+    * @apiName Get survey and observation documents in program
+    * @apiGroup Internal API
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiParam {String} programId.
+    * @apiSampleRequest /observation/getStartedObservations/63a42786c0b15a0009f0505e
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    {
+   "success":true,
+   "message":"Observation fetched successfully",
+   "status":200,
+   "result":[
+         {
+            "_id":"64639270a0efdd0008575952",
+            "solutionId":"63690d9e743f760009155f6b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667829150737",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         {
+            "_id":"64639279a0efdd000857595a",
+            "solutionId":"6369011a743f760009155e9b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667825946531",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         
+      ],
+}
+    */
+    /**
+   * Get observation documents for program.
+   * @method
+   * @name getStartedObservations
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - programId.
+   * @returns {JSON} 
+   */
+
+     async observations(req,res){
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+                let observationDetails = await usersHelper.observations(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                return resolve({
+                    message: observationDetails.message,
+                    result: observationDetails.data
+                })
+
+            } catch (error) {
+        
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+
+        });
+    }
+
+
+    /**
+    * @api {get} /user/surveys/{{programId}}
+    * @apiVersion 1.0.0
+    * @apiName Get survey and observation documents in program
+    * @apiGroup Internal API
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiParam {String} programId.
+    * @apiSampleRequest /surveys/getStartedSurveys/63a42786c0b15a0009f0505e
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    {
+   "success":true,
+   "message":"Surveys fetched successfully",
+   "status":200,
+   "result":[
+         {
+            "_id":"64639270a0efdd0008575952",
+            "solutionId":"63690d9e743f760009155f6b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667829150737",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+         {
+            "_id":"64639279a0efdd000857595a",
+            "solutionId":"6369011a743f760009155e9b",
+            "solutionExternalId":"2546ecb8-407f-11ec-8473-7fe753029532-1667825946531",
+            "programId":"6319a4d53c40dd000978dacb",
+            "programExternalId":"PGM-FD558-testing_program-5.0"
+         },
+      ],
+}
+    */
+    /**
+   * Get survey documents for program.
+   * @method
+   * @name getStartedSurveys
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - programId.
+   * @returns {JSON} 
+   */
+
+     async surveys(req,res){
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+                let surveyDetails = await usersHelper.surveys(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                return resolve({
+                    message: surveyDetails.message,
+                    result: surveyDetails.data
+                })
+
+            } catch (error) {
+        
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+
+        });
+    }
+
 }

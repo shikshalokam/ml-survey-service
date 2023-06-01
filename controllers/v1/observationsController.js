@@ -11,9 +11,7 @@ const observationsHelper = require(MODULES_BASE_PATH + "/observations/helper")
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper")
 const assessmentsHelper = require(MODULES_BASE_PATH + "/assessments/helper")
 const solutionsHelper = require(MODULES_BASE_PATH + "/solutions/helper")
-const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper");
 const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
-const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
@@ -2288,7 +2286,5 @@ module.exports = class Observations extends Abstract {
             }
         })
     }
-
-
 }
    
