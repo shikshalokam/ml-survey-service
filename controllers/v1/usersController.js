@@ -424,8 +424,7 @@ module.exports = class Users {
                  * @function observations 
                  * @param {String} programId - programId
                  * @param {String} userId - userId
-                 * 
-                 * @param {Object} containing all the observations information started by user in that program
+                 * @return {Object} containing all the observations information started by user in that program
                  */
                 let observationDetails = await usersHelper.observations(
                     req.userDetails.userId,
@@ -502,8 +501,7 @@ module.exports = class Users {
                  * @function survey 
                  * @param {String} programId - programId
                  * @param {String} userId - userId
-                 * 
-                 * @param {Object} containing all the survey information started by user in that program
+                 * @return {Object} containing all the survey information started by user in that program
                  */
                 let surveyDetails = await usersHelper.surveys(
                     req.userDetails.userId,
