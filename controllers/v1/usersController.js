@@ -420,6 +420,12 @@ module.exports = class Users {
         return new Promise(async (resolve, reject) => {
 
             try {
+                /**
+                 * @function observations 
+                 * @param {String} programId - programId
+                 * @param {String} userId - userId
+                 * @return {Object} containing all the observations information started by user in that program
+                 */
                 let observationDetails = await usersHelper.observations(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
@@ -491,6 +497,12 @@ module.exports = class Users {
 
             try {
 
+                /**
+                 * @function survey 
+                 * @param {String} programId - programId
+                 * @param {String} userId - userId
+                 * @return {Object} containing all the survey information started by user in that program
+                 */
                 let surveyDetails = await usersHelper.surveys(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""

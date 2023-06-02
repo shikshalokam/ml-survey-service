@@ -754,6 +754,15 @@ module.exports = class UserHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 
+                 /**
+                 * Get Survey document based on filtered data provided.
+                 * @name surveyDocuments
+                 * @param {Array} [surveyFilter = "all"] - survey ids.
+                 * @param {Array} [fieldsArray = "all"] - projected fields.
+                 * @param {Array} [sortedData = "all"] - sorted field.
+                 * @param {Array} [skipFields = "none"] - field not to include
+                 * @returns {Array} List of surveys. 
+                 */
                 let surveyData = await surveysHelper.surveyDocuments({
                     createdBy : userId,
                     programId : programId,
@@ -794,7 +803,13 @@ module.exports = class UserHelper {
      static observations(userId, programId){
         return new Promise(async (resolve, reject) => {
             try {
-                
+                 /**
+                 * Get Observation document based on filtered data provided.
+                 * @name observationDocuments
+                 * @param {Object} [findQuery = "all"] -filter data.
+                 * @param {Array} [fields = "all"] - Projected fields.
+                 * @returns {Array} - List of observations.
+                 */
                 let observationData = await observationsHelper.observationDocuments({
                     createdBy : userId,
                     programId : programId,
