@@ -925,7 +925,6 @@ module.exports = class SurveysHelper {
                             "description",
                             "imageCompression",
                             "isAPrivateProgram",
-                            "rootOrganisations",
                             "requestForPIIConsent"
                         ]
                     );
@@ -939,18 +938,6 @@ module.exports = class SurveysHelper {
 
                 if (programDocument.length > 0) {
                     result.program = programDocument[0];
-
-                    //Check data present in programUsers collection.
-                    //checkForUserJoinedProgramAndConsentShared will returns an object which contain joinProgram and consentShared status.
-                    let programJoinStatus = await programUsersHelper.checkForUserJoinedProgramAndConsentShared(programDocument[0]._id,userId);
-                    
-                    // if programJoined key is false, user not joined the program.
-                    result.programJoined = programJoinStatus.joinProgram;
-                    result.consentShared = programJoinStatus.consentShared;
-                    result.rootOrganisations = ( programDocument[0].rootOrganisations ) ? programDocument[0].rootOrganisations[0] : "";
-                    if ( programDocument[0].hasOwnProperty('requestForPIIConsent')) {
-                        result.requestForPIIConsent = programDocument[0].requestForPIIConsent;
-                    }
                 }
 
                 let assessment = {};
