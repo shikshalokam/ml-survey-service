@@ -925,7 +925,6 @@ module.exports = class SurveysHelper {
                             "description",
                             "imageCompression",
                             "isAPrivateProgram",
-                            "rootOrganisations",
                             "requestForPIIConsent"
                         ]
                     );
