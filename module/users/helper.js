@@ -823,6 +823,50 @@ module.exports = class UserHelper {
         })
     }
 
+    /**
+      * get surveySubmission Documents documents started by user.
+      * @method
+      * @name surveySubmissions
+      * @param  {String} userId - userId of user.
+      * @param  {String} solutionId - solution Id.
+      * @returns {result} - all the surveySubmission in particular solution which user has submitted. 
+     */
+
+     static surveySubmissions(userId, solutionId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveySubmission = await surveySubmissionsHelper.surveySubmissionDocuments({
+                    createdBy : userId,
+                    solutionId : solutionId,
+                    },[
+                        "surveyId",
+                        "solutionId",
+                        "surveyInformation.name",
+                        "surveyInformation.endDate",
+                        "surveyInformation.description",
+                        "status",
+                        "_id",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.SURVEY_SUBMISSION_FOUND,
+                    data: surveySubmission
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+
 };
 
   /**
