@@ -560,7 +560,6 @@ module.exports = class Users {
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
                 );
-                console.log(JSON.stringify(surveyDetails))
 
                 return resolve({
                     message: surveyDetails.message,
