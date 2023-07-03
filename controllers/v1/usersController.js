@@ -420,6 +420,12 @@ module.exports = class Users {
         return new Promise(async (resolve, reject) => {
 
             try {
+                /**
+                 * @function observations 
+                 * @param {String} programId - programId
+                 * @param {String} userId - userId
+                 * @return {Object} containing all the observations information started by user in that program
+                 */
                 let observationDetails = await usersHelper.observations(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
@@ -491,7 +497,78 @@ module.exports = class Users {
 
             try {
 
+                /**
+                 * @function survey 
+                 * @param {String} programId - programId
+                 * @param {String} userId - userId
+                 * @return {Object} containing all the survey information started by user in that program
+                 */
                 let surveyDetails = await usersHelper.surveys(
+                    req.userDetails.userId,
+                    req.params._id ? req.params._id : ""
+                );
+
+                return resolve({
+                    message: surveyDetails.message,
+                    result: surveyDetails.data
+                })
+
+            } catch (error) {
+        
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+
+        });
+    }
+
+      /**
+    * @api {get} /users/surveySubmissions/{{solutionId}}
+    * @apiVersion 1.0.0
+    * @apiName Get survey and observation documents in program
+    * @apiGroup Internal API
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiParam {String} programId.
+    * @apiSampleRequest /users/surveySubmissions/63a42786c0b15a0009f0505e
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    {
+        "success":true,
+        "message":"Survey submission fetched successfully",
+        "data":[
+            {
+                "_id":"62e228eedd8c6d0009da5084",
+                "solutionId":"627dfc6509446e00072ccf78",
+                "surveyId":"62e228eedd8c6d0009da507d",
+                "status":"completed",
+                "surveyInformation":{
+                    "name":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380",
+                    "description":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380"
+                }
+            }
+        ]
+    }
+    */
+    /**
+   * Get survey documents for program.
+   * @method
+   * @name getStartedSurveys
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - programId.
+   * @returns {JSON} 
+   */
+
+    async surveySubmissions(req,res){
+
+        return new Promise(async (resolve, reject) => {
+
+            try {
+
+                let surveyDetails = await usersHelper.surveySubmissions(
                     req.userDetails.userId,
                     req.params._id ? req.params._id : ""
                 );

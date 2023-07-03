@@ -754,6 +754,15 @@ module.exports = class UserHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 
+                 /**
+                 * Get Survey document based on filtered data provided.
+                 * @name surveyDocuments
+                 * @param {Array} [surveyFilter = "all"] - survey ids.
+                 * @param {Array} [fieldsArray = "all"] - projected fields.
+                 * @param {Array} [sortedData = "all"] - sorted field.
+                 * @param {Array} [skipFields = "none"] - field not to include
+                 * @returns {Array} List of surveys. 
+                 */
                 let surveyData = await surveysHelper.surveyDocuments({
                     createdBy : userId,
                     programId : programId,
@@ -794,7 +803,13 @@ module.exports = class UserHelper {
      static observations(userId, programId){
         return new Promise(async (resolve, reject) => {
             try {
-                
+                 /**
+                 * Get Observation document based on filtered data provided.
+                 * @name observationDocuments
+                 * @param {Object} [findQuery = "all"] -filter data.
+                 * @param {Array} [fields = "all"] - Projected fields.
+                 * @returns {Array} - List of observations.
+                 */
                 let observationData = await observationsHelper.observationDocuments({
                     createdBy : userId,
                     programId : programId,
@@ -810,6 +825,50 @@ module.exports = class UserHelper {
                     success: true,
                     message: messageConstants.apiResponses.OBSERVATION_FETCHED,
                     data: observationData
+                });
+
+            }
+            catch (err) {
+                return resolve({
+                    success: false,
+                    message: err.message,
+                    data: false
+                });
+            }
+        })
+    }
+
+    /**
+      * get surveySubmission Documents documents started by user.
+      * @method
+      * @name surveySubmissions
+      * @param  {String} userId - userId of user.
+      * @param  {String} solutionId - solution Id.
+      * @returns {result} - all the surveySubmission in particular solution which user has submitted. 
+     */
+
+     static surveySubmissions(userId, solutionId){
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                let surveySubmission = await surveySubmissionsHelper.surveySubmissionDocuments({
+                    createdBy : userId,
+                    solutionId : solutionId,
+                    },[
+                        "surveyId",
+                        "solutionId",
+                        "surveyInformation.name",
+                        "surveyInformation.endDate",
+                        "surveyInformation.description",
+                        "status",
+                        "_id",
+                    ]
+                );
+
+                return resolve({
+                    success: true,
+                    message: messageConstants.apiResponses.SURVEY_SUBMISSION_FOUND,
+                    data: surveySubmission
                 });
 
             }
