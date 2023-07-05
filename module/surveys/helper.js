@@ -1609,13 +1609,6 @@ module.exports = class SurveysHelper {
                 throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN)
             }
 
-            let solutionDocument = await solutionsHelper.solutionDocuments
-            (
-                { _id: solutionId,
-                  author: userId },
-                ["_id"]
-            )
-
             if (surveyId == "") {
 
                 let surveyDocument = await this.surveyDocuments
@@ -1638,6 +1631,17 @@ module.exports = class SurveysHelper {
 
                     if (!solutionData.success) {
                         throw new Error(messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND)
+                    }
+
+                    //get solution document from DB
+                    let solutionDocument = await solutionsHelper.solutionDocuments
+                    (
+                        { _id: solutionId },
+                        ["_id","endDate"]
+                    )
+                    //check if solution endDate is passs if passed then return solution has expired
+                    if(solutionDocument[0].endDate < new Date()){
+                        throw new Error(messageConstants.apiResponses.LINK_IS_EXPIRED)
                     }
 
                     let createSurveyDocument = await this.createSurveyDocument
