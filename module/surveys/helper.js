@@ -1609,13 +1609,6 @@ module.exports = class SurveysHelper {
                 throw new Error(messageConstants.apiResponses.REQUIRED_USER_AUTH_TOKEN)
             }
 
-            let solutionDocument = await solutionsHelper.solutionDocuments
-            (
-                { _id: solutionId,
-                  author: userId },
-                ["_id"]
-            )
-
             if (surveyId == "") {
 
                 let surveyDocument = await this.surveyDocuments
@@ -1633,11 +1626,16 @@ module.exports = class SurveysHelper {
                     (
                         token,
                         bodyData,
-                        solutionId
+                        solutionId,
+                        messageConstants.common.SURVEY
                     );
 
                     if (!solutionData.success) {
                         throw new Error(messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND)
+                    }
+
+                    if(solutionData.data.hasOwnProperty("endDate") && new Date(solutionData.data.endDate) < new Date()){
+                        throw new Error(messageConstants.apiResponses.SOLUTION_EXPIRED)
                     }
 
                     let createSurveyDocument = await this.createSurveyDocument
