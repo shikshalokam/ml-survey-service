@@ -1633,6 +1633,10 @@ module.exports = class SurveysHelper {
                         throw new Error(messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND)
                     }
 
+                    if(solutionData.data.hasOwnProperty("endDate") && new Date(solutionData.data.endDate) < new Date()){
+                        throw new Error(messageConstants.apiResponses.SOLUTION_EXPIRED)
+                    }
+
                     //get solution document from DB
                     let solutionDocument = await solutionsHelper.solutionDocuments
                     (
