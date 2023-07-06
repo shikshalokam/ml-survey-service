@@ -275,12 +275,12 @@ const solutionBasedOnRoleAndLocation = function ( token,bodyData,type,searchText
   * @returns {JSON} - Details of solution based on role and location.
 */
 
-const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solutionId ) {
+const solutionDetailsBasedOnRoleAndLocation = function ( token,bodyData,solutionId,type = "") {
     return new Promise(async (resolve, reject) => {
         try {
             
             const url = 
-            coreServiceBaseURL + messageConstants.endpoints.SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION + "/" + solutionId;
+            coreServiceBaseURL + messageConstants.endpoints.SOLUTION_DETAILS_BASED_ON_ROLE_LOCATION + "/" + solutionId + "?type=" + type;
 
             const options = {
                 headers : {
