@@ -1626,7 +1626,8 @@ module.exports = class SurveysHelper {
                     (
                         token,
                         bodyData,
-                        solutionId
+                        solutionId,
+                        messageConstants.common.SURVEY
                     );
 
                     if (!solutionData.success) {
