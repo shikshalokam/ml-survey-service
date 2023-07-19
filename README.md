@@ -111,7 +111,7 @@ The schema serves as a blueprint for creating and maintaining the database that 
 
 ### Postman Collection
 
-The ML Survey Service Postman Collection is a comprehensive resource for interacting with the ML Core Service. It includes organized endpoints, detailed documentation, and example workflows, providing a valuable reference for developers. Leverage this collection to enhance productivity and collaboration in ML projects.
+The ML Survey Service Postman Collection is a comprehensive resource for interacting with the ML Core Service. It includes organized endpoints, detailed documentation, and example workflows, providing a valuable reference for developers. Leverage this collection to enhance productivity and collaboration in ML Services.
 
 [Click here](https://documenter.getpostman.com/view/7997930/2s946chuaT)
 
