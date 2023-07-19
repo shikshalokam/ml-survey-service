@@ -1,0 +1,170 @@
+[
+  {
+    "_id": "5fa2ab8a2dbd4b755b88e682",
+    "evidencesStatus": [
+      {
+        "externalId": "SF",
+        "name": "Survey And Feedback",
+        "description": "Survey And Feedback",
+        "modeOfCollection": "",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": "",
+        "isActive": true,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    ],
+    "criteria": [
+      {
+        "_id": "5fa29df49e65d8758624e96d",
+        "__v": 0,
+        "createdAt": "2020-11-04T12:26:28.027+0000",
+        "criteriaType": "manual",
+        "description": "Survey and Feedback",
+        "externalId": "f2049c64-1e98-11eb-a3bf-000d3af02677-1604492787994-SF",
+        "flag": null,
+        "frameworkCriteriaId": null,
+        "name": "Survey and Feedback",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": null,
+        "rubric": null,
+        "score": null,
+        "showRemarks": null,
+        "timesUsed": null,
+        "updatedAt": "2020-11-04T12:26:28.027+0000",
+        "weightage": 0
+      }
+    ],
+    "isAPrivateProgram": false,
+    "deleted": false,
+    "solutionId": "5fa29df49e65d8758624e96e",
+    "solutionExternalId": "f2049c64-1e98-11eb-a3bf-000d3af02677-1604492787994",
+    "surveyId": "5fa2ab8a2dbd4b755b88e681",
+    "createdBy": "86d2d978-5b20-4453-8a76-82b5a4c728c9",
+    "status": "started",
+    "evidences": {
+      "SF": {
+        "externalId": "SF",
+        "name": "Survey And Feedback",
+        "description": "Survey And Feedback",
+        "modeOfCollection": "",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": "",
+        "isActive": true,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    },
+    "surveyInformation": {
+      "createdFor": ["0123221617357783046602"],
+      "rootOrganisations": ["0123221617357783046602"],
+      "isDeleted": false,
+      "isAPrivateProgram": false,
+      "status": "published",
+      "solutionId": "5fa29df49e65d8758624e96e",
+      "solutionExternalId": "f2049c64-1e98-11eb-a3bf-000d3af02677-1604492787994",
+      "createdBy": "86d2d978-5b20-4453-8a76-82b5a4c728c9",
+      "startDate": "2020-11-04T13:24:26.761+0000",
+      "endDate": "2021-11-04T12:26:20.940+0000",
+      "name": "Diksha test survey ",
+      "description": "Diksha test survey via genie",
+      "updatedAt": "2020-11-04T13:24:26.749+0000",
+      "createdAt": "2020-11-04T13:24:26.749+0000"
+    },
+    "updatedAt": "2020-11-04T13:24:26.762+0000",
+    "createdAt": "2020-11-04T13:24:26.762+0000",
+    "__v": 0
+  },
+  {
+    "_id": "5fcf481beff083796933d806",
+    "evidencesStatus": [
+      {
+        "externalId": "SF",
+        "name": "Survey And Feedback",
+        "description": "Survey And Feedback",
+        "modeOfCollection": "",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": "",
+        "isActive": true,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    ],
+    "criteria": [
+      {
+        "_id": "5fcf34503e9df47967eedb02",
+        "__v": 0,
+        "createdAt": "2020-12-08T08:07:44.231+0000",
+        "criteriaType": "manual",
+        "description": "Survey and Feedback",
+        "externalId": "cdcc3246-1e82-11eb-a3bf-000d3af02677-1607414864208-SF",
+        "flag": null,
+        "frameworkCriteriaId": null,
+        "name": "Survey and Feedback",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": null,
+        "rubric": null,
+        "score": null,
+        "showRemarks": null,
+        "timesUsed": null,
+        "updatedAt": "2020-12-08T08:07:44.231+0000",
+        "weightage": 0
+      }
+    ],
+    "isAPrivateProgram": false,
+    "deleted": false,
+    "solutionId": "5fcf34503e9df47967eedb03",
+    "solutionExternalId": "cdcc3246-1e82-11eb-a3bf-000d3af02677-1607414864208",
+    "surveyId": "5fcf481beff083796933d805",
+    "createdBy": "c5fc2f1c-c1dd-4580-8742-750840bcf824",
+    "status": "started",
+    "evidences": {
+      "SF": {
+        "externalId": "SF",
+        "name": "Survey And Feedback",
+        "description": "Survey And Feedback",
+        "modeOfCollection": "",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": "",
+        "isActive": true,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    },
+    "surveyInformation": {
+      "createdFor": ["0126684405014528002"],
+      "rootOrganisations": ["0126684405014528002"],
+      "isDeleted": false,
+      "isAPrivateProgram": false,
+      "status": "published",
+      "solutionId": "5fcf34503e9df47967eedb03",
+      "solutionExternalId": "cdcc3246-1e82-11eb-a3bf-000d3af02677-1607414864208",
+      "createdBy": "c5fc2f1c-c1dd-4580-8742-750840bcf824",
+      "startDate": "2020-12-08T09:32:11.999+0000",
+      "endDate": "2021-11-04T09:47:51.233+0000",
+      "name": "Diksha test survey ",
+      "description": "Diksha test survey via genie",
+      "updatedAt": "2020-12-08T09:32:11.988+0000",
+      "createdAt": "2020-12-08T09:32:11.988+0000"
+    },
+    "updatedAt": "2020-12-08T09:32:12.000+0000",
+    "createdAt": "2020-12-08T09:32:12.000+0000",
+    "__v": 0
+  }
+]

@@ -1,0 +1,469 @@
+[
+    {
+        "_id" : "5f34ade5585244939f89f8f5",
+        "resourceType" : [
+            "Observations Framework"
+        ],
+        "language" : [
+            "English"
+        ],
+        "keywords" : [
+            "Framework",
+            "Observation"
+        ],
+        "concepts" : [
+    
+        ],
+        "createdFor" : [
+            "0123221617357783046602"
+        ],
+        "themes" : [
+            {
+                "type" : "theme",
+                "label" : "theme",
+                "name" : "Observation Theme",
+                "externalId" : "OB",
+                "weightage" : 100,
+                "criteria" : [
+                    {
+                        "criteriaId" : "5f34ade5585244939f89f8f2",
+                        "weightage" : 33.333333333333336
+                    },
+                    {
+                        "criteriaId" : "5f34ade5585244939f89f8f3",
+                        "weightage" : 33.333333333333336
+                    },
+                    {
+                        "criteriaId" : "5f34ade5585244939f89f8f4",
+                        "weightage" : 33.333333333333336
+                    }
+                ]
+            }
+        ],
+        "flattenedThemes" : [
+    
+        ],
+        "entities" : [
+    
+        ],
+        "registry" : [
+    
+        ],
+        "isRubricDriven" : false,
+        "enableQuestionReadOut" : false,
+        "captureGpsLocationAtQuestionLevel" : false,
+        "isAPrivateProgram" : false,
+        "allowMultipleAssessemts" : false,
+        "isDeleted" : false,
+        "rootOrganisations" : [
+            "0123221617357783046602"
+        ],
+        "deleted" : false,
+        "externalId" : "cbd074fa-dd11-11ea-a3bf-000d3af02677-OBSERVATION-TEMPLATE",
+        "name" : "MH01-Mantra4Change-APSWREIS School Leader Feedback",
+        "description" : "Feedback on Mantra4Change engagement with APSWREIS school leaders",
+        "author" : "19d81ef7-36ce-41fe-ae2d-c8365d977be4",
+        "levelToScoreMapping" : {
+            "L1" : {
+                "points" : 100,
+                "label" : "Good"
+            }
+        },
+        "scoringSystem" : null,
+        "noOfRatingLevels" : 1,
+        "entityTypeId" : "5f32d8228e0dc83124040567",
+        "entityType" : "school",
+        "type" : "observation",
+        "subType" : "school",
+        "updatedBy" : "INITIALIZE",
+        "createdAt" : "2020-08-13T03:05:09.183+0000",
+        "updatedAt" : "2020-08-13T03:05:09.236+0000",
+        "frameworkId" : "5f34ade5ec065458d5c9d4ef",
+        "frameworkExternalId" : "cbd074fa-dd11-11ea-a3bf-000d3af02677",
+        "isReusable" : true,
+        "__v" : 0,
+        "evidenceMethods" : {
+            "OB" : {
+                "externalId" : "OB",
+                "tip" : null,
+                "name" : "Observation",
+                "description" : null,
+                "modeOfCollection" : "onfield",
+                "canBeNotApplicable" : false,
+                "notApplicable" : false,
+                "canBeNotAllowed" : false,
+                "remarks" : null
+            }
+        },
+        "isTempObTest" : "observationAutomation",
+        "sections" : {
+            "S1" : "Observation Questions"
+        },
+        "status" : "active",
+        "questionSequenceByEcm" : {
+            "OB" : {
+                "S1" : [
+                    "SLFB001_1597287896354",
+                    "SLFB002_1597287896354",
+                    "SLFB003_1597287896354",
+                    "SLFB004_1597287896354",
+                    "SLFB005_1597287896354",
+                    "SLFB006_1597287896354",
+                    "SLFB007_1597287896354",
+                    "SLFB008_1597287896354",
+                    "SLFB009_1597287896354",
+                    "SLFB010_1597287896354",
+                    "SLFB011_1597287896354",
+                    "SLFB012_1597287896354",
+                    "SLFB013_1597287896354",
+                    "SLFB014_1597287896354",
+                    "SLFB015_1597287896354",
+                    "SLFB016_1597287896354",
+                    "SLFB017_1597287896354"
+                ]
+            }
+        },
+        "minNoOfSubmissionsRequired" : 1
+    },
+    {
+        "_id" : "5fa278c72dbd4b755b88e637",
+        "resourceType" : [
+            "Survey Solution"
+        ],
+        "language" : [
+            "English"
+        ],
+        "keywords" : [
+            "Survey"
+        ],
+        "concepts" : [
+    
+        ],
+        "createdFor" : [
+    
+        ],
+        "themes" : [
+            {
+                "type" : "theme",
+                "label" : "theme",
+                "externalId" : "SF",
+                "name" : "Survey and Feedback",
+                "weightage" : 0,
+                "criteria" : [
+                    {
+                        "criteriaId" : "5fa278c72dbd4b755b88e636",
+                        "weightage" : 0
+                    }
+                ]
+            }
+        ],
+        "flattenedThemes" : [
+    
+        ],
+        "entities" : [
+    
+        ],
+        "registry" : [
+    
+        ],
+        "isRubricDriven" : false,
+        "enableQuestionReadOut" : false,
+        "captureGpsLocationAtQuestionLevel" : false,
+        "isAPrivateProgram" : false,
+        "allowMultipleAssessemts" : false,
+        "isDeleted" : false,
+        "rootOrganisations" : [
+    
+        ],
+        "deleted" : false,
+        "type" : "survey",
+        "subType" : "survey",
+        "name" : "Diksha test survey ",
+        "externalId" : "cdcc3246-1e82-11eb-a3bf-000d3af02677-SURVEY-TEMPLATE",
+        "description" : "Diksha test survey via genie",
+        "linkTitle" : "",
+        "linkUrl" : "",
+        "author" : "86d2d978-5b20-4453-8a76-82b5a4c728c9",
+        "isReusable" : true,
+        "status" : "active",
+        "startDate" : "2020-11-04T09:47:51.233+0000",
+        "endDate" : "2021-11-04T09:47:51.233+0000",
+        "sections" : {
+            "SQ" : "Survey Questions"
+        },
+        "evidenceMethods" : {
+            "SF" : {
+                "externalId" : "SF",
+                "name" : "Survey And Feedback",
+                "description" : "Survey And Feedback",
+                "modeOfCollection" : "",
+                "canBeNotApplicable" : false,
+                "notApplicable" : false,
+                "canBeNotAllowed" : false,
+                "remarks" : "",
+                "isActive" : true
+            }
+        },
+        "updatedAt" : "2020-11-04T09:47:51.238+0000",
+        "createdAt" : "2020-11-04T09:47:51.238+0000",
+        "__v" : 0,
+        "minNoOfSubmissionsRequired" : 1
+    },
+    {
+        "_id" : "61558fec27e9cd00077530e4",
+        "scope" : {
+            "entityType" : "state",
+            "entityTypeId" : "5f32d8228e0dc8312404056e",
+            "roles" : [
+                {
+                    "_id" : "5f32d8238e0dc831240405a0",
+                    "code" : "HM"
+                }
+            ],
+            "entities" : [
+                "bc75cc99-9205-463e-a722-5326857838f8"
+            ]
+        },
+        "resourceType" : [
+    
+        ],
+        "language" : [
+    
+        ],
+        "keywords" : [
+    
+        ],
+        "concepts" : [
+    
+        ],
+        "themes" : [
+    
+        ],
+        "flattenedThemes" : [
+    
+        ],
+        "entities" : [
+    
+        ],
+        "registry" : [
+    
+        ],
+        "isRubricDriven" : false,
+        "enableQuestionReadOut" : false,
+        "captureGpsLocationAtQuestionLevel" : false,
+        "isAPrivateProgram" : false,
+        "allowMultipleAssessemts" : false,
+        "isDeleted" : false,
+        "pageHeading" : "Domains",
+        "deleted" : false,
+        "name" : "Copy of Jaga july 14th test course",
+        "description" : "Test",
+        "link" : "https://staging.sunbirded.org/explore-course/course/do_2133511258201620481282",
+        "externalId" : "FD79-copy-of-jaga-july-14th-test-course",
+        "type" : "course",
+        "subType" : "course",
+        "programExternalId" : "PGM-testing_program-4.3",
+        "isReusable" : false,
+        "programId" : "61558efa27e9cd00077530b5",
+        "programName" : "Testing program 4.3",
+        "programDescription" : "Testing program 4.3",
+        "status" : "active",
+        "updatedAt" : "2021-09-30T10:28:13.717+0000",
+        "createdAt" : "2021-09-30T10:22:36.614+0000",
+        "__v" : 0,
+        "updatedBy" : "ec8deeb2-4ded-4fa2-ac48-023ad8298d92",
+        "minNoOfSubmissionsRequired" : 1
+    },
+    {
+        "_id" : "5f75c3879a3faabb16a0845f",
+        "resourceType" : [
+            "Individual Assessment Framework"
+        ],
+        "language" : [
+            "English"
+        ],
+        "keywords" : [
+            "Framework",
+            "Assessment"
+        ],
+        "concepts" : [
+
+        ],
+        "createdFor" : [
+            "0124487522476933120"
+        ],
+        "themes" : [
+            {
+                "name" : "Theme 1",
+                "type" : "theme",
+                "label" : "theme",
+                "externalId" : "SL",
+                "weightage" : 40,
+                "criteria" : [
+                    {
+                        "criteriaId" : "5f75c3879a3faabb16a0845c",
+                        "weightage" : 40
+                    },
+                    {
+                        "criteriaId" : "5f75c3879a3faabb16a0845d",
+                        "weightage" : 40
+                    },
+                    {
+                        "criteriaId" : "5f75c3879a3faabb16a0845a",
+                        "weightage" : 40
+                    },
+                    {
+                        "criteriaId" : "5f75c3879a3faabb16a0845b",
+                        "weightage" : 40
+                    },
+                    {
+                        "criteriaId" : "5f75c3879a3faabb16a0845e",
+                        "weightage" : 40
+                    }
+                ]
+            }
+        ],
+        "flattenedThemes" : [
+
+        ],
+        "entities" : [
+
+        ],
+        "registry" : [
+
+        ],
+        "isRubricDriven" : false,
+        "enableQuestionReadOut" : false,
+        "captureGpsLocationAtQuestionLevel" : false,
+        "isAPrivateProgram" : false,
+        "allowMultipleAssessemts" : false,
+        "isDeleted" : false,
+        "rootOrganisations" : [
+
+        ],
+        "deleted" : false,
+        "subType" : "individual",
+        "type" : "assessment",
+        "entityType" : "schoolLeader",
+        "name" : "KEF - Remote teaching and learning baseline assessment for PL",
+        "externalId" : "KEF-RTLBS-INDIVIDUAL_ASSESSMENT-TEMPLATE",
+        "updatedAt" : "2020-10-01T11:54:47.738+0000",
+        "createdAt" : "2020-10-01T16:01:59.349+0000",
+        "entityTypeId" : "5f32d8228e0dc8312404056a",
+        "author" : "a082787f-8f8f-42f2-a706-35457ca6f1fd",
+        "updatedBy" : "INITIALIZE",
+        "description" : "This is a type of individual assessment",
+        "frameworkId" : "5f75b81254670074deacef1c",
+        "frameworkExternalId" : "KEF-RTLBS-INDIVIDUAL_ASSESSMENT",
+        "isReusable" : true,
+        "__v" : 0,
+        "minNoOfSubmissionsRequired" : 1
+    },
+    {
+        "_id" : "5f688f019331bf20ee36b13e",
+        "resourceType" : [
+            "ImprovmentProject Solution"
+        ],
+        "language" : [
+            "English"
+        ],
+        "keywords" : [
+            "Framework",
+            "Improvment Project"
+        ],
+        "concepts" : [
+            ""
+        ],
+        "createdFor" : [
+    
+        ],
+        "registry" : [
+    
+        ],
+        "type" : "improvementProject",
+        "subType" : "improvementProject",
+        "deleted" : false,
+        "externalId" : "f46b1ea0-fbfd-11ea-8877-65b250e90278",
+        "name" : "test",
+        "description" : "",
+        "author" : "",
+        "createdAt" : "2020-09-21T11:31:13.000+0000",
+        "updatedAt" : "2020-09-21T11:31:13.000+0000",
+        "frameworkId" : "",
+        "entityTypeId" : "",
+        "entityType" : "",
+        "status" : "Open",
+        "isDeleted" : false,
+        "isReusable" : false,
+        "parentSolutionId" : "",
+        "baseProjectDetails" : [
+            {
+                "title" : "test",
+                "externalId" : "5bd5c4a6-0ccc-41fe-9633-d61ed5378a77",
+                "categories" : [
+    
+                ],
+                "duration" : {
+                    "value" : "1W",
+                    "label" : "1 Week"
+                },
+                "difficultyLevel" : {
+                    "value" : "B",
+                    "label" : "Basic"
+                },
+                "description" : "test",
+                "concepts" : [
+                    ""
+                ],
+                "keywords" : [
+                    ""
+                ],
+                "status" : "published",
+                "isDeleted" : false,
+                "recommendedFor" : [
+    
+                ],
+                "tasks" : [
+    
+                ],
+                "createdAt" : "2020-12-08T15:18:44+00:00",
+                "updatedAt" : "2020-12-08T15:18:44+00:00",
+                "createdBy" : "SYSTEM",
+                "updatedBy" : "SYSTEM",
+                "learningResources" : [
+    
+                ],
+                "isReusable" : true,
+                "entityType" : [
+    
+                ],
+                "taskSequence" : [
+    
+                ],
+                "metaInformation" : {
+                    "supportingDocuments" : [
+                        ""
+                    ],
+                    "primaryAudience" : [
+                        ""
+                    ]
+                },
+                "_id" : "5fcf9954546a92494f2e587c"
+            }
+        ],
+        "programId" : "5fcf9953546a92494f2e5873",
+        "roles" : {
+            "projectManagers" : [
+    
+            ],
+            "programManagers" : [
+    
+            ],
+            "collaborators" : [
+                "86d2d978-5b20-4453-8a76-82b5a4c728c9"
+            ]
+        },
+        "__v" : 0,
+        "minNoOfSubmissionsRequired" : 1
+    }
+]

@@ -1,0 +1,154 @@
+[
+  {
+    "_id": "5f34ade281871d939950bc9d",
+    "resourceType": ["Program", "Framework", "Criteria"],
+    "language": ["English"],
+    "keywords": ["Keyword 1", "Keyword 2"],
+    "concepts": [
+      {
+        "identifier": "LPD20100",
+        "name": "Teacher_Performance",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20400",
+        "name": "Instructional_Programme",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20200",
+        "name": "Teacher_Empowerment",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      }
+    ],
+    "createdFor": ["0125747659358699520", "0125748495625912324"],
+    "evidences": [],
+    "criteriaType": "manual",
+    "deleted": false,
+    "name": "Content",
+    "description": "Content",
+    "externalId": "CRI01_1597287896354",
+    "rubric": {
+      "name": "Content",
+      "description": "Content",
+      "type": "auto",
+      "levels": {
+        "L1": {
+          "level": "L1",
+          "label": "Level 1",
+          "description": "NA",
+          "expression": ""
+        }
+      }
+    },
+    "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+    "timesUsed": 12,
+    "weightage": 20,
+    "remarks": "",
+    "score": "",
+    "flag": "",
+    "updatedAt": "2020-08-13T03:05:06.627+0000",
+    "createdAt": "2020-08-13T03:05:06.627+0000",
+    "__v": 0
+  },
+  {
+    "_id": "5f34ade281871d939950bc9e",
+    "resourceType": ["Program", "Framework", "Criteria"],
+    "language": ["English"],
+    "keywords": ["Keyword 1", "Keyword 2"],
+    "concepts": [
+      {
+        "identifier": "LPD20100",
+        "name": "Teacher_Performance",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20400",
+        "name": "Instructional_Programme",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20200",
+        "name": "Teacher_Empowerment",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      }
+    ],
+    "createdFor": ["0125747659358699520", "0125748495625912324"],
+    "evidences": [],
+    "criteriaType": "manual",
+    "deleted": false,
+    "name": "Experience",
+    "description": "Experience",
+    "externalId": "CRI02_1597287896354",
+    "rubric": {
+      "name": "Experience",
+      "description": "Experience",
+      "type": "auto",
+      "levels": {
+        "L1": {
+          "level": "L1",
+          "label": "Level 1",
+          "description": "NA",
+          "expression": ""
+        }
+      }
+    },
+    "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+    "timesUsed": 12,
+    "weightage": 20,
+    "remarks": "",
+    "score": "",
+    "flag": "",
+    "updatedAt": "2020-08-13T03:05:06.627+0000",
+    "createdAt": "2020-08-13T03:05:06.627+0000",
+    "__v": 0
+  }
+]
