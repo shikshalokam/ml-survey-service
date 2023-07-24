@@ -1,0 +1,812 @@
+[
+  {
+    "_id": "5f34ade5585244939f89f8f2",
+    "__v": 0,
+    "concepts": [
+      {
+        "identifier": "LPD20100",
+        "name": "Teacher_Performance",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20400",
+        "name": "Instructional_Programme",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20200",
+        "name": "Teacher_Empowerment",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      }
+    ],
+    "createdAt": "2020-08-13T03:05:13.565+0000",
+    "createdFor": ["0125747659358699520", "0125748495625912324"],
+    "criteriaType": "manual",
+    "description": "Content",
+    "evidences": [
+      {
+        "code": "OB",
+        "sections": [
+          {
+            "code": "S1",
+            "questions": [
+              {
+                "_id": "5f34ade94c793c93779bdc52",
+                "question": [
+                  "Which topic did you find the most useful?",
+                  "आपल्याला कोणता विषय सर्वात उपयुक्त वाटला?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [
+                  {
+                    "value": "R1",
+                    "label": "Assessment"
+                  },
+                  {
+                    "value": "R2",
+                    "label": "Analysis prioritising and choosing projects "
+                  },
+                  {
+                    "value": "R3",
+                    "label": "Planning Detailing projects on Unnati"
+                  },
+                  {
+                    "value": "R4",
+                    "label": "Monitoring and Evaluation"
+                  },
+                  {
+                    "value": "R5",
+                    "label": "Digital literacy"
+                  },
+                  {
+                    "value": "R6",
+                    "label": "None of the above"
+                  }
+                ],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB001_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "radio",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "1",
+                "updatedAt": "2020-08-13T03:05:13.555+0000",
+                "createdAt": "2020-08-13T03:05:13.555+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f2"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc62",
+                "question": [
+                  "If possible, what additional resources/sessions would you like from Mantra4change?",
+                  "शक्य असल्यास मंत्र मंत्रालयातून कोणती अतिरिक्त संसाधने / सत्रे तुम्हाला आवडतील?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB017_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "12",
+                "updatedAt": "2020-08-13T03:05:13.751+0000",
+                "createdAt": "2020-08-13T03:05:13.751+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "externalId": "CRI01_1597287896354",
+    "flag": "",
+    "frameworkCriteriaId": "5f34ade281871d939950bc9d",
+    "keywords": ["Keyword 1", "Keyword 2"],
+    "language": ["English"],
+    "name": "Content",
+    "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+    "remarks": "",
+    "resourceType": ["Program", "Framework", "Criteria"],
+    "rubric": {
+      "name": "Content",
+      "description": "Content",
+      "type": "auto",
+      "levels": {
+        "L1": {
+          "level": "L1",
+          "label": "Level 1",
+          "description": "NA",
+          "expression": ""
+        }
+      }
+    },
+    "score": "",
+    "showRemarks": null,
+    "timesUsed": 12,
+    "updatedAt": "2020-08-13T03:05:13.757+0000",
+    "weightage": 20
+  },
+  {
+    "_id": "5f34ade5585244939f89f8f3",
+    "__v": 0,
+    "concepts": [
+      {
+        "identifier": "LPD20100",
+        "name": "Teacher_Performance",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20400",
+        "name": "Instructional_Programme",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      },
+      {
+        "identifier": "LPD20200",
+        "name": "Teacher_Empowerment",
+        "objectType": "Concept",
+        "relation": "associatedTo",
+        "description": null,
+        "index": null,
+        "status": null,
+        "depth": null,
+        "mimeType": null,
+        "visibility": null,
+        "compatibilityLevel": null
+      }
+    ],
+    "createdAt": "2020-08-13T03:05:13.575+0000",
+    "createdFor": ["0125747659358699520", "0125748495625912324"],
+    "criteriaType": "manual",
+    "description": "Experience",
+    "evidences": [
+      {
+        "code": "OB",
+        "sections": [
+          {
+            "code": "S1",
+            "questions": [
+              {
+                "_id": "5f34ade94c793c93779bdc53",
+                "question": [
+                  "Which mode of learning did you find the most useful?",
+                  "आपल्याला कोणत्या पद्धतीचा शिक्षण सर्वात उपयुक्त वाटला?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [
+                  {
+                    "value": "R1",
+                    "label": "Sessions by experts"
+                  },
+                  {
+                    "value": "R2",
+                    "label": "Self learning time"
+                  },
+                  {
+                    "value": "R3",
+                    "label": "Learning Circles"
+                  },
+                  {
+                    "value": "R4",
+                    "label": "Reflection journals"
+                  },
+                  {
+                    "value": "R5",
+                    "label": "Activities and submissions"
+                  }
+                ],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB002_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "radio",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "2",
+                "updatedAt": "2020-08-13T03:05:13.568+0000",
+                "createdAt": "2020-08-13T03:05:13.568+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5a",
+                "question": [
+                  "On a scale of 1 to 5, how useful were the Learning Circles?",
+                  "1 ते 5 च्या प्रमाणात, शिक्षण मंडळे किती उपयुक्त होती?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [
+                  {
+                    "value": "R1",
+                    "label": "1"
+                  },
+                  {
+                    "value": "R2",
+                    "label": "2"
+                  },
+                  {
+                    "value": "R3",
+                    "label": "3"
+                  },
+                  {
+                    "value": "R4",
+                    "label": "4"
+                  },
+                  {
+                    "value": "R5",
+                    "label": "5"
+                  }
+                ],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB009_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "radio",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "6",
+                "updatedAt": "2020-08-13T03:05:13.654+0000",
+                "createdAt": "2020-08-13T03:05:13.654+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5b",
+                "question": [
+                  "Do you have any feedback or suggestions for future LCs?",
+                  "भविष्यातील एलसीसाठी आपल्याकडे काही अभिप्राय किंवा सूचना आहेत?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB010_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "7",
+                "updatedAt": "2020-08-13T03:05:13.665+0000",
+                "createdAt": "2020-08-13T03:05:13.665+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5c",
+                "question": [
+                  "How much of the trainings will you be able to use in your leadership practices in the future?",
+                  "भविष्यात आपण किती प्रशिक्षण प्रशिक्षित करू शकता?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [
+                  {
+                    "value": "R1",
+                    "label": "None of them"
+                  },
+                  {
+                    "value": "R2",
+                    "label": "Some parts"
+                  },
+                  {
+                    "value": "R3",
+                    "label": "Most of the topics"
+                  },
+                  {
+                    "value": "R4",
+                    "label": "All the topics"
+                  }
+                ],
+                "sliderOptions": [],
+                "children": [
+                  "5f34ade94c793c93779bdc5d",
+                  "5f34ade94c793c93779bdc5e"
+                ],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB011_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "radio",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "8",
+                "updatedAt": "2020-08-13T03:05:13.702+0000",
+                "createdAt": "2020-08-13T03:05:13.676+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5d",
+                "question": [
+                  "Which of the topics covered will be able to use in your leadership practices in the future?",
+                  "भविष्यात आपल्या नेतृत्वाच्या पद्धतींमध्ये कोणत्या विषयांचा समावेश करण्यास सक्षम असेल?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": [
+                  {
+                    "operator": "===",
+                    "value": "R2",
+                    "_id": "5f34ade94c793c93779bdc5c"
+                  }
+                ],
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB012_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "8.1",
+                "updatedAt": "2020-08-13T03:05:13.687+0000",
+                "createdAt": "2020-08-13T03:05:13.687+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5e",
+                "question": [
+                  "Which of the topics covered will be able to use in your leadership practices in the future?",
+                  "भविष्यात आपल्या नेतृत्वाच्या पद्धतींमध्ये कोणत्या विषयांचा समावेश करण्यास सक्षम असेल?"
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": [
+                  {
+                    "operator": "===",
+                    "value": "R3",
+                    "_id": "5f34ade94c793c93779bdc5c"
+                  }
+                ],
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB013_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "8.1",
+                "updatedAt": "2020-08-13T03:05:13.700+0000",
+                "createdAt": "2020-08-13T03:05:13.700+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc5f",
+                "question": [
+                  "On a scale of 1 to 5, how likely would you be to recommend the Mantra4Change training to other school leaders? With 1 being the lowest and 5 being the highest.",
+                  "1 ते 5 प्रमाणात 1 सर्वात कमी आणि 5 सर्वात जास्त आहे."
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [
+                  {
+                    "value": "R1",
+                    "label": "1"
+                  },
+                  {
+                    "value": "R2",
+                    "label": "2"
+                  },
+                  {
+                    "value": "R3",
+                    "label": "3"
+                  },
+                  {
+                    "value": "R4",
+                    "label": "4"
+                  },
+                  {
+                    "value": "R5",
+                    "label": "5"
+                  }
+                ],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB014_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "radio",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "9",
+                "updatedAt": "2020-08-13T03:05:13.712+0000",
+                "createdAt": "2020-08-13T03:05:13.712+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc60",
+                "question": ["Why?", "का?"],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB015_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "10",
+                "updatedAt": "2020-08-13T03:05:13.725+0000",
+                "createdAt": "2020-08-13T03:05:13.725+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              },
+              {
+                "_id": "5f34ade94c793c93779bdc61",
+                "question": [
+                  "If you have any other feedback for the training session overall, please mention below.",
+                  "आपल्याकडे एकूणच प्रशिक्षण सत्रासाठी इतर काही अभिप्राय असल्यास, कृपया खाली नमूद करा."
+                ],
+                "isCompleted": false,
+                "showRemarks": false,
+                "options": [],
+                "sliderOptions": [],
+                "children": [],
+                "questionGroup": ["A1"],
+                "fileName": [],
+                "instanceQuestions": [],
+                "isAGeneralQuestion": false,
+                "autoCapture": false,
+                "allowAudioRecording": false,
+                "weightage": 1,
+                "prefillFromEntityProfile": false,
+                "entityFieldName": "",
+                "isEditable": true,
+                "showQuestionInPreview": false,
+                "deleted": false,
+                "remarks": "",
+                "value": "",
+                "usedForScoring": "",
+                "questionType": "auto",
+                "canBeNotApplicable": "false",
+                "visibleIf": "",
+                "validation": {
+                  "required": true
+                },
+                "externalId": "SLFB016_1597287896354",
+                "tip": "",
+                "hint": "",
+                "responseType": "text",
+                "modeOfCollection": "onfield",
+                "accessibility": "No",
+                "rubricLevel": "",
+                "sectionHeader": "",
+                "page": "p1",
+                "questionNumber": "11",
+                "updatedAt": "2020-08-13T03:05:13.739+0000",
+                "createdAt": "2020-08-13T03:05:13.739+0000",
+                "__v": 0,
+                "criteriaId": "5f34ade5585244939f89f8f3"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "externalId": "CRI02_1597287896354",
+    "flag": "",
+    "frameworkCriteriaId": "5f34ade281871d939950bc9e",
+    "keywords": ["Keyword 1", "Keyword 2"],
+    "language": ["English"],
+    "name": "Experience",
+    "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+    "remarks": "",
+    "resourceType": ["Program", "Framework", "Criteria"],
+    "rubric": {
+      "name": "Experience",
+      "description": "Experience",
+      "type": "auto",
+      "levels": {
+        "L1": {
+          "level": "L1",
+          "label": "Level 1",
+          "description": "NA",
+          "expression": ""
+        }
+      }
+    },
+    "score": "",
+    "showRemarks": null,
+    "timesUsed": 12,
+    "updatedAt": "2020-08-13T03:05:13.746+0000",
+    "weightage": 20
+  }
+]
