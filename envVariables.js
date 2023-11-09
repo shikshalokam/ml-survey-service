@@ -6,53 +6,65 @@ let log = new Log("debug");
 let tableData = new table();
 
 let enviromentVariables = {
-  "APPLICATION_PORT" : {
-    "message" : "Required port no",
-    "optional" : false
+  APPLICATION_PORT: {
+    message: "Required port no",
+    optional: false,
   },
-  "APPLICATION_ENV" : {
-    "message" : "Required node environment",
-    "optional" : false
+  APPLICATION_ENV: {
+    message: "Required node environment",
+    optional: false,
   },
-  "MONGODB_URL" : {
-    "message" : "Required mongodb url",
-    "optional" : false
+  MONGODB_URL: {
+    message: "Required mongodb url",
+    optional: false,
   },
-  "USER_SERVICE_URL" : {
-    "message" : "Required user service base url",
-    "optional" : false
+  USER_SERVICE_URL: {
+    message: "Required user service base url",
+    optional: false,
   },
-  "INTERNAL_ACCESS_TOKEN" : {
-    "message" : "Required internal access token",
-    "optional" : false
+  INTERNAL_ACCESS_TOKEN: {
+    message: "Required internal access token",
+    optional: false,
   },
-  "KAFKA_COMMUNICATIONS_ON_OFF" : {
-    "message" : "Enable/Disable kafka communications",
-    "optional" : false
+  KAFKA_COMMUNICATIONS_ON_OFF: {
+    message: "Enable/Disable kafka communications",
+    optional: false,
   },
-  "KAFKA_URL" : {
-    "message" : "Required kafka url",
-    "optional" : false
+  KAFKA_URL: {
+    message: "Required kafka url",
+    optional: false,
   },
-  "KAFKA_GROUP_ID" : {
-    "message" : "Required kafka group id",
-    "optional" : false
+  KAFKA_GROUP_ID: {
+    message: "Required kafka group id",
+    optional: false,
   },
-  "SUBMISSION_RATING_QUEUE_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
+  SUBMISSION_RATING_QUEUE_TOPIC: {
+    message: "OFF/TOPIC_NAME",
+    optional: false,
   },
-  "OBSERVATION_SUBMISSION_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
+  OBSERVATION_SUBMISSION_TOPIC: {
+    message: "OFF/TOPIC_NAME",
+    optional: false,
   },
-  "COMPLETED_SURVEY_SUBMISSION_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
+  COMPLETED_SURVEY_SUBMISSION_TOPIC: {
+    message: "OFF/TOPIC_NAME",
+    optional: false,
   },
-  "INCOMPLETE_SURVEY_SUBMISSION_TOPIC" : {
-    "message" : "OFF/TOPIC_NAME",
-    "optional" : false
+  INCOMPLETE_SURVEY_SUBMISSION_TOPIC: {
+    message: "OFF/TOPIC_NAME",
+    optional: false,
+  },
+  USER_DELETE_TOPIC: {
+    message: "Required user delete kafka topic",
+    optional: false,
+  },
+  ID: {
+    message: "Required Platform ID",
+    optional: false,
+  },
+  TELEMETRY_TOPIC: {
+    message: "Required telemetry topic",
+    optional: false,
   },
   // "ELASTICSEARCH_COMMUNICATIONS_ON_OFF" : {
   //   "message" : "Enable/Disable elastic search communications",
@@ -66,107 +78,138 @@ let enviromentVariables = {
   //   "message" : "Required entities index",
   //   "optional" : false
   // },
-  "ML_CORE_SERVICE_URL" : {
-    "message" : "Required core service url",
-    "optional" : false
+  ML_CORE_SERVICE_URL: {
+    message: "Required core service url",
+    optional: false,
   },
-  "ML_PROJECT_SERVICE_URL" : {
-    "message" : "Required project service url",
-    "optional" : false
+  ML_PROJECT_SERVICE_URL: {
+    message: "Required project service url",
+    optional: false,
   },
-  "KEYCLOAK_PUBLIC_KEY_PATH" : {
-    "message" : "Required keycloak public key path",
-    "optional" : false
+  KEYCLOAK_PUBLIC_KEY_PATH: {
+    message: "Required keycloak public key path",
+    optional: false,
   },
   // "ELASTIC_SEARCH_SNIFF_ON_START" : {
   //   "message" : "Elastic search sniff on start",
   //   "optional" : false
   // },
-  "DISABLE_LEARNER_SERVICE_ON_OFF": {
-    "message" : "Disable learner service on/off",
-    "default": "ON"
+  DISABLE_LEARNER_SERVICE_ON_OFF: {
+    message: "Disable learner service on/off",
+    default: "ON",
   },
-  "FORM_SERVICE_URL" : {
-    "message" : "Form service base url",
-    "optional" : true,
-    "default" : "http://player:3000"
-  }
-}
+  FORM_SERVICE_URL: {
+    message: "Form service base url",
+    optional: true,
+    default: "http://player:3000",
+  },
+};
 
 let success = true;
 
-module.exports = function() {
-  Object.keys(enviromentVariables).forEach(eachEnvironmentVariable=>{
-  
+module.exports = function () {
+  Object.keys(enviromentVariables).forEach((eachEnvironmentVariable) => {
     let tableObj = {
-      [eachEnvironmentVariable] : "PASSED"
+      [eachEnvironmentVariable]: "PASSED",
     };
-  
+
     let keyCheckPass = true;
 
-
-    if(enviromentVariables[eachEnvironmentVariable].optional === true
-      && enviromentVariables[eachEnvironmentVariable].requiredIf
-      && enviromentVariables[eachEnvironmentVariable].requiredIf.key
-      && enviromentVariables[eachEnvironmentVariable].requiredIf.key != ""
-      && enviromentVariables[eachEnvironmentVariable].requiredIf.operator
-      && validRequiredIfOperators.includes(enviromentVariables[eachEnvironmentVariable].requiredIf.operator)
-      && enviromentVariables[eachEnvironmentVariable].requiredIf.value
-      && enviromentVariables[eachEnvironmentVariable].requiredIf.value != "") {
-        switch (enviromentVariables[eachEnvironmentVariable].requiredIf.operator) {
-          case "EQUALS":
-            if(process.env[enviromentVariables[eachEnvironmentVariable].requiredIf.key] === enviromentVariables[eachEnvironmentVariable].requiredIf.value) {
-              enviromentVariables[eachEnvironmentVariable].optional = false;
-            }
-            break;
-          case "NOT_EQUALS":
-              if(process.env[enviromentVariables[eachEnvironmentVariable].requiredIf.key] != enviromentVariables[eachEnvironmentVariable].requiredIf.value) {
-                enviromentVariables[eachEnvironmentVariable].optional = false;
-              }
-              break;
-          default:
-            break;
-        }
+    if (
+      enviromentVariables[eachEnvironmentVariable].optional === true &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf.key &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf.key != "" &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf.operator &&
+      validRequiredIfOperators.includes(
+        enviromentVariables[eachEnvironmentVariable].requiredIf.operator
+      ) &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf.value &&
+      enviromentVariables[eachEnvironmentVariable].requiredIf.value != ""
+    ) {
+      switch (
+        enviromentVariables[eachEnvironmentVariable].requiredIf.operator
+      ) {
+        case "EQUALS":
+          if (
+            process.env[
+              enviromentVariables[eachEnvironmentVariable].requiredIf.key
+            ] === enviromentVariables[eachEnvironmentVariable].requiredIf.value
+          ) {
+            enviromentVariables[eachEnvironmentVariable].optional = false;
+          }
+          break;
+        case "NOT_EQUALS":
+          if (
+            process.env[
+              enviromentVariables[eachEnvironmentVariable].requiredIf.key
+            ] != enviromentVariables[eachEnvironmentVariable].requiredIf.value
+          ) {
+            enviromentVariables[eachEnvironmentVariable].optional = false;
+          }
+          break;
+        default:
+          break;
+      }
     }
-      
-    if(enviromentVariables[eachEnvironmentVariable].optional === false) {
-      if(!(process.env[eachEnvironmentVariable])
-        || process.env[eachEnvironmentVariable] == "") {
+
+    if (enviromentVariables[eachEnvironmentVariable].optional === false) {
+      if (
+        !process.env[eachEnvironmentVariable] ||
+        process.env[eachEnvironmentVariable] == ""
+      ) {
         success = false;
         keyCheckPass = false;
-      } else if (enviromentVariables[eachEnvironmentVariable].possibleValues
-        && Array.isArray(enviromentVariables[eachEnvironmentVariable].possibleValues)
-        && enviromentVariables[eachEnvironmentVariable].possibleValues.length > 0) {
-        if(!enviromentVariables[eachEnvironmentVariable].possibleValues.includes(process.env[eachEnvironmentVariable])) {
+      } else if (
+        enviromentVariables[eachEnvironmentVariable].possibleValues &&
+        Array.isArray(
+          enviromentVariables[eachEnvironmentVariable].possibleValues
+        ) &&
+        enviromentVariables[eachEnvironmentVariable].possibleValues.length > 0
+      ) {
+        if (
+          !enviromentVariables[eachEnvironmentVariable].possibleValues.includes(
+            process.env[eachEnvironmentVariable]
+          )
+        ) {
           success = false;
           keyCheckPass = false;
-          enviromentVariables[eachEnvironmentVariable].message += ` Valid values - ${enviromentVariables[eachEnvironmentVariable].possibleValues.join(", ")}`
+          enviromentVariables[
+            eachEnvironmentVariable
+          ].message += ` Valid values - ${enviromentVariables[
+            eachEnvironmentVariable
+          ].possibleValues.join(", ")}`;
         }
       }
     }
 
-    if((!(process.env[eachEnvironmentVariable])
-      || process.env[eachEnvironmentVariable] == "")
-      && enviromentVariables[eachEnvironmentVariable].default
-      && enviromentVariables[eachEnvironmentVariable].default != "") {
-      process.env[eachEnvironmentVariable] = enviromentVariables[eachEnvironmentVariable].default;
+    if (
+      (!process.env[eachEnvironmentVariable] ||
+        process.env[eachEnvironmentVariable] == "") &&
+      enviromentVariables[eachEnvironmentVariable].default &&
+      enviromentVariables[eachEnvironmentVariable].default != ""
+    ) {
+      process.env[eachEnvironmentVariable] =
+        enviromentVariables[eachEnvironmentVariable].default;
     }
 
-    if(!keyCheckPass) {
-      if(enviromentVariables[eachEnvironmentVariable].message !== "") {
-        tableObj[eachEnvironmentVariable] = 
-        enviromentVariables[eachEnvironmentVariable].message;
+    if (!keyCheckPass) {
+      if (enviromentVariables[eachEnvironmentVariable].message !== "") {
+        tableObj[eachEnvironmentVariable] =
+          enviromentVariables[eachEnvironmentVariable].message;
       } else {
-        tableObj[eachEnvironmentVariable] = `FAILED - ${eachEnvironmentVariable} is required`;
+        tableObj[
+          eachEnvironmentVariable
+        ] = `FAILED - ${eachEnvironmentVariable} is required`;
       }
     }
 
     tableData.push(tableObj);
-  })
+  });
 
   log.info(tableData.toString());
 
   return {
-    success : success
-  }
-}
+    success: success,
+  };
+};
