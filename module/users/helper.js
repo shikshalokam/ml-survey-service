@@ -28,6 +28,13 @@ const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
  * @class
  */
 module.exports = class UserHelper {
+  /**
+   * Delete user information.
+   * @method
+   * @name userDelete
+   * @param {Objcet} kafkaEvent
+   * @returns {Object} Object with status if found and updated then will return true else will return false.
+   */
   static userDelete(kafkaEvent) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -35,6 +42,20 @@ module.exports = class UserHelper {
         let userSurveySubmissionsProfileUpdateData = [];
         let userObservationProfileUpdateData = [];
         let userObservationSubmissionProfileUpdateData = [];
+        let updateObject = {
+          $set: { "userProfile.firstName": "Deleted User" },
+          $unset: {
+            "userProfile.email": 1,
+            "userProfile.maskedEmail": 1,
+            "userProfile.maskedPhone": 1,
+            "userProfile.recoveryEmail": 1,
+            "userProfile.phone": 1,
+            "userProfile.lastName": 1,
+            "userProfile.prevUsedPhone": 1,
+            "userProfile.prevUsedEmail": 1,
+            "userProfile.recoveryPhone": 1,
+          },
+        };
         let userSurveySubmissionData =
           await surveySubmissionsHelper.surveySubmissionDocuments(
             {
@@ -61,87 +82,70 @@ module.exports = class UserHelper {
             ["userProfile"],
             "none"
           );
+        if (
+          userSurveySubmissionData.length === 0 &&
+          userObservationData.length === 0 &&
+          userObservationSubmissionData.length === 0
+        ) {
+          return resolve({ success: false });
+        }
         if (userSurveySubmissionData.length > 0) {
           userSurveySubmissionData.forEach((userProfile) => {
             let updateProfile = {
               updateOne: {
                 filter: { _id: userProfile._id },
-                update: {
-                  $set: { "userProfile.firstName": "deletedUser" },
-                  $unset: {
-                    "userProfile.email": 1,
-                    "userProfile.maskedEmail": 1,
-                    "userProfile.maskedPhone": 1,
-                    "userProfile.recoveryEmail": 1,
-                    "userProfile.phone": 1,
-                    "userProfile.lastName": 1,
-                    "userProfile.prevUsedPhone": 1,
-                    "userProfile.prevUsedEmail": 1,
-                    "userProfile.recoveryPhone": 1,
-                  },
-                },
+                update: updateObject,
               },
             };
             userSurveySubmissionsProfileUpdateData.push(updateProfile);
           });
-          let updateUserProfile = await projectQueries.bulkProfileUpdate(
-            userProfileUpdateData
-          );
+          if (userSurveySubmissionsProfileUpdateData.length > 0) {
+            await database.models.surveySubmissions.bulkWrite(
+              userSurveySubmissionsProfileUpdateData
+            );
+          }
         }
+
         if (userObservationData.length > 0) {
           userObservationData.forEach((userProfile) => {
             let updateProfile = {
               updateOne: {
                 filter: { _id: userProfile._id },
-                update: {
-                  $set: { "userProfile.firstName": "deletedUser" },
-                  $unset: {
-                    "userProfile.email": 1,
-                    "userProfile.maskedEmail": 1,
-                    "userProfile.maskedPhone": 1,
-                    "userProfile.recoveryEmail": 1,
-                    "userProfile.phone": 1,
-                    "userProfile.lastName": 1,
-                    "userProfile.prevUsedPhone": 1,
-                    "userProfile.prevUsedEmail": 1,
-                    "userProfile.recoveryPhone": 1,
-                  },
-                },
+                update: updateObject,
               },
             };
             userObservationProfileUpdateData.push(updateProfile);
           });
+          if (userObservationProfileUpdateData.length > 0) {
+            await database.models.observations.bulkWrite(
+              userObservationProfileUpdateData
+            );
+          }
         }
+
         if (userObservationSubmissionData.length > 0) {
           userObservationSubmissionData.forEach((userProfile) => {
             let updateProfile = {
               updateOne: {
                 filter: { _id: userProfile._id },
-                update: {
-                  $set: { "userProfile.firstName": "deletedUser" },
-                  $unset: {
-                    "userProfile.email": 1,
-                    "userProfile.maskedEmail": 1,
-                    "userProfile.maskedPhone": 1,
-                    "userProfile.recoveryEmail": 1,
-                    "userProfile.phone": 1,
-                    "userProfile.lastName": 1,
-                    "userProfile.prevUsedPhone": 1,
-                    "userProfile.prevUsedEmail": 1,
-                    "userProfile.recoveryPhone": 1,
-                  },
-                },
+                update: updateObject,
               },
             };
             userObservationSubmissionProfileUpdateData.push(updateProfile);
           });
+          if (userObservationSubmissionProfileUpdateData.length > 0) {
+            await database.models.observationSubmissions.bulkWrite(
+              userObservationSubmissionProfileUpdateData
+            );
+          }
         }
-        if (updateUserProfile) {
-          return resolve({
-            success: true,
-          });
-        }
-      } catch (err) {}
+
+        return resolve({
+          success: true,
+        });
+      } catch (err) {
+        return reject(err);
+      }
     });
   }
 
