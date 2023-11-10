@@ -2267,16 +2267,14 @@ module.exports = class ObservationsHelper {
         }
 
         //check solution entity type is exist in allowed roles
-        if (
-          !allowedEntityTypes.length > 0 ||
-          !allowedEntityTypes.includes(solutionDocument[0].entityType) ||
-          !Object.keys(bodyData).includes(solutionDocument[0].entityType)
-        ) {
-          throw {
-            status: httpStatusCode.bad_request.status,
-            message:
-              messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER,
-          };
+        if ( !allowedEntityTypes.length > 0 || 
+            !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 
+            !(Object.keys(bodyData).includes(allowedEntityTypes[0]))) 
+        {
+            throw {
+                status: httpStatusCode.bad_request.status,
+                message: messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER
+            };
         }
 
         return resolve({
@@ -2378,7 +2376,6 @@ module.exports = class ObservationsHelper {
             result: [],
           };
         }
-
         allowedEntityTypes = subEntities.slice(findTargetedEntityIndex);
 
         return resolve({
