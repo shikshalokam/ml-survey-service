@@ -2131,7 +2131,7 @@ module.exports = class ObservationsHelper {
                 //check solution entity type is exist in allowed roles
                 if ( !allowedEntityTypes.length > 0 || 
                     !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 
-                    !(Object.keys(bodyData).includes(solutionDocument[0].entityType))) 
+                    !(Object.keys(bodyData).includes(allowedEntityTypes[0]))) 
                 {
                     throw {
                         status: httpStatusCode.bad_request.status,
@@ -2285,14 +2285,14 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
                         if(currentProfileUserType.subType && currentProfileUserType.subType !== null) { // If the role has a subType
 
                             // Check if subType exists in userRoleInformation role, if not means profile data is old and should be reset.
-                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.subType.toUpperCase())) {
+                            if(!userRoleInformation.role.toUpperCase().includes(currentProfileUserType.subType.toUpperCase())) {
                                 resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
                                 break;
                             }
                         } else { // If the role subType is null or is not there
 
                             // Check if type exists in userRoleInformation role, if not means profile data is old and should be reset.
-                            if(!observation.userRoleInformation.role.toUpperCase().includes(currentProfileUserType.type.toUpperCase())) {
+                            if(!userRoleInformation.role.toUpperCase().includes(currentProfileUserType.type.toUpperCase())) {
                                 resetCurrentUserProfileRoles = true; // Reset userProfile.profileUserTypes
                                 break;
                             }
