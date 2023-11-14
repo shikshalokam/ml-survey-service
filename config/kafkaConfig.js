@@ -23,53 +23,92 @@ var connect = function () {
     console.error.bind(console, "kafka producer creation error!");
   });
 
-  if (
-    process.env.SUBMISSION_RATING_QUEUE_TOPIC &&
-    process.env.SUBMISSION_RATING_QUEUE_TOPIC != "OFF"
-  ) {
-    let consumer = new kafka.ConsumerGroup(
-      {
-        kafkaHost: process.env.KAFKA_URL,
-        groupId: process.env.KAFKA_GROUP_ID,
-        autoCommit: true,
-      },
-      process.env.SUBMISSION_RATING_QUEUE_TOPIC
+  const Topics = [
+    process.env.SUBMISSION_RATING_QUEUE_TOPIC,
+    process.env.USER_DELETE_TOPIC,
+  ];
+
+  let consumer = new kafka.ConsumerGroup(
+    {
+      kafkaHost: process.env.KAFKA_URL,
+      groupId: process.env.KAFKA_GROUP_ID,
+      autoCommit: true,
+    },
+    Topics
+  );
+
+  consumer.on("message", function (message) {
+    console.log(
+      `Received message: ${message.value} from topic ${message.topic} at offset ${message.offset} in group ${group_id}`
     );
 
-    consumer.on("message", async function (message) {
-      console.log("-------Kafka consumer log starts here------------------");
-      console.log("Topic Name: ", process.env.SUBMISSION_RATING_QUEUE_TOPIC);
-      console.log("Message: ", JSON.stringify(message));
-      console.log("-------Kafka consumer log ends here------------------");
+    // Call different functions based on the topic
+    switch (message.topic) {
+      case "topic1":
+        handleTopic1(message.value);
+        break;
+      case "topic2":
+        handleTopic2(message.value);
+        break;
+      case "topic3":
+        handleTopic3(message.value);
+        break;
+      // Add more cases for additional topics as needed
+      default:
+        console.log(`No handler for topic ${message.topic}`);
+    }
+  });
+  consumer.on("error", function (error) {
+    console.error(error);
+  });
 
-      submissionRatingQueueConsumer.messageReceived(message);
-    });
+  // if (
+  //   process.env.SUBMISSION_RATING_QUEUE_TOPIC &&
+  //   process.env.SUBMISSION_RATING_QUEUE_TOPIC != "OFF"
+  // ) {
+  //   let consumer = new kafka.ConsumerGroup(
+  //     {
+  //       kafkaHost: process.env.KAFKA_URL,
+  //       groupId: process.env.KAFKA_GROUP_ID,
+  //       autoCommit: true,
+  //     },
+  //     process.env.SUBMISSION_RATING_QUEUE_TOPIC
+  //   );
 
-    consumer.on("error", async function (error) {
-      submissionRatingQueueConsumer.errorTriggered(error);
-    });
+  //   consumer.on("message", async function (message) {
+  //     console.log("-------Kafka consumer log starts here------------------");
+  //     console.log("Topic Name: ", process.env.SUBMISSION_RATING_QUEUE_TOPIC);
+  //     console.log("Message: ", JSON.stringify(message));
+  //     console.log("-------Kafka consumer log ends here------------------");
 
-    const topics = [{ topic: process.env.USER_DELETE_TOPIC }];
+  //     submissionRatingQueueConsumer.messageReceived(message);
+  //   });
 
-    const options = {
-      autoCommit: true,
-    };
+  //   consumer.on("error", async function (error) {
+  //     submissionRatingQueueConsumer.errorTriggered(error);
+  //   });
 
-    const deleteConsumer = new Consumer(client, topics, options);
+  //   const topics = [{ topic: process.env.USER_DELETE_TOPIC }];
 
-    deleteConsumer.on("message", function (message) {
-      console.log("-------Kafka consumer log starts here------------------");
-      console.log("Topic Name: ", process.env.USER_DELETE_TOPIC);
-      console.log("Message: ", JSON.stringify(message));
-      console.log("-------Kafka consumer log ends here------------------");
+  //   const options = {
+  //     autoCommit: true,
+  //   };
 
-      userDMSConsumer.messageReceived(message);
-    });
+  //   const deleteConsumer = new Consumer(client, topics, options);
 
-    deleteConsumer.on("error", function (err) {
-      userDMSConsumer.errorTriggered(err);
-    });
-  }
+  //   deleteConsumer.on("message", function (message) {
+  //     console.log("-------Kafka consumer log starts here------------------");
+  //     console.log("Topic Name: ", process.env.USER_DELETE_TOPIC);
+  //     console.log("Message: ", JSON.stringify(message));
+  //     console.log("-------Kafka consumer log ends here------------------");
+
+  //     userDMSConsumer.messageReceived(message);
+  //   });
+
+  //   deleteConsumer.on("error", function (err) {
+  //     userDMSConsumer.errorTriggered(err);
+  //   });
+  // }
 
   return {
     kafkaProducer: producer,

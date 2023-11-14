@@ -1,0 +1,32 @@
+version: "3"
+services:
+  zookeeper:
+    image: "bitnami/zookeeper:3.8.0"
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - elevate_net
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+    logging:
+      driver: none
+  kafka:
+    image: "bitnami/kafka:3.1.0"
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - elevate_net
+    volumes:
+      - kafka-data:/bitnami/kafka
+    logging:
+      driver: none
+networks:
+  elevate_net:
+    external: false
+volumes:
+  zookeeper-data:
+  kafka-data:
