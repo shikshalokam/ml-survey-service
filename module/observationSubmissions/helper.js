@@ -1315,6 +1315,32 @@ module.exports = class ObservationSubmissionsHelper {
     }
 
 
+    /**
+   * create or update bulk observation submissions documents
+   * @method
+   * @name updateBulkObservationSubmissions
+   * @param {Object} {updateObject} - Update or creact Object with data.
+   * @returns {Object} status of data. 
+   */
+  
+    static updateBulkObservationSubmissions(updateObject) {
+        return new Promise(async (resolve, reject) => {
+            try {
+        
+                let observationSubmissionData = await database.models.observationSubmissions.bulkWrite(
+                updateObject
+                );
+                return resolve(observationSubmissionData);
+                
+            } catch (error) {
+                return resolve({
+                    success: false,
+                    message: error.message,
+                    data: false
+                })
+            }
+        });
+    }
 };
 
 

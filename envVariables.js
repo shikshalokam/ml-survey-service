@@ -55,11 +55,11 @@ let enviromentVariables = {
     optional: false,
   },
   USER_DELETE_TOPIC: {
-    message: "Required user delete kafka topic",
+    message: "Required user delete kafka consumer topic name",
     optional: false,
   },
   ID: {
-    message: "Required Platform ID",
+    message: "Required Service ID",
     optional: false,
   },
   TELEMETRY_TOPIC: {

@@ -815,4 +815,32 @@ module.exports = class SurveySubmissionsHelper {
             }
         })
     }
+
+     /**
+   * create or update bulk survey submission documents
+   * @method
+   * @name bulkUpdateSurveySubmissions
+   * @param {Object} {updateObject} - Update or creact Object with data.
+   * @returns {Object} status of data. 
+   */
+  
+   static bulkUpdateSurveySubmissions(updateObject) {
+    return new Promise(async (resolve, reject) => {
+        try {
+    
+            let updateSurveySubmissions = await database.models.surveySubmissions.bulkWrite(
+              updateObject
+            );
+            return resolve(updateSurveySubmissions);
+            
+        } catch (error) {
+            return resolve({
+                success: false,
+                message: error.message,
+                data: false
+            })
+        }
+    });
+ }
+
 }

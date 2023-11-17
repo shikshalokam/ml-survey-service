@@ -319,35 +319,26 @@ function checkIfStringIsNumber(str) {
  * @returns {Object} returns telemetry event object
  */
 
-function getTelemetryEvent(message) {
+function getTelemetryEvent() {
   let telemetryEvent = {
-    eid: "AUDIT",
+    eid: "",
     ets: epochTime(),
     ver: "3.0",
     mid: generateUUId(),
-    actor: { id: message.edata.userId, type: "User" },
+    actor: {},
     context: {
-      channel: message.context.channel,
+      channel: "",
       pdata: {
         id: process.env.ID,
         pid: "manage-learn",
         ver: packageData.version,
       },
-      env: "User",
+      env: "",
       cdata: [{ id: generateUUId(), type: "Request" }],
       rollup: {},
     },
-    object: {
-      id: message.edata.userId,
-      type: "User",
-    },
-    edata: {
-      state: "Delete",
-      type: "DeleteUserStatus",
-      props: [
-        "{keycloakCredentials:false, userLookUpTable:true, userExternalIdTable:true, userTable:true}",
-      ],
-    },
+    object: {},
+    edata: {},
   };
   return telemetryEvent;
 }

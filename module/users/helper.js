@@ -21,8 +21,7 @@ const userExtensionsHelper = require(MODULES_BASE_PATH +
   "/userExtension/helper");
 const surveySubmissionsHelper = require(MODULES_BASE_PATH +
   "/surveySubmissions/helper");
-const shikshalokamHelper = require(MODULES_BASE_PATH + "/shikshalokam/helper");
-
+let kafkaClient = require(ROOT_PATH + "/generics/helpers/kafkaCommunications");
 /**
  * UserHelper
  * @class
@@ -32,18 +31,66 @@ module.exports = class UserHelper {
    * Delete user information.
    * @method
    * @name userDelete
-   * @param {Objcet} kafkaEvent
+   * @param {Objcet} userDeleteEvent
+   *{
+      "eid": "BE_JOB_REQUEST",
+      "ets": 1619527882745,
+      "mid": "LP.1619527882745.32dc378a-430f-49f6-83b5-bd73b767ad36",
+      "actor": {
+        "id": "delete-user",
+        "type": "System"
+      },
+      "context": {
+        "channel": "01309282781705830427",
+        "pdata": {
+          "id": "org.sunbird.platform",
+          "ver": "1.0"
+        },
+        "env": "dev"
+      },
+      "object": {
+        "id": "<deleted-userId>",
+        "type": "User"
+      },
+      "edata": {
+        "organisationId": "0126796199493140480",
+        "userId": "a102c136-c6da-4c6c-b6b7-0f0681e1aab9",
+        "suggested_users": [
+          {
+            "role": "ORG_ADMIN",
+            "users": [
+              "<orgAdminUserId>"
+            ]
+          },
+          {
+            "role": "CONTENT_CREATOR",
+            "users": [
+              "<contentCreatorUserId>"
+            ]
+          },
+          {
+            "role": "COURSE_MENTOR",
+            "users": [
+              "<courseMentorUserId>"
+            ]
+          }
+        ],
+        "action": "delete-user",
+        "iteration": 1
+      }
+    }
    * @returns {Object} Object with status if found and updated then will return true else will return false.
    */
-  static userDelete(kafkaEvent) {
+  static userDelete(userDeleteEvent) {
     return new Promise(async (resolve, reject) => {
       try {
-        let userId = kafkaEvent.edata.userId;
+        let userId = userDeleteEvent.edata.userId;
         let userSurveySubmissionsProfileUpdateData = [];
         let userObservationProfileUpdateData = [];
         let userObservationSubmissionProfileUpdateData = [];
+        let updatePromiseObject = []
         let updateObject = {
-          $set: { "userProfile.firstName": "Deleted User" },
+          $set: { "userProfile.firstName": messageConstants.common.DELETED_USER },
           $unset: {
             "userProfile.email": 1,
             "userProfile.maskedEmail": 1,
@@ -99,11 +146,8 @@ module.exports = class UserHelper {
             };
             userSurveySubmissionsProfileUpdateData.push(updateProfile);
           });
-          if (userSurveySubmissionsProfileUpdateData.length > 0) {
-            await database.models.surveySubmissions.bulkWrite(
-              userSurveySubmissionsProfileUpdateData
-            );
-          }
+
+          updatePromiseObject.push(surveySubmissionsHelper.bulkUpdateSurveySubmissions(userSurveySubmissionsProfileUpdateData))
         }
 
         if (userObservationData.length > 0) {
@@ -116,11 +160,7 @@ module.exports = class UserHelper {
             };
             userObservationProfileUpdateData.push(updateProfile);
           });
-          if (userObservationProfileUpdateData.length > 0) {
-            await database.models.observations.bulkWrite(
-              userObservationProfileUpdateData
-            );
-          }
+          updatePromiseObject.push(observationsHelper.bulkUpdateObservations(userObservationProfileUpdateData))
         }
 
         if (userObservationSubmissionData.length > 0) {
@@ -133,16 +173,44 @@ module.exports = class UserHelper {
             };
             userObservationSubmissionProfileUpdateData.push(updateProfile);
           });
-          if (userObservationSubmissionProfileUpdateData.length > 0) {
-            await database.models.observationSubmissions.bulkWrite(
-              userObservationSubmissionProfileUpdateData
-            );
-          }
+          updatePromiseObject.push(observationSubmissionsHelper.updateBulkObservationSubmissions(userObservationSubmissionProfileUpdateData))
         }
 
-        return resolve({
-          success: true,
-        });
+        let updateDataStatus = await Promise.all(updatePromiseObject)
+        if(updateDataStatus){
+        /**
+         * Telemetry Raw Event
+         * {"eid":"","ets":1700188609568,"ver":"3.0","mid":"e55a91cd-7964-46bc-b756-18750787fb32","actor":{},"context":{"channel":"","pdata":{"id":"projectservice","pid":"manage-learn","ver":"7.0.0"},"env":"","cdata":[{"id":"adf3b621-619b-4195-a82d-d814eecdb21f","type":"Request"}],"rollup":{}},"object":{},"edata":{}}
+         */
+          let rawEvent = await gen.utils.getTelemetryEvent();
+          rawEvent.eid = messageConstants.common.AUDIT;
+          rawEvent.context.channel = userDeleteEvent.context.channel;
+          rawEvent.context.env = "User";
+          rawEvent.edata.state = messageConstants.common.DELETE_STATE;
+          rawEvent.edata.type = messageConstants.common.USER_DELETE_TYPE;
+          rawEvent.edata.props = [];
+          let userObject = {
+            id: userId,
+            type: "User",
+          };
+          rawEvent.actor = userObject;
+          rawEvent.object = userObject;
+
+          let telemetryEvent = {
+            timestamp: new Date(),
+            msg: JSON.stringify(rawEvent),
+            lname: messageConstants.common.TELEMTRY_EVENT_LOGGER,
+            tname: "",
+            level: messageConstants.common.INFO_LEVEL,
+            HOSTNAME: "",
+            "application.home": "",
+          };
+          await kafkaClient.pushTelemetryEventToKafka(telemetryEvent)
+          return resolve({
+            success: true,
+          });
+        }
+        
       } catch (err) {
         return reject(err);
       }
