@@ -45,7 +45,7 @@ const observationSubmissionKafkaTopic =
 
 const telemetryEventTopic = process.env.TELEMETRY_TOPIC
   ? process.env.TELEMETRY_TOPIC
-  : "sl-telemetry-dev";
+  : "dev.telemetry.raw";
 const pushObservationSubmissionToKafka = function (message) {
   return new Promise(async (resolve, reject) => {
     try {

@@ -109,16 +109,14 @@ module.exports = class UserHelper {
               createdBy: userId,
               userProfile: { $exists: true },
             },
-            ["userProfile"],
-            "none"
+            ["userProfile"]
           );
         let userObservationData = await observationsHelper.observationDocuments(
           {
             createdBy: userId,
             userProfile: { $exists: true },
           },
-          ["userProfile"],
-          "none"
+          ["userProfile"]
         );
         let userObservationSubmissionData =
           await observationSubmissionsHelper.observationSubmissionsDocument(
@@ -126,8 +124,7 @@ module.exports = class UserHelper {
               createdBy: userId,
               userProfile: { $exists: true },
             },
-            ["userProfile"],
-            "none"
+            ["userProfile"]
           );
         if (
           userSurveySubmissionData.length === 0 &&
