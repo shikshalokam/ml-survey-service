@@ -1,0 +1,1312 @@
+[
+  {
+    "_id": "60111ac82d0bbd2f0c3229ca",
+    "evidencesStatus": [
+      {
+        "externalId": "OB",
+        "tip": null,
+        "name": "Observation",
+        "description": null,
+        "modeOfCollection": "onfield",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": null,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    ],
+    "criteria": [
+      {
+        "_id": "600b21c57ea68a7ed927886e",
+        "__v": 0,
+        "createdAt": "2021-01-22T19:04:37.816+0000",
+        "criteriaType": "auto",
+        "description": "Building Digital Learning Plans",
+        "externalId": "C1_1605598997049-1607593971105-1611342277791",
+        "flag": "",
+        "frameworkCriteriaId": "5fb37f1e6fbfaf2bc0cd31fa",
+        "name": "Building Digital Learning Plans",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "Building Digital Learning Plans",
+          "description": "Building Digital Learning Plans",
+          "type": "manual",
+          "expressionVariables": {
+            "SCORE": "600b21c57ea68a7ed927886e.scoreOfAllQuestionInCriteria("
+          },
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": "0<=SCORE<=100000"
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-22T19:04:37.816+0000",
+        "weightage": 1
+      },
+      {
+        "_id": "600b21c57ea68a7ed927886f",
+        "__v": 0,
+        "createdAt": "2021-01-22T19:04:37.823+0000",
+        "criteriaType": "auto",
+        "description": "Organizing Digital Learning",
+        "externalId": "C2_1605598997049-1607593971106-1611342277792",
+        "flag": "",
+        "frameworkCriteriaId": "5fb37f1e6fbfaf2bc0cd31fb",
+        "name": "Organizing Digital Learning",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "Organizing Digital Learning",
+          "description": "Organizing Digital Learning",
+          "type": "manual",
+          "expressionVariables": {
+            "SCORE": "600b21c57ea68a7ed927886f.scoreOfAllQuestionInCriteria("
+          },
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": "0<=SCORE<=100000"
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-22T19:04:37.823+0000",
+        "weightage": 1
+      },
+      {
+        "_id": "600b21c57ea68a7ed9278870",
+        "__v": 0,
+        "createdAt": "2021-01-22T19:04:37.812+0000",
+        "criteriaType": "auto",
+        "description": "Assessing students in Digital Classrooms",
+        "externalId": "C3_1605598997049-1607593971107-1611342277793",
+        "flag": "",
+        "frameworkCriteriaId": "5fb37f1e6fbfaf2bc0cd31fc",
+        "name": "Assessing students in Digital Classrooms",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "Assessing students in Digital Classrooms",
+          "description": "Assessing students in Digital Classrooms",
+          "type": "manual",
+          "expressionVariables": {
+            "SCORE": "600b21c57ea68a7ed9278870.scoreOfAllQuestionInCriteria("
+          },
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": "0<=SCORE<=100000"
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-22T19:04:37.812+0000",
+        "weightage": 1
+      },
+      {
+        "_id": "600b21c57ea68a7ed9278871",
+        "__v": 0,
+        "createdAt": "2021-01-22T19:04:37.827+0000",
+        "criteriaType": "auto",
+        "description": "Facilitating digital classrooms",
+        "externalId": "C4_1605598997049-1607593971107-1611342277794",
+        "flag": "",
+        "frameworkCriteriaId": "5fb37f1e6fbfaf2bc0cd31fd",
+        "name": "Facilitating digital classrooms",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "Facilitating digital classrooms",
+          "description": "Facilitating digital classrooms",
+          "type": "manual",
+          "expressionVariables": {
+            "SCORE": "600b21c57ea68a7ed9278871.scoreOfAllQuestionInCriteria("
+          },
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": "0<=SCORE<=100000"
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-22T19:04:37.827+0000",
+        "weightage": 1
+      },
+      {
+        "_id": "600b21c57ea68a7ed9278872",
+        "__v": 0,
+        "createdAt": "2021-01-22T19:04:37.836+0000",
+        "criteriaType": "auto",
+        "description": "Managing Self",
+        "externalId": "C5_1605598997049-1607593971108-1611342277796",
+        "flag": "",
+        "frameworkCriteriaId": "5fb37f1e6fbfaf2bc0cd31fe",
+        "name": "Managing Self",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "Managing Self",
+          "description": "Managing Self",
+          "type": "manual",
+          "expressionVariables": {
+            "SCORE": "600b21c57ea68a7ed9278872.scoreOfAllQuestionInCriteria("
+          },
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": "0<=SCORE<=100000"
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-22T19:04:37.836+0000",
+        "weightage": 1
+      }
+    ],
+    "themes": [],
+    "feedback": [],
+    "submissionsUpdatedHistory": [],
+    "pointsBasedMaxScore": 0,
+    "pointsBasedScoreAchieved": 0,
+    "pointsBasedPercentageScore": 0,
+    "isAPrivateProgram": false,
+    "isRubricDriven": true,
+    "deleted": false,
+    "entityId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+    "entityExternalId": "2822",
+    "entityInformation": {
+      "externalId": "2822",
+      "name": "ANANTAPUR",
+      "region": "",
+      "districtId": "2822",
+      "state": "AP",
+      "registryDetails": {
+        "locationId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+        "code": "2822",
+        "lastUpdatedAt": "2021-01-25T06:13:26.314+0000"
+      },
+      "hierarchy": [
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state"
+        }
+      ]
+    },
+    "solutionId": "600b21c57ea68a7ed9278873",
+    "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-DEO",
+    "programId": "600ab53cc7de076e6f993724",
+    "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+    "entityTypeId": "5f32d8228e0dc8312404056c",
+    "entityType": "district",
+    "observationId": "60111ac72d0bbd2f0c3229c9",
+    "scoringSystem": "pointsBasedScoring",
+    "observationInformation": {
+      "createdFor": ["0126796199493140480"],
+      "rootOrganisations": ["0126796199493140480"],
+      "isAPrivateProgram": false,
+      "name": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-DEO",
+      "description": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-DEO",
+      "status": "published",
+      "startDate": "2021-01-27T07:48:23.029+0000",
+      "endDate": "2022-01-27T07:48:23.029+0000",
+      "project": {
+        "_id": "6011136a2d25b926974d9ec9",
+        "taskId": "a083c997-af8a-4752-97dd-e06a03685add"
+      },
+      "referenceFrom": "project",
+      "solutionId": "600b21c57ea68a7ed9278873",
+      "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-DEO",
+      "programId": "600ab53cc7de076e6f993724",
+      "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+      "frameworkId": "5fb37f2131df5439c8aab659",
+      "frameworkExternalId": "9564e8aa-28a8-11eb-a3bf-000d3af02677",
+      "entityTypeId": "5f32d8228e0dc8312404056c",
+      "entityType": "district",
+      "createdBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "updatedAt": "2021-01-27T07:48:23.587+0000",
+      "createdAt": "2021-01-27T07:48:23.587+0000"
+    },
+    "createdBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+    "status": "started",
+    "referenceFrom": "project",
+    "project": {
+      "_id": "6011136a2d25b926974d9ec9",
+      "taskId": "a083c997-af8a-4752-97dd-e06a03685add"
+    },
+    "evidences": {
+      "OB": {
+        "externalId": "OB",
+        "tip": null,
+        "name": "Observation",
+        "description": null,
+        "modeOfCollection": "onfield",
+        "canBeNotApplicable": false,
+        "notApplicable": false,
+        "canBeNotAllowed": false,
+        "remarks": null,
+        "startTime": "",
+        "endTime": "",
+        "isSubmitted": false,
+        "submissions": []
+      }
+    },
+    "submissionNumber": 1,
+    "title": "Observation 1",
+    "updatedAt": "2021-01-27T07:48:24.764+0000",
+    "createdAt": "2021-01-27T07:48:24.764+0000",
+    "__v": 0,
+    "appInformation": {
+      "appName": "DIKSHA",
+      "appVersion": "86"
+    },
+    "criteriaLevelReport": false,
+    "userProfile": {
+      "webPages": null,
+      "maskedPhone": "******8976",
+      "tcStatus": null,
+      "loginId": null,
+      "subject": null,
+      "channel": "dikshapreprodcustodian",
+      "profileUserTypes": [
+        {
+          "subType": "dyeo",
+          "type": "administrator"
+        }
+      ],
+      "language": null,
+      "updatedDate": "2021-07-25 14:18:37:565+0000",
+      "password": null,
+      "managedBy": null,
+      "flagsValue": 0,
+      "id": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "recoveryEmail": "",
+      "identifier": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "thumbnail": null,
+      "profileVisibility": null,
+      "updatedBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "accesscode": null,
+      "externalIds": [],
+      "registryId": null,
+      "roleList": [
+        {
+          "name": "Book Creator",
+          "id": "BOOK_CREATOR"
+        },
+        {
+          "name": "Membership Management",
+          "id": "MEMBERSHIP_MANAGEMENT"
+        },
+        {
+          "name": "Flag Reviewer",
+          "id": "FLAG_REVIEWER"
+        },
+        {
+          "name": "Report Viewer",
+          "id": "REPORT_VIEWER"
+        },
+        {
+          "name": "Program Manager",
+          "id": "PROGRAM_MANAGER"
+        },
+        {
+          "name": "Program Designer",
+          "id": "PROGRAM_DESIGNER"
+        },
+        {
+          "name": "System Administration",
+          "id": "SYSTEM_ADMINISTRATION"
+        },
+        {
+          "name": "Content Curation",
+          "id": "CONTENT_CURATION"
+        },
+        {
+          "name": "Book Reviewer",
+          "id": "BOOK_REVIEWER"
+        },
+        {
+          "name": "Content Creator",
+          "id": "CONTENT_CREATOR"
+        },
+        {
+          "name": "Org Management",
+          "id": "ORG_MANAGEMENT"
+        },
+        {
+          "name": "Course Admin",
+          "id": "COURSE_ADMIN"
+        },
+        {
+          "name": "Org Moderator",
+          "id": "ORG_MODERATOR"
+        },
+        {
+          "name": "Public",
+          "id": "PUBLIC"
+        },
+        {
+          "name": "Admin",
+          "id": "ADMIN"
+        },
+        {
+          "name": "Course Mentor",
+          "id": "COURSE_MENTOR"
+        },
+        {
+          "name": "Content Reviewer",
+          "id": "CONTENT_REVIEWER"
+        },
+        {
+          "name": "Report Admin",
+          "id": "REPORT_ADMIN"
+        },
+        {
+          "name": "Org Admin",
+          "id": "ORG_ADMIN"
+        }
+      ],
+      "rootOrgId": "0126796199493140480",
+      "prevUsedEmail": "",
+      "firstName": "Aishwarya rastogi",
+      "isMinor": false,
+      "tncAcceptedOn": 1611398597019.0,
+      "allTncAccepted": {},
+      "profileDetails": null,
+      "phone": "******8976",
+      "dob": "1991-12-31",
+      "grade": null,
+      "currentLoginTime": null,
+      "userType": "administrator",
+      "status": 1,
+      "lastName": "",
+      "tncLatestVersion": "v12",
+      "gender": null,
+      "prevUsedPhone": "",
+      "stateValidated": false,
+      "encEmail": null,
+      "isDeleted": false,
+      "organisations": [
+        {
+          "organisationId": "0126796199493140480",
+          "approvedBy": null,
+          "channel": "dikshapreprodcustodian",
+          "updatedDate": null,
+          "approvaldate": null,
+          "isSystemUpload": false,
+          "isDeleted": false,
+          "id": "01320057821583769611",
+          "isApproved": null,
+          "orgjoindate": "2021-01-23 10:43:08:915+0000",
+          "isSelfDeclaration": true,
+          "updatedBy": null,
+          "orgName": "Staging Custodian Organization",
+          "addedByName": null,
+          "addedBy": null,
+          "associationType": 2,
+          "locationIds": [
+            "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+            "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          ],
+          "orgLocation": [
+            {
+              "type": "state",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            },
+            {
+              "type": "district",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+            }
+          ],
+          "externalId": "101010",
+          "userId": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+          "isSchool": false,
+          "hashTagId": "0126796199493140480",
+          "isSSO": false,
+          "isRejected": null,
+          "locations": [
+            {
+              "code": "29",
+              "name": "Karnataka",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+              "type": "state",
+              "parentId": null
+            },
+            {
+              "code": "2901",
+              "name": "BELAGAVI",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141",
+              "type": "district",
+              "parentId": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            }
+          ],
+          "position": null,
+          "orgLeftDate": null
+        }
+      ],
+      "provider": null,
+      "countryCode": "+91",
+      "tncLatestVersionUrl": "https://sunbirdstagingpublic.blob.core.windows.net/termsandcondtions/terms-and-conditions-v12.html",
+      "maskedEmail": null,
+      "tempPassword": null,
+      "email": "",
+      "rootOrg": {
+        "dateTime": null,
+        "preferredLanguage": null,
+        "keys": {},
+        "organisationSubType": null,
+        "channel": "dikshapreprodcustodian",
+        "approvedBy": null,
+        "description": "Pre-prod Custodian Organization",
+        "updatedDate": "2022-02-18 09:50:42:752+0000",
+        "organisationType": 5,
+        "addressId": null,
+        "orgType": null,
+        "isTenant": true,
+        "provider": null,
+        "locationId": null,
+        "orgCode": null,
+        "theme": null,
+        "id": "0126796199493140480",
+        "communityId": null,
+        "isApproved": null,
+        "isBoard": true,
+        "email": null,
+        "slug": "dikshapreprodcustodian",
+        "isSSOEnabled": null,
+        "thumbnail": null,
+        "orgName": "Staging Custodian Organization",
+        "updatedBy": null,
+        "locationIds": [
+          "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+          "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+        ],
+        "externalId": "101010",
+        "orgLocation": [
+          {
+            "type": "state",
+            "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+          },
+          {
+            "type": "district",
+            "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          }
+        ],
+        "isRootOrg": true,
+        "rootOrgId": "0126796199493140480",
+        "imgUrl": null,
+        "approvedDate": null,
+        "homeUrl": null,
+        "orgTypeId": null,
+        "isDefault": null,
+        "createdDate": "2019-01-18 09:48:13:428+0000",
+        "createdBy": "system",
+        "parentOrgId": null,
+        "hashTagId": "0126796199493140480",
+        "noOfMembers": null,
+        "status": 1
+      },
+      "phoneVerified": true,
+      "profileSummary": null,
+      "tcUpdatedDate": null,
+      "userLocations": [
+        {
+          "code": "2822",
+          "name": "ANANTAPUR",
+          "id": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+          "type": "district",
+          "parentId": "bc75cc99-9205-463e-a722-5326857838f8"
+        },
+        {
+          "code": "282245",
+          "name": "AMADAGUR",
+          "id": "8df55ad6-7b21-41d0-a93a-efda45d34857",
+          "type": "block",
+          "parentId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03"
+        },
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state",
+          "parentId": null
+        }
+      ],
+      "recoveryPhone": "",
+      "avatar": null,
+      "userName": "aishwaryarastogi_e1jj",
+      "userId": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "userSubType": "dyeo",
+      "declarations": [
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "0126796199493140480",
+          "status": null,
+          "info": {}
+        },
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "1269934121990553633",
+          "status": "SUBMITTED",
+          "info": {
+            "declared-phone": "8399908976",
+            "declared-school-name": "APMS AMADAGUR",
+            "declared-school-udise-code": "28224500619"
+          }
+        }
+      ],
+      "promptTnC": true,
+      "emailVerified": true,
+      "lastLoginTime": 0,
+      "createdDate": "2021-01-23 10:43:08:891+0000",
+      "framework": {
+        "board": ["State (Andhra Pradesh"],
+        "id": ["ap_k-12_1"]
+      },
+      "createdBy": null,
+      "profileUserType": {
+        "subType": "dyeo",
+        "type": "administrator"
+      },
+      "encPhone": "XhYSAcEKhcSqk+tB6VpFEjH7u2Zhert8qvBdibN8HBKqLDTDS4lK85+ktERL+whrjSfIQMm2FWHY\nfEE5wIOp8tbyGleYc1vfsMRN08fFmWnSuW/Nb7dLfqqoouulELgST6a+wzaAmCWueMEdPmZuRg==",
+      "location": null,
+      "tncAcceptedVersion": "3.5.0"
+    }
+  },
+  {
+    "_id": "60111b332d0bbd2f0c3229cc",
+    "evidencesStatus": [
+      {
+        "externalId": "OB",
+        "tip": null,
+        "name": "Observation",
+        "description": null,
+        "modeOfCollection": "onfield",
+        "canBeNotApplicable": false,
+        "notApplicable": null,
+        "canBeNotAllowed": false,
+        "remarks": null,
+        "startTime": 1627757492997.0,
+        "endTime": 1627757620226.0,
+        "isSubmitted": true,
+        "submissions": [
+          {
+            "externalId": "OB",
+            "startTime": 1627757492997.0,
+            "endTime": 1627757620226.0,
+            "gpsLocation": null,
+            "submittedBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+            "submittedByName": "Aishwarya rastogi ",
+            "submittedByEmail": "",
+            "submissionDate": "2021-07-31T18:53:40.749+0000",
+            "isValid": true
+          }
+        ],
+        "hasConflicts": false
+      }
+    ],
+    "criteria": [
+      {
+        "_id": "5ffbfb6669a1847d4286dfc3",
+        "__v": 0,
+        "createdAt": "2021-01-11T07:16:54.828+0000",
+        "criteriaType": "manual",
+        "description": "General Information",
+        "externalId": "PS001_1597737024465-1610349414822",
+        "flag": "",
+        "frameworkCriteriaId": "5f3b884b16fdc4ed0081719c",
+        "name": "General Information",
+        "owner": "2b655fd1-201d-4d2a-a1b7-9048a25c0afa",
+        "remarks": "",
+        "rubric": {
+          "name": "General Information",
+          "description": "General Information",
+          "type": "auto",
+          "levels": {
+            "L1": {
+              "level": "L1",
+              "label": "Level 1",
+              "description": "NA",
+              "expression": ""
+            }
+          }
+        },
+        "score": "",
+        "showRemarks": null,
+        "timesUsed": 12,
+        "updatedAt": "2021-01-11T07:16:54.828+0000",
+        "weightage": 100
+      }
+    ],
+    "themes": [],
+    "feedback": [],
+    "submissionsUpdatedHistory": [],
+    "pointsBasedMaxScore": 0,
+    "pointsBasedScoreAchieved": 0,
+    "pointsBasedPercentageScore": 0,
+    "isAPrivateProgram": false,
+    "isRubricDriven": false,
+    "deleted": false,
+    "entityId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+    "entityExternalId": "2822",
+    "entityInformation": {
+      "externalId": "2822",
+      "name": "ANANTAPUR",
+      "region": "",
+      "districtId": "2822",
+      "state": "AP",
+      "registryDetails": {
+        "locationId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+        "code": "2822",
+        "lastUpdatedAt": "2021-01-25T06:13:26.314+0000"
+      },
+      "hierarchy": [
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state"
+        }
+      ]
+    },
+    "solutionId": "600ac0d1c7de076e6f9943b9",
+    "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+    "programId": "600ab53cc7de076e6f993724",
+    "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+    "entityTypeId": "5f32d8228e0dc8312404056c",
+    "entityType": "district",
+    "observationId": "601113652d0bbd2f0c3229c6",
+    "scoringSystem": null,
+    "observationInformation": {
+      "createdFor": ["0126796199493140480"],
+      "rootOrganisations": ["0126796199493140480"],
+      "isAPrivateProgram": false,
+      "name": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+      "description": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+      "entityTypeId": "5f32d8228e0dc8312404056c",
+      "entityType": "district",
+      "programId": "600ab53cc7de076e6f993724",
+      "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+      "startDate": "2021-01-27T07:16:53.543+0000",
+      "endDate": "2022-01-27T07:16:53.543+0000",
+      "status": "published",
+      "solutionId": "600ac0d1c7de076e6f9943b9",
+      "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+      "frameworkId": "5f3b884eec065458d5c9d4fb",
+      "frameworkExternalId": "819e162a-e127-11ea-a3bf-000d3af02677",
+      "createdBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "updatedAt": "2021-01-27T07:16:53.857+0000",
+      "createdAt": "2021-01-27T07:16:53.857+0000"
+    },
+    "createdBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+    "status": "completed",
+    "evidences": {
+      "OB": {
+        "externalId": "OB",
+        "tip": null,
+        "name": "Observation",
+        "description": null,
+        "modeOfCollection": "onfield",
+        "canBeNotApplicable": false,
+        "notApplicable": null,
+        "canBeNotAllowed": false,
+        "remarks": null,
+        "startTime": 1627757492997.0,
+        "endTime": 1627757620226.0,
+        "isSubmitted": true,
+        "submissions": [
+          {
+            "externalId": "OB",
+            "answers": {
+              "5ffbfb6669a1847d4286dfbe": {
+                "qid": "5ffbfb6669a1847d4286dfbe",
+                "value": "gavsnak",
+                "remarks": "",
+                "fileName": [
+                  {
+                    "name": "1627757523752.jpg",
+                    "sourcePath": "survey/60111b332d0bbd2f0c3229cc/18155ae6-493d-4369-9668-165eb6dcaa2a/1bc5f055-97c7-43bb-8b95-9106be1cd113/1627757523752.jpg"
+                  }
+                ],
+                "gpsLocation": "",
+                "payload": {
+                  "question": [
+                    "As per PM eVidya guidelines, what has been touted as “One Nation, One Digital Platform”?",
+                    ""
+                  ],
+                  "labels": ["gavsnak"],
+                  "responseType": "text",
+                  "filesNotUploaded": []
+                },
+                "startTime": 1627757494237.0,
+                "endTime": 1627757513042.0,
+                "criteriaId": "5ffbfb6669a1847d4286dfc3",
+                "responseType": "text",
+                "evidenceMethod": "OB",
+                "rubricLevel": ""
+              },
+              "5ffbfb6669a1847d4286dfbf": {
+                "qid": "5ffbfb6669a1847d4286dfbf",
+                "value": "R3",
+                "remarks": "",
+                "fileName": [],
+                "gpsLocation": "",
+                "payload": {
+                  "question": ["Coherent Access Means?", ""],
+                  "labels": [
+                    "Ensuring per schedule, content shown via synchronous channels is also made available via asynchronous channels"
+                  ],
+                  "responseType": "radio",
+                  "filesNotUploaded": []
+                },
+                "startTime": 1627757494241.0,
+                "endTime": 1627757560361.0,
+                "criteriaId": "5ffbfb6669a1847d4286dfc3",
+                "responseType": "radio",
+                "evidenceMethod": "OB",
+                "rubricLevel": ""
+              },
+              "5ffbfb6669a1847d4286dfc0": {
+                "qid": "5ffbfb6669a1847d4286dfc0",
+                "value": "he nee",
+                "remarks": "",
+                "fileName": [],
+                "gpsLocation": "",
+                "payload": {
+                  "question": ["QR code shown on TV is also present in", ""],
+                  "labels": ["he nee"],
+                  "responseType": "text",
+                  "filesNotUploaded": []
+                },
+                "startTime": 1627757494245.0,
+                "endTime": 1627757609968.0,
+                "criteriaId": "5ffbfb6669a1847d4286dfc3",
+                "responseType": "text",
+                "evidenceMethod": "OB",
+                "rubricLevel": ""
+              },
+              "5ffbfb6669a1847d4286dfc1": {
+                "qid": "5ffbfb6669a1847d4286dfc1",
+                "value": "be nee",
+                "remarks": "",
+                "fileName": [],
+                "gpsLocation": "",
+                "payload": {
+                  "question": [
+                    "To accommodate TV content on Diksha, the file size limit has been increased to",
+                    ""
+                  ],
+                  "labels": ["be nee"],
+                  "responseType": "text",
+                  "filesNotUploaded": []
+                },
+                "startTime": 1627757494246.0,
+                "endTime": 1627757613590.0,
+                "criteriaId": "5ffbfb6669a1847d4286dfc3",
+                "responseType": "text",
+                "evidenceMethod": "OB",
+                "rubricLevel": ""
+              },
+              "5ffbfb6669a1847d4286dfc2": {
+                "qid": "5ffbfb6669a1847d4286dfc2",
+                "value": "be. d",
+                "remarks": "",
+                "fileName": [],
+                "gpsLocation": "",
+                "payload": {
+                  "question": [
+                    "The first State to successfully leverage coherent access via Diksha and increase consumption is",
+                    ""
+                  ],
+                  "labels": ["be. d"],
+                  "responseType": "text",
+                  "filesNotUploaded": []
+                },
+                "startTime": 1627757494248.0,
+                "endTime": 1627757615763.0,
+                "criteriaId": "5ffbfb6669a1847d4286dfc3",
+                "responseType": "text",
+                "evidenceMethod": "OB",
+                "rubricLevel": ""
+              }
+            },
+            "startTime": 1627757492997.0,
+            "endTime": 1627757620226.0,
+            "gpsLocation": null,
+            "submittedBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+            "submittedByName": "Aishwarya rastogi ",
+            "submittedByEmail": "",
+            "submissionDate": "2021-07-31T18:53:40.749+0000",
+            "isValid": true
+          }
+        ],
+        "hasConflicts": false
+      }
+    },
+    "submissionNumber": 1,
+    "title": "Observation 1",
+    "updatedAt": "2021-07-31T18:53:40.763+0000",
+    "createdAt": "2021-01-27T07:50:11.837+0000",
+    "__v": 0,
+    "appInformation": {
+      "appName": "Sunbird"
+    },
+    "answers": {
+      "5ffbfb6669a1847d4286dfbe": {
+        "qid": "5ffbfb6669a1847d4286dfbe",
+        "value": "gavsnak",
+        "remarks": "",
+        "fileName": [
+          {
+            "name": "1627757523752.jpg",
+            "sourcePath": "survey/60111b332d0bbd2f0c3229cc/18155ae6-493d-4369-9668-165eb6dcaa2a/1bc5f055-97c7-43bb-8b95-9106be1cd113/1627757523752.jpg"
+          }
+        ],
+        "gpsLocation": "",
+        "payload": {
+          "question": [
+            "As per PM eVidya guidelines, what has been touted as “One Nation, One Digital Platform”?",
+            ""
+          ],
+          "labels": ["gavsnak"],
+          "responseType": "text",
+          "filesNotUploaded": []
+        },
+        "startTime": 1627757494237.0,
+        "endTime": 1627757513042.0,
+        "criteriaId": "5ffbfb6669a1847d4286dfc3",
+        "responseType": "text",
+        "evidenceMethod": "OB",
+        "rubricLevel": ""
+      },
+      "5ffbfb6669a1847d4286dfbf": {
+        "qid": "5ffbfb6669a1847d4286dfbf",
+        "value": "R3",
+        "remarks": "",
+        "fileName": [],
+        "gpsLocation": "",
+        "payload": {
+          "question": ["Coherent Access Means?", ""],
+          "labels": [
+            "Ensuring per schedule, content shown via synchronous channels is also made available via asynchronous channels"
+          ],
+          "responseType": "radio",
+          "filesNotUploaded": []
+        },
+        "startTime": 1627757494241.0,
+        "endTime": 1627757560361.0,
+        "criteriaId": "5ffbfb6669a1847d4286dfc3",
+        "responseType": "radio",
+        "evidenceMethod": "OB",
+        "rubricLevel": ""
+      },
+      "5ffbfb6669a1847d4286dfc0": {
+        "qid": "5ffbfb6669a1847d4286dfc0",
+        "value": "he nee",
+        "remarks": "",
+        "fileName": [],
+        "gpsLocation": "",
+        "payload": {
+          "question": ["QR code shown on TV is also present in", ""],
+          "labels": ["he nee"],
+          "responseType": "text",
+          "filesNotUploaded": []
+        },
+        "startTime": 1627757494245.0,
+        "endTime": 1627757609968.0,
+        "criteriaId": "5ffbfb6669a1847d4286dfc3",
+        "responseType": "text",
+        "evidenceMethod": "OB",
+        "rubricLevel": ""
+      },
+      "5ffbfb6669a1847d4286dfc1": {
+        "qid": "5ffbfb6669a1847d4286dfc1",
+        "value": "be nee",
+        "remarks": "",
+        "fileName": [],
+        "gpsLocation": "",
+        "payload": {
+          "question": [
+            "To accommodate TV content on Diksha, the file size limit has been increased to",
+            ""
+          ],
+          "labels": ["be nee"],
+          "responseType": "text",
+          "filesNotUploaded": []
+        },
+        "startTime": 1627757494246.0,
+        "endTime": 1627757613590.0,
+        "criteriaId": "5ffbfb6669a1847d4286dfc3",
+        "responseType": "text",
+        "evidenceMethod": "OB",
+        "rubricLevel": ""
+      },
+      "5ffbfb6669a1847d4286dfc2": {
+        "qid": "5ffbfb6669a1847d4286dfc2",
+        "value": "be. d",
+        "remarks": "",
+        "fileName": [],
+        "gpsLocation": "",
+        "payload": {
+          "question": [
+            "The first State to successfully leverage coherent access via Diksha and increase consumption is",
+            ""
+          ],
+          "labels": ["be. d"],
+          "responseType": "text",
+          "filesNotUploaded": []
+        },
+        "startTime": 1627757494248.0,
+        "endTime": 1627757615763.0,
+        "criteriaId": "5ffbfb6669a1847d4286dfc3",
+        "responseType": "text",
+        "evidenceMethod": "OB",
+        "rubricLevel": ""
+      }
+    },
+    "completedDate": "2021-07-31T18:53:40.759+0000",
+    "userProfile": {
+      "webPages": null,
+      "maskedPhone": "******8976",
+      "tcStatus": null,
+      "loginId": null,
+      "subject": null,
+      "channel": "dikshapreprodcustodian",
+      "profileUserTypes": [
+        {
+          "subType": "dyeo",
+          "type": "administrator"
+        }
+      ],
+      "language": null,
+      "updatedDate": "2021-07-25 14:18:37:565+0000",
+      "password": null,
+      "managedBy": null,
+      "flagsValue": 0,
+      "id": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "recoveryEmail": "",
+      "identifier": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "thumbnail": null,
+      "profileVisibility": null,
+      "updatedBy": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "accesscode": null,
+      "externalIds": [],
+      "registryId": null,
+      "roleList": [
+        {
+          "name": "Book Creator",
+          "id": "BOOK_CREATOR"
+        },
+        {
+          "name": "Membership Management",
+          "id": "MEMBERSHIP_MANAGEMENT"
+        },
+        {
+          "name": "Flag Reviewer",
+          "id": "FLAG_REVIEWER"
+        },
+        {
+          "name": "Report Viewer",
+          "id": "REPORT_VIEWER"
+        },
+        {
+          "name": "Program Manager",
+          "id": "PROGRAM_MANAGER"
+        },
+        {
+          "name": "Program Designer",
+          "id": "PROGRAM_DESIGNER"
+        },
+        {
+          "name": "System Administration",
+          "id": "SYSTEM_ADMINISTRATION"
+        },
+        {
+          "name": "Content Curation",
+          "id": "CONTENT_CURATION"
+        },
+        {
+          "name": "Book Reviewer",
+          "id": "BOOK_REVIEWER"
+        },
+        {
+          "name": "Content Creator",
+          "id": "CONTENT_CREATOR"
+        },
+        {
+          "name": "Org Management",
+          "id": "ORG_MANAGEMENT"
+        },
+        {
+          "name": "Course Admin",
+          "id": "COURSE_ADMIN"
+        },
+        {
+          "name": "Org Moderator",
+          "id": "ORG_MODERATOR"
+        },
+        {
+          "name": "Public",
+          "id": "PUBLIC"
+        },
+        {
+          "name": "Admin",
+          "id": "ADMIN"
+        },
+        {
+          "name": "Course Mentor",
+          "id": "COURSE_MENTOR"
+        },
+        {
+          "name": "Content Reviewer",
+          "id": "CONTENT_REVIEWER"
+        },
+        {
+          "name": "Report Admin",
+          "id": "REPORT_ADMIN"
+        },
+        {
+          "name": "Org Admin",
+          "id": "ORG_ADMIN"
+        }
+      ],
+      "rootOrgId": "0126796199493140480",
+      "prevUsedEmail": "",
+      "firstName": "Aishwarya rastogi",
+      "isMinor": false,
+      "tncAcceptedOn": 1611398597019.0,
+      "allTncAccepted": {},
+      "profileDetails": null,
+      "phone": "******8976",
+      "dob": "1991-12-31",
+      "grade": null,
+      "currentLoginTime": null,
+      "userType": "administrator",
+      "status": 1,
+      "lastName": "",
+      "tncLatestVersion": "v12",
+      "gender": null,
+      "prevUsedPhone": "",
+      "stateValidated": false,
+      "encEmail": null,
+      "isDeleted": false,
+      "organisations": [
+        {
+          "organisationId": "0126796199493140480",
+          "approvedBy": null,
+          "channel": "dikshapreprodcustodian",
+          "updatedDate": null,
+          "approvaldate": null,
+          "isSystemUpload": false,
+          "isDeleted": false,
+          "id": "01320057821583769611",
+          "isApproved": null,
+          "orgjoindate": "2021-01-23 10:43:08:915+0000",
+          "isSelfDeclaration": true,
+          "updatedBy": null,
+          "orgName": "Staging Custodian Organization",
+          "addedByName": null,
+          "addedBy": null,
+          "associationType": 2,
+          "locationIds": [
+            "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+            "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          ],
+          "orgLocation": [
+            {
+              "type": "state",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            },
+            {
+              "type": "district",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+            }
+          ],
+          "externalId": "101010",
+          "userId": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+          "isSchool": false,
+          "hashTagId": "0126796199493140480",
+          "isSSO": false,
+          "isRejected": null,
+          "locations": [
+            {
+              "code": "29",
+              "name": "Karnataka",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+              "type": "state",
+              "parentId": null
+            },
+            {
+              "code": "2901",
+              "name": "BELAGAVI",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141",
+              "type": "district",
+              "parentId": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            }
+          ],
+          "position": null,
+          "orgLeftDate": null
+        }
+      ],
+      "provider": null,
+      "countryCode": "+91",
+      "tncLatestVersionUrl": "https://sunbirdstagingpublic.blob.core.windows.net/termsandcondtions/terms-and-conditions-v12.html",
+      "maskedEmail": null,
+      "tempPassword": null,
+      "email": "",
+      "rootOrg": {
+        "dateTime": null,
+        "preferredLanguage": null,
+        "keys": {},
+        "organisationSubType": null,
+        "channel": "dikshapreprodcustodian",
+        "approvedBy": null,
+        "description": "Pre-prod Custodian Organization",
+        "updatedDate": "2022-02-18 09:50:42:752+0000",
+        "organisationType": 5,
+        "addressId": null,
+        "orgType": null,
+        "isTenant": true,
+        "provider": null,
+        "locationId": null,
+        "orgCode": null,
+        "theme": null,
+        "id": "0126796199493140480",
+        "communityId": null,
+        "isApproved": null,
+        "isBoard": true,
+        "email": null,
+        "slug": "dikshapreprodcustodian",
+        "isSSOEnabled": null,
+        "thumbnail": null,
+        "orgName": "Staging Custodian Organization",
+        "updatedBy": null,
+        "locationIds": [
+          "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+          "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+        ],
+        "externalId": "101010",
+        "orgLocation": [
+          {
+            "type": "state",
+            "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+          },
+          {
+            "type": "district",
+            "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          }
+        ],
+        "isRootOrg": true,
+        "rootOrgId": "0126796199493140480",
+        "imgUrl": null,
+        "approvedDate": null,
+        "homeUrl": null,
+        "orgTypeId": null,
+        "isDefault": null,
+        "createdDate": "2019-01-18 09:48:13:428+0000",
+        "createdBy": "system",
+        "parentOrgId": null,
+        "hashTagId": "0126796199493140480",
+        "noOfMembers": null,
+        "status": 1
+      },
+      "phoneVerified": true,
+      "profileSummary": null,
+      "tcUpdatedDate": null,
+      "userLocations": [
+        {
+          "code": "2822",
+          "name": "ANANTAPUR",
+          "id": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+          "type": "district",
+          "parentId": "bc75cc99-9205-463e-a722-5326857838f8"
+        },
+        {
+          "code": "282245",
+          "name": "AMADAGUR",
+          "id": "8df55ad6-7b21-41d0-a93a-efda45d34857",
+          "type": "block",
+          "parentId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03"
+        },
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state",
+          "parentId": null
+        }
+      ],
+      "recoveryPhone": "",
+      "avatar": null,
+      "userName": "aishwaryarastogi_e1jj",
+      "userId": "18155ae6-493d-4369-9668-165eb6dcaa2a",
+      "userSubType": "dyeo",
+      "declarations": [
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "0126796199493140480",
+          "status": null,
+          "info": {}
+        },
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "1269934121990553633",
+          "status": "SUBMITTED",
+          "info": {
+            "declared-phone": "8399908976",
+            "declared-school-name": "APMS AMADAGUR",
+            "declared-school-udise-code": "28224500619"
+          }
+        }
+      ],
+      "promptTnC": true,
+      "emailVerified": true,
+      "lastLoginTime": 0,
+      "createdDate": "2021-01-23 10:43:08:891+0000",
+      "framework": {
+        "board": ["State (Andhra Pradesh"],
+        "id": ["ap_k-12_1"]
+      },
+      "createdBy": null,
+      "profileUserType": {
+        "subType": "dyeo",
+        "type": "administrator"
+      },
+      "encPhone": "XhYSAcEKhcSqk+tB6VpFEjH7u2Zhert8qvBdibN8HBKqLDTDS4lK85+ktERL+whrjSfIQMm2FWHY\nfEE5wIOp8tbyGleYc1vfsMRN08fFmWnSuW/Nb7dLfqqoouulELgST6a+wzaAmCWueMEdPmZuRg==",
+      "location": null,
+      "tncAcceptedVersion": "3.5.0"
+    }
+  }
+]

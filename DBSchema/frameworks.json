@@ -1,0 +1,112 @@
+[
+  {
+    "_id": "5f34ade5ec065458d5c9d4ef",
+    "externalId": "cbd074fa-dd11-11ea-a3bf-000d3af02677",
+    "name": "MH01-Mantra4Change-APSWREIS School Leader Feedback",
+    "description": "Feedback on Mantra4Change engagement with APSWREIS school leaders",
+    "author": "19d81ef7-36ce-41fe-ae2d-c8365d977be4",
+    "parentId": null,
+    "resourceType": ["Observations Framework"],
+    "language": "English",
+    "keywords": ["Framework", "Observation"],
+    "concepts": [],
+    "createdFor": ["0123221617357783046602"],
+    "rootOrganisations": ["0123221617357783046602"],
+    "themes": [
+      {
+        "type": "theme",
+        "label": "theme",
+        "name": "Observation Theme",
+        "externalId": "OB",
+        "weightage": 100,
+        "criteria": [
+          {
+            "criteriaId": "5f34ade281871d939950bc9d",
+            "weightage": 33.333333333333336
+          },
+          {
+            "criteriaId": "5f34ade281871d939950bc9e",
+            "weightage": 33.333333333333336
+          },
+          {
+            "criteriaId": "5f34ade281871d939950bc9f",
+            "weightage": 33.333333333333336
+          }
+        ]
+      }
+    ],
+    "levelToScoreMapping": {
+      "L1": {
+        "points": 100,
+        "label": "Good"
+      }
+    },
+    "scoringSystem": null,
+    "noOfRatingLevels": 1,
+    "isRubricDriven": false,
+    "isDeleted": false,
+    "entityTypeId": "5f32d8228e0dc83124040567",
+    "entityType": "school",
+    "type": "observation",
+    "subType": "school",
+    "updatedBy": "INITIALIZE",
+    "createdBy": "INITIALIZE",
+    "createdAt": "2020-08-13T03:05:09.183+0000",
+    "updatedAt": "2020-08-13T03:05:09.183+0000"
+  },
+  {
+    "_id": "5f896b4a66586aa9739219bb",
+    "externalId": "111f599a-0f94-11eb-a3bf-000d3af02677",
+    "name": "MT Feedback",
+    "description": "MT Feedback",
+    "author": "1deba81d-3be0-4f9a-b2c7-e284ac75227f",
+    "parentId": null,
+    "resourceType": ["Observations Framework"],
+    "language": "English",
+    "keywords": ["Framework", "Observation", "Feedback"],
+    "concepts": [],
+    "createdFor": ["01259891801536921611"],
+    "rootOrganisations": ["01259891801536921611"],
+    "themes": [
+      {
+        "type": "theme",
+        "label": "theme",
+        "name": "Observation Theme",
+        "externalId": "OB",
+        "weightage": 100,
+        "criteria": [
+          {
+            "criteriaId": "5f896b478f56b6244eba8817",
+            "weightage": 33.333333333333336
+          },
+          {
+            "criteriaId": "5f896b478f56b6244eba8816",
+            "weightage": 33.333333333333336
+          },
+          {
+            "criteriaId": "5f896b478f56b6244eba8815",
+            "weightage": 33.333333333333336
+          }
+        ]
+      }
+    ],
+    "levelToScoreMapping": {
+      "L1": {
+        "points": 100,
+        "label": "Good"
+      }
+    },
+    "scoringSystem": "pointsBasedScoring",
+    "noOfRatingLevels": 1,
+    "isRubricDriven": true,
+    "isDeleted": false,
+    "entityTypeId": "5f32d8228e0dc8312404056e",
+    "entityType": "state",
+    "type": "observation",
+    "subType": "state",
+    "updatedBy": "INITIALIZE",
+    "createdBy": "INITIALIZE",
+    "createdAt": "2020-10-16T09:43:38.177+0000",
+    "updatedAt": "2020-10-16T09:43:38.177+0000"
+  }
+]

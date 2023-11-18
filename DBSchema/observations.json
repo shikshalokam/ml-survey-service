@@ -1,0 +1,671 @@
+[
+  {
+    "_id": "60110e692d0bbd2f0c3229c3",
+    "entities": [
+      "b54a5c6d-98be-4313-af1c-33040b1703aa",
+      "03f321d5-c398-4315-8d7c-58b92242d7ab",
+      "aecac7ab-15e4-45c9-ac7b-d716444cd652",
+      "a31156d9-2d3f-4eea-84ee-08a2a79cc3db",
+      "732b83e7-cf4f-401c-a374-db1d45644b3b",
+      "df1bdc4e-7352-4be2-8e81-f9eb9f252286"
+    ],
+    "createdFor": ["0126796199493140480"],
+    "rootOrganisations": ["0126796199493140480"],
+    "isAPrivateProgram": false,
+    "deleted": false,
+    "name": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+    "description": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+    "entityTypeId": "5f32d8228e0dc8312404056c",
+    "entityType": "district",
+    "programId": "600ab53cc7de076e6f993724",
+    "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+    "startDate": "2021-01-27T06:55:29.436+0000",
+    "endDate": "2022-01-27T06:55:29.436+0000",
+    "status": "published",
+    "solutionId": "600ac0d1c7de076e6f9943b9",
+    "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+    "frameworkId": "5f3b884eec065458d5c9d4fb",
+    "frameworkExternalId": "819e162a-e127-11ea-a3bf-000d3af02677",
+    "createdBy": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+    "updatedAt": "2021-01-27T06:55:37.071+0000",
+    "createdAt": "2021-01-27T06:55:37.071+0000",
+    "__v": 0,
+    "userRoleInformation": {
+      "district": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+      "block": "8df55ad6-7b21-41d0-a93a-efda45d34857",
+      "state": "bc75cc99-9205-463e-a722-5326857838f8",
+      "role": "DEO",
+      "roleId": "5f32d8238e0dc831240405a3"
+    },
+    "userProfile": {
+      "webPages": null,
+      "maskedPhone": null,
+      "tcStatus": null,
+      "loginId": null,
+      "subject": null,
+      "channel": "dikshapreprodcustodian",
+      "profileUserTypes": [
+        {
+          "subType": "apc",
+          "type": "administrator"
+        }
+      ],
+      "language": null,
+      "updatedDate": "2021-10-25 15:24:52:499+0000",
+      "password": null,
+      "managedBy": null,
+      "flagsValue": 0,
+      "id": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "recoveryEmail": "",
+      "identifier": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "thumbnail": null,
+      "profileVisibility": null,
+      "updatedBy": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "accesscode": null,
+      "externalIds": [],
+      "registryId": null,
+      "roleList": [
+        {
+          "name": "Book Creator",
+          "id": "BOOK_CREATOR"
+        },
+        {
+          "name": "Membership Management",
+          "id": "MEMBERSHIP_MANAGEMENT"
+        },
+        {
+          "name": "Flag Reviewer",
+          "id": "FLAG_REVIEWER"
+        },
+        {
+          "name": "Report Viewer",
+          "id": "REPORT_VIEWER"
+        },
+        {
+          "name": "Program Manager",
+          "id": "PROGRAM_MANAGER"
+        },
+        {
+          "name": "Program Designer",
+          "id": "PROGRAM_DESIGNER"
+        },
+        {
+          "name": "System Administration",
+          "id": "SYSTEM_ADMINISTRATION"
+        },
+        {
+          "name": "Content Curation",
+          "id": "CONTENT_CURATION"
+        },
+        {
+          "name": "Book Reviewer",
+          "id": "BOOK_REVIEWER"
+        },
+        {
+          "name": "Content Creator",
+          "id": "CONTENT_CREATOR"
+        },
+        {
+          "name": "Org Management",
+          "id": "ORG_MANAGEMENT"
+        },
+        {
+          "name": "Course Admin",
+          "id": "COURSE_ADMIN"
+        },
+        {
+          "name": "Org Moderator",
+          "id": "ORG_MODERATOR"
+        },
+        {
+          "name": "Public",
+          "id": "PUBLIC"
+        },
+        {
+          "name": "Admin",
+          "id": "ADMIN"
+        },
+        {
+          "name": "Course Mentor",
+          "id": "COURSE_MENTOR"
+        },
+        {
+          "name": "Content Reviewer",
+          "id": "CONTENT_REVIEWER"
+        },
+        {
+          "name": "Report Admin",
+          "id": "REPORT_ADMIN"
+        },
+        {
+          "name": "Org Admin",
+          "id": "ORG_ADMIN"
+        }
+      ],
+      "rootOrgId": "0126796199493140480",
+      "prevUsedEmail": "",
+      "firstName": "R Rejneesh Pillai",
+      "isMinor": false,
+      "tncAcceptedOn": 1608704263787.0,
+      "allTncAccepted": {
+        "groupsTnc": {
+          "tncAcceptedOn": "2021-03-08 06:31:42:389+0000",
+          "version": "3.5.0"
+        }
+      },
+      "profileDetails": null,
+      "phone": "",
+      "dob": "1993-12-31",
+      "grade": null,
+      "currentLoginTime": null,
+      "userType": "administrator",
+      "status": 1,
+      "lastName": "",
+      "tncLatestVersion": "v12",
+      "gender": null,
+      "prevUsedPhone": "",
+      "stateValidated": false,
+      "encEmail": "gy65BxfojsR9eCliLYU8Vd1i+Koygy4CKZa+FCcjQ8idb6/X/xFZWD6UfD8ZzeUn3Rk2lNAXdlkE\nJB/dGN3MGEf4xt2xThWwAflL6PXQW9yh/wlbUhhfKSiOxfiGACidxdJ1tntIv9nbm4GY/c4jSe0o\n8BES3tiLslrk/wGiil4=",
+      "isDeleted": false,
+      "organisations": [
+        {
+          "organisationId": "0126796199493140480",
+          "approvedBy": null,
+          "channel": "dikshapreprodcustodian",
+          "updatedDate": null,
+          "approvaldate": null,
+          "isSystemUpload": false,
+          "isDeleted": false,
+          "id": "01317850716629401611",
+          "isApproved": null,
+          "orgjoindate": "2020-12-23 06:16:58:210+0000",
+          "isSelfDeclaration": true,
+          "updatedBy": null,
+          "orgName": "Staging Custodian Organization",
+          "addedByName": null,
+          "addedBy": null,
+          "associationType": 2,
+          "locationIds": [
+            "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+            "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          ],
+          "orgLocation": [
+            {
+              "type": "state",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            },
+            {
+              "type": "district",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+            }
+          ],
+          "externalId": "101010",
+          "userId": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+          "isSchool": false,
+          "hashTagId": "0126796199493140480",
+          "isSSO": false,
+          "isRejected": null,
+          "locations": [
+            {
+              "code": "29",
+              "name": "Karnataka",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+              "type": "state",
+              "parentId": null
+            },
+            {
+              "code": "2901",
+              "name": "BELAGAVI",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141",
+              "type": "district",
+              "parentId": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            }
+          ],
+          "position": null,
+          "orgLeftDate": null
+        }
+      ],
+      "provider": null,
+      "countryCode": "+91",
+      "tncLatestVersionUrl": "https://sunbirdstagingpublic.blob.core.windows.net/termsandcondtions/terms-and-conditions-v12.html",
+      "maskedEmail": "pi************@gmail.com",
+      "tempPassword": null,
+      "email": "pi************@gmail.com",
+      "rootOrg": {
+        "dateTime": null,
+        "preferredLanguage": null,
+        "keys": {},
+        "organisationSubType": null,
+        "channel": "dikshapreprodcustodian",
+        "approvedBy": null,
+        "description": "Pre-prod Custodian Organization",
+        "updatedDate": "2022-02-18 09:50:42:752+0000",
+        "organisationType": 5,
+        "addressId": null,
+        "orgType": null,
+        "isTenant": true,
+        "provider": null,
+        "locationId": null,
+        "orgCode": null,
+        "theme": null,
+        "id": "0126796199493140480",
+        "communityId": null,
+        "isApproved": null,
+        "isBoard": true,
+        "email": null,
+        "slug": "dikshapreprodcustodian",
+        "isSSOEnabled": null,
+        "thumbnail": null,
+        "orgName": "Staging Custodian Organization",
+        "updatedBy": null,
+        "locationIds": [
+          "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+          "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+        ],
+        "externalId": "101010",
+        "orgLocation": [
+          {
+            "type": "state",
+            "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+          },
+          {
+            "type": "district",
+            "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          }
+        ],
+        "isRootOrg": true,
+        "rootOrgId": "0126796199493140480",
+        "imgUrl": null,
+        "approvedDate": null,
+        "homeUrl": null,
+        "orgTypeId": null,
+        "isDefault": null,
+        "createdDate": "2019-01-18 09:48:13:428+0000",
+        "createdBy": "system",
+        "parentOrgId": null,
+        "hashTagId": "0126796199493140480",
+        "noOfMembers": null,
+        "status": 1
+      },
+      "phoneVerified": true,
+      "profileSummary": null,
+      "tcUpdatedDate": null,
+      "userLocations": [
+        {
+          "code": "2822",
+          "name": "ANANTAPUR",
+          "id": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+          "type": "district",
+          "parentId": "bc75cc99-9205-463e-a722-5326857838f8"
+        },
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state",
+          "parentId": null
+        }
+      ],
+      "recoveryPhone": "",
+      "avatar": null,
+      "userName": "rrejneeshpillai_k3c5",
+      "userId": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "userSubType": "apc",
+      "declarations": [
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "0126796199493140480",
+          "status": null,
+          "info": {}
+        }
+      ],
+      "promptTnC": true,
+      "emailVerified": true,
+      "lastLoginTime": 0,
+      "createdDate": "2020-12-23 06:16:58:167+0000",
+      "framework": {
+        "board": ["CBSE"],
+        "id": ["ekstep_ncert_k-12"]
+      },
+      "createdBy": null,
+      "profileUserType": {
+        "subType": "apc",
+        "type": "administrator"
+      },
+      "encPhone": null,
+      "location": null,
+      "tncAcceptedVersion": "3.5.0"
+    }
+  },
+  {
+    "_id": "601130d32d0bbd2f0c3229d8",
+    "entities": ["2a128c91-a5a2-4e25-aa21-3d9196ad8203"],
+    "createdFor": ["0126796199493140480"],
+    "rootOrganisations": ["0126796199493140480"],
+    "isAPrivateProgram": false,
+    "deleted": false,
+    "name": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-HM",
+    "description": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-HM",
+    "status": "published",
+    "startDate": "2021-01-27T09:22:26.437+0000",
+    "endDate": "2022-01-27T09:22:26.437+0000",
+    "project": {
+      "_id": "601128e72d25b926974d9ecc",
+      "taskId": "eb6efc00-a645-4229-80b2-97d1a501d873"
+    },
+    "referenceFrom": "project",
+    "solutionId": "600b20877ea68a7ed927885f",
+    "solutionExternalId": "AP-TEST-PROGRAM-3.6.5-OBS-IMP-PROJECT-2-HM",
+    "programId": "600ab53cc7de076e6f993724",
+    "programExternalId": "AP-TEST-PROGRAM-3.6.5",
+    "frameworkId": "5f3b941a8b9b517aa1946d1c",
+    "frameworkExternalId": "89a5d1e4-e12e-11ea-a3bf-000d3af02677",
+    "entityTypeId": "5f32d8228e0dc83124040567",
+    "entityType": "school",
+    "createdBy": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+    "updatedAt": "2021-01-27T09:22:27.013+0000",
+    "createdAt": "2021-01-27T09:22:27.013+0000",
+    "__v": 0,
+    "userProfile": {
+      "webPages": null,
+      "maskedPhone": null,
+      "tcStatus": null,
+      "loginId": null,
+      "subject": null,
+      "channel": "dikshapreprodcustodian",
+      "profileUserTypes": [
+        {
+          "subType": "apc",
+          "type": "administrator"
+        }
+      ],
+      "language": null,
+      "updatedDate": "2021-10-25 15:24:52:499+0000",
+      "password": null,
+      "managedBy": null,
+      "flagsValue": 0,
+      "id": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "recoveryEmail": "",
+      "identifier": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "thumbnail": null,
+      "profileVisibility": null,
+      "updatedBy": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "accesscode": null,
+      "externalIds": [],
+      "registryId": null,
+      "roleList": [
+        {
+          "name": "Book Creator",
+          "id": "BOOK_CREATOR"
+        },
+        {
+          "name": "Membership Management",
+          "id": "MEMBERSHIP_MANAGEMENT"
+        },
+        {
+          "name": "Flag Reviewer",
+          "id": "FLAG_REVIEWER"
+        },
+        {
+          "name": "Report Viewer",
+          "id": "REPORT_VIEWER"
+        },
+        {
+          "name": "Program Manager",
+          "id": "PROGRAM_MANAGER"
+        },
+        {
+          "name": "Program Designer",
+          "id": "PROGRAM_DESIGNER"
+        },
+        {
+          "name": "System Administration",
+          "id": "SYSTEM_ADMINISTRATION"
+        },
+        {
+          "name": "Content Curation",
+          "id": "CONTENT_CURATION"
+        },
+        {
+          "name": "Book Reviewer",
+          "id": "BOOK_REVIEWER"
+        },
+        {
+          "name": "Content Creator",
+          "id": "CONTENT_CREATOR"
+        },
+        {
+          "name": "Org Management",
+          "id": "ORG_MANAGEMENT"
+        },
+        {
+          "name": "Course Admin",
+          "id": "COURSE_ADMIN"
+        },
+        {
+          "name": "Org Moderator",
+          "id": "ORG_MODERATOR"
+        },
+        {
+          "name": "Public",
+          "id": "PUBLIC"
+        },
+        {
+          "name": "Admin",
+          "id": "ADMIN"
+        },
+        {
+          "name": "Course Mentor",
+          "id": "COURSE_MENTOR"
+        },
+        {
+          "name": "Content Reviewer",
+          "id": "CONTENT_REVIEWER"
+        },
+        {
+          "name": "Report Admin",
+          "id": "REPORT_ADMIN"
+        },
+        {
+          "name": "Org Admin",
+          "id": "ORG_ADMIN"
+        }
+      ],
+      "rootOrgId": "0126796199493140480",
+      "prevUsedEmail": "",
+      "firstName": "R Rejneesh Pillai",
+      "isMinor": false,
+      "tncAcceptedOn": 1608704263787.0,
+      "allTncAccepted": {
+        "groupsTnc": {
+          "tncAcceptedOn": "2021-03-08 06:31:42:389+0000",
+          "version": "3.5.0"
+        }
+      },
+      "profileDetails": null,
+      "phone": "",
+      "dob": "1993-12-31",
+      "grade": null,
+      "currentLoginTime": null,
+      "userType": "administrator",
+      "status": 1,
+      "lastName": "",
+      "tncLatestVersion": "v12",
+      "gender": null,
+      "prevUsedPhone": "",
+      "stateValidated": false,
+      "encEmail": "gy65BxfojsR9eCliLYU8Vd1i+Koygy4CKZa+FCcjQ8idb6/X/xFZWD6UfD8ZzeUn3Rk2lNAXdlkE\nJB/dGN3MGEf4xt2xThWwAflL6PXQW9yh/wlbUhhfKSiOxfiGACidxdJ1tntIv9nbm4GY/c4jSe0o\n8BES3tiLslrk/wGiil4=",
+      "isDeleted": false,
+      "organisations": [
+        {
+          "organisationId": "0126796199493140480",
+          "approvedBy": null,
+          "channel": "dikshapreprodcustodian",
+          "updatedDate": null,
+          "approvaldate": null,
+          "isSystemUpload": false,
+          "isDeleted": false,
+          "id": "01317850716629401611",
+          "isApproved": null,
+          "orgjoindate": "2020-12-23 06:16:58:210+0000",
+          "isSelfDeclaration": true,
+          "updatedBy": null,
+          "orgName": "Staging Custodian Organization",
+          "addedByName": null,
+          "addedBy": null,
+          "associationType": 2,
+          "locationIds": [
+            "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+            "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          ],
+          "orgLocation": [
+            {
+              "type": "state",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            },
+            {
+              "type": "district",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+            }
+          ],
+          "externalId": "101010",
+          "userId": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+          "isSchool": false,
+          "hashTagId": "0126796199493140480",
+          "isSSO": false,
+          "isRejected": null,
+          "locations": [
+            {
+              "code": "29",
+              "name": "Karnataka",
+              "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+              "type": "state",
+              "parentId": null
+            },
+            {
+              "code": "2901",
+              "name": "BELAGAVI",
+              "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141",
+              "type": "district",
+              "parentId": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+            }
+          ],
+          "position": null,
+          "orgLeftDate": null
+        }
+      ],
+      "provider": null,
+      "countryCode": "+91",
+      "tncLatestVersionUrl": "https://sunbirdstagingpublic.blob.core.windows.net/termsandcondtions/terms-and-conditions-v12.html",
+      "maskedEmail": "pi************@gmail.com",
+      "tempPassword": null,
+      "email": "pi************@gmail.com",
+      "rootOrg": {
+        "dateTime": null,
+        "preferredLanguage": null,
+        "keys": {},
+        "organisationSubType": null,
+        "channel": "dikshapreprodcustodian",
+        "approvedBy": null,
+        "description": "Pre-prod Custodian Organization",
+        "updatedDate": "2022-02-18 09:50:42:752+0000",
+        "organisationType": 5,
+        "addressId": null,
+        "orgType": null,
+        "isTenant": true,
+        "provider": null,
+        "locationId": null,
+        "orgCode": null,
+        "theme": null,
+        "id": "0126796199493140480",
+        "communityId": null,
+        "isApproved": null,
+        "isBoard": true,
+        "email": null,
+        "slug": "dikshapreprodcustodian",
+        "isSSOEnabled": null,
+        "thumbnail": null,
+        "orgName": "Staging Custodian Organization",
+        "updatedBy": null,
+        "locationIds": [
+          "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf",
+          "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+        ],
+        "externalId": "101010",
+        "orgLocation": [
+          {
+            "type": "state",
+            "id": "027f81d8-0a2c-4fc6-96ac-59fe4cea3abf"
+          },
+          {
+            "type": "district",
+            "id": "8250d58d-f1a2-4397-bfd3-b2e688ba7141"
+          }
+        ],
+        "isRootOrg": true,
+        "rootOrgId": "0126796199493140480",
+        "imgUrl": null,
+        "approvedDate": null,
+        "homeUrl": null,
+        "orgTypeId": null,
+        "isDefault": null,
+        "createdDate": "2019-01-18 09:48:13:428+0000",
+        "createdBy": "system",
+        "parentOrgId": null,
+        "hashTagId": "0126796199493140480",
+        "noOfMembers": null,
+        "status": 1
+      },
+      "phoneVerified": true,
+      "profileSummary": null,
+      "tcUpdatedDate": null,
+      "userLocations": [
+        {
+          "code": "2822",
+          "name": "ANANTAPUR",
+          "id": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+          "type": "district",
+          "parentId": "bc75cc99-9205-463e-a722-5326857838f8"
+        },
+        {
+          "code": "28",
+          "name": "Andhra Pradesh",
+          "id": "bc75cc99-9205-463e-a722-5326857838f8",
+          "type": "state",
+          "parentId": null
+        }
+      ],
+      "recoveryPhone": "",
+      "avatar": null,
+      "userName": "rrejneeshpillai_k3c5",
+      "userId": "5deed393-6e04-449a-b98d-7f0fbf88f22e",
+      "userSubType": "apc",
+      "declarations": [
+        {
+          "persona": "default",
+          "errorType": null,
+          "orgId": "0126796199493140480",
+          "status": null,
+          "info": {}
+        }
+      ],
+      "promptTnC": true,
+      "emailVerified": true,
+      "lastLoginTime": 0,
+      "createdDate": "2020-12-23 06:16:58:167+0000",
+      "framework": {
+        "board": ["CBSE"],
+        "id": ["ekstep_ncert_k-12"]
+      },
+      "createdBy": null,
+      "profileUserType": {
+        "subType": "apc",
+        "type": "administrator"
+      },
+      "encPhone": null,
+      "location": null,
+      "tncAcceptedVersion": "3.5.0"
+    }
+  }
+]

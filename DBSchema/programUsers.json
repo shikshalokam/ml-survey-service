@@ -1,0 +1,16 @@
+{
+    "_id": "645358eb6144f31d8e8fcef4",
+    "programId": "5f75b90454670074deacf087",
+    "userId": "f5591238-63c8-4716-a1c9-27c18a32a4d4",
+    "__v": 0,
+    "createdAt": "2023-05-04T07:04:11.874Z",
+    "resourcesStarted": false,
+    "updatedAt": "2023-05-04T07:04:11.874Z",
+    "userProfile": null,
+    "userRoleInformation": {
+        "role": "HM",
+        "state": "db331a8c-b9e2-45f8-b3c0-7ec1e826b6df",
+        "district": "1dcbc362-ec4c-4559-9081-e0c2864c2931",
+        "school": "c5726207-4f9f-4f45-91f1-3e9e8e84d824"
+    }
+}
