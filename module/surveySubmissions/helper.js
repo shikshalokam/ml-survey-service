@@ -87,6 +87,34 @@ module.exports = class SurveySubmissionsHelper {
 
 
     /**
+     * Update survey Submission
+     * @method
+     * @name updateMany
+     * @param {Object} query 
+     * @param {Object} update 
+     * @param {Object} options 
+     * @returns {JSON} - update observations.
+    */
+  
+    static updateMany(query, update, options={}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+            
+                let surveySubmissionUpdate = await database.models.surveySubmissions.updateMany(
+                    query, 
+                    update,
+                    options
+                );
+                if( surveySubmissionUpdate) {
+                    return resolve(surveySubmissionUpdate);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
+
+    /**
    * Push completed survey submission in kafka for reporting.
    * @method
    * @name pushCompletedSurveySubmissionForReporting
@@ -815,32 +843,4 @@ module.exports = class SurveySubmissionsHelper {
             }
         })
     }
-
-     /**
-   * create or update bulk survey submission documents
-   * @method
-   * @name bulkUpdateSurveySubmissions
-   * @param {Object} {updateObject} - Update or creact Object with data.
-   * @returns {Object} status of data. 
-   */
-  
-   static bulkUpdateSurveySubmissions(updateObject) {
-    return new Promise(async (resolve, reject) => {
-        try {
-    
-            let updateSurveySubmissions = await database.models.surveySubmissions.bulkWrite(
-              updateObject
-            );
-            return resolve(updateSurveySubmissions);
-            
-        } catch (error) {
-            return resolve({
-                success: false,
-                message: error.message,
-                data: false
-            })
-        }
-    });
- }
-
 }

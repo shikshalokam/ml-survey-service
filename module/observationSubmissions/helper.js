@@ -91,6 +91,33 @@ module.exports = class ObservationSubmissionsHelper {
     });
 }
 
+  /**
+     * Update observations submission
+     * @method
+     * @name updateMany
+     * @param {Object} query 
+     * @param {Object} update 
+     * @param {Object} options 
+     * @returns {JSON} - update observations submission.
+    */
+  
+    static updateMany(query, update, options={}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+            
+                let observationSubmissionUpdate = await database.models.observationSubmissions.updateMany(
+                    query, 
+                    update,
+                    options
+                );
+                if( observationSubmissionUpdate) {
+                    return resolve(observationSubmissionUpdate);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
     /**
    * Push observation submission in kafka for reporting.
    * @method
@@ -1315,32 +1342,6 @@ module.exports = class ObservationSubmissionsHelper {
     }
 
 
-    /**
-   * create or update bulk observation submissions documents
-   * @method
-   * @name updateBulkObservationSubmissions
-   * @param {Object} {updateObject} - Update or creact Object with data.
-   * @returns {Object} status of data. 
-   */
-  
-    static updateBulkObservationSubmissions(updateObject) {
-        return new Promise(async (resolve, reject) => {
-            try {
-        
-                let observationSubmissionData = await database.models.observationSubmissions.bulkWrite(
-                updateObject
-                );
-                return resolve(observationSubmissionData);
-                
-            } catch (error) {
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data: false
-                })
-            }
-        });
-    }
 };
 
 

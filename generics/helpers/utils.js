@@ -1,7 +1,6 @@
-const uuid = require("uuid/v4");
+const uuid = require('uuid/v4');
 const md5 = require("md5");
 const packageData = require(ROOT_PATH + "/package.json");
-
 function camelCaseToTitleCase(in_camelCaseString) {
   var result = in_camelCaseString // "ToGetYourGEDInTimeASongAboutThe26ABCsIsOfTheEssenceButAPersonalIDCardForUser456InRoom26AContainingABC26TimesIsNotAsEasyAs123ForC3POOrR2D2Or2R2D"
     .replace(/([a-z])([A-Z][a-z])/g, "$1 $2") // "To Get YourGEDIn TimeASong About The26ABCs IsOf The Essence ButAPersonalIDCard For User456In Room26AContainingABC26Times IsNot AsEasy As123ForC3POOrR2D2Or2R2D"
@@ -24,26 +23,22 @@ function camelCaseToTitleCase(in_camelCaseString) {
 }
 
 function lowerCase(str) {
-  return str.toLowerCase();
+  return str.toLowerCase()
 }
 
 function checkIfStringIsUrl(str) {
-  var pattern = new RegExp(
-    "^(https?:\\/\\/)?" + // protocol
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|" + // domain name
-      "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-      "(\\#[-a-z\\d_]*)?$",
-    "i"
-  ); // fragment locator
+  var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
   return pattern.test(str);
 }
 
 function generateRandomCharacters(numberOfChar) {
   var text = "";
-  var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz123456789!@#%&*";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz123456789!@#%&*";
   for (var i = 0; i < numberOfChar; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
 
@@ -52,79 +47,83 @@ function generateRandomCharacters(numberOfChar) {
 
 function getCriteriaIds(themes) {
   let allCriteriaIds = [];
-  themes.forEach((theme) => {
+  themes.forEach(theme => {
     let criteriaIdArray = [];
     if (theme.children) {
       criteriaIdArray = this.getCriteriaIds(theme.children);
     } else {
       criteriaIdArray = theme.criteria;
     }
-    criteriaIdArray.forEach((eachCriteria) => {
+    criteriaIdArray.forEach(eachCriteria => {
       if (eachCriteria.criteriaId) {
         allCriteriaIds.push(eachCriteria.criteriaId);
       } else {
         allCriteriaIds.push(eachCriteria);
       }
-    });
-  });
+    })
+  })
   return allCriteriaIds;
 }
 
 function getCriteriaIdsAndWeightage(themes) {
   let allCriteriaIds = [];
-  themes.forEach((theme) => {
+  themes.forEach(theme => {
     let criteriaIdArray = [];
     if (theme.children) {
       criteriaIdArray = this.getCriteriaIdsAndWeightage(theme.children);
     } else {
       criteriaIdArray = theme.criteria;
     }
-    criteriaIdArray.forEach((eachCriteria) => {
+    criteriaIdArray.forEach(eachCriteria => {
       allCriteriaIds.push({
         criteriaId: eachCriteria.criteriaId,
-        weightage: eachCriteria.weightage,
+        weightage: eachCriteria.weightage
       });
-    });
-  });
+    })
+  })
   return allCriteriaIds;
 }
 
 function getUserRole(userDetails, caseSensitive = false) {
   if (userDetails && userDetails.allRoles.length) {
-    _.pull(userDetails.allRoles, "PUBLIC");
+    _.pull(userDetails.allRoles, 'PUBLIC');
     let role = userDetails.allRoles[0];
     if (caseSensitive == true) {
-      return mapUserRole(role);
+      return mapUserRole(role)
     }
     return role;
   } else {
-    return;
+    return
   }
 }
 
 function getReadableUserRole(userDetails) {
   if (userDetails && userDetails.allRoles.length) {
-    _.pull(userDetails.allRoles, "PUBLIC");
+
+    _.pull(userDetails.allRoles, 'PUBLIC');
 
     let readableRoles = {
       ASSESSOR: "Assessors",
       LEAD_ASSESSOR: "Lead Assessors",
       PROJECT_MANAGER: "Project Managers",
-      PROGRAM_MANAGER: "Program Managers",
-    };
+      PROGRAM_MANAGER: "Program Managers"
+    }
 
     return readableRoles[userDetails.allRoles[0]] || "";
   } else {
-    return;
+    return
   }
 }
 
 function fetchAssessorsLeadAssessorRole() {
-  return ["LEAD_ASSESSOR", "ASSESSOR"];
+  return [
+      "LEAD_ASSESSOR",
+      "ASSESSOR"
+  ]
 }
 
 function mapUserRole(role) {
-  let allRoles = assessmentRoles();
+  let allRoles = assessmentRoles()
   return allRoles[role];
 }
 
@@ -133,69 +132,68 @@ function assessmentRoles() {
     ASSESSOR: "assessors",
     LEAD_ASSESSOR: "leadAssessors",
     PROJECT_MANAGER: "projectManagers",
-    PROGRAM_MANAGER: "programManagers",
-  };
+    PROGRAM_MANAGER: "programManagers"
+  }
   return allRoles;
 }
 
 function getAllQuestionId(criteria) {
   let questionIds = [];
-  criteria.forEach((eachCriteria) => {
-    eachCriteria.evidences.forEach((eachEvidence) => {
-      eachEvidence.sections.forEach((eachSection) => {
-        eachSection.questions.forEach((eachQuestion) => {
-          questionIds.push(eachQuestion);
-        });
-      });
-    });
-  });
-  return questionIds;
+  criteria.forEach(eachCriteria => {
+    eachCriteria.evidences.forEach(eachEvidence => {
+      eachEvidence.sections.forEach(eachSection => {
+        eachSection.questions.forEach(eachQuestion => {
+          questionIds.push(eachQuestion)
+        })
+      })
+    })
+  })
+  return questionIds
 }
 
 function valueParser(dataToBeParsed) {
-  let parsedData = {};
 
-  Object.keys(dataToBeParsed).forEach((eachDataToBeParsed) => {
-    parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim();
-  });
+  let parsedData = {}
 
-  if (
-    parsedData._arrayFields &&
-    parsedData._arrayFields.split(",").length > 0
-  ) {
-    parsedData._arrayFields.split(",").forEach((arrayTypeField) => {
+  Object.keys(dataToBeParsed).forEach(eachDataToBeParsed => {
+    parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
+  })
+
+  if(parsedData._arrayFields && parsedData._arrayFields.split(",").length > 0) {
+    parsedData._arrayFields.split(",").forEach(arrayTypeField => {
       if (parsedData[arrayTypeField]) {
-        parsedData[arrayTypeField] = parsedData[arrayTypeField].split(",");
+        parsedData[arrayTypeField] = parsedData[arrayTypeField].split(",")
       }
-    });
+    })
   }
 
-  return parsedData;
+  return parsedData
 }
 
 function arrayIdsTobjectIds(ids) {
-  return ids.map((id) => ObjectId(id));
+  return ids.map(id => ObjectId(id));
 }
 
-function checkIfEnvDataExistsOrNot(data) {
+function checkIfEnvDataExistsOrNot(data){
+  
   let value;
 
-  if (process.env[data] && process.env[data] !== "") {
-    value = process.env[data];
+  if(process.env[data] && process.env[data] !== ""){
+    value  = process.env[data];
   } else {
-    let defaultEnv = "DEFAULT_" + data;
+    let defaultEnv = "DEFAULT_"+data;
     value = process.env[defaultEnv];
   }
 
   return value;
 }
 
-/**
- * Get epoch time from current date.
- * @function
- * @name epochTime
- * @returns {Date} returns epoch time.
- */
+ /**
+  * Get epoch time from current date.
+  * @function
+  * @name epochTime
+  * @returns {Date} returns epoch time.  
+*/
 
 function epochTime() {
   var currentDate = new Date();
@@ -203,170 +201,188 @@ function epochTime() {
   return currentDate;
 }
 
-/**
- * check whether id is mongodbId or not.
- * @function
- * @name isValidMongoId
- * @param {String} id
- * @returns {Boolean} returns whether id is valid mongodb id or not.
- */
+ /**
+  * check whether id is mongodbId or not.
+  * @function
+  * @name isValidMongoId
+  * @param {String} id 
+  * @returns {Boolean} returns whether id is valid mongodb id or not.  
+*/
 
 function isValidMongoId(id) {
   return ObjectId.isValid(id) && new ObjectId(id).toString() === id;
 }
 
 /**
- * generate uuid
- * @function
- * @name generateUUId
- * @returns {String} returns uuid.
- */
+  * generate uuid
+  * @function
+  * @name generateUUId
+  * @returns {String} returns uuid.  
+*/
 
 function generateUUId() {
   return uuid();
 }
 
 /**
- * md5 hash
- * @function
- * @name md5Hash
- * @returns {String} returns uuid.
- */
+  * md5 hash
+  * @function
+  * @name md5Hash
+  * @returns {String} returns uuid.  
+*/
 
 function md5Hash(value) {
   return md5(value);
 }
 
 /**
- * Remove duplicates from array
- * @function
- * @name removeDuplicatesFromArray
- * @returns {Array}  returns unique data in array.
- */
+  * Remove duplicates from array
+  * @function
+  * @name removeDuplicatesFromArray
+  * @returns {Array}  returns unique data in array.  
+*/
 
 function removeDuplicatesFromArray(data, key) {
   let uniqueArray = [];
   let newMap = new Map();
-
+ 
   uniqueArray = data.filter((singleData) => {
-    const element = newMap.get(singleData[key].toString());
-    if (!element) {
-      newMap.set(singleData[key].toString(), singleData);
-      return true;
-    } else {
+  const element = newMap.get(singleData[key].toString());
+  if (!element) {
+    newMap.set(singleData[key].toString(), singleData);
+    return true;
+  } else {
       return false;
     }
   });
-
+ 
   return uniqueArray;
 }
 
 function convertStringToBoolean(stringData) {
-  let stringToBoolean = stringData === "TRUE" || stringData === "true";
+  let stringToBoolean = (stringData === "TRUE" || stringData === "true");
   return stringToBoolean;
 }
 /**
- * check the uuid is valid
- * @function
- * @name checkIfValidUUID
- * @returns {String} returns boolean.
- */
+  * check the uuid is valid
+  * @function
+  * @name checkIfValidUUID
+  * @returns {String} returns boolean.  
+*/
 
 function checkIfValidUUID(value) {
-  const regexExp =
-    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+  const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
   return regexExp.test(value);
 }
 
 /**
- * filter out location id and code
- * @function
- * @name filterLocationIdandCode
- * @returns {Object} - Object contain locationid and location code array.
- */
+  * filter out location id and code
+  * @function
+  * @name filterLocationIdandCode
+  * @returns {Object} - Object contain locationid and location code array.  
+*/
 
 function filterLocationIdandCode(dataArray) {
-  let locationIds = [];
-  let locationCodes = [];
-  dataArray.forEach((element) => {
-    if (this.checkIfValidUUID(element)) {
-      locationIds.push(element);
-    } else {
-      locationCodes.push(element);
-    }
-  });
-  return {
-    ids: locationIds,
-    codes: locationCodes,
-  };
+    let locationIds = [];
+    let locationCodes = [];
+    dataArray.forEach(element=>{
+        if (this.checkIfValidUUID(element)) {
+            locationIds.push(element);
+        } else {
+            locationCodes.push(element);
+        }
+    });
+    return ({
+      ids : locationIds,
+      codes : locationCodes
+    });
 }
 
 /**
- * check whether string contains only number
- * @function
- * @name checkIfStringIsNumber
- * @returns {Boolean} returns a Boolean value true/false
- */
+  * check whether string contains only number
+  * @function
+  * @name checkIfStringIsNumber
+  * @returns {Boolean} returns a Boolean value true/false
+*/
 
 function checkIfStringIsNumber(str) {
   return /^[0-9]+$/.test(str);
 }
 
-/**
- * generate Telemetry Event
- * @function
- * @name getTelemetryEvent
- * @returns {Object} returns telemetry event object
- */
 
-function getTelemetryEvent() {
-  let telemetryEvent = {
+/**
+ * generate skeleton telemetry raw event
+ * @function
+ * @name generateTelemetryEventSkeletonStructure
+ * @returns {Object} returns uuid.
+ */
+ function generateTelemetryEventSkeletonStructure() {
+  let telemetrySkeleton = {
     eid: "",
     ets: epochTime(),
-    ver: "3.0",
+    ver: messageConstants.common.TELEMETRY_VERSION,
     mid: generateUUId(),
     actor: {},
     context: {
       channel: "",
       pdata: {
         id: process.env.ID,
-        pid: "manage-learn",
         ver: packageData.version,
       },
       env: "",
-      cdata: [{ id: generateUUId(), type: "Request" }],
+      cdata: [],
       rollup: {},
     },
     object: {},
     edata: {},
   };
+  return telemetrySkeleton;
+}
+
+/**
+ * generate telemetry vent
+ * @function
+ * @name generateTelemetryEvent
+ * @returns {Object} returns uuid.
+ */
+ function generateTelemetryEvent(rawEvent) {
+  let telemetryEvent = {
+    timestamp: new Date(),
+    msg: JSON.stringify(rawEvent),
+    lname: "",
+    tname: "",
+    level: "",
+    HOSTNAME: "",
+    "application.home": "",
+  };
   return telemetryEvent;
 }
 
 module.exports = {
-  camelCaseToTitleCase: camelCaseToTitleCase,
-  lowerCase: lowerCase,
-  checkIfStringIsUrl: checkIfStringIsUrl,
-  generateRandomCharacters: generateRandomCharacters,
-  getCriteriaIds: getCriteriaIds,
-  getUserRole: getUserRole,
-  getReadableUserRole: getReadableUserRole,
-  mapUserRole: mapUserRole,
-  valueParser: valueParser,
-  getAllQuestionId: getAllQuestionId,
-  getCriteriaIdsAndWeightage: getCriteriaIdsAndWeightage,
-  assessmentRoles: assessmentRoles,
-  arrayIdsTobjectIds: arrayIdsTobjectIds,
-  checkIfEnvDataExistsOrNot: checkIfEnvDataExistsOrNot,
-  fetchAssessorsLeadAssessorRole: fetchAssessorsLeadAssessorRole,
-  epochTime: epochTime,
-  isValidMongoId: isValidMongoId,
-  generateUUId: generateUUId,
-  md5Hash: md5Hash,
-  removeDuplicatesFromArray: removeDuplicatesFromArray,
-  convertStringToBoolean: convertStringToBoolean,
-  checkIfValidUUID: checkIfValidUUID,
-  filterLocationIdandCode: filterLocationIdandCode,
-  checkIfStringIsNumber: checkIfStringIsNumber,
-  getTelemetryEvent: getTelemetryEvent,
+  camelCaseToTitleCase : camelCaseToTitleCase,
+  lowerCase : lowerCase,
+  checkIfStringIsUrl : checkIfStringIsUrl,
+  generateRandomCharacters : generateRandomCharacters,
+  getCriteriaIds : getCriteriaIds,
+  getUserRole : getUserRole,
+  getReadableUserRole : getReadableUserRole,
+  mapUserRole : mapUserRole,
+  valueParser : valueParser,
+  getAllQuestionId : getAllQuestionId,
+  getCriteriaIdsAndWeightage : getCriteriaIdsAndWeightage,
+  assessmentRoles : assessmentRoles,
+  arrayIdsTobjectIds : arrayIdsTobjectIds,
+  checkIfEnvDataExistsOrNot : checkIfEnvDataExistsOrNot,
+  fetchAssessorsLeadAssessorRole : fetchAssessorsLeadAssessorRole,
+  epochTime : epochTime,
+  isValidMongoId : isValidMongoId,
+  generateUUId : generateUUId,
+  md5Hash : md5Hash,
+  removeDuplicatesFromArray : removeDuplicatesFromArray,
+  convertStringToBoolean : convertStringToBoolean,
+  checkIfValidUUID : checkIfValidUUID,
+  filterLocationIdandCode :filterLocationIdandCode,
+  checkIfStringIsNumber : checkIfStringIsNumber,
+  generateTelemetryEventSkeletonStructure : generateTelemetryEventSkeletonStructure,
+  generateTelemetryEvent : generateTelemetryEvent
 };
