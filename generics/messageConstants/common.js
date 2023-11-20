@@ -62,5 +62,16 @@ module.exports = {
     CACHE_TTL : 43200 ,
     GET_METHOD : "GET",
     SUBENTITY :"subEntityTypesOf_",
-    STATE: "state"
+    STATE: "state",
+    TELEMETRY_VERSION: "3.0",
+    DELETED_USER: "Deleted User",
+    TELEMTRY_EVENT_LOGGER: "TelemetryEventLogger",
+    INFO_LEVEL: "INFO",
+    DELETE_STATE: "Delete",
+    USER_DELETE_TYPE: "DeleteUserStatus",
+    AUDIT: "AUDIT",
+    DELETE_USER: "delete-user",
+    USER: "User",
+    USER_DELETE_MODULE: "userDelete",
+    OFF: "OFF"
 }

@@ -7,7 +7,7 @@ const completedSurveySubmissionKafkaTopic = (process.env.COMPLETED_SURVEY_SUBMIS
 const inCompleteSurveySubmissionKafkaTopic = (process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC && process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC != "OFF") ? process.env.INCOMPLETE_SURVEY_SUBMISSION_TOPIC : "sl_incomplete_surveys_raw"
 const improvementProjectSubmissionTopic = (process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC && process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC != "OFF") ? process.env.IMPROVEMENT_PROJECT_SUBMISSION_TOPIC : "sl-improvement-project-submission-dev";
 const observationSubmissionKafkaTopic = (process.env.OBSERVATION_SUBMISSION_TOPIC && process.env.OBSERVATION_SUBMISSION_TOPIC != "OFF") ? process.env.OBSERVATION_SUBMISSION_TOPIC : "sl-observations-dev"
-
+const telemetryEventTopic = process.env.TELEMETRY_TOPIC ? process.env.TELEMETRY_TOPIC : "dev.telemetry.raw";
 
 const pushObservationSubmissionToKafka = function (message) {
   return new Promise(async (resolve, reject) => {
@@ -28,6 +28,23 @@ const pushObservationSubmissionToKafka = function (message) {
       }
   })
 }
+
+const pushTelemetryEventToKafka = function (message) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let kafkaPushStatus = await pushMessageToKafka([
+        {
+          topic: telemetryEventTopic,
+          messages: JSON.stringify(message),
+        },
+      ]);
+
+      return resolve(kafkaPushStatus);
+    } catch (error) {
+      return reject(error);
+    }
+  });
+};
 
 const pushCompletedSubmissionToKafka = function (message) {
   return new Promise(async (resolve, reject) => {
@@ -212,6 +229,7 @@ module.exports = {
   pushCompletedSurveySubmissionToKafka : pushCompletedSurveySubmissionToKafka,
   pushInCompleteSurveySubmissionToKafka : pushInCompleteSurveySubmissionToKafka,
   pushSubmissionToImprovementService : pushSubmissionToImprovementService,
-  pushObservationSubmissionToKafka: pushObservationSubmissionToKafka
+  pushObservationSubmissionToKafka: pushObservationSubmissionToKafka,
+  pushTelemetryEventToKafka : pushTelemetryEventToKafka
 };
 

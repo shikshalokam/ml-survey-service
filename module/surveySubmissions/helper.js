@@ -87,6 +87,34 @@ module.exports = class SurveySubmissionsHelper {
 
 
     /**
+     * Update survey Submission
+     * @method
+     * @name updateMany
+     * @param {Object} query 
+     * @param {Object} update 
+     * @param {Object} options 
+     * @returns {JSON} - update observations.
+    */
+  
+    static updateMany(query, update, options={}) {
+        return new Promise(async (resolve, reject) => {
+            try {
+            
+                let surveySubmissionUpdate = await database.models.surveySubmissions.updateMany(
+                    query, 
+                    update,
+                    options
+                );
+                if( surveySubmissionUpdate) {
+                    return resolve(surveySubmissionUpdate);
+                }
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
+
+    /**
    * Push completed survey submission in kafka for reporting.
    * @method
    * @name pushCompletedSurveySubmissionForReporting
