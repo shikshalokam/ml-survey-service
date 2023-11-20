@@ -111,7 +111,7 @@ module.exports = class UserHelper {
                     observationsHelper.updateMany(filter,updateObject),
                     observationSubmissionsHelper.updateMany(filter,updateObject)
                 ])
-                if(updateDataStatus){
+                if(updateDataStatus && (updateDataStatus[0].nModified > 0 || updateDataStatus[0].nModified > 0 || updateDataStatus[0].nModified > 0 )){
                     if(telemetryEventOnOff !== messageConstants.common.OFF){
                         /**
                          * Telemetry Raw Event
@@ -139,6 +139,10 @@ module.exports = class UserHelper {
 
                         await kafkaClient.pushTelemetryEventToKafka(telemetryEvent)
                     }
+                    return resolve({
+                        success: true,
+                    });
+                } else {
                     return resolve({
                         success: true,
                     });
