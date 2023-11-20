@@ -111,7 +111,7 @@ module.exports = class UserHelper {
                     observationsHelper.updateMany(filter,updateObject),
                     observationSubmissionsHelper.updateMany(filter,updateObject)
                 ])
-                if(updateDataStatus && (updateDataStatus[0].nModified > 0 || updateDataStatus[0].nModified > 0 || updateDataStatus[0].nModified > 0 )){
+                if(updateDataStatus && (updateDataStatus[0].nModified > 0 || updateDataStatus[1].nModified > 0 || updateDataStatus[2].nModified > 0 )){
                     if(telemetryEventOnOff !== messageConstants.common.OFF){
                         /**
                          * Telemetry Raw Event
