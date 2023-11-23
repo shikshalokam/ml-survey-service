@@ -104,6 +104,7 @@ module.exports = class UserHelper {
                         "userProfile.prevUsedPhone": 1,
                         "userProfile.prevUsedEmail": 1,
                         "userProfile.recoveryPhone": 1,
+                        "userProfile.dob": 1,
                     },
                 };
                 

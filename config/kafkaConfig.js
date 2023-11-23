@@ -2,6 +2,7 @@
 const kafka = require("kafka-node");
 const SUBMISSION_RATING_QUEUE_TOPIC = process.env.SUBMISSION_RATING_QUEUE_TOPIC;
 const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC;
+const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
 var connect = function () {
   Producer = kafka.Producer;
   KeyedMessage = kafka.KeyedMessage;
@@ -27,7 +28,7 @@ var connect = function () {
   _sendToKafkaConsumers(SUBMISSION_RATING_QUEUE_TOPIC, process.env.KAFKA_URL)
 
 
-  _sendToKafkaConsumers(USER_DELETE_TOPIC, process.env.KAFKA_URL)
+  _sendToKafkaConsumers(USER_DELETE_TOPIC, process.env.KAFKA_URL, USER_DELETE_ON_OFF)
 
   return {
     kafkaProducer: producer,
@@ -45,8 +46,8 @@ var connect = function () {
  * @param {String} host - kafka host
  */
 
- var _sendToKafkaConsumers = function (topic, host) {
-
+var _sendToKafkaConsumers = function (topic, host, status="ON") {
+  if(status !== "OFF"){
     if(topic && topic != "OFF" ){
       let consumer = new kafka.ConsumerGroup(
         {
@@ -83,6 +84,7 @@ var connect = function () {
         }
       });
     }
-  };
+  }
+};
 
 module.exports = connect;
