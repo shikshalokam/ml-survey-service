@@ -99,6 +99,11 @@ let enviromentVariables = {
   "USER_DELETE_TOPIC": {
     message: "Required user delete kafka consumer topic name",
     optional: true,
+    requiredIf : {
+      key: "USER_DELETE_ON_OFF",
+      operator: "EQUALS",
+      value: "ON"
+    }
   },
   "ID": {
     message: "Required Service ID",
@@ -112,6 +117,11 @@ let enviromentVariables = {
   "TELEMETRY_TOPIC": {
     message: "Required telemetry topic",
     optional: true,
+    requiredIf : {
+      key: "TELEMETRY_ON_OFF",
+      operator: "EQUALS",
+      value: "ON"
+    }
   },
 }
 
