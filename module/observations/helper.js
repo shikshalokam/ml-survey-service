@@ -71,6 +71,34 @@ module.exports = class ObservationsHelper {
   }
 
   /**
+   * Update observations
+   * @method
+   * @name updateMany
+   * @param {Object} query 
+   * @param {Object} update 
+   * @param {Object} options 
+   * @returns {JSON} - update observations.
+  */
+  
+  static updateMany(query, update, options={}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+        
+            let observationUpdate = await database.models.observations.updateMany(
+                query, 
+                update,
+                options
+            );
+            if( observationUpdate) {
+                return resolve(observationUpdate);
+            }
+        } catch (error) {
+            return reject(error);
+        }
+    })
+  }
+
+  /**
    * Create observation.
    * @method
    * @name create
@@ -295,35 +323,6 @@ module.exports = class ObservationsHelper {
         return reject(error);
       }
     });
-  }
-
-
-      /**
-     * Update observations
-     * @method
-     * @name updateMany
-     * @param {Object} query 
-     * @param {Object} update 
-     * @param {Object} options 
-     * @returns {JSON} - update observations.
-    */
-  
-  static updateMany(query, update, options={}) {
-    return new Promise(async (resolve, reject) => {
-        try {
-        
-            let observationUpdate = await database.models.observations.updateMany(
-                query, 
-                update,
-                options
-            );
-            if( observationUpdate) {
-                return resolve(observationUpdate);
-            }
-        } catch (error) {
-            return reject(error);
-        }
-    })
   }
 
   /**
