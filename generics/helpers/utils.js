@@ -1,6 +1,6 @@
 const uuid = require('uuid/v4');
 const md5 = require("md5");
-
+const packageData = require(ROOT_PATH + "/package.json");
 function camelCaseToTitleCase(in_camelCaseString) {
   var result = in_camelCaseString // "ToGetYourGEDInTimeASongAboutThe26ABCsIsOfTheEssenceButAPersonalIDCardForUser456InRoom26AContainingABC26TimesIsNotAsEasyAs123ForC3POOrR2D2Or2R2D"
     .replace(/([a-z])([A-Z][a-z])/g, "$1 $2") // "To Get YourGEDIn TimeASong About The26ABCs IsOf The Essence ButAPersonalIDCard For User456In Room26AContainingABC26Times IsNot AsEasy As123ForC3POOrR2D2Or2R2D"
@@ -309,6 +309,55 @@ function checkIfStringIsNumber(str) {
   return /^[0-9]+$/.test(str);
 }
 
+
+/**
+ * generate skeleton telemetry raw event
+ * @function
+ * @name generateTelemetryEventSkeletonStructure
+ * @returns {Object} returns uuid.
+ */
+ function generateTelemetryEventSkeletonStructure() {
+  let telemetrySkeleton = {
+    eid: "",
+    ets: epochTime(),
+    ver: messageConstants.common.TELEMETRY_VERSION,
+    mid: generateUUId(),
+    actor: {},
+    context: {
+      channel: "",
+      pdata: {
+        id: process.env.ID,
+        ver: packageData.version,
+      },
+      env: "",
+      cdata: [],
+      rollup: {},
+    },
+    object: {},
+    edata: {},
+  };
+  return telemetrySkeleton;
+}
+
+/**
+ * generate telemetry vent
+ * @function
+ * @name generateTelemetryEvent
+ * @returns {Object} returns uuid.
+ */
+ function generateTelemetryEvent(rawEvent) {
+  let telemetryEvent = {
+    timestamp: new Date(),
+    msg: JSON.stringify(rawEvent),
+    lname: "",
+    tname: "",
+    level: "",
+    HOSTNAME: "",
+    "application.home": "",
+  };
+  return telemetryEvent;
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -333,5 +382,7 @@ module.exports = {
   convertStringToBoolean : convertStringToBoolean,
   checkIfValidUUID : checkIfValidUUID,
   filterLocationIdandCode :filterLocationIdandCode,
-  checkIfStringIsNumber : checkIfStringIsNumber
+  checkIfStringIsNumber : checkIfStringIsNumber,
+  generateTelemetryEventSkeletonStructure : generateTelemetryEventSkeletonStructure,
+  generateTelemetryEvent : generateTelemetryEvent
 };

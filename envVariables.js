@@ -90,7 +90,39 @@ let enviromentVariables = {
     "message" : "Form service base url",
     "optional" : true,
     "default" : "http://player:3000"
-  }
+  },
+  "USER_DELETE_ON_OFF": {
+    message: "Enable/Disable User delete flow",
+    optional: false,
+    default: "ON"
+  },
+  "USER_DELETE_TOPIC": {
+    message: "Required user delete kafka consumer topic name",
+    optional: true,
+    requiredIf : {
+      key: "USER_DELETE_ON_OFF",
+      operator: "EQUALS",
+      value: "ON"
+    }
+  },
+  "ID": {
+    message: "Required Service ID",
+    optional: false,
+  },
+  "TELEMETRY_ON_OFF":{
+    message: "Required telemetry on/off status",
+    optional: false,
+    default: "ON"
+  },
+  "TELEMETRY_TOPIC": {
+    message: "Required telemetry topic",
+    optional: true,
+    requiredIf : {
+      key: "TELEMETRY_ON_OFF",
+      operator: "EQUALS",
+      value: "ON"
+    }
+  },
 }
 
 let success = true;

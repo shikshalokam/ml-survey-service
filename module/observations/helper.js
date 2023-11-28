@@ -47,7 +47,6 @@ module.exports = class ObservationsHelper {
     return new Promise(async (resolve, reject) => {
       try {
         let queryObject = {};
-
         if (findQuery != "all") {
           queryObject = _.merge(queryObject, findQuery);
         }
@@ -68,6 +67,34 @@ module.exports = class ObservationsHelper {
         return reject(error);
       }
     });
+  }
+
+  /**
+   * Update observations
+   * @method
+   * @name updateMany
+   * @param {Object} query 
+   * @param {Object} update 
+   * @param {Object} options 
+   * @returns {JSON} - update observations.
+  */
+  
+  static updateMany(query, update, options={}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+        
+            let observationUpdate = await database.models.observations.updateMany(
+                query, 
+                update,
+                options
+            );
+            if( observationUpdate) {
+                return resolve(observationUpdate);
+            }
+        } catch (error) {
+            return reject(error);
+        }
+    })
   }
 
   /**
@@ -1230,6 +1257,7 @@ module.exports = class ObservationsHelper {
     });
   }
 
+
   /**
    * observation link.
    * @method
@@ -1779,6 +1807,7 @@ module.exports = class ObservationsHelper {
           let endIndex = startIndex + pageSize;
           mergedData = mergedData.slice(startIndex, endIndex);
         }
+
 
         return resolve({
           success: true,
