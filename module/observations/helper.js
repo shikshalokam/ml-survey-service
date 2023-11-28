@@ -47,7 +47,6 @@ module.exports = class ObservationsHelper {
     return new Promise(async (resolve, reject) => {
       try {
         let queryObject = {};
-
         if (findQuery != "all") {
           queryObject = _.merge(queryObject, findQuery);
         }
@@ -1258,6 +1257,7 @@ module.exports = class ObservationsHelper {
     });
   }
 
+
   /**
    * observation link.
    * @method
@@ -1807,6 +1807,7 @@ module.exports = class ObservationsHelper {
           let endIndex = startIndex + pageSize;
           mergedData = mergedData.slice(startIndex, endIndex);
         }
+
 
         return resolve({
           success: true,
