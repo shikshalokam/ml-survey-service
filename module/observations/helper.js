@@ -143,32 +143,34 @@ module.exports = class ObservationsHelper {
           userRoleAndProfileInformation &&
           Object.keys(userRoleAndProfileInformation).length > 0
         ) {
-          let solutionData =
-            await coreService.solutionDetailsBasedOnRoleAndLocation(
-              requestingUserAuthToken,
+          if(validateEntities !== "OFF"){
+            let solutionData =
+              await coreService.solutionDetailsBasedOnRoleAndLocation(
+                requestingUserAuthToken,
+                userRoleAndProfileInformation,
+                solutionId
+              );
+
+            if (!solutionData.success) {
+              throw {
+                message:
+                  messageConstants.apiResponses
+                    .SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED,
+              };
+            }
+
+            //validate the user access to create observation
+            let validateUserRole = await this.validateUserRole(
               userRoleAndProfileInformation,
               solutionId
             );
-
-          if (!solutionData.success) {
-            throw {
-              message:
-                messageConstants.apiResponses
-                  .SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED,
-            };
-          }
-
-          //validate the user access to create observation
-          let validateUserRole = await this.validateUserRole(
-            userRoleAndProfileInformation,
-            solutionId
-          );
-          if (!validateUserRole.success) {
-            throw {
-              status: httpStatusCode.bad_request.status,
-              message:
-                messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER,
-            };
+            if (!validateUserRole.success) {
+              throw {
+                status: httpStatusCode.bad_request.status,
+                message:
+                  messageConstants.apiResponses.OBSERVATION_NOT_RELEVENT_FOR_USER,
+              };
+            }
           }
         }
 
@@ -232,14 +234,15 @@ module.exports = class ObservationsHelper {
   ) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (data.entities) {
-          let entitiesToAdd = await entitiesHelper.validateEntities(
-            data.entities,
-            solution.entityType
-          );
-          data.entities = entitiesToAdd.entityIds;
+        if(validateEntities !== "OFF"){
+          if (data.entities) {
+            let entitiesToAdd = await entitiesHelper.validateEntities(
+              data.entities,
+              solution.entityType
+            );
+            data.entities = entitiesToAdd.entityIds;
+          }
         }
-
         if (data.project) {
           data.project._id = ObjectId(data.project._id);
           data.referenceFrom = messageConstants.common.PROJECT;
@@ -1822,18 +1825,31 @@ module.exports = class ObservationsHelper {
           if (observationData.length > 0) {
             observationId = observationData[0]._id;
           } else {
-            let solutionData =
-              await coreService.solutionDetailsBasedOnRoleAndLocation(
-                token,
-                bodyData,
-                solutionId
-              );
+            let solutionData
+            if(validateEntities !== "OFF"){
+              solutionData =
+                await coreService.solutionDetailsBasedOnRoleAndLocation(
+                  token,
+                  bodyData,
+                  solutionId
+                );
 
-            if (!solutionData.success) {
-              throw {
-                message:
-                  messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND,
-              };
+              if (!solutionData.success) {
+                throw {
+                  message:
+                    messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND,
+                };
+              }
+            } else {
+              solutionData = await solutionHelper.solutionDocuments({_id:ObjectId(solutionId)}) 
+              if (solutionData.length <= 0) {
+                throw {
+                  message:
+                    messageConstants.apiResponses.SOLUTION_DETAILS_NOT_FOUND,
+                };
+              }else{
+                solutionData.data = solutionData[0]
+              }
             }
 
             solutionData.data["startDate"] = new Date();
@@ -1860,21 +1876,21 @@ module.exports = class ObservationsHelper {
             }
 
             delete solutionData.data._id;
-
-            //validate the user access to create observation
-            let validateUserRole = await this.validateUserRole(
-              bodyData,
-              solutionId
-            );
-            if (!validateUserRole.success) {
-              throw {
-                status: httpStatusCode.bad_request.status,
-                message:
-                  messageConstants.apiResponses
-                    .OBSERVATION_NOT_RELEVENT_FOR_USER,
-              };
-            }
-
+            if(validateEntities !== "OFF") {
+              //validate the user access to create observation
+              let validateUserRole = await this.validateUserRole(
+                bodyData,
+                solutionId
+              );
+              if (!validateUserRole.success) {
+                throw {
+                  status: httpStatusCode.bad_request.status,
+                  message:
+                    messageConstants.apiResponses
+                      .OBSERVATION_NOT_RELEVENT_FOR_USER,
+                };
+              }
+           }
             let observation = await this.create(
               solutionId,
               solutionData.data,
@@ -1950,6 +1966,7 @@ module.exports = class ObservationsHelper {
           data: data,
         });
       } catch (error) {
+        console.log(error)
         return resolve({
           status: error.status
             ? error.status

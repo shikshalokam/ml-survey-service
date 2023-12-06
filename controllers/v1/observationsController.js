@@ -15,7 +15,8 @@ const programsHelper = require(MODULES_BASE_PATH + "/programs/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const coreService = require(ROOT_PATH + "/generics/services/core");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
-
+const validateEntities = process.env.VALIDATE_ENTITIES
+const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF
 /**
     * Observations
     * @class
@@ -32,7 +33,7 @@ module.exports = class Observations extends Abstract {
     * @apiName Observation Solution
     * @apiGroup Observations
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /assessment/api/v1/observations/solutions/5cd955487e100b4dded3ebb3?search=Framework&pageSize=10&pageNo=1
+    * @apiSampleRequest /as/api/v1/observations/solutions/5cd955487e100b4dded3ebb3?search=Framework&pageSize=10&pageNo=1
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -1099,22 +1100,25 @@ module.exports = class Observations extends Abstract {
                 
                 let formatResult = true; 
                 let returnObject = true;
-                let entitiesDocument = await userProfileService.locationSearch( filterData,"","","",formatResult, returnObject );
-                
-                if ( !entitiesDocument.success ) {
-                    return resolve({ 
-                        status: httpStatusCode.bad_request.status, 
-                        message: messageConstants.apiResponses.ENTITY_NOT_FOUND 
-                    });
-                }
+                let entityDocument = { metaInformation: {} };
+                if(validateEntities !== "OFF"){
+                    let entitiesDocument = await userProfileService.locationSearch( filterData,"","","",formatResult, returnObject );
+                    
+                    if ( !entitiesDocument.success ) {
+                        return resolve({ 
+                            status: httpStatusCode.bad_request.status, 
+                            message: messageConstants.apiResponses.ENTITY_NOT_FOUND 
+                        });
+                    }
 
-                let entityDocument = entitiesDocument.data;
-                if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
-                    entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
-                }
+                    entityDocument = entitiesDocument.data;
+                    if (entityDocument.registryDetails && Object.keys(entityDocument.registryDetails).length > 0) {
+                        entityDocument.metaInformation.registryDetails = entityDocument.registryDetails;
+                    }
 
-                let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
-                entityDocument.metaInformation.hierarchy = entityHierarchy;
+                    let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
+                    entityDocument.metaInformation.hierarchy = entityHierarchy;
+                }
 
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
                 let solutionQueryObject = {
@@ -1166,41 +1170,42 @@ module.exports = class Observations extends Abstract {
                 if ( !programDocument.length > 0 || !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
-
-                if (programDocument[0].hasOwnProperty('requestForPIIConsent')) {
-                    //fetch programUsers data
-                    let programUsers = await programUsersHelper.programUsersDocuments(
-                        {
-                            userId : req.userDetails.userId,
-                            programId : observationDocument.programId
-                        },
-                        [
-                            "_id",
-                            "resourcesStarted"
-                        ]
-                    );
-
-                    if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
-                        // join observation's program. PII data consent is given via this api call.
-                        // no need to check if usr already joined the program or not it is managed in ml-core service. 
-                        
-                        let programJoinData = {};
-                        programJoinData.userRoleInformation = req.body;
-                        programJoinData.isResource = true;
-                        programJoinData.consentShared = true;
-                        let joinProgram = await coreService.joinProgram (
-                            req.userDetails.userToken,
-                            programJoinData,
-                            observationDocument.programId,
-                            appVersion,
-                            appName
+                if(programJoinEnabled !== "OFF"){
+                    if (programDocument[0].hasOwnProperty('requestForPIIConsent')) {
+                        //fetch programUsers data
+                        let programUsers = await programUsersHelper.programUsersDocuments(
+                            {
+                                userId : req.userDetails.userId,
+                                programId : observationDocument.programId
+                            },
+                            [
+                                "_id",
+                                "resourcesStarted"
+                            ]
                         );
-                        
-                        if ( !joinProgram.success ) {
-                            return resolve({ 
-                                status: httpStatusCode.bad_request.status, 
-                                message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
-                            });
+
+                        if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+                            // join observation's program. PII data consent is given via this api call.
+                            // no need to check if usr already joined the program or not it is managed in ml-core service. 
+                            
+                            let programJoinData = {};
+                            programJoinData.userRoleInformation = req.body;
+                            programJoinData.isResource = true;
+                            programJoinData.consentShared = true;
+                            let joinProgram = await coreService.joinProgram (
+                                req.userDetails.userToken,
+                                programJoinData,
+                                observationDocument.programId,
+                                appVersion,
+                                appName
+                            );
+                            
+                            if ( !joinProgram.success ) {
+                                return resolve({ 
+                                    status: httpStatusCode.bad_request.status, 
+                                    message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED
+                                });
+                            }
                         }
                     }
                 }
