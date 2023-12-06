@@ -1581,14 +1581,15 @@ module.exports = class Observations extends Abstract {
                 if (!frameworkDocument._id) {
                     throw messageConstants.apiResponses.FRAMEWORK_NOT_FOUND;
                 }
-
-                let bodyData = { "type" : req.query.entityType };
-                let entityTypeDocument = await userProfileService.locationSearch( bodyData);
-                if ( !entityTypeDocument.success ) {
-                    throw messageConstants.apiResponses.ENTITY_TYPES_NOT_FOUND;
+                if(process.env.VALIDATE_ENTITIES !== "OFF"){
+                    let bodyData = { "type" : req.query.entityType };
+                    let entityTypeDocument = await userProfileService.locationSearch( bodyData);
+                    if ( !entityTypeDocument.success ) {
+                        throw messageConstants.apiResponses.ENTITY_TYPES_NOT_FOUND;
+                    }
+                    
+                    let entityType = entityTypeDocument.data[0].type;
                 }
-                
-                let entityType = entityTypeDocument.data[0].type;
 
                 let criteriasIdArray = gen.utils.getCriteriaIds(frameworkDocument.themes);
 
@@ -1630,15 +1631,21 @@ module.exports = class Observations extends Abstract {
                 updateThemes(newSolutionDocument.themes);
 
                 newSolutionDocument.type = "observation";
-                newSolutionDocument.subType = (frameworkDocument.subType && frameworkDocument.subType != "") ? frameworkDocument.subType : entityType;
-
+               
                 newSolutionDocument.externalId = 
                 frameworkDocument.externalId + "-OBSERVATION-TEMPLATE";
 
                 newSolutionDocument.frameworkId = frameworkDocument._id;
                 newSolutionDocument.frameworkExternalId = frameworkDocument.externalId;
+                if(process.env.VALIDATE_ENTITIES !== "OFF"){
+                    newSolutionDocument.subType = (frameworkDocument.subType && frameworkDocument.subType != "") ? frameworkDocument.subType : entityType;
 
-                newSolutionDocument.entityType = entityType;
+                    newSolutionDocument.entityType = entityType; 
+                   
+                }else{
+                    newSolutionDocument.subType = req.query.entityType;
+                    newSolutionDocument.entityType = req.query.entityType;;
+                }
                 newSolutionDocument.isReusable = true;
 
                 let newBaseSolution = 

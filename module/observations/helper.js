@@ -28,7 +28,7 @@ const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const formService = require(ROOT_PATH + "/generics/services/form");
 const userRolesHelper = require(MODULES_BASE_PATH + "/userRoles/helper");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
-
+const validateEntities = process.env.VALIDATE_ENTITIES
 /**
  * ObservationsHelper
  * @class
@@ -1843,17 +1843,20 @@ module.exports = class ObservationsHelper {
             solutionData.data["status"] = messageConstants.common.PUBLISHED;
 
             let entityTypes = Object.keys(_.omit(bodyData, ["role"]));
+            if (validateEntities !== 'OFF') {
+              if (entityTypes.includes(solutionData.data.entityType)) {
+                let entityData = await entitiesHelper.listByLocationIds([
+                  bodyData[solutionData.data.entityType],
+                ]);
 
-            if (entityTypes.includes(solutionData.data.entityType)) {
-              let entityData = await entitiesHelper.listByLocationIds([
-                bodyData[solutionData.data.entityType],
-              ]);
+                if (!entityData.success) {
+                  return resolve(entityData);
+                }
 
-              if (!entityData.success) {
-                return resolve(entityData);
+                solutionData.data["entities"] = [entityData.data[0]._id];
               }
-
-              solutionData.data["entities"] = [entityData.data[0]._id];
+            }else {
+              solutionData.data['entities'] = [bodyData[solutionData.data.entityType]];
             }
 
             delete solutionData.data._id;

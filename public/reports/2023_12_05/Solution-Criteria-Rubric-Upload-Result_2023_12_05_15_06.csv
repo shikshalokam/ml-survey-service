@@ -1,0 +1,6 @@
+"externalId","name","criteriaId","weightage","expressionVariables","L1","L2","L3","status"
+"D1C1_1701768960273","Planning & Execution","656eef09caf818fd44a47d6f","1.0","SCORE=656eef09caf818fd44a47d6f.scoreOfAllQuestionInCriteria()","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success."
+"D2C1_1701768960273","Data based Governance","656eef09caf818fd44a47d70","1.0","SCORE=656eef09caf818fd44a47d70.scoreOfAllQuestionInCriteria()","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success."
+"D2C2_1701768960273","Communication","656eef09caf818fd44a47d71","1.0","SCORE=656eef09caf818fd44a47d71.scoreOfAllQuestionInCriteria()","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success."
+"D3C1_1701768960273","Influence","656eef09caf818fd44a47d72","1.0","SCORE=656eef09caf818fd44a47d72.scoreOfAllQuestionInCriteria()","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success."
+"D4C1_1701768960273","Collaboration","656eef09caf818fd44a47d73","1.0","SCORE=656eef09caf818fd44a47d73.scoreOfAllQuestionInCriteria()","25<=SCORE<=50","50<SCORE<=75","75<SCORE<=100","Success."

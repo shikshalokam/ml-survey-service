@@ -1,0 +1,5 @@
+"externalId","name","weightage","L1","L2","L3","status"
+"D1","Domain 1","1.0","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success"
+"D2","Domain 2","1.0","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success"
+"D3","Domain 3","1.0","20<=SCORE<=40","40<SCORE<=80","80<SCORE<=100","Success"
+"D4","Domain 4","1.0","25<=SCORE<=50","50<SCORE<=75","75<SCORE<=100","Success"
