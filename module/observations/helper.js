@@ -1966,7 +1966,6 @@ module.exports = class ObservationsHelper {
           data: data,
         });
       } catch (error) {
-        console.log(error)
         return resolve({
           status: error.status
             ? error.status

@@ -111,7 +111,8 @@ module.exports = async function (req, res, next) {
     "solutions/addEntities",
     "frameworks/delete/",
     "questions/delete/",
-    "observationSubmissions/disable/"
+    "observationSubmissions/disable/",
+    "admin/createIndex"
   ];
   
   let performInternalAccessTokenCheck = false;
