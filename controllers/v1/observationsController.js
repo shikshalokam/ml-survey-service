@@ -33,7 +33,7 @@ module.exports = class Observations extends Abstract {
     * @apiName Observation Solution
     * @apiGroup Observations
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /as/api/v1/observations/solutions/5cd955487e100b4dded3ebb3?search=Framework&pageSize=10&pageNo=1
+    * @apiSampleRequest /assessment/api/v1/observations/solutions/5cd955487e100b4dded3ebb3?search=Framework&pageSize=10&pageNo=1
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -1101,7 +1101,7 @@ module.exports = class Observations extends Abstract {
                 let formatResult = true; 
                 let returnObject = true;
                 let entityDocument = { metaInformation: {} };
-                if(validateEntities !== "OFF"){
+                if(validateEntities !== messageConstants.common.OFF){
                     let entitiesDocument = await userProfileService.locationSearch( filterData,"","","",formatResult, returnObject );
                     
                     if ( !entitiesDocument.success ) {
@@ -1170,7 +1170,7 @@ module.exports = class Observations extends Abstract {
                 if ( !programDocument.length > 0 || !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
-                if(programJoinEnabled !== "OFF"){
+                if(programJoinEnabled !== messageConstants.common.OFF){
                     if (programDocument[0].hasOwnProperty('requestForPIIConsent')) {
                         //fetch programUsers data
                         let programUsers = await programUsersHelper.programUsersDocuments(

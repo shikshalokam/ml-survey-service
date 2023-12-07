@@ -1069,7 +1069,7 @@ module.exports = class SurveysHelper {
           submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
         } else {
           // join survey's program. PII data consent is given via this api call.
-          if(programJoinEnabled !== "OFF") {
+          if(programJoinEnabled !== messageConstants.common.OFF) {
             if (solutionDocument.programId && userToken !== "") {
               if (
                 programDocument.length > 0 &&

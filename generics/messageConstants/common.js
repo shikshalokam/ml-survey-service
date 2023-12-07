@@ -62,5 +62,6 @@ module.exports = {
     CACHE_TTL : 43200 ,
     GET_METHOD : "GET",
     SUBENTITY :"subEntityTypesOf_",
-    STATE: "state"
+    STATE: "state",
+    OFF: "OFF"
 }

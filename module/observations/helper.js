@@ -143,7 +143,7 @@ module.exports = class ObservationsHelper {
           userRoleAndProfileInformation &&
           Object.keys(userRoleAndProfileInformation).length > 0
         ) {
-          if(validateEntities !== "OFF"){
+          if(validateEntities !== messageConstants.common.OFF){
             let solutionData =
               await coreService.solutionDetailsBasedOnRoleAndLocation(
                 requestingUserAuthToken,
@@ -1826,7 +1826,7 @@ module.exports = class ObservationsHelper {
             observationId = observationData[0]._id;
           } else {
             let solutionData
-            if(validateEntities !== "OFF"){
+            if(validateEntities !== messageConstants.common.OFF){
               solutionData =
                 await coreService.solutionDetailsBasedOnRoleAndLocation(
                   token,
@@ -1859,7 +1859,7 @@ module.exports = class ObservationsHelper {
             solutionData.data["status"] = messageConstants.common.PUBLISHED;
 
             let entityTypes = Object.keys(_.omit(bodyData, ["role"]));
-            if (validateEntities !== 'OFF') {
+            if (validateEntities !== messageConstants.common.OFF) {
               if (entityTypes.includes(solutionData.data.entityType)) {
                 let entityData = await entitiesHelper.listByLocationIds([
                   bodyData[solutionData.data.entityType],
@@ -1876,7 +1876,7 @@ module.exports = class ObservationsHelper {
             }
 
             delete solutionData.data._id;
-            if(validateEntities !== "OFF") {
+            if(validateEntities !== messageConstants.common.OFF) {
               //validate the user access to create observation
               let validateUserRole = await this.validateUserRole(
                 bodyData,
