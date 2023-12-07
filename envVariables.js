@@ -92,12 +92,12 @@ let enviromentVariables = {
     "default" : "http://player:3000"
   },
   "VALIDATE_ENTITIES" : {
-    "message" : "Form service base url",
+    "message" : "Validate entities enable or disable.",
     "optional" : false,
     "default" : "ON"
   },
   "PROGRAM_JOIN_ON_OFF" : {
-    "message" : "Form service base url",
+    "message" : "Program Join on/off",
     "optional" : false,
     "default" : "ON"
   }
