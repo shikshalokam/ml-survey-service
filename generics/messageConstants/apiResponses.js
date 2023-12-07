@@ -373,4 +373,6 @@ module.exports = {
     "SUBMISSION_NOT_FOUND_OR_SUBMISSION_STATUS_NOT_COMPLETE":"No submission found or Submission status is not completed",
     "PROGRAM_JOIN_FAILED" : "Failed to join program",
     "SOLUTION_EXPIRED":"Solution has expired.",
+    "KEYS_INDEXED_SUCCESSFULLY": 'Keys indexed successfully',
+    "KEYS_ALREADY_INDEXED": 'Keys already indexed',
 }
