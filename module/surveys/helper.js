@@ -26,7 +26,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
-
+const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF
 /**
  * SurveysHelper
  * @class
@@ -1069,41 +1069,43 @@ module.exports = class SurveysHelper {
           submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
         } else {
           // join survey's program. PII data consent is given via this api call.
-          if (solutionDocument.programId && userToken !== "") {
-            if (
-              programDocument.length > 0 &&
-              programDocument[0].hasOwnProperty("requestForPIIConsent")
-            ) {
-              //fetch programUsers data
-              let programUsers = await programUsersHelper.programUsersDocuments(
-                {
-                  userId: userId,
-                  programId: solutionDocument.programId,
-                },
-                ["_id", "resourcesStarted"]
-              );
+          if(programJoinEnabled !== messageConstants.common.OFF) {
+            if (solutionDocument.programId && userToken !== "") {
               if (
-                !programUsers.length > 0 ||
-                (programUsers.length > 0 &&
-                  programUsers[0].resourcesStarted == false)
+                programDocument.length > 0 &&
+                programDocument[0].hasOwnProperty("requestForPIIConsent")
               ) {
-                let programJoinData = {};
-                programJoinData.userRoleInformation = roleInformation;
-                programJoinData.isResource = true;
-                programJoinData.consentShared = true;
-                let joinProgram = await coreService.joinProgram(
-                  userToken,
-                  programJoinData,
-                  solutionDocument.programId,
-                  appVersion,
-                  appName
+                //fetch programUsers data
+                let programUsers = await programUsersHelper.programUsersDocuments(
+                  {
+                    userId: userId,
+                    programId: solutionDocument.programId,
+                  },
+                  ["_id", "resourcesStarted"]
                 );
+                if (
+                  !programUsers.length > 0 ||
+                  (programUsers.length > 0 &&
+                    programUsers[0].resourcesStarted == false)
+                ) {
+                  let programJoinData = {};
+                  programJoinData.userRoleInformation = roleInformation;
+                  programJoinData.isResource = true;
+                  programJoinData.consentShared = true;
+                  let joinProgram = await coreService.joinProgram(
+                    userToken,
+                    programJoinData,
+                    solutionDocument.programId,
+                    appVersion,
+                    appName
+                  );
 
-                if (!joinProgram.success) {
-                  return resolve({
-                    status: httpStatusCode.bad_request.status,
-                    message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
-                  });
+                  if (!joinProgram.success) {
+                    return resolve({
+                      status: httpStatusCode.bad_request.status,
+                      message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
+                    });
+                  }
                 }
               }
             }

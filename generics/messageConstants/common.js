@@ -74,4 +74,5 @@
   USER: "User",
   USER_DELETE_MODULE: "userDelete",
   OFF: "OFF"
+
 }

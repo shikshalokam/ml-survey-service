@@ -147,7 +147,7 @@ module.exports = class EntityTypesHelper {
                                 entityType.profileFields = entityType.profileFields.split(",") || [];
                             }
 
-                            if(entityType.immediateChildrenEntityType != ""){
+                            if(entityType.immediateChildrenEntityType != "" && entityType.immediateChildrenEntityType != undefined){
                                 let entityTypeImmediateChildren = entityType.immediateChildrenEntityType.split(",");
                                 entityTypeImmediateChildren = _.uniq(entityTypeImmediateChildren);
 
