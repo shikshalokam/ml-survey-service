@@ -164,6 +164,11 @@ module.exports = class ObservationsHelper {
         ) {
           userProfileData = userProfile.data.response;
           addReportInfoToSolution = true;
+        } else {
+          throw {
+            message: messageConstants.apiResponses.FAILED_TO_START_RESOURCE,
+            status: httpStatusCode.failed_dependency.status,
+          };
         }
 
         if (
