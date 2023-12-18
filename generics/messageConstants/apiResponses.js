@@ -375,4 +375,5 @@ module.exports = {
     "SOLUTION_EXPIRED":"Solution has expired.",
     "KEYS_INDEXED_SUCCESSFULLY": 'Keys indexed successfully',
     "KEYS_ALREADY_INDEXED": 'Keys already indexed',
+    "FAILED_TO_START_RESOURCE": "There was an error in starting/joining. Please try again after some time."
 }
