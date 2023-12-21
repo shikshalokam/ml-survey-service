@@ -2150,10 +2150,15 @@ module.exports = class ObservationsHelper {
           });
         }
 
-        let entitiesToAdd = await entitiesHelper.validateEntities(
-          requestedData,
-          observationDocument[0].entityType
-        );
+        let entitiesToAdd = []
+        if(validateEntities !== messageConstants.common.OFF) {
+          entitiesToAdd = await entitiesHelper.validateEntities(
+            requestedData,
+            observationDocument[0].entityType
+          );
+        } else {
+          entitiesToAdd.entityIds = [...requestedData]
+        }
 
         if (entitiesToAdd.entityIds.length > 0) {
           await database.models.observations.updateOne(

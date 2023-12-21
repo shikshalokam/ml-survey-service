@@ -1118,6 +1118,8 @@ module.exports = class Observations extends Abstract {
 
                     let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
                     entityDocument.metaInformation.hierarchy = entityHierarchy;
+                } else {
+                    entityDocument._id = req.query.entityId
                 }
 
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
