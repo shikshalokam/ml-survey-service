@@ -107,10 +107,39 @@ module.exports = class UserHelper {
                         "userProfile.dob": 1,
                     },
                 };
+
+                let updateObjectForObservationSubmission =  {
+                    $set: {
+                        "userProfile.firstName": messageConstants.common.DELETED_USER,
+                        "observationInformation.userProfile.firstName": messageConstants.common.DELETED_USER,
+                    },
+                    $unset: {
+                        "userProfile.email": 1,
+                        "userProfile.maskedEmail": 1,
+                        "userProfile.maskedPhone": 1,
+                        "userProfile.recoveryEmail": 1,
+                        "userProfile.phone": 1,
+                        "userProfile.lastName": 1,
+                        "userProfile.prevUsedPhone": 1,
+                        "userProfile.prevUsedEmail": 1,
+                        "userProfile.recoveryPhone": 1,
+                        "userProfile.dob": 1,
+                        "observationInformation.userProfile.email": 1,
+                        "observationInformation.userProfile.maskedEmail": 1,
+                        "observationInformation.userProfile.maskedPhone": 1,
+                        "observationInformation.userProfile.recoveryEmail": 1,
+                        "observationInformation.userProfile.phone": 1,
+                        "observationInformation.userProfile.lastName": 1,
+                        "observationInformation.userProfile.prevUsedPhone": 1,
+                        "observationInformation.userProfile.prevUsedEmail": 1,
+                        "observationInformation.userProfile.recoveryPhone": 1,
+                        "observationInformation.userProfile.dob": 1,
+                    },
+                };
                 
                 let updateDataStatus = await Promise.all([surveySubmissionsHelper.updateMany(filter,updateObject),
                     observationsHelper.updateMany(filter,updateObject),
-                    observationSubmissionsHelper.updateMany(filter,updateObject)
+                    observationSubmissionsHelper.updateMany(filter,updateObjectForObservationSubmission)
                 ])
                 if(updateDataStatus && (updateDataStatus[0].nModified > 0 || updateDataStatus[1].nModified > 0 || updateDataStatus[2].nModified > 0 )){
                     if(telemetryEventOnOff !== messageConstants.common.OFF){
