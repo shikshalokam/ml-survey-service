@@ -47,6 +47,8 @@ const profile = function ( token,userId = "" ) {
                             "response.prevUsedPhone",
                             "response.prevUsedEmail",
                             "response.recoveryPhone",
+                            "response.encEmail",
+                            "response.encPhone"
                           ]);
                     } else {
                         result.success = false;
