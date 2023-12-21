@@ -105,6 +105,8 @@ module.exports = class UserHelper {
                         "userProfile.prevUsedEmail": 1,
                         "userProfile.recoveryPhone": 1,
                         "userProfile.dob": 1,
+                        "userProfile.encEmail": 1,
+                        "userProfile.encPhone": 1,
                     },
                 };
 
@@ -124,6 +126,8 @@ module.exports = class UserHelper {
                         "userProfile.prevUsedEmail": 1,
                         "userProfile.recoveryPhone": 1,
                         "userProfile.dob": 1,
+                        "userProfile.encEmail": 1,
+                        "userProfile.encPhone": 1,
                         "observationInformation.userProfile.email": 1,
                         "observationInformation.userProfile.maskedEmail": 1,
                         "observationInformation.userProfile.maskedPhone": 1,
@@ -134,6 +138,8 @@ module.exports = class UserHelper {
                         "observationInformation.userProfile.prevUsedEmail": 1,
                         "observationInformation.userProfile.recoveryPhone": 1,
                         "observationInformation.userProfile.dob": 1,
+                        "observationInformation.userProfile.encEmail": 1,
+                        "observationInformation.userProfile.encPhone": 1,
                     },
                 };
                 
