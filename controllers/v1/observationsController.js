@@ -1588,6 +1588,7 @@ module.exports = class Observations extends Abstract {
                 if (!frameworkDocument._id) {
                     throw messageConstants.apiResponses.FRAMEWORK_NOT_FOUND;
                 }
+                let entityType
                 if(process.env.VALIDATE_ENTITIES !== "OFF"){
                     let bodyData = { "type" : req.query.entityType };
                     let entityTypeDocument = await userProfileService.locationSearch( bodyData);
@@ -1595,7 +1596,7 @@ module.exports = class Observations extends Abstract {
                         throw messageConstants.apiResponses.ENTITY_TYPES_NOT_FOUND;
                     }
                     
-                    let entityType = entityTypeDocument.data[0].type;
+                    entityType = entityTypeDocument.data[0].type;
                 }
 
                 let criteriasIdArray = gen.utils.getCriteriaIds(frameworkDocument.themes);
