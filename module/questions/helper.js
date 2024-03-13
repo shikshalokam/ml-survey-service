@@ -115,6 +115,13 @@ module.exports = class QuestionsHelper {
               allValues["validation"]["max"] = parsedQuestion.validationMax;
               allValues["validation"]["min"] = parsedQuestion.validationMin ? parsedQuestion.validationMin : parsedQuestion.validationMin = "";
             }
+            if(parsedQuestion["responseType"] == "text"){
+              if(parsedQuestion.hasOwnProperty("validationRegex")){
+                if(parsedQuestion["validationRegex"] !== ""){
+                  allValues["validation"]["regex"] = parsedQuestion["validationRegex"]
+                }
+              }
+            }
 
             if (parsedQuestion["responseType"] == "number") {
 
