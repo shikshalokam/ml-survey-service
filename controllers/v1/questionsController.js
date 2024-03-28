@@ -179,7 +179,7 @@ module.exports = class Questions extends Abstract {
             externalId: { $in: criteriaIds }
         }).lean();
 
-        if (!criteriaDocument.length > 0) {
+        if (!(criteriaDocument.length > 0)) {
           throw messageConstants.apiResponses.CRITERIA_NOT_FOUND;
         }
 

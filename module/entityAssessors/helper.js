@@ -822,7 +822,7 @@ module.exports = class EntityAssessorHelper {
                     status : messageConstants.common.ACTIVE_STATUS
                 },["_id","entityType","entityTypeId"]);
 
-                if( !solutionData.length > 0) {
+                if( !(solutionData.length > 0)) {
                     throw {
                         status : httpStatusCode.bad_request.status,
                         message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
@@ -833,7 +833,7 @@ module.exports = class EntityAssessorHelper {
                     _id : programId
                 },["_id"]);
 
-                if ( !programData.length > 0 ) {
+                if ( !(programData.length > 0) ) {
                     throw {
                         status : httpStatusCode.bad_request.status,
                         message : messageConstants.apiResponses.PROGRAM_NOT_FOUND
@@ -848,7 +848,7 @@ module.exports = class EntityAssessorHelper {
 
                 let updateData = {};
 
-                if( !assessorData.length > 0 ) {
+                if( !(assessorData.length > 0) ) {
 
                     updateData = {
                         userId : userDetails.userId,

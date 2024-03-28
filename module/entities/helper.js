@@ -990,7 +990,7 @@ module.exports = class EntitiesHelper {
                 }
             }
            
-            if ( !entityInformation.length > 0 ) {
+            if ( !(entityInformation.length > 0) ) {
                 throw {
                     message : messageConstants.apiResponses.ENTITY_NOT_FOUND
                 } 
@@ -1614,7 +1614,7 @@ module.exports = class EntitiesHelper {
                     "metaInformation.externalId"
                 ]);
 
-                if( !entities.length > 0 ) {
+                if( !(entities.length > 0) ) {
                     throw { 
                         message : messageConstants.apiResponses.ENTITY_NOT_FOUND
                     }
@@ -1685,7 +1685,7 @@ module.exports = class EntitiesHelper {
                             [`groups.${entityType}`] : entityId
                         },["_id"]);
 
-                        if( !entityInParent.length > 0 ) {
+                        if( !(entityInParent.length > 0) ) {
                             singleCsvData["_SYSTEM_ID"] = ""; 
                             singleCsvData["STATUS"] = 
                             messageConstants.apiResponses.ENTITY_NOT_FOUND_IN_PARENT_ENTITY_GROUP;
@@ -1847,7 +1847,7 @@ module.exports = class EntitiesHelper {
                 }
             }
            
-            if ( !entityInformation.length > 0 ) {
+            if ( !(entityInformation.length > 0) ) {
                 throw {
                     message : messageConstants.apiResponses.ENTITY_NOT_FOUND
                 } 

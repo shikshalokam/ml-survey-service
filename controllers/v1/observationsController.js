@@ -763,7 +763,7 @@ module.exports = class Observations extends Abstract {
                             parentId.push(req.query.parentEntityId );
                             let subEntities = await userProfileService.getSubEntitiesBasedOnEntityType( parentId,result.entityType,subEntitiesMatchingType )
                             
-                            if( !subEntities.length > 0 ) {
+                            if( !(subEntities.length > 0) ) {
                                 return resolve({
                                     "message" : messageConstants.apiResponses.ENTITY_NOT_FOUND,
                                     "result" : [{
@@ -824,7 +824,6 @@ module.exports = class Observations extends Abstract {
                         req.pageSize, 
                         req.pageNo
                     );
-    
                     let data = 
                     await entitiesHelper.observationSearchEntitiesResponse(
                         entityDocuments[0].data,
@@ -1169,7 +1168,7 @@ module.exports = class Observations extends Abstract {
                     ]
                 );
 
-                if ( !programDocument.length > 0 || !programDocument[0]._id ) {
+                if ( !(programDocument.length > 0) || !programDocument[0]._id ) {
                     throw messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                 }
                 if(programJoinEnabled !== messageConstants.common.OFF){
@@ -1186,7 +1185,7 @@ module.exports = class Observations extends Abstract {
                             ]
                         );
 
-                        if (!programUsers.length > 0 || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
+                        if (!(programUsers.length > 0) || ( programUsers.length > 0 && programUsers[0].resourcesStarted == false)) {
                             // join observation's program. PII data consent is given via this api call.
                             // no need to check if usr already joined the program or not it is managed in ml-core service. 
                             

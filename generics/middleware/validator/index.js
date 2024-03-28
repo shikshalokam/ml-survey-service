@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
         ROOT_PATH + `/module/${req.params.controller}/validator/${req.params.version}.js`;
     }
 
-    if (fs.existsSync(validatorPath)) require(validatorPath)(req);
+    if (fs.existsSync(validatorPath)) require(validatorPath.replace(/\.\.\//g, ''))(req);
 
     next();
 

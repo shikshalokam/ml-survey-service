@@ -322,7 +322,7 @@ module.exports = class UserExtensionHelper {
                                 ["_id"]
                             );
 
-                            if (!entityDetails.length > 0) {
+                            if (!(entityDetails.length > 0)) {
                                 userRole["_SYSTEM_ID"] = "";
                                 userRole.status = messageConstants.apiResponses.INVALID_ENTITY_ID;
                                 userRolesUploadedData.push(userRole);
@@ -339,7 +339,7 @@ module.exports = class UserExtensionHelper {
                                 externalId : { $in : userRole.programs } 
                             },["_id"]);
 
-                            if ( !programDocuments.length > 0 ) {
+                            if ( !(programDocuments.length > 0) ) {
                                 userRole["_SYSTEM_ID"] = "";
                                 userRole.status = messageConstants.apiResponses.PROGRAM_NOT_FOUND;
                                 userRolesUploadedData.push(userRole);
@@ -703,7 +703,7 @@ module.exports = class UserExtensionHelper {
 
                 let userExtensionEntities = await this.getUserEntities(userId);
 
-                if ( !userExtensionEntities.length > 0 ) {
+                if ( !(userExtensionEntities.length > 0) ) {
                     resolve(allEntities);
                 } else {
                     allEntities = userExtensionEntities;
@@ -771,7 +771,7 @@ module.exports = class UserExtensionHelper {
             let entities = 
             await this.getUserEntities(userId);
 
-            if ( !entities.length > 0 ) {
+            if ( !(entities.length > 0) ) {
                 throw {
                     status : httpStatusCode.bad_request.status,
                     message : messageConstants.apiResponses.ENTITY_NOT_FOUND
@@ -812,7 +812,7 @@ module.exports = class UserExtensionHelper {
                 })
             }
             
-            if (!allEntities.length > 0) {
+            if (!(allEntities.length > 0)) {
                 throw { 
                     status: httpStatusCode.bad_request.status,
                     message: messageConstants.apiResponses.ENTITY_NOT_FOUND

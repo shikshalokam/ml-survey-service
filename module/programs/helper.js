@@ -194,7 +194,7 @@ module.exports = class ProgramsHelper {
           isAPrivateProgram : true
         },["name","externalId","description","_id"]);
 
-        if( !programsData.length > 0 ) {
+        if( !(programsData.length > 0 )) {
           return resolve({
             message : messageConstants.apiResponses.PROGRAM_NOT_FOUND,
             result : []
@@ -288,7 +288,7 @@ module.exports = class ProgramsHelper {
                 "updatedBy"
               ]);
 
-              if( !programsData.length > 0 ) {
+              if( !(programsData.length > 0) ) {
                 throw {
                   status : httpStatusCode["bad_request"].status,
                   message : messageConstants.apiResponses.PROGRAM_NOT_FOUND
@@ -329,7 +329,7 @@ module.exports = class ProgramsHelper {
 
             let programsData = await this.list({_id : programId },["_id"]);
 
-            if( !programsData.length > 0 ) {
+            if( !(programsData.length > 0) ) {
               throw {
                 status : httpStatusCode["bad_request"].status,
                 message : messageConstants.apiResponses.PROGRAM_NOT_FOUND

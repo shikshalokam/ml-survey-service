@@ -1561,7 +1561,7 @@ module.exports = class SolutionsHelper {
           let solutionDocument = 
           await this.solutionDocuments(solutionQuery, ["entityType"]);
 
-          if( !solutionDocument.length > 0 ) {
+          if( !(solutionDocument.length > 0) ) {
             throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
           }
   
@@ -1630,7 +1630,7 @@ module.exports = class SolutionsHelper {
             "entities"
         ])
  
-          if( !solutionData.length > 0 ) {
+          if( !(solutionData.length > 0) ) {
             throw {
               message : messageConstants.apiResponses.SOLUTION_NOT_FOUND,
               status : httpStatusCode["bad_request"].status
@@ -1682,7 +1682,7 @@ module.exports = class SolutionsHelper {
           let solutionDocument = 
           await this.solutionDocuments(solutionQuery, ["_id"]);
 
-          if( !solutionDocument.length > 0 ) {
+          if( !(solutionDocument.length > 0) ) {
             throw new Error(messageConstants.apiResponses.SOLUTION_NOT_FOUND);
           }
 
@@ -1729,7 +1729,7 @@ module.exports = class SolutionsHelper {
         let programData = 
         await programsHelper.programDocument({ _id : programId },["_id","scope"]);
  
-        if( !programData.length > 0 ) {
+        if( !(programData.length > 0 )) {
           return resolve({
             status : httpStatusCode.bad_request.status,
             message : messageConstants.apiResponses.PROGRAM_NOT_FOUND
@@ -1738,7 +1738,7 @@ module.exports = class SolutionsHelper {
 
         let solutionData = await this.solutionDocuments({ _id : solutionId },["_id"]);
 
-        if( !solutionData.length > 0 ) {
+        if( !(solutionData.length > 0) ) {
           return resolve({
             status : httpStatusCode.bad_request.status,
             message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
@@ -1796,7 +1796,7 @@ module.exports = class SolutionsHelper {
                 }
               }
 
-              if( !entityIds.length > 0 ) {
+              if( !(entityIds.length > 0) ) {
                 return resolve({
                   status : httpStatusCode.bad_request.status,
                   message : messageConstants.apiResponses.ENTITIES_NOT_FOUND
@@ -1814,7 +1814,7 @@ module.exports = class SolutionsHelper {
                 entitiesData = entityIds
               // }
 
-              if( !entitiesData.length > 0 ) {
+              if( !(entitiesData.length > 0) ) {
                 
                 return resolve({
                   status : httpStatusCode.bad_request.status,
@@ -1835,7 +1835,7 @@ module.exports = class SolutionsHelper {
                 "code" : 1
               });
   
-              if( !userRoles.length > 0 ) {
+              if( !(userRoles.length > 0) ) {
                 return resolve({
                   status : httpStatusCode.bad_request.status,
                   message : messageConstants.apiResponses.INVALID_ROLE_CODE
@@ -1892,7 +1892,7 @@ module.exports = class SolutionsHelper {
       try {
 
           let solutionDocument = await this.solutionDocuments({ externalId : solutionExternalId },["_id","themes"]);
-          if( !solutionDocument.length > 0 ) {
+          if( !(solutionDocument.length > 0 )) {
             return resolve({
               status : httpStatusCode.bad_request.status,
               message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
@@ -1900,7 +1900,7 @@ module.exports = class SolutionsHelper {
           }
 
           let themeData = solutionDocument[0].themes;
-          if(!themeData.length > 0){
+          if(!(themeData.length > 0)){
             return resolve({
               status : httpStatusCode.bad_request.status,
               message : messageConstants.apiResponses.THEMES_NOT_FOUND

@@ -477,7 +477,7 @@ module.exports = class ObservationSubmissionsHelper {
                 }
             );
             
-            if( !result.length > 0 ) {
+            if( !(result.length > 0 )) {
                 return resolve({
                     status : httpStatusCode.ok.status,
                     message : messageConstants.apiResponses.SUBMISSION_NOT_FOUND,
@@ -713,7 +713,7 @@ module.exports = class ObservationSubmissionsHelper {
                     "solutionId" : ObjectId(solutionId) 
                 },["observationId"]);
 
-                if(!submissionDocument.length > 0){
+                if(!(submissionDocument.length > 0)){
                     throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
                 }
 
@@ -1033,7 +1033,7 @@ module.exports = class ObservationSubmissionsHelper {
                     entitiesData =  entityInformation.concat(entityData.data);
                 }
             }
-            if( !entitiesData.length > 0 ) {
+            if( !(entitiesData.length > 0) ) {
                 throw {
                     message: messageConstants.apiResponses.ENTITIES_NOT_FOUND
                 }
