@@ -691,6 +691,12 @@ module.exports = class ProgramOperations {
         return new Promise(async (resolve, reject) => {
             try {
 
+                if (!/^[a-zA-Z0-9_-]+$/.test(req.query.id)) {
+                    return reject({
+                        status:  httpStatusCode.unprocessable_entity,
+                        message: httpStatusCode.unprocessable_entity,
+                    }); 
+                   }
                 let programDocument = await solutionHelper.solutionDocument(ObjectId(req.params._id), ["_id", "entities"]);
 
                 if (!programDocument.length) {
@@ -701,7 +707,7 @@ module.exports = class ProgramOperations {
                 }
 
                 programDocument = programDocument[0];
-
+                
                 let entityIdAndName = await database.models.entities.find(
                     {
                         _id: { $in: programDocument.entities },
