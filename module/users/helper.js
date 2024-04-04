@@ -831,7 +831,7 @@ module.exports = class UserHelper {
                     ["externalId","name","description"]
                 );
 
-                if( !userPrivateProgram.length > 0 ) {
+                if( !(userPrivateProgram.length > 0) ) {
                     return resolve({
                         message : messageConstants.apiResponses.PROGRAM_NOT_FOUND,
                         result : {}
