@@ -455,7 +455,7 @@ module.exports = class ProgramOperations {
 
                 assessorQueryObject["solutionId"] = ObjectId(req.params._id);
 
-                if (req.query.assessorName) assessorQueryObject["name"] = new RegExp(req.query.assessorName, 'i');
+                if (req.query.assessorName) assessorQueryObject["name"] = new RegExp(req.query.assessorName.replace(/[^a-zA-Z0-9_-]/g, ''), 'i');
 
                 if (req.query.csv && req.query.csv == "true") {
                     const fileName = `assessorReport`;
@@ -690,13 +690,6 @@ module.exports = class ProgramOperations {
         opsHelper.checkUserAuthorization(req.userDetails, req.params._id);
         return new Promise(async (resolve, reject) => {
             try {
-
-                if (!/^[a-zA-Z0-9_-]+$/.test(req.query.id)) {
-                    return reject({
-                        status:  httpStatusCode.unprocessable_entity,
-                        message: httpStatusCode.unprocessable_entity,
-                    }); 
-                   }
                 let programDocument = await solutionHelper.solutionDocument(ObjectId(req.params._id), ["_id", "entities"]);
 
                 if (!programDocument.length) {
@@ -711,7 +704,7 @@ module.exports = class ProgramOperations {
                 let entityIdAndName = await database.models.entities.find(
                     {
                         _id: { $in: programDocument.entities },
-                        "metaInformation.externalId": new RegExp(req.query.id, 'i')
+                        "metaInformation.externalId": new RegExp(req.query.id.replace(/[^a-zA-Z0-9_-]/g, ''), 'i')
                     },
                     {
                         "metaInformation.externalId": 1,
