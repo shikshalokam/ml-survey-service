@@ -1,8 +1,6 @@
-const { create, all } = require('mathjs')
-// create a mathjs instance
-const math = create(all)
+const math = require('mathjs')
 
-math.import({
+math.create(math.all).import({
   compareTextValues: function (string1, string2) {
 
     if(typeof string1 != "string" || typeof string2 != "string") {
