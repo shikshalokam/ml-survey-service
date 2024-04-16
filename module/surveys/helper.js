@@ -1084,7 +1084,7 @@ module.exports = class SurveysHelper {
                   ["_id", "resourcesStarted"]
                 );
                 if (
-                  !programUsers.length > 0 ||
+                  !(programUsers.length > 0) ||
                   (programUsers.length > 0 &&
                     programUsers[0].resourcesStarted == false)
                 ) {

@@ -690,7 +690,6 @@ module.exports = class ProgramOperations {
         opsHelper.checkUserAuthorization(req.userDetails, req.params._id);
         return new Promise(async (resolve, reject) => {
             try {
-
                 let programDocument = await solutionHelper.solutionDocument(ObjectId(req.params._id), ["_id", "entities"]);
 
                 if (!programDocument.length) {
@@ -701,7 +700,7 @@ module.exports = class ProgramOperations {
                 }
 
                 programDocument = programDocument[0];
-
+                
                 let entityIdAndName = await database.models.entities.find(
                     {
                         _id: { $in: programDocument.entities },

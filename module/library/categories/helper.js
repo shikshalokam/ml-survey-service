@@ -132,7 +132,7 @@ module.exports = class libraryCategoriesHelper {
                     ]
                 );
                 
-                if( !libraryCategories.length > 0 ) {
+                if( !(libraryCategories.length > 0) ) {
                     throw {
                         status : httpStatusCode.bad_request.status,
                         message : messageConstants.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND,

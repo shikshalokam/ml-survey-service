@@ -1,6 +1,6 @@
 const math = require('mathjs')
 
-math.import({
+math.create(math.all).import({
   compareTextValues: function (string1, string2) {
 
     if(typeof string1 != "string" || typeof string2 != "string") {

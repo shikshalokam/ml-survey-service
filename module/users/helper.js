@@ -347,14 +347,14 @@ module.exports = class UserHelper {
 
                 solutionIds = solutionIds.concat(surveySolutions);
 
-                if ( !programIds.length > 0 ) {
+                if ( !(programIds.length > 0) ) {
                     throw {
                         status : httpStatusCode.ok.status,
                         message : messageConstants.apiResponses.PROGRAM_NOT_MAPPED_TO_USER
                     }
                 }
 
-                if( !solutionIds.length > 0 ) {
+                if( !(solutionIds.length > 0) ) {
                     throw {
                         status : httpStatusCode.ok.status,
                         message : messageConstants.apiResponses.SOLUTION_NOT_MAPPED_TO_USER
@@ -367,7 +367,7 @@ module.exports = class UserHelper {
                     ["name","externalId","description"]
                 );
                 
-                if ( !programs.length > 0 ) {
+                if ( !(programs.length > 0) ) {
                     throw {
                         status : httpStatusCode.ok.status,
                         message : messageConstants.apiResponses.PROGRAM_NOT_FOUND
@@ -400,7 +400,7 @@ module.exports = class UserHelper {
                     ]
                 );
 
-                if ( !solutions.length > 0 ) {
+                if ( !(solutions.length > 0)) {
                     throw {
                         status : httpStatusCode.ok.status,
                         message : messageConstants.apiResponses.SOLUTION_NOT_FOUND
@@ -831,7 +831,7 @@ module.exports = class UserHelper {
                     ["externalId","name","description"]
                 );
 
-                if( !userPrivateProgram.length > 0 ) {
+                if( !(userPrivateProgram.length > 0) ) {
                     return resolve({
                         message : messageConstants.apiResponses.PROGRAM_NOT_FOUND,
                         result : {}

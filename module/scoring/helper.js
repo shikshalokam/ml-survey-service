@@ -385,7 +385,7 @@ module.exports = class ScoringHelper {
 
                                                     expressionResult[level] = {
                                                         expressionParsed: criteria.rubric.levels[level].expression,
-                                                        result: mathJs.eval(criteria.rubric.levels[level].expression, expressionVariables)
+                                                        result: mathJs.evaluate(criteria.rubric.levels[level].expression, expressionVariables)
                                                     };
 
                                                 } catch (error) {
@@ -786,7 +786,7 @@ module.exports = class ScoringHelper {
 
                                                         expressionResult[level] = {
                                                             expressionParsed: theme.rubric.levels[level].expression,
-                                                            result: mathJs.eval(theme.rubric.levels[level].expression, expressionVariables)
+                                                            result: mathJs.evaluate(theme.rubric.levels[level].expression, expressionVariables)
                                                         };
 
                                                     } catch (error) {

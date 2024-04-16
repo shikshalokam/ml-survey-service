@@ -142,7 +142,7 @@ module.exports = class ObservationsHelper {
           ]
         );
 
-        if (!solutionData.length > 0) {
+        if (!(solutionData.length > 0)) {
           throw {
             status: httpStatusCode.bad_request.status,
             message: messageConstants.apiResponses.SOLUTION_NOT_FOUND,
@@ -984,7 +984,7 @@ module.exports = class ObservationsHelper {
           })
           .lean();
 
-        if (!observationDocuments.length > 0) {
+        if (!(observationDocuments.length > 0)) {
           throw {
             message: messageConstants.apiResponses.NO_COMPLETED_OBSERVATIONS,
           };
@@ -1539,7 +1539,7 @@ module.exports = class ObservationsHelper {
           ["_id"]
         );
 
-        if (!observation.length > 0) {
+        if (!(observation.length > 0)) {
           throw {
             message: messageConstants.apiResponses.OBSERVATION_NOT_FOUND,
             status: httpStatusCode["bad_request"].status,
@@ -1556,7 +1556,7 @@ module.exports = class ObservationsHelper {
             ["status", "submissionNumber"]
           );
 
-        if (!observationSubmissions.length > 0) {
+        if (!(observationSubmissions.length > 0)) {
           throw {
             message:
               messageConstants.apiResponses.OBSERVATION_SUBMISSSION_NOT_FOUND,
@@ -2060,7 +2060,7 @@ module.exports = class ObservationsHelper {
             entitiesData = entityData.data;
           }
 
-          if (!entitiesData.length > 0) {
+          if (!(entitiesData.length > 0)) {
             throw {
               message: messageConstants.apiResponses.ENTITIES_NOT_FOUND,
             };
@@ -2327,7 +2327,7 @@ module.exports = class ObservationsHelper {
         }
 
         //check solution entity type is exist in allowed roles
-        if ( !allowedEntityTypes.length > 0 || 
+        if ( !(allowedEntityTypes.length > 0) || 
             !(allowedEntityTypes.includes(solutionDocument[0].entityType)) || 
             !(Object.keys(bodyData).includes(allowedEntityTypes[0]))) 
         {
@@ -2377,7 +2377,7 @@ module.exports = class ObservationsHelper {
           ["entityTypes.entityType"]
         );
 
-        if (!rolesDocument.length > 0) {
+        if (!(rolesDocument.length > 0)) {
           throw {
             status: httpStatusCode.bad_request.status,
             message: messageConstants.apiResponses.USER_ROLES_NOT_FOUND,
@@ -2407,7 +2407,7 @@ module.exports = class ObservationsHelper {
             stateLocationCode,
             entityKey
           );
-          if (!subEntities.length > 0) {
+          if (!(subEntities.length > 0)) {
             return resolve({
               message: messageConstants.apiResponses.ENTITIES_NOT_FOUND,
               result: [],

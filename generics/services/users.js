@@ -291,7 +291,7 @@ const locationSearch = function ( filterData, pageSize = "", pageNo = "", search
 
 async function getSubEntitiesBasedOnEntityType( parentIds, entityType, result ) {
      
-    if( !parentIds.length > 0 ){
+    if( !(parentIds.length > 0) ){
         return result;
     }
     let bodyData={

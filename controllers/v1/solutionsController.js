@@ -600,7 +600,7 @@ module.exports = class Solutions extends Abstract {
 
         let themeData = await csv().fromString(req.files.themes.data.toString());
 
-        if(!themeData.length>0) {
+        if(!(themeData.length>0)) {
           throw new Error("Bad data.");
         }
 
@@ -695,7 +695,7 @@ module.exports = class Solutions extends Abstract {
 
         let criteriaData = await csv().fromString(req.files.criteria.data.toString());
 
-        if(!criteriaData.length>0) {
+        if(!(criteriaData.length>0)) {
           throw new Error("Bad data.");
         }
 

@@ -1518,7 +1518,7 @@ module.exports = class SubmissionsHelper {
                 }
             );
 
-            if( !result.length > 0 ) {
+            if( !(result.length > 0) ) {
                 return resolve({
                     status : httpStatusCode.bad_request.status,
                     message : messageConstants.apiResponses.SUBMISSION_NOT_FOUND,
@@ -1587,7 +1587,7 @@ module.exports = class SubmissionsHelper {
                         projection
                     );
                 
-                if (!submissionDocument.length > 0) {
+                if (!(submissionDocument.length > 0)) {
                     throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND);
                 }
 
@@ -1821,7 +1821,7 @@ module.exports = class SubmissionsHelper {
                         projection,
                     );
 
-                if (!submissionDocument.length > 0) {
+                if (!(submissionDocument.length > 0)) {
                     throw new Error(messageConstants.apiResponses.SUBMISSION_NOT_FOUND)
                 }
 
