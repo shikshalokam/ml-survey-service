@@ -26,7 +26,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
-const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF
+const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF;
 /**
  * SurveysHelper
  * @class
@@ -1069,20 +1069,21 @@ module.exports = class SurveysHelper {
           submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
         } else {
           // join survey's program. PII data consent is given via this api call.
-          if(programJoinEnabled !== messageConstants.common.OFF) {
+          if (programJoinEnabled !== messageConstants.common.OFF) {
             if (solutionDocument.programId && userToken !== "") {
               if (
                 programDocument.length > 0 &&
                 programDocument[0].hasOwnProperty("requestForPIIConsent")
               ) {
                 //fetch programUsers data
-                let programUsers = await programUsersHelper.programUsersDocuments(
-                  {
-                    userId: userId,
-                    programId: solutionDocument.programId,
-                  },
-                  ["_id", "resourcesStarted"]
-                );
+                let programUsers =
+                  await programUsersHelper.programUsersDocuments(
+                    {
+                      userId: userId,
+                      programId: solutionDocument.programId,
+                    },
+                    ["_id", "resourcesStarted"]
+                  );
                 if (
                   !(programUsers.length > 0) ||
                   (programUsers.length > 0 &&
@@ -1103,7 +1104,8 @@ module.exports = class SurveysHelper {
                   if (!joinProgram.success) {
                     return resolve({
                       status: httpStatusCode.bad_request.status,
-                      message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
+                      message:
+                        messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
                     });
                   }
                 }
@@ -1413,6 +1415,103 @@ module.exports = class SurveysHelper {
     });
   }
 
+  /**
+   * List of surveys based on UserId.
+   * @method
+   * @name listSurveyByUserId
+   * @param {String} requestUserId - id of the user to fetch docmunet.
+   * @param {String} queryType -     type of collection to query whether its survey or obs
+   * @returns {JSON} List of surveys.
+   */
+
+  static listSurveyByUserId(requestUserId, queryType = "") {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let surveyDataofUser = await this.surveyDocuments(
+          { createdBy: requestUserId },
+          ["_id", "solutionId", "userId", "name", "createdBy"]
+        );
+
+        if (!(surveyDataofUser.length > 0)) {
+          return resolve({
+            status: httpStatusCode.bad_request.status,
+            message: messageConstants.apiResponses.SURVEY_NOT_FOUND,
+          });
+        }
+        let surveyListedBasedOnStatus = [];
+        let surveySolutionIds = [];
+
+        if (queryType != "") {
+          if (surveyDataofUser.length > 0) {
+            surveySolutionIds = surveyDataofUser.map(function (obj) {
+              return obj.solutionId;
+            });
+          }
+          let surveySubmissionFindQuery = {};
+          if (surveySolutionIds.length > 0) {
+            surveySubmissionFindQuery = {
+              solutionId: { $in: surveySolutionIds },
+              createdBy: requestUserId,
+            };
+          }
+          let surveySubmissionData =
+            await surveySubmissionsHelper.surveySubmissionDocuments(
+              surveySubmissionFindQuery,
+              [
+                "_id",
+                "name",
+                "status",
+                "completedDate",
+                "createdAt",
+                "solutionId",
+                "updatedAt",
+              ]
+            );
+
+          surveyDataofUser.filter((eachSurvey) => {
+            surveySubmissionData.forEach((eachSurveySubmission) => {
+              if (
+                eachSurveySubmission.solutionId.toString() ===
+                eachSurvey.solutionId.toString()
+              ) {
+                return surveyListedBasedOnStatus.push({
+                  _id: eachSurvey._id,
+                  userId: eachSurvey.createdBy,
+                  name: eachSurvey.name,
+                  solutionId: eachSurvey.solutionId,
+                  createdAt: eachSurveySubmission.createdAt,
+                  status: eachSurveySubmission.status,
+                  lastUpdateOrCompletedDate:
+                    eachSurveySubmission.status ===
+                    messageConstants.common.SUBMISSION_STATUS_COMPLETED
+                      ? eachSurveySubmission.completedDate
+                      : eachSurveySubmission.updatedAt,
+                });
+              }
+            });
+          });
+        }
+
+        return resolve({
+          success: true,
+          message: messageConstants.apiResponses.SURVEYS_FETCHED,
+          data:
+            queryType != ""
+              ? surveyListedBasedOnStatus
+              : surveyDataofUser.length,
+        });
+      } catch (error) {
+        return resolve({
+          success: false,
+          message: error.message,
+          data: {
+            data: [],
+            count: 0,
+          },
+        });
+      }
+    });
+  }
   /**
    * Get list of surveys with the targetted ones.
    * @method
