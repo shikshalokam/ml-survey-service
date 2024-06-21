@@ -113,7 +113,7 @@ module.exports = async function (req, res, next) {
     "questions/delete/",
     "observationSubmissions/disable/",
     "admin/createIndex",
-    "userOverview/listObservationInfo"
+    "users/listObservationInfo"
   ];
   
   let performInternalAccessTokenCheck = false;
