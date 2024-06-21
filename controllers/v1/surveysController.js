@@ -751,7 +751,7 @@ module.exports = class Surveys extends Abstract {
       try {
         let surveys = await surveysHelper.userSurvey(
           req.userDetails.userId,
-          req.query.type ? req.query.type : ""
+          req.query.stats,
         );
         return resolve({
           message: surveys.message,

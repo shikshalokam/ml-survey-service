@@ -1424,81 +1424,29 @@ module.exports = class SurveysHelper {
    * @returns {JSON} List or count of surveys for specific user.
    */
 
-  static userSurvey(requestUserId, queryType = "") {
+  static userSurvey(requestUserId, stats = "true") {
     return new Promise(async (resolve, reject) => {
       try {
-        let surveyListedBasedOnStatus = [];
-        let bigNumberOfSurvey;
-        //if there is an queryType
-        if (queryType != "") {
-          //match query to get survey based on userId
-          let surveyMatchQuery = {
-            $match: {
-              createdBy: requestUserId,
-            },
-          };
-          let surveySolutionIds = [];
-
-          let surveyDocument = await this.getAggregate(surveyMatchQuery);
-          let surveyDataofUser = surveyDocument[0].data;
-          //getting solutionIds rom surveyDocuments to check the status of survey in Surveysubmission
-          if (surveyDataofUser.length > 0) {
-            surveySolutionIds = surveyDataofUser.map(function (obj) {
-              return obj.solutionId;
-            });
-          }
-          let surveySubmissionMatchQuery = {};
-          if (surveySolutionIds.length > 0) {
-            surveySubmissionMatchQuery = {
-              $match: {
-                solutionId: { $in: surveySolutionIds },
-                createdBy: requestUserId,
-              },
-            };
-          }
-
-          let surveySubmissionData = await surveySubmissionsHelper.getAggregate(
-            surveySubmissionMatchQuery
-          );
-          // matching surveysubmission and survey documents to get surveyStatus and other details
-          surveyDataofUser.filter((eachSurvey) => {
-            surveySubmissionData[0].data.forEach((eachSurveySubmission) => {
-              if (
-                eachSurveySubmission.solutionId.toString() ===
-                eachSurvey.solutionId.toString()
-              ) {
-                return surveyListedBasedOnStatus.push({
-                  _id: eachSurvey._id,
-                  userId: eachSurvey.createdBy,
-                  name: eachSurvey.name,
-                  solutionId: eachSurvey.solutionId,
-                  createdAt: eachSurveySubmission.createdAt,
-                  status: eachSurveySubmission.status,
-                  lastUpdateOrCompletedDate:
-                    eachSurveySubmission.status ===
-                    messageConstants.common.SUBMISSION_STATUS_COMPLETED
-                      ? eachSurveySubmission.completedDate
-                      : eachSurveySubmission.updatedAt,
-                });
-              }
-            });
+        if (stats === "false") {
+          let surveyDocument = await this.getAggregate(requestUserId);
+          return resolve({
+            success: true,
+            message: messageConstants.apiResponses.SURVEYS_FETCHED,
+            data: surveyDocument,
           });
         } else {
-           bigNumberOfSurvey = await this.countDocuments({
+          let surveyCount = await this.countDocuments({
             createdBy: requestUserId,
           });
-        }
 
-        return resolve({
-          success: true,
-          message: messageConstants.apiResponses.SURVEYS_FETCHED,
-          data:
-            queryType != ""
-              ? surveyListedBasedOnStatus
-              : bigNumberOfSurvey,
-        });
+          return resolve({
+            success: true,
+            message: messageConstants.apiResponses.SURVEYS_FETCHED,
+            data: surveyCount,
+          });
+        }
       } catch (error) {
-        return resolve({
+        return reject({
           success: false,
           message: error.message,
           data: {
@@ -1523,70 +1471,70 @@ module.exports = class SurveysHelper {
    * @returns {Array} survey details.
    */
 
-  static getAggregate(
-    filteredData,
-    pageSize = 100,
-    pageNo = 1,
-    projection,
-    search = ""
-  ) {
+  static getAggregate(createdBy) {
     return new Promise(async (resolve, reject) => {
       try {
-        let surveySubmissionDocument = [];
-
-        let projection1 = {};
-
-        if (projection) {
-          projection1["$project"] = projection;
-        } else {
-          projection1["$project"] = {
-            name: 1,
-            userId: 1,
-            createdBy: 1,
-            solutionId: 1,
-            _id: 1,
-          };
-        }
-
-        if (search !== "") {
-          filteredData["$match"]["$or"] = [];
-          filteredData["$match"]["$or"].push(
-            {
-              name: new RegExp(search, "i"),
+        const pipeline = [
+          {
+            $match: {
+              createdBy: createdBy,
             },
-            {
-              description: new RegExp(search, "i"),
-            }
-          );
-        }
-
-        let facetQuery = {};
-        facetQuery["$facet"] = {};
-
-        facetQuery["$facet"]["totalCount"] = [{ $count: "count" }];
-        facetQuery["$facet"]["data"] = [
-          { $skip: pageSize * (pageNo - 1) },
-          { $limit: pageSize },
+          },
+          {
+            $lookup: {
+              from: "surveySubmissions",
+              let: {
+                surveyId: "$_id",
+                createdBy: "$createdBy",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$surveyId", "$$surveyId"] },
+                        { $eq: ["$createdBy", "$$createdBy"] },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: "submissions",
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              _id: 1,
+              description: 1,
+              createdBy: 1,
+              submissions: {
+                $map: {
+                  input: "$submissions",
+                  as: "submission",
+                  in: {
+                    _id: "$$submission._id",
+                    title: "$$submission.title",
+                    status: "$$submission.status",
+                    createdAt: "$$submission.createdAt",
+                    lastUpdateOrCompletedDate:
+                      "$$submission.status" ===
+                      messageConstants.common.SUBMISSION_STATUS_COMPLETED
+                        ? "$$submission.completedDate"
+                        : "$$submission.updatedAt",
+                  },
+                },
+              },
+            },
+          },
         ];
 
-        let projection2 = {};
-        projection2["$project"] = {
-          data: 1,
-          count: {
-            $arrayElemAt: ["$totalCount.count", 0],
-          },
-        };
-        surveySubmissionDocument.push(
-          filteredData,
-          projection1,
-          facetQuery,
-          projection2
-        );
-        let aggregatedData = await database.models.surveys.aggregate(
-          surveySubmissionDocument
-        );
-        return resolve(aggregatedData);
+        let surveyUpdate = await database.models.surveys.aggregate(pipeline);
+        if (surveyUpdate) {
+          return resolve(surveyUpdate);
+        }
       } catch (error) {
+        console.log(error);
         return reject(error);
       }
     });
