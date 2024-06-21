@@ -1462,13 +1462,8 @@ module.exports = class SurveysHelper {
    * aggregate function.
    * @method
    * @name getAggregate
-   * @param {Array} [filteredData = []] - matchQuerry array
-   * @param {Number} [pageSize]         - pageSize 
-   * @param {Number} [pageNo]           - pageNo 
-   * @param {Object} [projection ]      - projection 
-   * @param {String} [search]           - searchText 
-
-   * @returns {Array} survey details.
+   * @param {String} [createdBy]         - userId
+   * * @returns {Array}                  survey details.
    */
 
   static getAggregate(createdBy) {
