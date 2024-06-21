@@ -1427,17 +1427,17 @@ module.exports = class SurveysHelper {
   static listSurveyByUserId(requestUserId, queryType = "") {
     return new Promise(async (resolve, reject) => {
       try {
-        let surveyDataofUser = await this.surveyDocuments(
-          { createdBy: requestUserId },
-          ["_id", "solutionId", "userId", "name", "createdBy"]
-        );
 
-        if (!(surveyDataofUser.length > 0)) {
-          return resolve({
-            status: httpStatusCode.bad_request.status,
-            message: messageConstants.apiResponses.SURVEY_NOT_FOUND,
-          });
+        let surveyMatchQuery ={
+          $match:{
+             createdBy: requestUserId 
+
+          }
         }
+        let surveyDocument = await this.getAggregate(
+          surveyMatchQuery
+        );
+        let surveyDataofUser= surveyDocument[0].data
         let surveyListedBasedOnStatus = [];
         let surveySolutionIds = [];
 
@@ -1447,29 +1447,21 @@ module.exports = class SurveysHelper {
               return obj.solutionId;
             });
           }
-          let surveySubmissionFindQuery = {};
+          let surveySubmissionMatchQuery = {};
           if (surveySolutionIds.length > 0) {
-            surveySubmissionFindQuery = {
-              solutionId: { $in: surveySolutionIds },
-              createdBy: requestUserId,
+            surveySubmissionMatchQuery = {
+              $match: {
+                solutionId: { $in: surveySolutionIds },
+                createdBy: requestUserId,
+              },
             };
           }
-          let surveySubmissionData =
-            await surveySubmissionsHelper.surveySubmissionDocuments(
-              surveySubmissionFindQuery,
-              [
-                "_id",
-                "name",
-                "status",
-                "completedDate",
-                "createdAt",
-                "solutionId",
-                "updatedAt",
-              ]
-            );
 
+          let surveySubmissionData = await surveySubmissionsHelper.getAggregate(
+            surveySubmissionMatchQuery
+          );
           surveyDataofUser.filter((eachSurvey) => {
-            surveySubmissionData.forEach((eachSurveySubmission) => {
+            surveySubmissionData[0].data.forEach((eachSurveySubmission) => {
               if (
                 eachSurveySubmission.solutionId.toString() ===
                 eachSurvey.solutionId.toString()
@@ -1498,7 +1490,7 @@ module.exports = class SurveysHelper {
           data:
             queryType != ""
               ? surveyListedBasedOnStatus
-              : surveyDataofUser.length,
+              : surveyDocument[0].count,
         });
       } catch (error) {
         return resolve({
@@ -1509,6 +1501,83 @@ module.exports = class SurveysHelper {
             count: 0,
           },
         });
+      }
+    });
+  }
+
+   /**
+   * aggregate function.
+   * @method
+   * @name getAggregate
+   * @param {Array} [filteredData = []] - matchQuerry array
+   * @param {Number} [pageSize]         - pageSize 
+   * @param {Number} [pageNo]           - pageNo 
+   * @param {Object} [projection ]      - projection 
+   * @param {String} [search]           - searchText 
+
+   * @returns {Array} survey details.
+   */
+
+   static getAggregate(filteredData, pageSize=100, pageNo=1, projection, search = "") {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let surveySubmissionDocument = [];
+
+        let projection1 = {};
+
+        if (projection) {
+          projection1["$project"] = projection;
+        } else {
+          projection1["$project"] = {
+            name: 1,
+            userId: 1,
+            createdBy: 1,
+            solutionId: 1,
+            _id: 1,
+          };
+        }
+
+        if (search !== "") {
+          filteredData["$match"]["$or"] = [];
+          filteredData["$match"]["$or"].push(
+            {
+              name: new RegExp(search, "i"),
+            },
+            {
+              description: new RegExp(search, "i"),
+            }
+          );
+        }
+
+        let facetQuery = {};
+        facetQuery["$facet"] = {};
+
+        facetQuery["$facet"]["totalCount"] = [{ $count: "count" }];
+          facetQuery["$facet"]["data"] = [
+            { $skip:pageSize * (pageNo - 1) },
+            { $limit: pageSize },
+          ];
+        
+
+        let projection2 = {};
+        projection2["$project"] = {
+          data: 1,
+          count: {
+            $arrayElemAt: ["$totalCount.count", 0],
+          },
+        };
+        surveySubmissionDocument.push(
+          filteredData,
+          projection1,
+          facetQuery,
+          projection2
+        );
+        let aggregatedData = await database.models.surveys.aggregate(
+          surveySubmissionDocument
+        );
+        return resolve(aggregatedData);
+      } catch (error) {
+        return reject(error);
       }
     });
   }

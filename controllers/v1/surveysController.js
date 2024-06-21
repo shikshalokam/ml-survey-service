@@ -741,12 +741,12 @@ module.exports = class Surveys extends Abstract {
   /**
    * List of surveys based on user.
    * @method
-   * @name listSurveyByUserId
+   * @name userSurvey
    * @param {Object} req - request data.
    * @returns {JSON} List of surveys based on user.
    */
 
-  async listSurveyByUserId(req) {
+  async userSurvey(req) {
     return new Promise(async (resolve, reject) => {
       try {
         let surveys = await surveysHelper.listSurveyByUserId(
