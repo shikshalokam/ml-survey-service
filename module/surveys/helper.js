@@ -1487,7 +1487,6 @@ module.exports = class SurveysHelper {
            bigNumberOfSurvey = await this.countDocuments({
             createdBy: requestUserId,
           });
-          console.log(bigNumberOfSurvey, "this is a big number of");
         }
 
         return resolve({
