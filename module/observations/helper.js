@@ -93,7 +93,122 @@ module.exports = class ObservationsHelper {
       }
     });
   }
+    /**
+     * Get Observation & submittion data document aggregation based on filtered data provided.
+     * @method
+     * @name agrregatedObservarionAndSubmissionResult
+     * @param {Object} createdBy -filter data.
+     * @returns {Array} - List of observations.
+     */
 
+    static agrregatedObservartionAndSubmissionResult({
+      createdBy
+    }) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const pipeline = [{
+              $match: {
+                createdBy: createdBy
+              }
+            },
+            {
+              $lookup: {
+                from: 'observationSubmissions',
+                localField: '_id',
+                foreignField: 'observationId',
+                as: 'submissions'
+              }
+            },
+            {
+              $project: {
+                name: 1,
+                isAPrivateProgram: 1,
+                entities: 1,
+                status: 1,
+                description: 1,
+                submissions: {
+                  $map: {
+                    input: '$submissions',
+                    as: 'submission',
+                    in: {
+                      _id: '$$submission._id',
+                      title: '$$submission.title',
+                      status: '$$submission.status',
+                      createdBy: '$$submission.createdBy',
+                      entityId: '$$submission.entityId',
+                      entityType: '$$submission.entityType',
+                      createdAt: '$$submission.createdAt',
+                      updatedAt: '$$submission.updatedAt',
+                      entityName: '$$submission.entityInformation.name'
+                    }
+
+                  }
+                }
+              }
+            }
+          ];
+          let observationUpdate = await database.models.observations.aggregate(pipeline);
+          if (observationUpdate) {
+            return resolve(observationUpdate);
+          }
+        } catch (error) {
+          console.log(error)
+          return reject(error);
+        }
+      });
+    }
+    /**
+     * get usersObservationDocuments documents started by user.
+     * @method
+     * @name usersObservation
+     * @param  {String} userId - userId of user.
+     * @param  {String} solutionId - solution Id.
+     * @returns {result} - all the usersObservation in particular solution which user has submitted. 
+     */
+
+    static usersObservation({
+      stats,
+      userId
+    }) {
+      return new Promise(async (resolve, reject) => {
+        try {
+
+          let fields = [
+            'name',
+            'isAPrivateProgram',
+            'entities',
+            'status',
+            'description',
+
+          ]
+
+          if (stats == 'true') {
+
+            let countObservations = await this.countDocuments({
+              createdBy: userId
+            })
+
+            resolve({
+              count: countObservations
+            })
+          } else {
+
+            let observationDocumentAggregated =
+              await this.agrregatedObservartionAndSubmissionResult({
+                  createdBy: userId
+                },
+                fields
+              );
+
+            resolve(observationDocumentAggregated)
+
+          }
+
+        } catch (err) {
+          reject(err)
+        }
+      })
+    }
   /**
    * Update observations
    * @method
