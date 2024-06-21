@@ -1418,30 +1418,30 @@ module.exports = class SurveysHelper {
   /**
    * List of surveys based on UserId.
    * @method
-   * @name listSurveyByUserId
+   * @name userSurvey
    * @param {String} requestUserId - id of the user to fetch docmunet.
    * @param {String} queryType -     type of collection to query whether its survey or obs
-   * @returns {JSON} List of surveys.
+   * @returns {JSON} List or count of surveys for specific user.
    */
 
-  static listSurveyByUserId(requestUserId, queryType = "") {
+  static userSurvey(requestUserId, queryType = "") {
     return new Promise(async (resolve, reject) => {
       try {
-
-        let surveyMatchQuery ={
-          $match:{
-             createdBy: requestUserId 
-
-          }
-        }
-        let surveyDocument = await this.getAggregate(
-          surveyMatchQuery
-        );
-        let surveyDataofUser= surveyDocument[0].data
         let surveyListedBasedOnStatus = [];
-        let surveySolutionIds = [];
-
+        let bigNumberOfSurvey;
+        //if there is an queryType
         if (queryType != "") {
+          //match query to get survey based on userId
+          let surveyMatchQuery = {
+            $match: {
+              createdBy: requestUserId,
+            },
+          };
+          let surveySolutionIds = [];
+
+          let surveyDocument = await this.getAggregate(surveyMatchQuery);
+          let surveyDataofUser = surveyDocument[0].data;
+          //getting solutionIds rom surveyDocuments to check the status of survey in Surveysubmission
           if (surveyDataofUser.length > 0) {
             surveySolutionIds = surveyDataofUser.map(function (obj) {
               return obj.solutionId;
@@ -1460,6 +1460,7 @@ module.exports = class SurveysHelper {
           let surveySubmissionData = await surveySubmissionsHelper.getAggregate(
             surveySubmissionMatchQuery
           );
+          // matching surveysubmission and survey documents to get surveyStatus and other details
           surveyDataofUser.filter((eachSurvey) => {
             surveySubmissionData[0].data.forEach((eachSurveySubmission) => {
               if (
@@ -1482,6 +1483,11 @@ module.exports = class SurveysHelper {
               }
             });
           });
+        } else {
+           bigNumberOfSurvey = await this.countDocuments({
+            createdBy: requestUserId,
+          });
+          console.log(bigNumberOfSurvey, "this is a big number of");
         }
 
         return resolve({
@@ -1490,7 +1496,7 @@ module.exports = class SurveysHelper {
           data:
             queryType != ""
               ? surveyListedBasedOnStatus
-              : surveyDocument[0].count,
+              : bigNumberOfSurvey,
         });
       } catch (error) {
         return resolve({
@@ -1505,7 +1511,7 @@ module.exports = class SurveysHelper {
     });
   }
 
-   /**
+  /**
    * aggregate function.
    * @method
    * @name getAggregate
@@ -1518,7 +1524,13 @@ module.exports = class SurveysHelper {
    * @returns {Array} survey details.
    */
 
-   static getAggregate(filteredData, pageSize=100, pageNo=1, projection, search = "") {
+  static getAggregate(
+    filteredData,
+    pageSize = 100,
+    pageNo = 1,
+    projection,
+    search = ""
+  ) {
     return new Promise(async (resolve, reject) => {
       try {
         let surveySubmissionDocument = [];
@@ -1553,11 +1565,10 @@ module.exports = class SurveysHelper {
         facetQuery["$facet"] = {};
 
         facetQuery["$facet"]["totalCount"] = [{ $count: "count" }];
-          facetQuery["$facet"]["data"] = [
-            { $skip:pageSize * (pageNo - 1) },
-            { $limit: pageSize },
-          ];
-        
+        facetQuery["$facet"]["data"] = [
+          { $skip: pageSize * (pageNo - 1) },
+          { $limit: pageSize },
+        ];
 
         let projection2 = {};
         projection2["$project"] = {
@@ -1576,6 +1587,32 @@ module.exports = class SurveysHelper {
           surveySubmissionDocument
         );
         return resolve(aggregatedData);
+      } catch (error) {
+        return reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get surveys document Count based on filtered data provided.
+   * @method
+   * @name countDocuments
+   * @param {Object} [findQuery = "all"] -filter data.
+   * @returns {Array} - Count of Survey.
+   */
+
+  static countDocuments(findQuery = "all") {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let queryObject = {};
+        if (findQuery != "all") {
+          queryObject = _.merge(queryObject, findQuery);
+        }
+        let countDocuments = await database.models.surveys
+          .countDocuments(queryObject)
+          .lean();
+
+        return resolve(countDocuments);
       } catch (error) {
         return reject(error);
       }

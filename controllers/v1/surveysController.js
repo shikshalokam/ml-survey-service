@@ -749,7 +749,7 @@ module.exports = class Surveys extends Abstract {
   async userSurvey(req) {
     return new Promise(async (resolve, reject) => {
       try {
-        let surveys = await surveysHelper.listSurveyByUserId(
+        let surveys = await surveysHelper.userSurvey(
           req.userDetails.userId,
           req.query.type ? req.query.type : ""
         );
