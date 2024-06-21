@@ -667,91 +667,18 @@ module.exports = class Users {
     * @param {Object} req -request Data.
     * @returns {JSON} - List of observation consumed by an user
     */
-
-    listObservationInfo(req) {
+    usersObservation(req) {
         return new Promise(async (resolve, reject) => {
             try {
     
-                let queryObject = {
-                    createdBy: req.userDetails.userId,
-                }
-    
-                let stats = req.query.stats;
+                let userObservationDetails = await usersHelper.usersObservation({
+                    stats:req.query.stats,
+                    userId:req.userDetails.userId
+                })
                 
-                let fields = [
-                    'name',
-                    'isAPrivateProgram',
-                    'entities',
-                    'status',
-                    'description',
-    
-                ] 
-    
-                if (stats == "true") {
-                  fields = ["_id"];
-                }
-                let observationDocument =
-                  await observationsHelper.observationDocuments(
-                    queryObject,
-                    fields
-                  );
-                if (stats !== "true") {
-                  for (let i = 0; i < observationDocument.length; i++) {
-                    let submissionInfoArray = [];
-                    let observationId = observationDocument[i]._id;
-                    let entityArray = observationDocument[i].entities;
-    
-                    for (let j = 0; j < entityArray.length; j++) {
-                      let entityId = entityArray[j];
-                      let observationSubmissions =
-                        await observationSubmissionsHelper.observationSubmissionsDocument(
-                          {
-                            observationId: observationId,
-                            entityId: entityId,
-                          },
-                          [
-                            "_id",
-                            "title",
-                            "status",
-                            "createdBy",
-                            "entityId",
-                            "entity.type",
-                            "entityInformation.name",
-                            "entityType",
-                            "createdAt",
-                            "updatedAt",
-                          ]
-                        );
-    
-                      if (
-                        observationSubmissions &&
-                        observationSubmissions.length > 0
-                      ) {
-                        let updatedAt = observationSubmissions[0].updatedAt;
-                        let createdAt = observationSubmissions[0].createdAt;
-    
-                        delete observationSubmissions[0].updatedAt;
-                        delete observationSubmissions[0].createdAt;
-                        observationSubmissions[0].started = createdAt;
-                        if (
-                          observationSubmissions &&
-                          observationSubmissions[0].status == "completed"
-                        ) {
-                          observationSubmissions[0].completed = updatedAt;
-                        }
-                      } else {
-                        continue;
-                      }
-    
-                      submissionInfoArray.push(observationSubmissions[0]);
-                    }
-                    observationDocument[i]["submissionInfoArray"] =
-                      submissionInfoArray;
-                  }
-                }
                 return resolve({
                     message:messageConstants.apiResponses.OBSERVATION_OVERVIEW_INFORMATION_FETCHED,
-                    result: observationDocument
+                    result: userObservationDetails
                 });
     
             } catch (error) {
@@ -764,5 +691,4 @@ module.exports = class Users {
             }
         })
     }
-
 }

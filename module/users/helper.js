@@ -1047,6 +1047,113 @@ module.exports = class UserHelper {
         })
     }
 
+        /**
+      * get usersObservationDocuments documents started by user.
+      * @method
+      * @name usersObservation
+      * @param  {String} userId - userId of user.
+      * @param  {String} solutionId - solution Id.
+      * @returns {result} - all the usersObservation in particular solution which user has submitted. 
+     */
+
+        static usersObservation({
+            stats,
+            userId
+        }){
+            return new Promise(async (resolve, reject) => {
+                try {
+
+                    let fields = [
+                        'name',
+                        'isAPrivateProgram',
+                        'entities',
+                        'status',
+                        'description',
+        
+                    ] 
+
+                    if(stats == 'true')
+                    {
+
+                        let countObservations = await observationsHelper.countDocuments({createdBy:userId})
+                        
+                        resolve({
+                            count:countObservations
+                        })
+                    }
+                    else{
+                        let observationDocument =
+                        await observationsHelper.observationDocuments(
+                            {createdBy:userId},
+                          fields
+                        );
+
+                        for (let i = 0; i < observationDocument.length; i++) {
+                            let submissionInfoArray = [];
+                            let observationId = observationDocument[i]._id;
+                            let entityArray = observationDocument[i].entities;
+            
+                            for (let j = 0; j < entityArray.length; j++) {
+                              let entityId = entityArray[j];
+                              let observationSubmissions =
+                                await observationSubmissionsHelper.observationSubmissionsDocument(
+                                  {
+                                    observationId: observationId,
+                                    entityId: entityId,
+                                  },
+                                  [
+                                    "_id",
+                                    "title",
+                                    "status",
+                                    "createdBy",
+                                    "entityId",
+                                    "entity.type",
+                                    "entityInformation.name",
+                                    "entityType",
+                                    "createdAt",
+                                    "updatedAt",
+                                  ]
+                                );
+            
+                              if (
+                                observationSubmissions &&
+                                observationSubmissions.length > 0
+                              ) {
+                                let updatedAt = observationSubmissions[0].updatedAt;
+                                let createdAt = observationSubmissions[0].createdAt;
+            
+                                delete observationSubmissions[0].updatedAt;
+                                delete observationSubmissions[0].createdAt;
+                                observationSubmissions[0].started = createdAt;
+                                if (
+                                  observationSubmissions &&
+                                  observationSubmissions[0].status == "completed"
+                                ) {
+                                  observationSubmissions[0].completed = updatedAt;
+                                }
+                              } else {
+                                continue;
+                              }
+            
+                              submissionInfoArray.push(observationSubmissions[0]);
+                            }
+                            observationDocument[i]["submissionInfoArray"] =
+                              submissionInfoArray;
+                          }
+
+                        resolve({
+                            observationDocument
+                        })
+
+                    }
+    
+                }
+                catch (err) {
+                    reject(err)
+                }
+            })
+        }
+
 };
 
   /**

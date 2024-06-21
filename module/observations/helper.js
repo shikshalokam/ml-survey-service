@@ -34,6 +34,31 @@ const validateEntities = process.env.VALIDATE_ENTITIES
  * @class
  */
 module.exports = class ObservationsHelper {
+    /**
+   * Get Observation document based on filtered data provided.
+   * @method
+   * @name countDocuments
+   * @param {Object} [findQuery = "all"] -filter data.
+   * @returns {Array} - Count of observations.
+   */
+
+    static countDocuments(findQuery = "all",) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          let queryObject = {};
+          if (findQuery != "all") {
+            queryObject = _.merge(queryObject, findQuery);
+          }
+          let countDocuments = await database.models.observations
+            .countDocuments(queryObject)
+            .lean();
+  
+          return resolve(countDocuments);
+        } catch (error) {
+          return reject(error);
+        }
+      });
+    }
   /**
    * Get Observation document based on filtered data provided.
    * @method
