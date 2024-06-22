@@ -749,9 +749,14 @@ module.exports = class Surveys extends Abstract {
   async userSurvey(req) {
     return new Promise(async (resolve, reject) => {
       try {
+        let surveyStats;
+        if (req.query.stats) {
+          //convert req.query.stats string to Boolean value
+          surveyStats = gen.utils.convertStringToBoolean(req.query.stats);
+        }
         let surveys = await surveysHelper.userSurvey(
           req.userDetails.userId,
-          req.query.stats,
+          surveyStats
         );
         return resolve({
           message: surveys.message,

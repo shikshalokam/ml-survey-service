@@ -1416,18 +1416,20 @@ module.exports = class SurveysHelper {
   }
 
   /**
-   * List of surveys based on UserId.
+   * List of surveys or count of survey based on UserId.
    * @method
    * @name userSurvey
    * @param {String} requestUserId - id of the user to fetch docmunet.
-   * @param {String} queryType -     type of collection to query whether its survey or obs
-   * @returns {JSON} List or count of surveys for specific user.
+   * @param {Boolean} stats        - to get stats or not
+   * @returns {JSON}               - List or count of surveys for specific user.
    */
 
-  static userSurvey(requestUserId, stats = "true") {
+  static userSurvey(requestUserId, stats=true) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (stats === "false") {
+        // Check if the 'stats' query parameter is false
+        if (stats == false) {
+          // If 'stats' is false, fetch the aggregate survey details for the user
           let surveyDocument = await this.getAggregate(requestUserId);
           return resolve({
             success: true,
@@ -1435,6 +1437,7 @@ module.exports = class SurveysHelper {
             data: surveyDocument,
           });
         } else {
+          // If 'stats' is true, count the number of surveys based On the user
           let surveyCount = await this.countDocuments({
             createdBy: requestUserId,
           });
@@ -1540,7 +1543,7 @@ module.exports = class SurveysHelper {
    * @method
    * @name countDocuments
    * @param {Object} [findQuery = "all"] -filter data.
-   * @returns {Array} - Count of Survey.
+   * @returns {Promise<Number>}          - Count of Survey.
    */
 
   static countDocuments(findQuery = "all") {
@@ -1553,7 +1556,6 @@ module.exports = class SurveysHelper {
         let countDocuments = await database.models.surveys
           .countDocuments(queryObject)
           .lean();
-
         return resolve(countDocuments);
       } catch (error) {
         return reject(error);
