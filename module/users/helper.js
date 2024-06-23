@@ -1046,7 +1046,6 @@ module.exports = class UserHelper {
             }
         })
     }
-
 };
 
   /**

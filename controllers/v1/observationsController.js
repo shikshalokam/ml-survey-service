@@ -2300,5 +2300,110 @@ module.exports = class Observations extends Abstract {
             }
         })
     }
+               /**
+     * @api {get} /assessment/api/v1/observations/usersObservation Get Overview Info of observation consumed by an user
+     * @apiVersion 1.0.0
+     * @apiName List Observation Info
+     * @apiGroup users
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /assessment/api/v1/users/usersObservation
+     * @apiParamExample {json} Response:
+{
+    "message": "Observation overview information fetched successfully",
+    "status": 200,
+    "result": [
+        {
+            "_id": "60caf260ecea0772d81d7e5e",
+            "entities": [
+                "8ac1efe9-0415-4313-89ef-884e1c8eee34",
+                "b54a5c6d-98be-4313-af1c-33040b1703aa",
+                "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03"
+            ],
+            "isAPrivateProgram": false,
+            "name": "AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+            "description": "Description of AP-TEST-PROGRAM-3.6.5-OBS-1-DEO",
+            "status": "published",
+            "submissions": [
+                [
+                    {
+                        "_id": "60d1d97ea2709472c8c49b09",
+                        "entityId": "8ac1efe9-0415-4313-89ef-884e1c8eee34",
+                        "entityInformation": {
+                            "name": "SRIKAKULAM"
+                        },
+                        "entityType": "district",
+                        "createdBy": "fca2925f-1eee-4654-9177-fece3fd6afc9",
+                        "status": "started",
+                        "title": "Observation 1"
+                    }
+                ],
+                [
+                    {
+                        "_id": "60d58ee5983c1372591ccb5b",
+                        "entityId": "b54a5c6d-98be-4313-af1c-33040b1703aa",
+                        "entityInformation": {
+                            "name": "VIZIANAGARAM"
+                        },
+                        "entityType": "district",
+                        "createdBy": "fca2925f-1eee-4654-9177-fece3fd6afc9",
+                        "status": "completed",
+                        "title": "Observation 1"
+                    }
+                ],
+                [
+                    {
+                        "_id": "60caf262ecea0772d81d7e5f",
+                        "entityId": "2f76dcf5-e43b-4f71-a3f2-c8f19e1fce03",
+                        "entityInformation": {
+                            "name": "ANANTAPUR"
+                        },
+                        "entityType": "district",
+                        "createdBy": "fca2925f-1eee-4654-9177-fece3fd6afc9",
+                        "status": "started",
+                        "title": "Observation 1"
+                    }
+                ]
+            ]
+        }]}
+     * @apiUse successBody
+     * @apiUse errorBody
+     */
+     
+    /**
+    * list Observation Info
+    * @method
+    * @name listObservationInfo
+    * @param {Object} req -request Data.
+    * @returns {JSON} - List of observation consumed by an user
+    */
+    usersObservation(req) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if (req.query.stats) {
+                    //convert req.query.stats string to Boolean value
+                    req.query.stats = gen.utils.convertStringToBoolean(req.query.stats);
+                  }
+    
+                let userObservationDetails = await observationsHelper.usersObservation({
+                    stats:req.query.stats,
+                    userId:req.userDetails.userId
+                })
+
+                return resolve({
+                    message:messageConstants.apiResponses.OBSERVATION_OVERVIEW_INFORMATION_FETCHED,
+                    result: userObservationDetails
+                });
+    
+            } catch (error) {
+    
+                return reject({
+                    status: error.status || httpStatusCode.internal_server_error.status,
+                    message: error.message || httpStatusCode.internal_server_error.message,
+                    errorObject: error
+                });
+            }
+        })
+    }
 }
    

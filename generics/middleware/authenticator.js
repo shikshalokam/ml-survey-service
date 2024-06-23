@@ -113,8 +113,10 @@ module.exports = async function (req, res, next) {
     "questions/delete/",
     "observationSubmissions/disable/",
     "admin/createIndex",
+    "users/listObservationInfo",
     "surveys/userSurvey"
 ];
+
   
   let performInternalAccessTokenCheck = false;
   await Promise.all(internalAccessApiPaths.map(async function (path) {

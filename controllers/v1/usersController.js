@@ -8,7 +8,6 @@
  // Dependencies 
 
  const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
-
  /**
     * Users
     * @class
