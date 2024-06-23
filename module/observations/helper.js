@@ -182,7 +182,7 @@ module.exports = class ObservationsHelper {
 
           ]
 
-          if (stats == 'true') {
+          if (stats == true) {
 
             let countObservations = await this.countDocuments({
               createdBy: userId

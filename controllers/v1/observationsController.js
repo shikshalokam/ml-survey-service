@@ -2379,6 +2379,11 @@ module.exports = class Observations extends Abstract {
     usersObservation(req) {
         return new Promise(async (resolve, reject) => {
             try {
+
+                if (req.query.stats) {
+                    //convert req.query.stats string to Boolean value
+                    req.query.stats = gen.utils.convertStringToBoolean(req.query.stats);
+                  }
     
                 let userObservationDetails = await observationsHelper.usersObservation({
                     stats:req.query.stats,
