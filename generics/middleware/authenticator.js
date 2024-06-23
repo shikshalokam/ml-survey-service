@@ -112,8 +112,9 @@ module.exports = async function (req, res, next) {
     "frameworks/delete/",
     "questions/delete/",
     "observationSubmissions/disable/",
-    "admin/createIndex"
-  ];
+    "admin/createIndex",
+    "surveys/userSurvey"
+];
   
   let performInternalAccessTokenCheck = false;
   await Promise.all(internalAccessApiPaths.map(async function (path) {
@@ -121,9 +122,10 @@ module.exports = async function (req, res, next) {
       performInternalAccessTokenCheck = true;
     }
   }));
-  
   if (performInternalAccessTokenCheck) {
+
     if (req.headers["internal-access-token"] !== process.env.INTERNAL_ACCESS_TOKEN) {
+
       return res.status(401).send(invalidTokenMsg);
     }
   }
@@ -147,7 +149,7 @@ module.exports = async function (req, res, next) {
 //api need either x-authenticated-user-token or internal access token
  const insternalAccessTokenOrTokenPaths = [
       "userExtension/getProfile/",
-      "entities/relatedEntities/"
+      "entities/relatedEntities/",
 ];
  let performInternalAccessTokenOrTokenCheck = false;
   await Promise.all(insternalAccessTokenOrTokenPaths.map(async function (path) {

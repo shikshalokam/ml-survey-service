@@ -26,7 +26,7 @@ const surveyAndFeedback = "SF";
 const questionsHelper = require(MODULES_BASE_PATH + "/questions/helper");
 const userProfileService = require(ROOT_PATH + "/generics/services/users");
 const programUsersHelper = require(MODULES_BASE_PATH + "/programUsers/helper");
-const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF
+const programJoinEnabled = process.env.PROGRAM_JOIN_ON_OFF;
 /**
  * SurveysHelper
  * @class
@@ -1069,20 +1069,21 @@ module.exports = class SurveysHelper {
           submissionDocumentEvidences = surveySubmissionDocument[0].evidences;
         } else {
           // join survey's program. PII data consent is given via this api call.
-          if(programJoinEnabled !== messageConstants.common.OFF) {
+          if (programJoinEnabled !== messageConstants.common.OFF) {
             if (solutionDocument.programId && userToken !== "") {
               if (
                 programDocument.length > 0 &&
                 programDocument[0].hasOwnProperty("requestForPIIConsent")
               ) {
                 //fetch programUsers data
-                let programUsers = await programUsersHelper.programUsersDocuments(
-                  {
-                    userId: userId,
-                    programId: solutionDocument.programId,
-                  },
-                  ["_id", "resourcesStarted"]
-                );
+                let programUsers =
+                  await programUsersHelper.programUsersDocuments(
+                    {
+                      userId: userId,
+                      programId: solutionDocument.programId,
+                    },
+                    ["_id", "resourcesStarted"]
+                  );
                 if (
                   !(programUsers.length > 0) ||
                   (programUsers.length > 0 &&
@@ -1103,7 +1104,8 @@ module.exports = class SurveysHelper {
                   if (!joinProgram.success) {
                     return resolve({
                       status: httpStatusCode.bad_request.status,
-                      message: messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
+                      message:
+                        messageConstants.apiResponses.PROGRAM_JOIN_FAILED,
                     });
                   }
                 }
@@ -1413,6 +1415,153 @@ module.exports = class SurveysHelper {
     });
   }
 
+  /**
+   * List of surveys or count of survey based on UserId.
+   * @method
+   * @name userSurvey
+   * @param {String} requestUserId - id of the user to fetch docmunet.
+   * @param {Boolean} stats        - to get stats or not
+   * @returns {JSON}               - List or count of surveys for specific user.
+   */
+
+  static userSurvey(requestUserId, stats=true) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Check if the 'stats' query parameter is false
+        if (stats == false) {
+          // If 'stats' is false, fetch the aggregate survey details for the user
+          let surveyDocument = await this.getAggregate(requestUserId);
+          return resolve({
+            success: true,
+            message: messageConstants.apiResponses.SURVEYS_FETCHED,
+            data: surveyDocument,
+          });
+        } else {
+          // If 'stats' is true, count the number of surveys based On the user
+          let surveyCount = await this.countDocuments({
+            createdBy: requestUserId,
+          });
+
+          return resolve({
+            success: true,
+            message: messageConstants.apiResponses.SURVEYS_FETCHED,
+            data: surveyCount,
+          });
+        }
+      } catch (error) {
+        return reject({
+          success: false,
+          message: error.message,
+          data: {
+            data: [],
+            count: 0,
+          },
+        });
+      }
+    });
+  }
+
+  /**
+   * aggregate function.
+   * @method
+   * @name getAggregate
+   * @param {String} [createdBy]         - userId
+   * * @returns {Array}                  survey details.
+   */
+
+  static getAggregate(createdBy) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const pipeline = [
+          {
+            $match: {
+              createdBy: createdBy,
+            },
+          },
+          {
+            $lookup: {
+              from: "surveySubmissions",
+              let: {
+                surveyId: "$_id",
+                createdBy: "$createdBy",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$surveyId", "$$surveyId"] },
+                        { $eq: ["$createdBy", "$$createdBy"] },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: "submissions",
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              _id: 1,
+              description: 1,
+              createdBy: 1,
+              submissions: {
+                $map: {
+                  input: "$submissions",
+                  as: "submission",
+                  in: {
+                    _id: "$$submission._id",
+                    title: "$$submission.title",
+                    status: "$$submission.status",
+                    createdAt: "$$submission.createdAt",
+                    lastUpdateOrCompletedDate:
+                      "$$submission.status" ===
+                      messageConstants.common.SUBMISSION_STATUS_COMPLETED
+                        ? "$$submission.completedDate"
+                        : "$$submission.updatedAt",
+                  },
+                },
+              },
+            },
+          },
+        ];
+
+        let surveyUpdate = await database.models.surveys.aggregate(pipeline);
+        if (surveyUpdate) {
+          return resolve(surveyUpdate);
+        }
+      } catch (error) {
+        console.log(error);
+        return reject(error);
+      }
+    });
+  }
+
+  /**
+   * Get surveys document Count based on filtered data provided.
+   * @method
+   * @name countDocuments
+   * @param {Object} [findQuery = "all"] -filter data.
+   * @returns {Promise<Number>}          - Count of Survey.
+   */
+
+  static countDocuments(findQuery = "all") {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let queryObject = {};
+        if (findQuery != "all") {
+          queryObject = _.merge(queryObject, findQuery);
+        }
+        let countDocuments = await database.models.surveys
+          .countDocuments(queryObject)
+          .lean();
+        return resolve(countDocuments);
+      } catch (error) {
+        return reject(error);
+      }
+    });
+  }
   /**
    * Get list of surveys with the targetted ones.
    * @method
