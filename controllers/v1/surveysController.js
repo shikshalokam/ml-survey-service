@@ -9,22 +9,20 @@
 
 const surveysHelper = require(MODULES_BASE_PATH + "/surveys/helper");
 
-
 /**
-    * Surveys
-    * @class
-*/
+ * Surveys
+ * @class
+ */
 module.exports = class Surveys extends Abstract {
+  constructor() {
+    super(surveysSchema);
+  }
 
-    constructor() {
-        super(surveysSchema);
-    }
+  static get name() {
+    return "surveys";
+  }
 
-    static get name() {
-        return "surveys";
-    }
-    
-     /**
+  /**
      * @api {post} /assessment/api/v1/surveys/createSolutionTemplate Create survey template solution.
      * @apiVersion 1.0.0
      * @apiName Create survey solution template.
@@ -53,42 +51,39 @@ module.exports = class Surveys extends Abstract {
      * @apiUse errorBody
      */
 
-    /**
-    * Create survey solution template.
-    * @method
-    * @name createSolutionTemplate
-    * @param {Object} req -request Data.
-    * @param {String} req.body- survey solution creation data.  
-    * @returns {JSON} - solutionId
-    */
+  /**
+   * Create survey solution template.
+   * @method
+   * @name createSolutionTemplate
+   * @param {Object} req -request Data.
+   * @param {String} req.body- survey solution creation data.
+   * @returns {JSON} - solutionId
+   */
 
-    async createSolutionTemplate(req) {
-      return new Promise(async (resolve, reject) => {
-        try {
-            
-            let createSolutionTemplate = await surveysHelper.createSolutionTemplate
-            (
-                req.body,
-                req.userDetails.userId
-            )
+  async createSolutionTemplate(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let createSolutionTemplate = await surveysHelper.createSolutionTemplate(
+          req.body,
+          req.userDetails.userId
+        );
 
-            return resolve({
-                message: createSolutionTemplate.message,
-                result: createSolutionTemplate.data
-            })
-
-        } catch (error) {
-            return reject({
-                status: error.status || httpStatusCode.internal_server_error.status,
-                message: error.message || httpStatusCode.internal_server_error.message,
-                errorObject: error
-            });
-        }
+        return resolve({
+          message: createSolutionTemplate.message,
+          result: createSolutionTemplate.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
     });
-}
+  }
 
-
-     /**
+  /**
      * @api {get} /assessment/api/v1/surveys/importSurveryTemplateToSolution/:solutionId?appName=:appName Import template survey solution to solution.
      * @apiVersion 1.0.0
      * @apiName Import survey template to solution.
@@ -108,44 +103,41 @@ module.exports = class Surveys extends Abstract {
      * @apiUse errorBody
      */
 
-    /**
-    * Import survey template to solution.
-    * @method
-    * @name importSurveryTemplateToSolution
-    * @param {Object} req -request Data.
-    * @param {String} req.params._id - survey template solution id. 
-    * @param {String} req.query.appName - Name of the app 
-    * @returns {JSON} - sharable link
-    */
+  /**
+   * Import survey template to solution.
+   * @method
+   * @name importSurveryTemplateToSolution
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - survey template solution id.
+   * @param {String} req.query.appName - Name of the app
+   * @returns {JSON} - sharable link
+   */
 
-   async importSurveryTemplateToSolution(req) {
+  async importSurveryTemplateToSolution(req) {
     return new Promise(async (resolve, reject) => {
       try {
-          
-          let result = await surveysHelper.importSurveryTemplateToSolution
-          (
-              req.params._id,
-              req.userDetails.userId,
-              req.query.appName
-          )
+        let result = await surveysHelper.importSurveryTemplateToSolution(
+          req.params._id,
+          req.userDetails.userId,
+          req.query.appName
+        );
 
-          return resolve({
-              message: result.message,
-              result: result.data
-          })
-
+        return resolve({
+          message: result.message,
+          result: result.data,
+        });
       } catch (error) {
-          return reject({
-              status: error.status || httpStatusCode.internal_server_error.status,
-              message: error.message || httpStatusCode.internal_server_error.message,
-              errorObject: error
-          });
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
       }
-  });
-}
+    });
+  }
 
-    
-    /**
+  /**
      * @api {get} /assessment/api/v1/surveys/mapSurverySolutionToProgram/:solutionId?programId=:programId Map survey solution to program.
      * @apiVersion 1.0.0
      * @apiName Map survey solution to program.
@@ -161,42 +153,39 @@ module.exports = class Surveys extends Abstract {
      * @apiUse errorBody
      */
 
-    /**
-    * Map survey solution to program.
-    * @method
-    * @name mapSurverySolutionToProgram
-    * @param {Object} req -request Data.
-    * @param {String} req.params._id - survey solution id. 
-    * @param {String} req.query.programId - program Id 
-    * @returns {String} - message
-    */
+  /**
+   * Map survey solution to program.
+   * @method
+   * @name mapSurverySolutionToProgram
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - survey solution id.
+   * @param {String} req.query.programId - program Id
+   * @returns {String} - message
+   */
 
-   async mapSurverySolutionToProgram(req) {
+  async mapSurverySolutionToProgram(req) {
     return new Promise(async (resolve, reject) => {
       try {
-          
-          let result = await surveysHelper.mapSurverySolutionToProgram
-          (
-              req.params._id,
-              req.query.programId
-          )
+        let result = await surveysHelper.mapSurverySolutionToProgram(
+          req.params._id,
+          req.query.programId
+        );
 
-          return resolve({
-              message: result.message
-          })
-
+        return resolve({
+          message: result.message,
+        });
       } catch (error) {
-          return reject({
-              status: error.status || httpStatusCode.internal_server_error.status,
-              message: error.message || httpStatusCode.internal_server_error.message,
-              errorObject: error
-          });
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
       }
-  });
-}
+    });
+  }
 
-
-     /**
+  /**
      * @api {post} /assessment/api/v1/surveys/getDetailsByLink/:link Get the survey details by link
      * @apiVersion 1.0.0
      * @apiName Get the survey details by link
@@ -385,48 +374,44 @@ module.exports = class Surveys extends Abstract {
      * @apiUse successBody
      * @apiUse errorBody
      */
-     
-    /**
-    * Get the survey details by link
-    * @method
-    * @name getDetailsByLink
-    * @param {Object} req -request Data.
-    * @param {String} req.params._id - link.  
-    * @returns {JSON} - Survey details
-    */
 
-    getDetailsByLink(req) {
-      return new Promise(async (resolve, reject) => {
+  /**
+   * Get the survey details by link
+   * @method
+   * @name getDetailsByLink
+   * @param {Object} req -request Data.
+   * @param {String} req.params._id - link.
+   * @returns {JSON} - Survey details
+   */
 
-        try {
+  getDetailsByLink(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let bodyData = req.body ? req.body : {};
 
-            let bodyData = req.body ? req.body : {};
+        let surveyDetails = await surveysHelper.getDetailsByLink(
+          req.params._id,
+          req.userDetails.userId,
+          req.userDetails.userToken,
+          bodyData
+        );
 
-            let surveyDetails = await surveysHelper.getDetailsByLink(
-                req.params._id,
-                req.userDetails.userId,
-                req.userDetails.userToken,
-                bodyData
-            );
+        return resolve({
+          message: surveyDetails.message,
+          result: surveyDetails.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
+    });
+  }
 
-            return resolve({
-                  message: surveyDetails.message,
-                  result: surveyDetails.data
-            });
-
-        } catch (error) {
-
-            return reject({
-                status: error.status || httpStatusCode.internal_server_error.status,
-                message: error.message || httpStatusCode.internal_server_error.message,
-                errorObject: error
-            });
-        }
-    })
-}
-
-
-    /**
+  /**
     * @api {post} /assessment/api/v1/surveys/details/:(surveyId/Link)?solutionId=:solutionId Get the survey details by link or Survey Id  
     * Survey details.
     * @apiVersion 2.0.0
@@ -616,72 +601,76 @@ module.exports = class Surveys extends Abstract {
     }
     */
 
-   /**
-    * Survey details.
-    * @method
-    * @name details
-    * @param  {Request} req request body.
-    * @param  {req.param._id} Either surveyId or link.
-    * @param  {req.query.solutionId} solutionId (not required in the case of passing link).
-    * @returns {Object} returns survey details information.
-    * Result will have the details of survey.
-    */
+  /**
+   * Survey details.
+   * @method
+   * @name details
+   * @param  {Request} req request body.
+   * @param  {req.param._id} Either surveyId or link.
+   * @param  {req.query.solutionId} solutionId (not required in the case of passing link).
+   * @returns {Object} returns survey details information.
+   * Result will have the details of survey.
+   */
 
-    async details(req) {
+  async details(req) {
     return new Promise(async (resolve, reject) => {
-        try {
-            let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
-            let appName = req.headers["x-app-id"]  ? req.headers["x-app-id"]  : req.headers.appname ? req.headers.appname : "";
-            let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
+      try {
+        let appVersion = req.headers["x-app-ver"]
+          ? req.headers["x-app-ver"]
+          : req.headers.appversion
+          ? req.headers.appversion
+          : "";
+        let appName = req.headers["x-app-id"]
+          ? req.headers["x-app-id"]
+          : req.headers.appname
+          ? req.headers.appname
+          : "";
+        let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
-            let surveyDetails = {};
+        let surveyDetails = {};
 
-            if( validateSurveyId || req.query.solutionId ) {
-                
-                let surveyId = req.params._id ? req.params._id : "";
-       
-                surveyDetails = await surveysHelper.detailsV3
-                (   
-                    req.body,
-                    surveyId,
-                    req.query.solutionId,
-                    req.userDetails.userId,
-                    req.userDetails.userToken,
-                    appVersion,
-                    appName
-                );
-                
-            } else {
+        if (validateSurveyId || req.query.solutionId) {
+          let surveyId = req.params._id ? req.params._id : "";
 
-                let bodyData = req.body ? req.body : {};
+          surveyDetails = await surveysHelper.detailsV3(
+            req.body,
+            surveyId,
+            req.query.solutionId,
+            req.userDetails.userId,
+            req.userDetails.userToken,
+            appVersion,
+            appName
+          );
+        } else {
+          let bodyData = req.body ? req.body : {};
 
-                surveyDetails = await surveysHelper.getDetailsByLink(
-                    req.params._id,
-                    req.userDetails.userId,
-                    req.userDetails.userToken,
-                    bodyData,
-                    "",
-                    appVersion,
-                    appName
-                );
-            }
-
-            return resolve({
-                message: surveyDetails.message,
-                result: surveyDetails.data
-            });
-
-        } catch (error) {
-            return reject({
-                status: error.status || httpStatusCode.internal_server_error.status,
-                message: error.message || httpStatusCode.internal_server_error.message,
-                errorObject: error
-            });
+          surveyDetails = await surveysHelper.getDetailsByLink(
+            req.params._id,
+            req.userDetails.userId,
+            req.userDetails.userToken,
+            bodyData,
+            "",
+            appVersion,
+            appName
+          );
         }
+
+        return resolve({
+          message: surveyDetails.message,
+          result: surveyDetails.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
     });
-   }
-   
-    /**
+  }
+
+  /**
     * @api {post} /assessment/api/v1/surveys/getSurvey?page=:page&limit=:limit&search=:search
     * List of surveys and targetted ones.
     * @apiVersion 1.0.0
@@ -714,43 +703,77 @@ module.exports = class Surveys extends Abstract {
     * @apiUse errorBody
     */
 
-    /**
-      * List of surveys and targetted ones.
-      * @method
-      * @name getSurvey
-      * @param {Object} req - request data.
-      * @returns {JSON} List of surveys with targetted ones.
-     */
+  /**
+   * List of surveys and targetted ones.
+   * @method
+   * @name getSurvey
+   * @param {Object} req - request data.
+   * @returns {JSON} List of surveys with targetted ones.
+   */
 
-    async getSurvey(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
+  async getSurvey(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let surveys = await surveysHelper.getSurvey(
+          req.body,
+          req.userDetails.userId,
+          req.userDetails.userToken,
+          req.pageSize,
+          req.pageNo,
+          req.searchText
+        );
 
-                let surveys = await surveysHelper.getSurvey(
-                    req.body,
-                    req.userDetails.userId,
-                    req.userDetails.userToken,
-                    req.pageSize,
-                    req.pageNo,
-                    req.searchText
-                );
+        return resolve({
+          message: surveys.message,
+          result: surveys.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
+    });
+  }
 
-                return resolve({
-                    message: surveys.message,
-                    result: surveys.data
-                });
+  /**
+   * List of surveys based on user.
+   * @method
+   * @name userSurvey
+   * @param {Object} req - request data.
+   * @returns {JSON} List of surveys based on user.
+   */
 
-            } catch (error) {
-                return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
+  async userSurvey(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let surveyStats;
+        if (req.query.stats) {
+          //convert req.query.stats string to Boolean value
+          surveyStats = gen.utils.convertStringToBoolean(req.query.stats);
+        }
+        let surveys = await surveysHelper.userSurvey(
+          req.userDetails.userId,
+          surveyStats
+        );
+        return resolve({
+          message: surveys.message,
+          result: surveys.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
+    });
+  }
 
-     /**
+  /**
     * @api {get} /assessment/api/v1/surveys/userAssigned?page=:page&limit=:limit&search=:search&filter=:filter
     * User assigned list of surveys.
     * @apiVersion 1.0.0
@@ -776,45 +799,43 @@ module.exports = class Surveys extends Abstract {
     * @apiUse errorBody
     */
 
-    /**
-      * User assigned list of surveys.
-      * @method
-      * @name userAssigned
-      * @param {Object} req - request data.
-      * @returns {JSON} List of user assigned surveys.
-     */
+  /**
+   * User assigned list of surveys.
+   * @method
+   * @name userAssigned
+   * @param {Object} req - request data.
+   * @returns {JSON} List of user assigned surveys.
+   */
 
-     async userAssigned(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
+  async userAssigned(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let surveys = await surveysHelper.userAssigned(
+          req.userDetails.userId,
+          req.pageSize,
+          req.pageNo,
+          req.searchText,
+          req.query.filter,
+          req.query.surveyReportPage,
+          req.body && req.body.solutionIds ? req.body.solutionIds : []
+        );
 
-                let surveys = await surveysHelper.userAssigned(
-                    req.userDetails.userId,
-                    req.pageSize,
-                    req.pageNo,
-                    req.searchText,
-                    req.query.filter,
-                    req.query.surveyReportPage,
-                    ( req.body && req.body.solutionIds ) ? req.body.solutionIds : []
-                );
+        return resolve({
+          message: surveys.message,
+          result: surveys.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
+    });
+  }
 
-                return resolve({
-                    message: surveys.message,
-                    result: surveys.data
-                });
-
-            } catch (error) {
-                return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
-    
-
-    /**
+  /**
     * @api {get} /assessment/api/v1/surveys/getLink/{{surveySolutionId}}?appName:appName 
     * @apiVersion 1.0.0
     * @apiName Get survey shareable link
@@ -832,40 +853,36 @@ module.exports = class Surveys extends Abstract {
       "result": "https://apps.shikshalokam.org/samiksha/take-survey/8e8902eb1e13ae9c38dec8f1b5a4bdff"
     }
     */
-    /**
+  /**
    * Get survey Solution Sharing Link.
    * @method
    * @name getLink
    * @param {Object} req -request Data.
    * @param {String} req.params._id - survey solution externalId.
    * @param {String} req.query.appName - app Name.
-   * @returns {JSON} 
+   * @returns {JSON}
    */
 
-   async getLink(req) {
-
+  async getLink(req) {
     return new Promise(async (resolve, reject) => {
+      try {
+        let surveySolutionDetails = await surveysHelper.getLink(
+          req.params._id,
+          req.query.appName
+        );
 
-        try {
-
-            let surveySolutionDetails = await surveysHelper.getLink(req.params._id, req.query.appName);
-
-            return resolve({
-                message: surveySolutionDetails.message,
-                result: surveySolutionDetails.data
-            })
-
-        } catch (error) {
-    
-            return reject({
-                status: error.status || httpStatusCode.internal_server_error.status,
-                message: error.message || httpStatusCode.internal_server_error.message,
-                errorObject: error
-            });
-        }
-
+        return resolve({
+          message: surveySolutionDetails.message,
+          result: surveySolutionDetails.data,
+        });
+      } catch (error) {
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message:
+            error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error,
+        });
+      }
     });
-
-}
-
-}
+  }
+};
