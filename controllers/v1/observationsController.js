@@ -2301,12 +2301,12 @@ module.exports = class Observations extends Abstract {
         })
     }
                /**
-     * @api {get} /assessment/api/v1/observations/usersObservation Get Overview Info of observation consumed by an user
+     * @api {get} /assessment/api/v1/observations/overview Get Overview Info of observation consumed by an user
      * @apiVersion 1.0.0
      * @apiName List Observation Info
      * @apiGroup users
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /assessment/api/v1/users/usersObservation
+     * @apiSampleRequest /assessment/api/v1/observations/overview
      * @apiParamExample {json} Response:
 {
     "message": "Observation overview information fetched successfully",
@@ -2376,7 +2376,7 @@ module.exports = class Observations extends Abstract {
     * @param {Object} req -request Data.
     * @returns {JSON} - List of observation consumed by an user
     */
-    usersObservation(req) {
+    overview(req) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -2385,7 +2385,7 @@ module.exports = class Observations extends Abstract {
                     req.query.stats = gen.utils.convertStringToBoolean(req.query.stats);
                   }
     
-                let userObservationDetails = await observationsHelper.usersObservation({
+                let userObservationDetails = await observationsHelper.overview({
                     stats:req.query.stats,
                     userId:req.userDetails.userId
                 })
