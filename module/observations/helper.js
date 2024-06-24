@@ -158,15 +158,15 @@ module.exports = class ObservationsHelper {
       });
     }
     /**
-     * get usersObservationDocuments documents started by user.
+     * get observations created by user.
      * @method
-     * @name usersObservation
+     * @name overview
      * @param  {String} userId - userId of user.
      * @param  {String} solutionId - solution Id.
-     * @returns {result} - all the usersObservation in particular solution which user has submitted. 
+     * @returns {result} - all the observation in particular solution which user has submitted. 
      */
 
-    static usersObservation({
+    static overview({
       stats,
       userId
     }) {
