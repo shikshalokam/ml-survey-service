@@ -114,7 +114,7 @@ module.exports = async function (req, res, next) {
     "observationSubmissions/disable/",
     "admin/createIndex",
     "observations/overview",
-    "surveys/userSurvey"
+    "surveys/overview"
 ];
 
   

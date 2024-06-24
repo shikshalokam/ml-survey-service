@@ -741,12 +741,12 @@ module.exports = class Surveys extends Abstract {
   /**
    * List of surveys based on user.
    * @method
-   * @name userSurvey
+   * @name overview
    * @param {Object} req - request data.
    * @returns {JSON} List of surveys based on user.
    */
 
-  async userSurvey(req) {
+  async overview(req) {
     return new Promise(async (resolve, reject) => {
       try {
         let surveyStats;
@@ -754,7 +754,7 @@ module.exports = class Surveys extends Abstract {
           //convert req.query.stats string to Boolean value
           surveyStats = gen.utils.convertStringToBoolean(req.query.stats);
         }
-        let surveys = await surveysHelper.userSurvey(
+        let surveys = await surveysHelper.overview(
           req.userDetails.userId,
           surveyStats
         );
