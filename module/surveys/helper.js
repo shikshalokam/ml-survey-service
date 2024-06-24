@@ -1418,13 +1418,13 @@ module.exports = class SurveysHelper {
   /**
    * List of surveys or count of survey based on UserId.
    * @method
-   * @name userSurvey
+   * @name overview
    * @param {String} requestUserId - id of the user to fetch docmunet.
    * @param {Boolean} stats        - to get stats or not
    * @returns {JSON}               - List or count of surveys for specific user.
    */
 
-  static userSurvey(requestUserId, stats=true) {
+  static overview(requestUserId, stats=true) {
     return new Promise(async (resolve, reject) => {
       try {
         // Check if the 'stats' query parameter is false
