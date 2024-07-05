@@ -64,19 +64,17 @@ function generateUUId() {
 
     let duplicateProjectsChunk = _.chunk(duplicateArray,100);
     let successfullyDeletedRecords = [];
-    let failedToDeletedRecords = [];
 
     for(let i=0;i<duplicateProjectsChunk.length;i++)
       {
         let currentChunk = duplicateProjectsChunk[i];
         for (let duplicateRecord of currentChunk) {
           try {
-    
             let duplicateArray = duplicateRecord.duplicateArray;
             let completedProjects = [];
             let inCompleteProjects = [];
             let toBeDeletedRecords = [];
-    
+
             for (let i = 0; i < duplicateArray.length; i++) {
               if (duplicateArray[i].status == "published") {
                 completedProjects.push(duplicateArray[i]);
@@ -84,13 +82,13 @@ function generateUUId() {
                 inCompleteProjects.push(duplicateArray[i]);
               }
             }
-    
+
             completedProjects.sort(sortByCreatedAtDescending);
             inCompleteProjects.sort(sortByCreatedAtDescending);
-  
+
             if (completedProjects.length > 0) {
               let firstRecord = completedProjects[0];
-    
+
               for (let i = 1; i < completedProjects.length; i++) {
                 toBeDeletedRecords.push(completedProjects[i]);
               }
@@ -98,42 +96,22 @@ function generateUUId() {
               for (let i = 0; i < inCompleteProjects.length; i++) {
                 toBeDeletedRecords.push(inCompleteProjects[i]);
               }
-    
-            } 
-            else if (inCompleteProjects.length > 0) {
+            } else if (inCompleteProjects.length > 0) {
               let firstRecord = inCompleteProjects[0];
               for (let i = 1; i < inCompleteProjects.length; i++) {
                 toBeDeletedRecords.push(inCompleteProjects[i]);
               }
             }
 
-            
-    
-            for(let record of toBeDeletedRecords)
-                {
-                    try{
-    
-                        let result = await db
-                        .collection("observations")
-                        .deleteOne({
-                            _id:record._id
-                        })
-                        
-                        if(result.deletedCount == 1)
-                        {
-                            successfullyDeletedRecords.push(record._id);
-                        }
-                        else{
-                            failedToDeletedRecords.push(record._id);
-                        }
-                        
-                    }catch(e){
-                        
-                        failedToDeletedRecords.push(record);
-                    }
-    
-                }
-    
+            const idsToDelete = toBeDeletedRecords.map((record) => record._id);
+
+            const result = await db.collection("observations").deleteMany({
+              _id: { $in: idsToDelete },
+            });
+
+            if (result.deletedCount === toBeDeletedRecords.length) {
+              successfullyDeletedRecords.push(...idsToDelete);
+            } 
           } catch (e) {
             console.log(e);
             continue;
@@ -142,7 +120,6 @@ function generateUUId() {
 
       }
     fs.writeFileSync('successfully_deleted_duplicated_records' + generateUUId()+'.js',JSON.stringify(successfullyDeletedRecords))
-    fs.writeFileSync('failed_to_deleted_duplicated_records' + generateUUId()+'.js',JSON.stringify(failedToDeletedRecords))
     console.log('Script execution completed');
     connection.close();
   } catch (error) {

@@ -180,30 +180,15 @@ function generateUUId() {
               }
             }
     
-            for(let record of toBeDeletedRecords)
-                {
-                    try{
-    
-                        let result = await db
-                        .collection("observationSubmissions")
-                        .deleteOne({
-                            _id:record._id
-                        })
-                        
-                        if(result.deletedCount == 1)
-                        {
-                            successfullyDeletedRecords.push(record._id);
-                        }
-                        else{
-                            failedToDeletedRecords.push(record._id);
-                        }
-                        
-                    }catch(e){
-                        
-                        failedToDeletedRecords.push(record);
-                    }
-    
-                }
+            const idsToDelete = toBeDeletedRecords.map((record) => record._id);
+
+            const result = await db.collection("observationSubmissions").deleteMany({
+              _id: { $in: idsToDelete },
+            });
+
+            if (result.deletedCount === toBeDeletedRecords.length) {
+              successfullyDeletedRecords.push(...idsToDelete);
+            } 
     
           } catch (e) {
             console.log(e);
@@ -213,7 +198,6 @@ function generateUUId() {
 
       }
     fs.writeFileSync('successfully_deleted_duplicated_records' + generateUUId()+'.js',JSON.stringify(successfullyDeletedRecords))
-    fs.writeFileSync('failed_to_deleted_duplicated_records' + generateUUId()+'.js',JSON.stringify(failedToDeletedRecords))
     console.log('Script execution completed');
     connection.close();
   } catch (error) {
