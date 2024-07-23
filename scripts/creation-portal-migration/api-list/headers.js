@@ -1,123 +1,133 @@
-const queryString = require('query-string');
 const { default: axios } = require("axios");
-const { CONFIG } = require("../constants/config");
+const { CONFIG } = require("../constant/config");
+const querystring = require("query-string");
 const jwt = require("jsonwebtoken");
 const logger = require("../logger");
 
-const ED = 'ed';
-const CREATION_PORTAL = 'creation_portal'
+/**
+* To generate the user token
+* @method
+* @name genToken
+* @param {String} url - url 
+* @param {querystring} body - body 
+* @param {String} type - type
+* 
+  * @returns {string} - Generates the user token
+*/
+const genToken = async (url, body, type) => {
+  const isValid = await validateToken(type);
 
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
 
-// only check token was expired or not 
-const validateToken = (type) => {
+  if (!isValid) {
+    const res = await axios.post(url, body, headers).catch((err) => {
+      logger.error(`Error while generateToken Error: ${JSON.stringify(err?.response?.data)}`)
+      return err;
+    });
+    return res ? res?.data?.access_token : "";
+  } else {
+    const token = this.ed_token;
+    // type === "ed" ? this.ed_token : this.ed_token
+    // this.creation_portal_token;
 
-    const token = type === "ed" ? this.ed_token : this.creation_portal_token;
-
-    try {
-        if (token) {
-            const decoded = jwt.decode(token, { header: true });
-            if (Date.now() >= decoded?.exp * 1000) {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    } catch (err) {
-        return false;
-    }
+    return token;
+  }
 };
 
+/**
+* To validate the user token
+* @method
+* @name validateToken
+* @param {String} type - type
+* 
+  * @returns {Boolean} - Returns the boolean response  
+*/
 
-// Generate Token if invalid token
-const genToken = async (url, body, type) => {
-    const isValid = await validateToken(type);
+const validateToken = (type) => {
+  const token = type === "ed" ? this.ed_token : this.ed_token;
+  // creation_portal_token;
 
-    console.log(isValid);
-
-    const headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    };
-
-    // if Not true 
-    if (!isValid) {
-        try {
-            const result = await axios.post(url, body, headers);
-            console.log(result);
-            return result ? result?.data?.access_token : "";
-        } catch (error) {
-            logger.error(`Error while generateToken Error: ${JSON.stringify(error?.response?.data)}`)
-            console.log(`Error while generateToken Error: ${JSON.stringify(error?.response?.data)}`);
-            return "";
-        }
-    } else {
-        const token = type === ED ? this.ed_token : this.creation_portal_token
-        return token;
+  try {
+    if (token) {
+      const decoded = jwt.decode(token, {header: true});
+      if (Date.now() >= decoded?.exp * 1000) {
+        return false;
+      }
+      return true;
     }
+    return false;
+  } catch (err) {
+    return false;
+  }
+};
 
-}
+/**
+* prepare the reqbody and calls the generate token  
+* @method
+* @name generateToken
+* @param {String} type - type
+* 
+  * @returns {string} - Returns the user token
+*/
 
-
-
-// Generate token 
 const generateToken = async (type) => {
+  let url = "";
+  let body = {};
+  url = CONFIG.HOST.ed + CONFIG.APIS.token;
+  switch (type) {
+    case "ed":
+      // url = CONFIG.HOST.ed + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.ED.QUERY });
+      this.ed_token = await genToken(url, body, "ed");
+      return this.ed_token;
+    case "creation_portal":
+      // url = CONFIG.HOST.creation_portal + CONFIG.APIS.token;
+      body = querystring.stringify({ ...CONFIG.KEYS.CREATION_PORTAL.QUERY });
+      this.creation_portal_token = await genToken(url, body, "creation_portal");
+      return this.creation_portal_token;
+  }
+};
 
-    let url = "";
-    let body = {};
+/**
+* get headers based on the environment
+* @method
+* @name getHeaders
+* @param {String} type - type
+* @param {Boolean} isTokenReq - isTokenReq
+* 
+  * @returns {Object} - Returns the headers
+*/
 
-    switch (type) {
-        case ED:
-            url = CONFIG.HOST.ed + CONFIG.APIS.token;
-            body = queryString.stringify({ ...CONFIG.KEYS.ED.QUERY });
-            console.log(body);
-            this.ed_token = await genToken(url, body, ED);
-            return this.ed_token;
-
-        case CREATION_PORTAL:
-            url = CONFIG.HOST.creation_portal + CONFIG.APIS.token;
-            body = queryString.stringify({ ...CONFIG.KEYS.CREATION_PORTAL });
-            this.creation_portal_token = await genToken(url, body, CREATION_PORTAL);
-            return this.creation_portal_token;
-        default:
-            return null;
-    }
-}
-
-
-
-// header for apis
 const getHeaders = async (isTokenReq, type) => {
+  let headers = {};
 
-    let headers = {};
+  switch (type) {
+    case "ed":
+      headers = {
+        "Content-Type": "application/json",
+        Authorization: CONFIG.KEYS.ED.AUTHORIZATION,
+      };
+      if (isTokenReq) {
+        headers["x-authenticated-user-token"] = await generateToken("ed");
+      }
+      break;
 
-    switch (type) {
+    case "creation_portal":
+      headers = {
+        "Content-Type": "application/json",
+        Authorization: CONFIG.KEYS.CREATION_PORTAL.AUTHORIZATION,
+      };
+      if (isTokenReq) {
+        headers["x-authenticated-user-token"] = await generateToken("creation_portal");
+      }
+      break;
+  }
 
-        case ED:
-            headers = {
-                "Content-Type": "application/json",
-                Authorization: CONFIG.KEYS.ED.AUTHORIZATION,
-            };
-            if (isTokenReq) {
-                headers["x-authenticated-user-token"] = await generateToken(ED);
-            }
-            break;
+  return headers;
+};
 
-        case CREATION_PORTAL:
-            headers = {
-                "Content-Type": "application/json",
-                Authorization: CONFIG.KEYS.CREATION_PORTAL.AUTHORIZATION,
-            };
-            if (isTokenReq) {
-                headers["x-authenticated-user-token"] = await generateToken(CREATION_PORTAL);
-            }
-            break;
-
-        default:
-            break;
-    }
-
-    return headers;
-
-}
-
-
-module.exports = { getHeaders };
+module.exports = {
+  getHeaders,
+};

@@ -1,39 +1,132 @@
 require("dotenv").config({ path: "./../../.env" });
-const { createQuestionTemplate } = require('./template/helper/questionsethelper');
+const { createDBInstance } = require("./db/dbConfig");
+const { findAll } = require("./db");
+const {
+  createProgramAndQuestionsets,
+} = require("./template/generate/gQuestionSet.js");
 
-const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Types;
+const { getAllCriterias, migrateQuestionset } = require('./template/generate/gQuestionSet.js')
 
-const migrateData = async () => {
-    try {
-        // Ensure the connection is established before making queries
-        await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
-        const db = mongoose.connection.db; // Get the native MongoDB database instance
+const logger = require("./logger");
+const { CONFIG } = require("./constant/config");
+const { ObjectID } = require("mongodb");
 
-        // Find the documents
-        const dateQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f350abaaf0a4decfa9a105c") });
-        const multiselectQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f3504b319377eecddb06926") });
-        const matrixQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f350abaaf0a4decfa9a105b") });
-        const numberQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f3504b319377eecddb06924") });
-        const radioQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f34ade94c793c93779bdc52") });
-        const sliderQuestion = await db.collection("questions").findOne({ _id: ObjectId("5fa278cb6c10b27561cd281f") });
-        const textQuestion = await db.collection("questions").findOne({ _id: ObjectId("5f34ade94c793c93779bdc55") });
+const migrateData = async (req, res) => {
+  try {
 
-        const questions = [dateQuestion, multiselectQuestion, matrixQuestion, numberQuestion, radioQuestion, sliderQuestion, textQuestion];
+    const programMigration = {
+      migrated: 0,
+      updated: 0,
+      published: 0,
+      nominated: 0,
+      contributor: 0,
+      accepted: 0,
+    };
+    const questionSetMigration = {
+      migrated: 0,
+      hierarchy: 0,
+      branching: 0,
+      published: 0,
+    };
 
-        // Ensure all the data exists before attempting to create question templates
-        if (questions.every(q => q !== null)) {
-            const questionTemplates = await Promise.all(questions.map(q => createQuestionTemplate(q, 0)));
-            console.log(questionTemplates);
-        } else {
-            console.log('One or more documents not found');
-        }
-    } catch (error) {
-        console.error('Error finding document:', error);
-    } finally {
-        // Clean up the connection
-        await mongoose.connection.close();
-    }
+    // This migratedCount object is to keep track of the migration count
+    const migratedCount = {
+      totalCount: 0,
+      success: {
+        program: {
+          existing: {
+            ...programMigration,
+          },
+          current: {
+            ...programMigration,
+          },
+        },
+        questionSet: {
+          existing: {
+            ...questionSetMigration,
+          },
+          current: {
+            ...questionSetMigration,
+          },
+        },
+      },
+      failed: {
+        program: {
+          migrated: { count: 0, ids: [] },
+          updated: { count: 0, ids: [] },
+          published: { count: 0, ids: [] },
+          nominated: { count: 0, ids: [] },
+          contributor: { count: 0, ids: [] },
+          accepted: { count: 0, ids: [] },
+        },
+        questionSet: {
+          migrated: { count: 0, ids: [] },
+          hierarchy: { count: 0, ids: [] },
+          branching: { count: 0, ids: [] },
+          published: { count: 0, ids: [] },
+        },
+        question: { count: 0, ids: [] }
+      },
+    };
+
+    // connect to db
+    const db = await createDBInstance();
+
+    // get solutions from mongo {survey, observation w/o rubric}
+    let data = await findAll(CONFIG.DB.TABLES.solutions, {
+      programId: { $exists: true },
+      isRubricDriven: false,
+      type: { $in: ["observation", "survey"] },
+      // _id: ObjectID("5f362b78af0a4decfa9a1070")
+      // _id: ObjectID("5f3bc15416fdc4ed008171b1")
+      // _id: ObjectID("5f362b78af0a4decfa9a1070")
+      // _id: ObjectID("5f34e44681871d939950bca7")
+      // _id: ObjectID("5f34ec17585244939f89f90d")
+      // _id: ObjectID("5f36d6d019377eecddb06946")
+      _id: ObjectID("5f4000bd19377eecddb06979")
+
+    });
+    migratedCount.totalCount = data.length;
+
+
+    // const p = await  getAllCriterias(data[0],migratedCount,"program 1");
+
+    // contributor = {
+    //   "authorId": "86d2d978-5b20-4453-8a76-82b5a4c728c9",
+    //   "mappedUserId": "b8e3c5f2-07b3-49f3-964f-ef8e90897513",
+    //   "userName": "karan121",
+    //   "rootOrgId": "01338111579044249633",
+    //   "rootOrgName": "dockstaging",
+    //   "org_id": "d7da22f6-b737-4817-a194-6a205e535559",
+    //   "srcOrgAdminId": "2730f876-735d-4935-ba52-849c524a53fe",
+    //   "srcOrgAdminUserName": "dockstaging1@yopmail.com",
+    //   "contributorOrgAdminId": "2730f876-735d-4935-ba52-849c524a53fe",
+    //   "contributorOrgAdminUserName": "dockstaging1@yopmail.com",
+    //   "programId": "d1b93850-df5e-11ed-87b4-9feca80ba862",
+    //   "programName": "MH01-Mantra4Change-APSWREIS School Leader Feedback sourcing project",
+    //   "solutionId": "5f362b78af0a4decfa9a1070",
+    //   "solutionName": "Need Assessment Form_Teacher Training"
+    // }
+
+    // const t = await migrateQuestionset(data[0], "d1b93850-df5e-11ed-87b4-9feca80ba862", migratedCount, contributor)
+
+
+
+
+    // To create the program and the questionsets
+    const template = await createProgramAndQuestionsets(
+      data,
+      migratedCount
+    );
+
+    console.log(JSON.stringify(migratedCount));
+    logger.info(`\n migratedCount ${JSON.stringify(migratedCount)}`);
+    process.exit();
+  } catch (err) {
+    logger.error(`Error while migrating : ${err}`)
+    console.log(err)
+    throw new Error("Error occured", err);
+  }
 };
 
 migrateData();
