@@ -19,7 +19,6 @@ const defaultData = {
 };
 
 const writeCSV = async (data) => {
-    console.log(data)
     const rowData = { ...defaultData, ...data };
     const row = Object.values(rowData).join(',') + '\n';
 
@@ -55,7 +54,6 @@ const writeCSV = async (data) => {
 }
 **/
 const updateQuestionMappingInCSV = async (inputData) => {
-    console.log("this is input data ". inputData);
     const { solutionId, criteriaId, questionsetId, questions } = inputData;
 
     for (const [questionID, questionDetails] of Object.entries(questions)) {

@@ -10,7 +10,8 @@
     "test": "mocha --timeout 10000",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "coverage": " nyc --reporter=lcov mocha --timeout 10000 test --exit"
+    "coverage": " nyc --reporter=lcov mocha --timeout 10000 test --exit",
+    "creation_portal_script": "node scripts/creation-portal-migration/index.js"
   },
   "keywords": [
     "shikshalokam",
@@ -29,6 +30,8 @@
     "commander": "^2.20.0",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
+    "csv-parse": "^5.3.0",
+    "csv-stringify": "^6.2.0",
     "csvtojson": "^2.0.8",
     "dotenv": "^6.1.0",
     "express": "^4.16.3",
@@ -46,6 +49,7 @@
     "jwt-decode": "^2.2.0",
     "kafka-node": "^5.0.0",
     "keycloak-auth-utils": "^3.3.0",
+    "lodash": "^4.17.21",
     "log": "^1.4.0",
     "mathjs": "^12.4.0",
     "md5": "^2.3.0",

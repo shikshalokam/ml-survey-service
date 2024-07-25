@@ -77,41 +77,9 @@ const migrateData = async (req, res) => {
       programId: { $exists: true },
       isRubricDriven: false,
       type: { $in: ["observation", "survey"] },
-      // _id: ObjectID("5f362b78af0a4decfa9a1070")
-      // _id: ObjectID("5f3bc15416fdc4ed008171b1")
-      // _id: ObjectID("5f362b78af0a4decfa9a1070")
-      // _id: ObjectID("5f34e44681871d939950bca7")
-      // _id: ObjectID("5f34ec17585244939f89f90d")
-      // _id: ObjectID("5f36d6d019377eecddb06946")
-      _id: ObjectID("5f4000bd19377eecddb06979")
-
     });
     migratedCount.totalCount = data.length;
-
-
-    // const p = await  getAllCriterias(data[0],migratedCount,"program 1");
-
-    // contributor = {
-    //   "authorId": "86d2d978-5b20-4453-8a76-82b5a4c728c9",
-    //   "mappedUserId": "b8e3c5f2-07b3-49f3-964f-ef8e90897513",
-    //   "userName": "karan121",
-    //   "rootOrgId": "01338111579044249633",
-    //   "rootOrgName": "dockstaging",
-    //   "org_id": "d7da22f6-b737-4817-a194-6a205e535559",
-    //   "srcOrgAdminId": "2730f876-735d-4935-ba52-849c524a53fe",
-    //   "srcOrgAdminUserName": "dockstaging1@yopmail.com",
-    //   "contributorOrgAdminId": "2730f876-735d-4935-ba52-849c524a53fe",
-    //   "contributorOrgAdminUserName": "dockstaging1@yopmail.com",
-    //   "programId": "d1b93850-df5e-11ed-87b4-9feca80ba862",
-    //   "programName": "MH01-Mantra4Change-APSWREIS School Leader Feedback sourcing project",
-    //   "solutionId": "5f362b78af0a4decfa9a1070",
-    //   "solutionName": "Need Assessment Form_Teacher Training"
-    // }
-
-    // const t = await migrateQuestionset(data[0], "d1b93850-df5e-11ed-87b4-9feca80ba862", migratedCount, contributor)
-
-
-
+   
 
     // To create the program and the questionsets
     const template = await createProgramAndQuestionsets(

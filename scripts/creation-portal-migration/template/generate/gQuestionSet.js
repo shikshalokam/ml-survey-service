@@ -249,9 +249,6 @@ const migrateQuestionset = async (
           "reasons": `${JSON.stringify(err?.response?.data)}`
         })
 
-        console.log(questionSetId)
-
-
         if (
           !migratedCount.failed.questionSet.migrated.ids.includes(questionSetId)
         ) {
@@ -267,11 +264,6 @@ const migrateQuestionset = async (
       "referenceQuestionSetId": questionSetMigratedId,
       "reasons": ""
     })
-
-
-    console.log(questionSetId, questionSetMigratedId);
-
-
 
     logger.info(
       `migrateQuestionset: questionSetMigratedId: 
@@ -879,7 +871,7 @@ const getNonMatrixSectionData = async (
       }
     }
   }
-  // console.log(JSON.stringify(sections));
+
   return { sections, migratedCount };
 
 }
