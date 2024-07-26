@@ -1,6 +1,7 @@
 const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
 const { getHeaders } = require("./headers");
+const constants = require('../constant');
 
 
 /**
@@ -66,7 +67,7 @@ const createProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "creation_portal"),
+    headers: await getHeaders(false, c),
     data: data,
   };
 
@@ -146,7 +147,7 @@ const updateProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "creation_portal"),
+    headers: await getHeaders(false,constants.CREATION_PORTAL),
     data: data,
   };
   const res = await axios(config);
@@ -177,7 +178,7 @@ const publishProgram = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(false, "creation_portal"),
+    headers: await getHeaders(false, constants.CREATION_PORTAL),
     data: data,
   };
 
@@ -246,7 +247,7 @@ const nominateProgram = async (program_id, orgAdmin) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: data,
   };
 
@@ -288,7 +289,7 @@ const updateContributorToProgram = async (reqData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: data,
   };
 

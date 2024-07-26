@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
 const logger = require("../logger");
 const { getHeaders } = require("./headers");
+const constants = require('../constant');
 
 // Questionset
 /**
@@ -57,7 +58,7 @@ const createQuestionSet = async (templateData) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: data,
   };
   const res = await axios(config);
@@ -148,7 +149,7 @@ const updateQuestionSetHierarchy = async (templateData) => {
   const config = {
     method: "patch",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: templateData,
   };
 
@@ -173,7 +174,7 @@ const publishQuestionSet = async (questionsetId) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: {},
   };
 
@@ -199,7 +200,7 @@ const readQuestionSetHierarchy = async (questionSetId) => {
   const config = {
     method: "get",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true,constants.CREATION_PORTAL),
   };
 
   const res = await axios(config);
@@ -225,7 +226,7 @@ const createQuestions = async (templateData, questionId) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: data,
   };
   const res = await axios(config).catch((err) => {
@@ -251,7 +252,7 @@ const publishQuestion = async (questionId) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal")
+    headers: await getHeaders(true,constants.CREATION_PORTAL)
   };
 
   const res = await axios(config)

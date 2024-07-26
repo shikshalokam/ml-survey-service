@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const { CONFIG } = require("../constant/config");
 const logger = require("../logger");
 const { getHeaders } = require("./headers");
+const constants = require('../constant')
 
 /**
  * To search the users
@@ -16,7 +17,7 @@ const searchUser = async (userId) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "ed"),
+    headers: await getHeaders(true,  constants.ED),
     data: {
       request: { filters: { id: userId } },
     },
@@ -83,7 +84,7 @@ const getOpenSaberUserOrgId = async (userIds) => {
   const config = {
     method: "post",
     url: url,
-    headers: await getHeaders(true, "creation_portal"),
+    headers: await getHeaders(true, constants.CREATION_PORTAL),
     data: query,
   };
 

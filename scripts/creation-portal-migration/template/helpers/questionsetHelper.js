@@ -10,6 +10,7 @@ const {
   getMCQTemplate,
   getTextTemplate,
 } = require("../generate/gQuestion");
+const constants = require('../../constant');
 
 /**
 * Create the mapping for questionset to add in creation portal
@@ -84,19 +85,19 @@ const createQuestionTemplate = async (question, migratedCount) => {
   let isPublished = question?.migrationReference?.isPublished;
 
   if (type) {
-    if (type.toLowerCase() === "date") {
+    if (type.toLowerCase() === constants.DATE) {
       questionToMigrate = getDateTemplate(question);
     }
-    if (type.toLowerCase() === "slider") {
+    if (type.toLowerCase() === constants.SLIDER) {
       questionToMigrate = getSliderTemplate(question);
     }
-    if (type.toLowerCase() === "multiselect") {
+    if (type.toLowerCase() === constants.MULTI_SELECT) {
       questionToMigrate = getMSMCQTemplate(question);
     }
-    if (type.toLowerCase() === "radio") {
+    if (type.toLowerCase() === constants.RADIO) {
       questionToMigrate = getMCQTemplate(question);
     }
-    if (type.toLowerCase() === "text" || type.toLowerCase() === "number") {
+    if (type.toLowerCase() === constants.TEXT || type.toLowerCase() === constants.NUMBER) {
       questionToMigrate = getTextTemplate(question, type);
     }
 
