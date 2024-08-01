@@ -272,7 +272,6 @@ const questionTemplate = {
       mimeType: "file.type",
     },
   },
-  
 };
 
 const questionStatic = {
