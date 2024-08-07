@@ -72,12 +72,6 @@ const getOpenSaberUserOrgId = async (userIds) => {
         },
       },
     },
-    // request: {
-    //   entityType: ["User_Org"],
-    //   filters: {},
-    //   limit: 10000,
-    //   offset: 0,
-    // },
   };
   const url =
     CONFIG.HOST.creation_portal + CONFIG.APIS.open_saber_user_org_search;

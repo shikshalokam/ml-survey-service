@@ -7,7 +7,7 @@ const fs = require("fs");
 const { searchUser, getOpenSaberUserOrgId } = require("./api-list/user");
 
 /**
-* To get the userdata from creation portal
+* To get the userData from creation portal
 * @method
 * @name getUserIds
 **/

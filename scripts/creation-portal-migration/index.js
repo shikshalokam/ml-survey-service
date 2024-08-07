@@ -69,31 +69,46 @@ const migrateData = async (req, res) => {
       },
     };
 
+    const batchSize = 100;
+    let skip = 0;
+    let hasMoreDocuments = true;
+
     // connect to db
     const db = await createDBInstance();
 
-    // get solutions from mongo {survey, observation w/o rubric}
-    let data = await findAll(CONFIG.DB.TABLES.solutions, {
-      programId: { $exists: true },
-      isRubricDriven: false,
-      type: { $in: ["observation", "survey"] },
-    });
-    migratedCount.totalCount = data.length;
-   
 
-    // To create the program and the questionsets
-    const template = await createProgramAndQuestionsets(
-      data,
-      migratedCount
-    );
+    while (hasMoreDocuments) {
+      // get solutions from mongo {survey, observation w/o rubric}
+      let data = await findAll(CONFIG.DB.TABLES.solutions, {
+        programId: { $exists: true },
+        isRubricDriven: false,
+        type: { $in: ["observation", "survey"] },
+      });
 
-    console.log(JSON.stringify(migratedCount));
-    logger.info(`\n migratedCount ${JSON.stringify(migratedCount)}`);
+      migratedCount.totalCount = data.length;
+
+      // To create the program and the questionsets
+      const template = await createProgramAndQuestionsets(
+        data,
+        migratedCount
+      );
+
+      console.log(JSON.stringify(migratedCount));
+      logger.info(`\n migratedCount ${JSON.stringify(migratedCount)}`);
+
+
+      skip += batchSize;
+
+      if (data.length < batchSize) {
+        hasMoreDocuments = false;
+      }
+    }
+
     process.exit();
   } catch (err) {
     logger.error(`Error while migrating : ${err}`)
     console.log(err)
-    throw new Error("Error occured", err);
+    throw new Error("Error occurred", err);
   }
 };
 
