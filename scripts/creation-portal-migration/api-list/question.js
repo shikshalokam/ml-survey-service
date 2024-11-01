@@ -48,37 +48,43 @@ const creation_portal_url = CONFIG.HOST.creation_portal;
     }
 }
 * 
-* @returns {String} - return Questionset unique identifier Id ( do_21376612089008128017430 )
+* @returns {Object} - return Questionset Object with unique identifier Id ( do_21376612089008128017430 )
 */
 
-const createQuestionSet = async (templateData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.create_questionset;
-    const data = {
-      request: {
-        questionset: { ...templateData },
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: data,
-    };
+const createQuestionSet = function (templateData) {
+  const url = creation_portal_url + CONFIG.APIS.create_questionset;
+  const data = {
+    request: {
+      questionset: { ...templateData },
+    },
+  };
 
-    const res = await axios(config);
+  const config = {
+    method: constants.METHOD.PATCH,
+    url: url,
+    headers: null,
+    data: data,
+  };
 
-    if (res?.status === 200) {
-      return res?.data?.result?.identifier;
-    } else {
-      throw new Error("Unexpected response status");
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while creating the Questionset: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while creating the Questionset : ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
 
 /**
@@ -151,37 +157,38 @@ const createQuestionSet = async (templateData) => {
     }
 }
 * 
-  * @returns {JSON} - response: 
-  {
-    "Comments and Reflection:": "do_21377895770669056011493",
-    "Comments and Reflection: 2": "do_21377895770669056011495"
-  }
-    
+  * @returns {QuestionSetHierarchyObject} - Object
 */
-const updateQuestionSetHierarchy = async (templateData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.update_hierarchy;
 
-    const config = {
-      method: "patch",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: templateData,
-    };
+const updateQuestionSetHierarchy = function (templateData) {
+  const url = creation_portal_url + CONFIG.APIS.update_hierarchy;
 
-    const res = await axios(config);
+  const config = {
+    method: constants.METHOD.PATCH,
+    url: url,
+    headers: null,
+    data: templateData,
+  };
 
-    if (res?.status === 200) {
-      return res?.data?.result?.identifiers;
-    } else {
-      throw new Error("Unexpected response status");
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while updating QuestionSetHierarchy: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while updating QuestionSetHierarchy: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
 
 /**
@@ -190,20 +197,38 @@ const updateQuestionSetHierarchy = async (templateData) => {
  * @name publishQuestionSet
  * @param {String} questionsetId - do_21376461469939302415285
  *
- * @returns {String} - response: "do_21376461469939302415285"
+ * @returns {Object} - responseObject with Question identifier (ex. "do_21376461469939302415285" )
  */
-const publishQuestionSet = async (questionsetId) => {
+const publishQuestionSet = function (questionsetId) {
   const url =
     creation_portal_url + CONFIG.APIS.publish_questionset + "/" + questionsetId;
+
   const config = {
-    method: "post",
+    method: constants.METHOD.POST,
     url: url,
-    headers: await getHeaders(true, constants.CREATION_PORTAL),
+    headers: null,
     data: {},
   };
 
-  const res = await axios(config);
-  return res?.data?.result?.identifier;
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while publishing question set for questionsetId ${questionsetId}: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
 /**
@@ -214,34 +239,41 @@ const publishQuestionSet = async (questionsetId) => {
  *
  * @returns {JSON} - returns questionset with hierarchy
  */
-const readQuestionSetHierarchy = async (questionSetId) => {
-  try {
-    const url =
-      creation_portal_url +
-      CONFIG.APIS.read_questionset +
-      questionSetId +
-      "?mode=edit";
 
-    const config = {
-      method: "get",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-    };
+const readQuestionSetHierarchy = function (questionSetId) {
+  const url =
+    creation_portal_url +
+    CONFIG.APIS.read_questionset +
+    questionSetId +
+    "?mode=edit";
 
-    const res = await axios(config);
+  const config = {
+    method: constants.METHOD.GET,
+    url: url,
+    headers: null,
+  };
 
-    if (res?.status === 200) {
-      return res?.data?.result?.questionSet;
-    } else {
-      throw new Error("Unexpected response status");
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error in readQuestionSetHierarchy: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error in readQuestionSetHierarchy: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
+
 
 // Questions
 /**
@@ -250,36 +282,42 @@ const readQuestionSetHierarchy = async (questionSetId) => {
  * @name createQuestions
  * @param {String} questionId - do_213771658975903744111423
  * @param {Object} templateData - {"name":"What medium of instruction would you prefer for trainings?","code":"PS25_1597311656239","description":"","showRemarks":"Yes","mimeType":"application/vnd.sunbird.question","primaryCategory":"Multiselect Multiple Choice Question","interactionTypes":["choice"],"body":"<div class='question-body'><div class='mcq-title'><p>What medium of instruction would you prefer for trainings?&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div><div class='mcq-title'><p>&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>","interactions":{"validation":{"required":"Yes"},"response1":{"type":"choice","options":[{"value":"R1","label":"English"},{"value":"R2","label":"Hindi"},{"value":"R3","label":"Bi-lingual"}]}},"editorState":{"question":"<div class='question-body'><div class='mcq-title'><p>What medium of instruction would you prefer for trainings?&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div><div class='mcq-title'><p>&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>","options":[{"answer":false,"value":{"body":"<p>English</p>","value":0}},{"answer":false,"value":{"body":"<p>Hindi</p>","value":1}},{"answer":false,"value":{"body":"<p>Bi-lingual</p>","value":2}}]},"responseDeclaration":{"response1":{"maxScore":0,"cardinality":"single","type":"integer","correctResponse":{"outcomes":{"SCORE":0}}}},"instructions":{"default":""},"hints":"","evidence":{"mimeType":[]}}
- * @returns {string} -  return Question unique identifier Id
+ * @returns {Object} -  return QuestionObject with unique identifier Id
  */
-const createQuestions = async (templateData, questionId) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.create_question;
-    const data = {
-      request: {
-        question: { ...templateData },
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: data,
-    };
+const createQuestions = function (templateData, questionId) {
+  const url = creation_portal_url + CONFIG.APIS.create_question;
+  const data = {
+    request: {
+      question: { ...templateData },
+    },
+  };
 
-    const res = await axios(config);
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
 
-    if (res?.status === 200) {
-      return res?.data?.result?.identifier;
-    } else {
-      throw new Error("Unexpected response status");
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while creating the question for questionId ${questionId}: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while creating the question for questionid: ${questionId}: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
 
 /**
@@ -287,32 +325,38 @@ const createQuestions = async (templateData, questionId) => {
  * @method
  * @name publishQuestion
  * @param {String} questionId - do_21376461469939302415285
- * @returns {JSON} - return question unique identifierID
+ * @returns {JSON} - return question responseObject with unique identifierID
  */
-const publishQuestion = async (questionId) => {
-  try {
-    const url =
-      creation_portal_url + CONFIG.APIS.publish_question + "/" + questionId;
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-    };
+const publishQuestion = function (questionId) {
+  const url = creation_portal_url + CONFIG.APIS.publish_question + "/" + questionId;
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+  };
 
-    const res = await axios(config);
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
 
-    if (res?.status === 200) {
-      return res?.data?.result?.identifier;
-    } else {
-      throw new Error("Unexpected response status");
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while publishing question for questionId ${questionId}: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error  while publishing question for questionId ${questionId}: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
+
+
 
 module.exports = {
   createQuestionSet,

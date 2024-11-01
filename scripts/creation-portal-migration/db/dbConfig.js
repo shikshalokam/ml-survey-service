@@ -7,7 +7,6 @@ const connect = async () => {
   try {
     const Connect = mongoose.createConnection();
     // connect to database
-    console.log("MONGODB_URL", CONFIG.DB.DB_HOST);
     this.database = await Connect.openUri(CONFIG.DB.DB_HOST, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

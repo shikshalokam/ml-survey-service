@@ -33,8 +33,16 @@ const getUserIds = async () => {
     });
     let uniqUsers = uniq(userIds);
     uniqUsers = compact(uniqUsers);
-    const usersList = await searchUser(uniqUsers);
-    const openSaberOrg = await getOpenSaberUserOrgId(uniqUsers);
+    const usersList = null;
+    const userListResponse = await searchUser(uniqUsers);
+    if (userListResponse?.responseCode === "OK") {
+      usersList = userListResponse?.result?.response?.content;
+    }
+    const openSaberOrg = null;
+    const openSaberOrgResponse = getOpenSaberUserOrgId(uniqUsers);
+    if (openSaberOrgResponse?.responseCode === "OK") {
+      openSaberOrg = await getOpenSaberUserOrgId(uniqUsers);
+    }
     const d = writeToCSVFile(usersList, uniqUsers, openSaberOrg, solutions);
     console.log(`\n migratedCount userIds`, d);
   } catch (err) {

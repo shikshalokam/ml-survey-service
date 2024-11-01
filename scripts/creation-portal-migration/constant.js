@@ -9,6 +9,10 @@ const constants = Object.freeze({
   NUMBER: "number",
   APPLICATION_URL_ENCODED: "application/x-www-form-urlencoded",
   APPLICATION_JSON: "application/json",
+  SURVEY: "Survey",
+  OBSERVATION: "Observation",
+  QUESTION_SET: "QuestionSet",
+  PENDING : "Pending",
 
   // Migration Reference related constants
   MIGRATION_REFERENCE: {
@@ -35,9 +39,12 @@ const constants = Object.freeze({
     SURVEY_QUESTIONSET_ALL: "obj-cat:survey_questionset_all",
   },
 
-  OBSERVATION: "Observation",
-  QUESTION_SET: "QuestionSet",
-  SURVEY: "Survey",
+  //https methods
+  METHOD: {
+    GET: "get",
+    POST: "post",
+    PATCH: "patch"
+  },
 });
 
 module.exports = constants;

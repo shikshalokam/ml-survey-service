@@ -64,7 +64,7 @@ const publishQuestions = async () => {
           `createQuestion Template publish response: ${res} , "referenceQuestionId" ${referenceQuestionId} questionId, ${question?._id}`
         );
 
-        if (res) {
+        if (res?.responseCode == "OK") {
           question = {
             ...question,
             migrationReference: { isPublished: true },
@@ -135,7 +135,7 @@ const publishQuestions = async () => {
           }
         });
 
-        if (!res) {
+        if (res?.responseCode !== "OK") {
           // Update the solutions collection with hierarchy update and branching update status
           await updateSolutionsDb(
             query,
@@ -144,6 +144,7 @@ const publishQuestions = async () => {
           );
           return;
         }
+
         query = {
           ...query,
           [constants.MIGRATION_REFERENCE.IS_PUBLISHED]: true,

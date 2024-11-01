@@ -57,36 +57,43 @@ const creation_portal_url = CONFIG.HOST.creation_portal;
     }
 }
 * 
-* @returns {string} - return ProgramId 
+* @returns {Object} - return newly created Program object with ProgramId in the response 
 */
-const createProgram = async (templateData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.create_program;
-    const data = {
-      request: {
-        ...templateData,
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(false, constants.CREATION_PORTAL),
-      data: data,
-    };
 
-    const res = await axios(config);
+const createProgram = function (templateData) {
+  const url = creation_portal_url + CONFIG.APIS.create_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
 
-    if (res?.status === 200) {
-      return res?.data?.result?.program_id;
-    } else {
-      throw new Error("Unexpected response status");
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(false, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while creating program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = err?.response?.data;
-    logger.error(
-      `Error while creating program, Error : ${errorResponse?.responseCode} -${errorResponse.params?.errmsg} `
-    );
-  }
+  });
 };
 
 /**
@@ -150,34 +157,40 @@ const createProgram = async (templateData) => {
 * 
 *  @returns {JSON} - Updates the program with the updated program template
 */
-const updateProgram = async (templateData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.update_program;
-    const data = {
-      request: {
-        ...templateData,
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(false, constants.CREATION_PORTAL),
-      data: data,
-    };
+const updateProgram = function (templateData) {
+  const url = creation_portal_url + CONFIG.APIS.update_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
 
-    const res = await axios(config);
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
 
-    if (res?.status === 200) {
-      return res?.data;
-    } else {
-      throw new Error("Unexpected response status");
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(false, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while updating program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = err?.response?.data;
-    logger.error(
-      `Error while updating program, Error : ${errorResponse?.responseCode} -${errorResponse.params?.errmsg} `
-    );
-  }
+  });
 };
 
 /**
@@ -194,34 +207,41 @@ const updateProgram = async (templateData) => {
 * 
 * @returns {JSON} - Published the program 
 */
-const publishProgram = async (templateData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.publish_program;
-    const data = {
-      request: {
-        ...templateData,
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(false, constants.CREATION_PORTAL),
-      data: data,
-    };
 
-    const res = await axios(config);
+const publishProgram = function (templateData) {
+  const url = creation_portal_url + CONFIG.APIS.publish_program;
+  const data = {
+    request: {
+      ...templateData,
+    },
+  };
 
-    if (res?.status === 200) {
-      return res?.data;
-    } else {
-      throw new Error("Unexpected response status");
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(false, constants.CREATION_PORTAL);
+
+      axios(config)
+        .then((res) => {
+          return resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while publishing program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          return reject(errorResponse);
+        });
+    } catch (error) {
+      return reject(error);
     }
-  } catch (error) {
-    const errorResponse = err?.response?.data;
-    logger.error(
-      `Error while publishing program, Error : ${errorResponse?.responseCode} -${errorResponse.params?.errmsg} `
-    );
-  }
+  });
 };
 
 /**
@@ -256,54 +276,58 @@ const publishProgram = async (templateData) => {
 * 
 * @returns {JSON} - Nominates the program
 **/
-const nominateProgram = async (program_id, orgAdmin) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.add_program_nomination;
-    const data = {
-      request: {
-        program_id: program_id,
-        status: "Pending",
-        collection_ids: [],
-        createdby: orgAdmin?.srcOrgAdminId,
-        targetprimarycategories: [
-          {
-            name: "Observation",
-            identifier: "obj-cat:observation_questionset_all",
-            targetObjectType: "QuestionSet",
-          },
-          {
-            name: "Survey",
-            identifier: "obj-cat:survey_questionset_all",
-            targetObjectType: "QuestionSet",
-          },
-        ],
-        content_types: [],
-        organisation_id: orgAdmin?.org_id,
-        user_id:
-          orgAdmin?.mappedUserId ||
-          process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
-      },
-    };
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: data,
-    };
+const nominateProgram = function (program_id, orgAdmin) {
+  const url = creation_portal_url + CONFIG.APIS.add_program_nomination;
+  const data = {
+    request: {
+      program_id: program_id,
+      status: constants.PENDING,
+      collection_ids: [],
+      createdby: orgAdmin?.srcOrgAdminId,
+      targetprimarycategories: [
+        {
+          name: constants.OBSERVATION,
+          identifier: constants.OBJ_CAT.OBSERVATION_QUESTIONSET_ALL,
+          targetObjectType: constants.QUESTION_SET,
+        },
+        {
+          name: constants.SURVEY,
+          identifier: constants.OBJ_CAT.SURVEY_QUESTIONSET_ALL,
+          targetObjectType: constants.QUESTION_SET,
+        },
+      ],
+      content_types: [],
+      organisation_id: orgAdmin?.org_id,
+      user_id:
+        orgAdmin?.mappedUserId || process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
+    },
+  };
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
 
-    const res = await axios(config);
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
 
-    if (res?.status === 200) {
-      return res?.data;
-    } else {
-      throw new Error("Unexpected response status");
+      axios(config)
+        .then((res) => {
+          return resolve(res?.data);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while nominating program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          return reject(errorResponse);
+        });
+    } catch (error) {
+      return reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while nominating program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
 
 /**
@@ -328,35 +352,40 @@ const nominateProgram = async (program_id, orgAdmin) => {
 * 
 * @returns {JSON} - updates the contributor to the program
 **/
-const updateContributorToProgram = async (reqData) => {
-  try {
-    const url = creation_portal_url + CONFIG.APIS.update_program_nomination;
-    const data = {
-      request: {
-        ...reqData,
-      },
-    };
+const updateContributorToProgram = function (reqData) {
+  const url = creation_portal_url + CONFIG.APIS.update_program_nomination;
+  const data = {
+    request: {
+      ...reqData,
+    },
+  };
 
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: data,
-    };
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: data,
+  };
 
-    const res = await axios(config);
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
 
-    if (res?.status === 200) {
-      return res?.data;
-    } else {
-      throw new Error("Unexpected response status");
+      axios(config)
+        .then((res) => {
+          resolve(res.data); // Directly resolve the data without checking status
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while updating contributor to program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while updating contributor to  program, Error: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
 
 module.exports = {

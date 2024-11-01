@@ -12,31 +12,39 @@ const constants = require("../constant");
  * @returns {JSON} - returns the users list
  **/
 
-const searchUser = async (userId) => {
-  try {
-    const url = CONFIG.HOST.ed + CONFIG.APIS.search_user;
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.ED),
-      data: {
-        request: { filters: { id: userId } },
-      },
-    };
 
-    const res = await axios(config);
-    if (res?.status === 200) {
-      return res?.data?.result?.response?.content;
-    } else {
-      throw new Error("Unexpected response status");
+const searchUser = function (userId) {
+  const url = CONFIG.HOST.ed + CONFIG.APIS.search_user;
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: {
+      request: { filters: { id: userId } },
+    },
+  };
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.ED);
+
+      axios(config)
+        .then((res) => {
+          resolve(res?.data?.result?.response?.content);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while searching User: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while searching User : ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
+
 
 /**
 * To search the user org in open saber reg
@@ -59,51 +67,55 @@ const searchUser = async (userId) => {
   ]
 **/
 
-const getOpenSaberUserOrgId = async (userIds) => {
-  try {
-    const query = {
-      id: "open-saber.registry.search",
-      ver: "1.0",
-      ets: "11234",
-      params: {
-        did: "",
-        key: "",
-        msgid: "",
-      },
-      request: {
-        entityType: ["User_Org"],
-        filters: {
-          userId: {
-            or: [userIds],
-          },
+const getOpenSaberUserOrgId = function (userIds) {
+  const query = {
+    id: "open-saber.registry.search",
+    ver: "1.0",
+    ets: "11234",
+    params: {
+      did: "",
+      key: "",
+      msgid: "",
+    },
+    request: {
+      entityType: ["User_Org"],
+      filters: {
+        userId: {
+          or: [userIds],
         },
       },
-    };
+    },
+  };
 
-    const url =
-      CONFIG.HOST.creation_portal + CONFIG.APIS.open_saber_user_org_search;
+  const url = CONFIG.HOST.creation_portal + CONFIG.APIS.open_saber_user_org_search;
+  const config = {
+    method: constants.METHOD.POST,
+    url: url,
+    headers: null,
+    data: query,
+  };
 
-    const config = {
-      method: "post",
-      url: url,
-      headers: await getHeaders(true, constants.CREATION_PORTAL),
-      data: query,
-    };
+  return new Promise(async (resolve, reject) => {
+    try {
+      config.headers = await getHeaders(true, constants.CREATION_PORTAL);
 
-    const res = await axios(config);
-
-    if (res?.status === 200) {
-      return res?.data?.result?.Org || [];
-    } else {
-      throw new Error("Unexpected response status");
+      axios(config)
+        .then((res) => {
+          resolve(res?.data?.result?.Org || []);
+        })
+        .catch((error) => {
+          const errorResponse = error?.response?.data;
+          logger.error(
+            `Error while searching User: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
+          );
+          reject(errorResponse);
+        });
+    } catch (error) {
+      reject(error);
     }
-  } catch (error) {
-    const errorResponse = error?.response?.data;
-    logger.error(
-      `Error while searching User: ${errorResponse?.responseCode} - ${errorResponse?.params?.errmsg}`
-    );
-  }
+  });
 };
+
 
 module.exports = {
   searchUser,

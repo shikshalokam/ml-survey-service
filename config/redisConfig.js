@@ -3,8 +3,7 @@ const redis = require("redis");
 
 var Connect = function () {
   var client = redis.createClient({
-    host: process.env.REDIS_URL,
-    database: process.env.REDIS_DB,
+    url: process.env.REDIS_URL,
     socket: {
       connectTimeout: 30000
     }

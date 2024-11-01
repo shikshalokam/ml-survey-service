@@ -9,6 +9,7 @@ const { updateById } = require("../../db");
 const logger = require("../../logger");
 const constants = require("../../constant");
 
+
 /**
  * Update the query fields in solutions collections
  * @method
@@ -69,31 +70,34 @@ const updateHierarchyTemplate = async (
   let query = {};
   if (!solution?.migrationReference?.isHierarchyUpdated) {
     updateHierarchyData = getHierarchyData(sectionsList, solution);
-    const result = await updateQuestionSetHierarchy(updateHierarchyData).catch(
-      (err) => {
-        logger.error(`Error while updating the questionset for solution_id: ${
-          solution?._id
-        } Error:
+    const response = await updateQuestionSetHierarchy(
+      updateHierarchyData
+    ).catch((err) => {
+      logger.error(`Error while updating the questionset for solution_id: ${
+        solution?._id
+      } Error:
           ${JSON.stringify(err.response.data)}`);
-        // increment questionSet hierarchy failed count and store the id
+      // increment questionSet hierarchy failed count and store the id
 
-        if (
-          !migratedCount.failed.questionSet.hierarchy.ids.includes(
-            solution?.referenceQuestionSetId
-          )
-        ) {
-          migratedCount.failed.questionSet.hierarchy.count++;
-          migratedCount.failed.questionSet.hierarchy.ids.push(
-            solution?.referenceQuestionSetId
-          );
-        }
+      if (
+        !migratedCount.failed.questionSet.hierarchy.ids.includes(
+          solution?.referenceQuestionSetId
+        )
+      ) {
+        migratedCount.failed.questionSet.hierarchy.count++;
+        migratedCount.failed.questionSet.hierarchy.ids.push(
+          solution?.referenceQuestionSetId
+        );
       }
-    );
+    });
 
-    if (!result) {
+    if (response.responseCode !== "OK") {
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
     }
+
+    const result = response.result?.identifier;
+
     query = {
       ...query,
       [constants.MIGRATION_REFERENCE.IS_HIERARCHY_UPDATED]: true,
@@ -193,7 +197,8 @@ const updateHierarchyTemplate = async (
         }
       }
     );
-    if (!res) {
+
+    if (res?.responseCode !== "OK") {
       // Update the solutions collection with hierarchy update and branching update status
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
@@ -334,12 +339,19 @@ const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
     solution?.migrationReference?.isHierarchyUpdated
   ) {
     // Called If the questionset hierarchy is but updated fails to update the branchig Logic
-    questionSetHierarchy = await readQuestionSetHierarchy(
+    const response = await readQuestionSetHierarchy(
       solution?.referenceQuestionSetId
     ).catch((err) => {
       console.log("Error", err);
       return;
     });
+
+    if(response?.responseCode !== "OK"){
+      //nothing do further
+      return;
+    }
+
+    questionSetHierarchy = response?.result?.questionSet;
   }
 
   const result = {};

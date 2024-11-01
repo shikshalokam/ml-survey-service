@@ -112,7 +112,6 @@ const createProgramTemplate = async (solution, migratedCount) => {
     ? userData?.srcOrgAdmin?.rootOrgId
     : process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID;
 
-  
   // Template to create the program
   const template = {
     name: `${solution?.name} sourcing project`,
@@ -163,7 +162,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
 
   // If sourcingProgramId is not created then create using above the formed template;
   if (isEmpty(programId)) {
-    programId = await createProgram(template).catch((err) => {
+    const res = await createProgram(template).catch((err) => {
       logger.error(`Error while creating program for solution_id: ${
         solution?._id
       } Error:
@@ -176,6 +175,10 @@ const createProgramTemplate = async (solution, migratedCount) => {
         migratedCount.failed.program.migrated.ids.push(id);
       }
     });
+
+    if (res.responseCode == "OK") {
+      programId = res.result?.program_id;
+    }
 
     // Update csv file with programId,
     // so that if there is any solution which belongs to same org that can be migrated under the same program
@@ -204,12 +207,10 @@ const createProgramTemplate = async (solution, migratedCount) => {
     migratedCount.success.program.existing.migrated++;
   }
 
-
   // If failed to create the program and programId is empty return
   if (isEmpty(programId)) {
     return;
   }
-
 
   // To update the solution with program
   if (!solution?.migrationReference?.isSourceProgramUpdated) {
@@ -239,18 +240,19 @@ const createProgramTemplate = async (solution, migratedCount) => {
     migratedCount.success.program.existing.updated++;
   }
 
-
   if (!solution?.migrationReference?.isSourceProgramPublished) {
     const publishResponse = await publishProgramTemplate(
       programId,
       solution?._id
-    );
-    // increment program publish failed count and store the id
-    if (!publishResponse) {
+    ).catch((err) => {
+      // increment program publish failed count and store the id
       migratedCount.failed.program.published.count++;
       if (!migratedCount.failed.program.published.ids.includes(id)) {
         migratedCount.failed.program.published.ids.push(id);
       }
+    });
+
+    if (publishResponse.responseCode !== "OK") {
       // Update the db with only migrationReference with sourcingProgramId, isSourceProgramUpdated if failed to publish
       await updateSolutionDb(query, solution, migratedCount);
       return;
@@ -270,12 +272,10 @@ const createProgramTemplate = async (solution, migratedCount) => {
     migratedCount.success.program.existing.published++;
   }
 
-
   if (!solution?.migrationReference?.isNominated) {
     // call the api to nominate program
     const res = await nominateProgram(programId, userData?.srcOrgAdmin).catch(
       (err) => {
-        // updateFailedCount(migratedCount, "nominated",  solution?._id);
         // increment program nominated failed count and store the id
         migratedCount.failed.program.nominated.count++;
         if (!migratedCount.failed.program.nominated.ids.includes(id)) {
@@ -288,8 +288,8 @@ const createProgramTemplate = async (solution, migratedCount) => {
       }
     );
 
-    if (!res) {
-      // Update the db with only migrationReference with sourcingProgramId, isSourceProgramUpdated, isSourceProgramPublished if failed to nominate
+    if (res.responseCode !== "OK") {
+      // Update the database with migration reference if nomination fails
       await updateSolutionDb(query, solution, migratedCount);
       return;
     }
@@ -305,7 +305,6 @@ const createProgramTemplate = async (solution, migratedCount) => {
     migratedCount.success.program.existing.nominated++;
   }
 
-
   if (!solution?.migrationReference?.isContributorAdded) {
     // Template to add the contributor
     const addContributor = {
@@ -319,7 +318,6 @@ const createProgramTemplate = async (solution, migratedCount) => {
         ],
       },
     };
-
 
     // call the api to add contributor
     const updateNomination = await updateContributorToProgram(
@@ -337,16 +335,15 @@ const createProgramTemplate = async (solution, migratedCount) => {
         ${JSON.stringify(err?.response?.data)}`);
     });
 
-
-    if (!updateNomination) {
-      // Update the db with only migrationReference with sourcingProgramId, isSourceProgramUpdated, isSourceProgramPublished, isNominated if failed to add contributor
+    if (updateNomination.responseCode !== "OK") {
+      // Update the database if contributor update fails
       await updateSolutionDb(query, solution, migratedCount);
       return;
     }
+
     logger.info(
       `Sourcing Program added contributor for solution_id: ${solution?._id} === ${programId}`
     );
-
 
     // update the query with isContributorAdded
     query = {
@@ -515,6 +512,11 @@ const updateProgramTemplate = async (programId, solution) => {
     } Error:
       ${JSON.stringify(err?.response?.data)}`);
   });
+
+  if (updateRes.responseCode !== "OK") {
+    return null;
+  }
+
   return updateRes;
 };
 

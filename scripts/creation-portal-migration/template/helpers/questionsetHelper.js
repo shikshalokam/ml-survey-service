@@ -82,33 +82,37 @@ const createQuestionTemplate = async (question, migratedCount) => {
   let referenceQuestionId = question?.referenceQuestionId;
   let query = {};
   let questionToMigrate = {};
+  let typeInLowerCase = type.toLowerCase();
 
   if (type) {
-    if (type.toLowerCase() === constants.DATE) {
+    if (typeInLowerCase === constants.DATE) {
       questionToMigrate = getDateTemplate(question);
     }
-    if (type.toLowerCase() === constants.SLIDER) {
+    if (typeInLowerCase === constants.SLIDER) {
       questionToMigrate = getSliderTemplate(question);
     }
-    if (type.toLowerCase() === constants.MULTI_SELECT) {
+    if (typeInLowerCase === constants.MULTI_SELECT) {
       questionToMigrate = getMultipleSelectMCQTemplate(question);
     }
-    if (type.toLowerCase() === constants.RADIO) {
+    if (typeInLowerCase === constants.RADIO) {
       questionToMigrate = getMCQTemplate(question);
     }
     if (
-      type.toLowerCase() === constants.TEXT ||
-      type.toLowerCase() === constants.NUMBER
+      typeInLowerCase === constants.TEXT ||
+      typeInLowerCase === constants.NUMBER
     ) {
       questionToMigrate = getTextTemplate(question, type);
     }
 
     if (!isEmpty(questionToMigrate) && !referenceQuestionId) {
       // call the api to create the question
-      referenceQuestionId = await createQuestions(
-        questionToMigrate,
-        question._id
-      );
+      const response = await createQuestions(questionToMigrate, question._id);
+
+      if (response?.responseCode !== "OK") {
+        return;
+      }
+
+      referenceQuestionId = response?.result?.identifier;
       question.referenceQuestionId = referenceQuestionId;
     }
   }

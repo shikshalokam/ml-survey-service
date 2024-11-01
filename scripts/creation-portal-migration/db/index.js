@@ -16,19 +16,19 @@ const findAll = async (collectionName, query, options = {}) => {
     const db = await getDBInstance();
     const collection = db.collection(collectionName);
 
-    let cursor = collection.find({ ...query });
+    let documentsCursor = collection.find({ ...query });
 
     // Apply options if they are provided
     if (options.sort) {
-      cursor = cursor.sort(options.sort);
+      documentsCursor = documentsCursor.sort(options.sort);
     }
     if (options.limit) {
-      cursor = cursor.limit(options.limit);
+      documentsCursor = documentsCursor.limit(options.limit);
     }
     if (options.skip) {
-      cursor = cursor.skip(options.skip);
+      documentsCursor = documentsCursor.skip(options.skip);
     }
-    return await cursor.toArray();
+    return await documentsCursor.toArray();
   } catch (err) {
     logger.error(`findAll Error: ${err}`);
   }

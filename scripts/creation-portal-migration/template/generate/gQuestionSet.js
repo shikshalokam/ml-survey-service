@@ -244,7 +244,7 @@ const migrateQuestionset = async (
     migratedCount.success.questionSet.existing.migrated++;
   } else {
     // calls the api to create the question set
-    questionSetMigratedId = await createQuestionSet(templateData).catch(
+    const response = await createQuestionSet(templateData).catch(
       (err) => {
         logger.error(`migrateQuestionset: Error while creating Questionset for solution_id: ${questionSetId} Error:
                         ${JSON.stringify(err?.response?.data)}`);
@@ -264,6 +264,12 @@ const migrateQuestionset = async (
       }
     );
 
+    if (response.responseCode !== "OK") {
+      return;
+    }
+
+    questionSetMigratedId = response.result?.identifier ;
+
     writeCSV({
       solutionId: questionSetId,
       isFailed: "NO",
@@ -276,9 +282,6 @@ const migrateQuestionset = async (
       ${questionSetMigratedId}`
     );
 
-    if (!questionSetMigratedId) {
-      return;
-    }
 
     solution.referenceQuestionSetId = questionSetMigratedId;
     await updateById(CONFIG.DB.TABLES.solutions, questionSetId, {
@@ -697,8 +700,8 @@ const getNonMatrixSectionData = async (
   nonMatrixQuestionIds,
   allQuestionsFromAllSections,
   solutionType,
-  solutionId, 
-  referenceQuestionsetId, 
+  solutionId,
+  referenceQuestionsetId,
   sections,
   existingCriteriaQuestions,
   migratedCount
@@ -796,11 +799,11 @@ const getNonMatrixSectionData = async (
             )
           ) {
             sectionData.branchingLogic[migratedQuestion?.referenceQuestionId] =
-              {
-                target: [],
-                preCondition: {},
-                source: [],
-              };
+            {
+              target: [],
+              preCondition: {},
+              source: [],
+            };
           }
           // Add the question data to nodesModified changing the visibility to parent
           sectionData.nodesModified[migratedQuestion?.referenceQuestionId] = {
@@ -832,7 +835,7 @@ const getNonMatrixSectionData = async (
         if (parentQuestion?.children?.length <= 0) {
           const data = await findAll(CONFIG.DB.TABLES.questions, {
             _id: parentQuestion?._id,
-          }).catch((err) => {});
+          }).catch((err) => { });
           parentQuestion = data[0];
         }
         const parentSectionId = parentQuestionCriteria?.sectionId;
@@ -958,15 +961,15 @@ const getNonMatrixSectionData = async (
             const visible = question?.visibleIf ? question?.visibleIf[0] : {};
             // Update the branching logic with the question predefined conditions
             sectionData.branchingLogic[migratedQuestion?.referenceQuestionId] =
-              {
-                target: [],
-                preCondition: getPrecondition(
-                  visible,
-                  parentReferenceQuestionId,
-                  parentQuestion
-                ),
-                source: [parentReferenceQuestionId],
-              };
+            {
+              target: [],
+              preCondition: getPrecondition(
+                visible,
+                parentReferenceQuestionId,
+                parentQuestion
+              ),
+              source: [parentReferenceQuestionId],
+            };
             sectionData.nodesModified[migratedQuestion?.referenceQuestionId] = {
               isNew: false,
               metadata: {
