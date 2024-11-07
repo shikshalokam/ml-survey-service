@@ -134,11 +134,7 @@ let enviromentVariables = {
     "default" : "ON"
   },
   "REDIS_URL": {
-    "message" : "Required redis url",
-    "optional" : false
-  },
-  "REDIS_DB": {
-    "message" : "Required redis dbname",
+    "message" : "Required redis url which include both username and password",
     "optional" : false
   },
   "REDIS_TTL": {

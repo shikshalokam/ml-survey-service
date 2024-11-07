@@ -16,7 +16,6 @@ const copyQuestionSet = function (copyReq, questionSetId) {
 
     return new Promise((resolve, reject) => {
         try {
-
             const copyQuestionSetCallback = function (err, data) {
                 if (err || data.statusCode != 200) {
                     return reject({
@@ -68,15 +67,15 @@ const updateQuestionSetHierarchy = function (req) {
         try {
 
             let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
-            function updateQuestionSetHierarchyCallBack(err, data) {
-                if (err || data.statusCode != 200) {
+            function updateQuestionSetHierarchyCallBack(err, res) {
+                if (err || res.body.responseCode !== "OK") {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (data.statusCode == 200) {
+                } else if (res.body.responseCode === "OK") {
                     return resolve({
-                        status: data.statusCode
+                        status: 200
                     })
                 }
             }
@@ -94,17 +93,16 @@ const publishQuestionSet = function (questionsetId) {
         try {
 
             let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
-            async function publishQuestionSetCallBack(err, data) {
-                if (err || data.statusCode != 200) {
-                    const errmsg = JSON.parse(data.body)
+            async function publishQuestionSetCallBack(err, res) {
+                if (err || res.body.responseCode !== "OK") {
+                    const errmsg = JSON.parse(res.body)
                     return reject({
                         message: errmsg.errmsg || messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (data.statusCode == 200) {
+                } else if (res.body.responseCode === "OK") {
                     return resolve({
-                        status: data.statusCode
-
+                        status: 200
                     })
                 }
             }

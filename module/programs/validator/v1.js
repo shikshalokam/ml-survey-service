@@ -18,10 +18,6 @@ module.exports = (req) => {
             req.checkQuery('solutionId').exists().withMessage("required solution id")
             req.checkQuery('blockId').exists().withMessage("required block id")
         },
-        addSolutions: function () {
-            req.checkParams('_id').exists().withMessage("required program id");
-            req.checkBody("solutionIds").exists().withMessage("required solutions ids");
-        },
         mapObservation: function () {
             req.checkBody("programId").exists().withMessage("required program id");
             req.checkBody("questionsetId").exists().withMessage("required questionset Id");

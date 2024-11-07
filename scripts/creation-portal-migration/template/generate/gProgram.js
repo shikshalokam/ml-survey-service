@@ -81,6 +81,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
 
   // If srcOrgAdmin is not present in csv don't do any further actions and return
   if (!userData?.srcOrgAdmin) {
+    logger.error("srcOrgAdmin is missing or undefined in user data.");
     return;
   }
 

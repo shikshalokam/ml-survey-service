@@ -377,7 +377,7 @@ module.exports = class ProgramsHelper {
    * @returns {Array} List of program document. 
    */
 
-  static search(filteredData, pageSize, pageNo,projection,search = "") {
+  static search(filteredData, pageSize, pageNo, projection, search = "") {
     return new Promise(async (resolve, reject) => {
       try {
 
@@ -385,7 +385,7 @@ module.exports = class ProgramsHelper {
 
         let projection1 = {};
 
-        if( projection ) {
+        if (projection) {
           projection1["$project"] = projection
         } else {
           projection1["$project"] = {
@@ -397,7 +397,7 @@ module.exports = class ProgramsHelper {
           };
         }
 
-        if ( search !== "" ) {
+        if (search !== "") {
           filteredData["$match"]["$or"] = [];
           filteredData["$match"]["$or"].push(
             { 
@@ -457,14 +457,23 @@ module.exports = class ProgramsHelper {
         let programData = await database.models.programs.findOne({ _id: programId }).lean();
         if (!programData) {
           return resolve({
+            success: false,
             message: messageConstants.apiResponses.PROGRAM_NOT_FOUND,
             status: httpStatusCode.bad_request.status,
           });
         }
-        const copyQuestionSetRes = await questionSetService.copyQuestionSet(copyReq, questionSetId)
+        const copyQuestionSetRes = await questionSetService.copyQuestionSet(copyReq, questionSetId);
+
+        if (copiedQuestionsetId.responseCode !== "OK") {
+          return {
+            success: false,
+            status: httpStatusCode.bad_request.status,
+            message: copyQuestionSetRes.params.errmsg
+          };
+        }
         const copiedQuestionsetId = copyQuestionSetRes.result.node_id[questionSetId]
         const readRes = await questionSetService.readQuestionSet(copiedQuestionsetId);
-        if (!readRes || !readRes.result || !readRes.result.questionSet) {
+        if (!readRes?.result?.questionSet) {
           return {
             success: false,
             status: httpStatusCode.bad_request.status,
@@ -478,7 +487,7 @@ module.exports = class ProgramsHelper {
               nodesModified: {
                 [readQuestionSetRes.identifier]: {
                   metadata: {
-                    visibility: "Private"
+                    visibility: messageConstants.common.PRIVATE
                   }
                 }
               },

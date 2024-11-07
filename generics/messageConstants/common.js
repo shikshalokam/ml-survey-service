@@ -73,6 +73,6 @@
   DELETE_USER: "delete-user",
   USER: "User",
   USER_DELETE_MODULE: "userDelete",
-  OFF: "OFF"
-
+  OFF: "OFF",
+  PRIVATE : "Private"
 }
