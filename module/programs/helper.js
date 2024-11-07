@@ -464,7 +464,7 @@ module.exports = class ProgramsHelper {
         }
         const copyQuestionSetRes = await questionSetService.copyQuestionSet(copyReq, questionSetId);
 
-        if (copiedQuestionsetId.responseCode !== "OK") {
+        if (copiedQuestionsetId.responseCode !== httpStatusCode.ok.code) {
           return {
             success: false,
             status: httpStatusCode.bad_request.status,

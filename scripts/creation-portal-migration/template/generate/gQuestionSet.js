@@ -264,7 +264,7 @@ const migrateQuestionset = async (
       }
     );
 
-    if (response.responseCode !== "OK") {
+    if (response.responseCode !== httpStatusCode.ok.code) {
       return;
     }
 

@@ -4,7 +4,7 @@ const { getHeaders } = require("./headers");
 const constants = require("../constant");
 const logger = require("../logger");
 
-const creation_portal_url = CONFIG.HOST.creation_portal;
+const creationPortalUrl = CONFIG.HOST.creation_portal;
 
 /**
 * To create the program in creation portal
@@ -61,7 +61,7 @@ const creation_portal_url = CONFIG.HOST.creation_portal;
 */
 
 const createProgram = function (templateData) {
-  const url = creation_portal_url + CONFIG.APIS.create_program;
+  const url = creationPortalUrl + CONFIG.APIS.create_program;
   const data = {
     request: {
       ...templateData,
@@ -158,7 +158,7 @@ const createProgram = function (templateData) {
 *  @returns {JSON} - Updates the program with the updated program template
 */
 const updateProgram = function (templateData) {
-  const url = creation_portal_url + CONFIG.APIS.update_program;
+  const url = creationPortalUrl + CONFIG.APIS.update_program;
   const data = {
     request: {
       ...templateData,
@@ -209,7 +209,7 @@ const updateProgram = function (templateData) {
 */
 
 const publishProgram = function (templateData) {
-  const url = creation_portal_url + CONFIG.APIS.publish_program;
+  const url = creationPortalUrl + CONFIG.APIS.publish_program;
   const data = {
     request: {
       ...templateData,
@@ -277,7 +277,7 @@ const publishProgram = function (templateData) {
 * @returns {JSON} - Nominates the program
 **/
 const nominateProgram = function (program_id, orgAdmin) {
-  const url = creation_portal_url + CONFIG.APIS.add_program_nomination;
+  const url = creationPortalUrl + CONFIG.APIS.add_program_nomination;
   const data = {
     request: {
       program_id: program_id,
@@ -353,7 +353,7 @@ const nominateProgram = function (program_id, orgAdmin) {
 * @returns {JSON} - updates the contributor to the program
 **/
 const updateContributorToProgram = function (reqData) {
-  const url = creation_portal_url + CONFIG.APIS.update_program_nomination;
+  const url = creationPortalUrl + CONFIG.APIS.update_program_nomination;
   const data = {
     request: {
       ...reqData,

@@ -2,17 +2,13 @@ var path = require("path");
 var fs = require("fs");
 var Logger = require("bunyan");
 
-const date =
-  new Date().getDate() +
-  "-" +
-  (new Date().getMonth() + 1) +
-  "-" +
-  new Date().getFullYear();
+const currentDate = new Date();
+const formattedDate = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`;
 
-var dir = __dirname + "/logs";
+var logDir = __dirname + "/logs";
 
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
 var logger = new Logger({
@@ -20,15 +16,15 @@ var logger = new Logger({
   streams: [
     {
       level: "error",
-      path: path.join(__dirname, `/logs/${date}-error.log`),
+      path: path.join(__dirname, `/logs/${formattedDate}-error.log`),
     },
     {
       level: "debug",
-      path: path.join(__dirname, `/logs/${date}-debug.log`),
+      path: path.join(__dirname, `/logs/${formattedDate}-debug.log`),
     },
     {
       level: "info",
-      path: path.join(__dirname, `/logs/${date}-info.log`),
+      path: path.join(__dirname, `/logs/${formattedDate}-info.log`),
     },
   ],
 });

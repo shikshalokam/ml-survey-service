@@ -177,7 +177,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
       }
     });
 
-    if (res.responseCode == "OK") {
+    if (res.responseCode === httpStatusCode.ok.code) {
       programId = res.result?.program_id;
     }
 
@@ -253,7 +253,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
       }
     });
 
-    if (publishResponse.responseCode !== "OK") {
+    if (publishResponse.responseCode !== httpStatusCode.ok.code) {
       // Update the db with only migrationReference with sourcingProgramId, isSourceProgramUpdated if failed to publish
       await updateSolutionDb(query, solution, migratedCount);
       return;
@@ -289,7 +289,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
       }
     );
 
-    if (res.responseCode !== "OK") {
+    if (res.responseCode !== httpStatusCode.ok.code) {
       // Update the database with migration reference if nomination fails
       await updateSolutionDb(query, solution, migratedCount);
       return;
@@ -336,7 +336,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
         ${JSON.stringify(err?.response?.data)}`);
     });
 
-    if (updateNomination.responseCode !== "OK") {
+    if (updateNomination.responseCode !== httpStatusCode.ok.code) {
       // Update the database if contributor update fails
       await updateSolutionDb(query, solution, migratedCount);
       return;
@@ -416,40 +416,31 @@ const createProgramTemplate = async (solution, migratedCount) => {
  * @param {Object} migratedCount - migratedCount to increment the count.
  */
 const updateSolutionDb = async (query, solution, migratedCount) => {
-  const res = await updateSolutionById({
-    id: solution._id.toString(),
-    query: { ...query },
-  }).catch((err) => {
+  try {
+    await updateSolutionById({
+      id: solution._id.toString(),
+      query: { ...query },
+    });
+  } catch (err) {
     logger.error(
       `Error while updating program in solutions collection: ${solution?._id} Error: ${err}`
     );
-  });
+    return;
+  }
 
-  if (query.hasOwnProperty(constants.MIGRATION_REFERENCE.SOURCING_PROGRAM_ID)) {
-    migratedCount.success.program.current.migrated++;
-  }
-  if (
-    query.hasOwnProperty(constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_UPDATED)
-  ) {
-    migratedCount.success.program.current.updated++;
-  }
-  if (
-    query.hasOwnProperty(constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_PUBLISHED)
-  ) {
-    migratedCount.success.program.current.published++;
-  }
-  if (query.hasOwnProperty(constants.MIGRATION_REFERENCE.IS_NOMINATED)) {
-    migratedCount.success.program.current.nominated++;
-  }
-  if (
-    query.hasOwnProperty(constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ADDED)
-  ) {
-    migratedCount.success.program.current.contributor++;
-  }
-  if (
-    query.hasOwnProperty(constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ACCEPTED)
-  ) {
-    migratedCount.success.program.current.accepted++;
+  const migrationFields = {
+    [constants.MIGRATION_REFERENCE.SOURCING_PROGRAM_ID]: "migrated",
+    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_UPDATED]: "updated",
+    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_PUBLISHED]: "published",
+    [constants.MIGRATION_REFERENCE.IS_NOMINATED]: "nominated",
+    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ADDED]: "contributor",
+    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ACCEPTED]: "accepted",
+  };
+
+  for (const [key, field] of Object.entries(migrationFields)) {
+    if (query.hasOwnProperty(key)) {
+      migratedCount.success.program.current[field]++;
+    }
   }
 };
 
@@ -514,7 +505,7 @@ const updateProgramTemplate = async (programId, solution) => {
       ${JSON.stringify(err?.response?.data)}`);
   });
 
-  if (updateRes.responseCode !== "OK") {
+  if (updateRes.responseCode !== httpStatusCode.ok.code) {
     return null;
   }
 

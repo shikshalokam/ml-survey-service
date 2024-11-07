@@ -11,7 +11,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "coverage": " nyc --reporter=lcov mocha --timeout 10000 test --exit",
-    "creation_portal_script": "node scripts/creation-portal-migration/index.js"
+    "creation-portal-script": "node scripts/creation-portal-migration/index.js"
   },
   "keywords": [
     "shikshalokam",

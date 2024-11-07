@@ -10,18 +10,19 @@ const { searchUser, getOpenSaberUserOrgId } = require("./api-list/user");
  * To get the userData from creation portal
  * @method
  * @name getUserIds
+ * @returns {Promise<void>} Returns a promise that completes once the migration process finishes.
  **/
 const getUserIds = async () => {
   try {
-    const db = await createDBInstance();
-    const data = await findAll(CONFIG.DB.TABLES.solutions, {
+    const dbInstance = await createDBInstance();
+    const solutionData = await findAll(CONFIG.DB.TABLES.solutions, {
       programId: { $exists: true },
       isRubricDriven: false,
       type: { $in: ["observation", "survey"] },
     });
 
-    const userIds = data.map((solution) => solution.author);
-    const solutions = data.map((solution) => {
+    const userIds = solutionData.map((solution) => solution.author);
+    const solutionDetails = solutionData.map((solution) => {
       const programName = `${solution.name} sourcing project`;
       return {
         userId: solution.author,
@@ -31,25 +32,31 @@ const getUserIds = async () => {
         programName: programName,
       };
     });
-    let uniqUsers = uniq(userIds);
-    uniqUsers = compact(uniqUsers);
-    const usersList = null;
-    const userListResponse = await searchUser(uniqUsers);
-    if (userListResponse?.responseCode === "OK") {
+
+    let uniqueUserIds = uniq(userIds);
+    uniqueUserIds = compact(uniqueUserIds);
+
+    let usersList = null;
+    const userListResponse = await searchUser(uniqueUserIds);
+    if (userListResponse?.responseCode === httpStatusCode.ok.code) {
       usersList = userListResponse?.result?.response?.content;
     }
-    const openSaberOrg = null;
-    const openSaberOrgResponse = getOpenSaberUserOrgId(uniqUsers);
-    if (openSaberOrgResponse?.responseCode === "OK") {
-      openSaberOrg = await getOpenSaberUserOrgId(uniqUsers);
+
+    let openSaberOrganizations = null;
+    const openSaberOrgResponse = await getOpenSaberUserOrgId(uniqueUserIds);
+    if (openSaberOrgResponse?.responseCode === httpStatusCode.ok.code) {
+      openSaberOrganizations = openSaberOrgResponse;
     }
-    const d = writeToCSVFile(usersList, uniqUsers, openSaberOrg, solutions);
-    console.log(`\n migratedCount userIds`, d);
+
+    const migrationResult = writeToCSVFile(usersList, uniqueUserIds, openSaberOrganizations, solutionDetails);
+    console.log(`\nMigrated user count:`, migrationResult);
+
   } catch (err) {
-    console.log(`Error while migrating : ${err}`);
+    console.log(`Error while migrating: ${err}`);
     throw new Error("Error occurred", err);
   }
 };
+
 
 /**
 * Write the data to csv file

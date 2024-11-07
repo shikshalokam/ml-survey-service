@@ -12,7 +12,6 @@ const constants = require("../constant");
  * @param {String} url - url
  * @param {querystring} body - body
  * @param {String} type - type of token ( ED || Creation-portal )
- *
  * @returns {string} - Generates the user token
  */
 const generateToken = async (url, body, type) => {
@@ -42,7 +41,6 @@ const generateToken = async (url, body, type) => {
  * @method
  * @name isAValidToken
  * @param {String} type - type of token ( ED || Creation-portal )
- *
  * @returns {Boolean} - Returns the boolean
  */
 
@@ -67,7 +65,6 @@ const isAValidToken = (type) => {
  * @method
  * @name generateUserToken
  * @param {String} type - type
- *
  * @returns {string} - Returns the user token
  */
 
@@ -102,7 +99,6 @@ const generateUserToken = async (type) => {
  * @name getHeaders
  * @param {String} type - type
  * @param {Boolean} isTokenRequired - isTokenReq
- *
  * @returns {Object} - Returns the headers
  */
 

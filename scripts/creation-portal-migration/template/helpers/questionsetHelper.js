@@ -108,7 +108,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
       // call the api to create the question
       const response = await createQuestions(questionToMigrate, question._id);
 
-      if (response?.responseCode !== "OK") {
+      if (response?.responseCode !== httpStatusCode.ok.code) {
         return;
       }
 

@@ -91,7 +91,7 @@ const updateHierarchyTemplate = async (
       }
     });
 
-    if (response.responseCode !== "OK") {
+    if (response.responseCode !== httpStatusCode.ok.code ) {
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
     }
@@ -198,7 +198,7 @@ const updateHierarchyTemplate = async (
       }
     );
 
-    if (res?.responseCode !== "OK") {
+    if (res?.responseCode !== httpStatusCode.ok.code) {
       // Update the solutions collection with hierarchy update and branching update status
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
@@ -346,7 +346,7 @@ const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
       return;
     });
 
-    if(response?.responseCode !== "OK"){
+    if(response?.responseCode !== httpStatusCode.ok.code){
       //nothing do further
       return;
     }

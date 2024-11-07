@@ -832,6 +832,7 @@ module.exports = class SurveysHelper {
    * @param {String} userToken - userToken.
    * @param {Number} appVersion - appVersion.
    * @param {String} appName - app name.
+   * @param {Boolean} isTransformationRequired - Flag to determine if transformation is required when using the inquiry building block for fetching questions.
    * @returns {JSON} - returns survey solution, program and questions.
    */
 
@@ -887,12 +888,8 @@ module.exports = class SurveysHelper {
 
         let referenceQuestionSetId = solutionDocument[0]?.referenceQuestionSetId;
 
-        if (isTransformationRequired) {
-          referenceQuestionSetId = solutionDocument[0]?.referenceQuestionSetId;
-
-          if (!referenceQuestionSetId) {
-            throw new Error(messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED)
-          }
+        if (isTransformationRequired && !referenceQuestionSetId) {
+          throw new Error(messageConstants.apiResponses.SOLUTION_IS_NOT_MIGRATED);
         }
 
         solutionDocument = solutionDocument[0];
@@ -1014,10 +1011,10 @@ module.exports = class SurveysHelper {
 
         submissionDocumentEvidences = solutionDocument.evidenceMethods;
 
-        let evidences = {};
+        let evidencesObject = {};
 
         if (isTransformationRequired && referenceQuestionSetId) {
-          evidences = await transFormationHelper.getQuestionSetHierarchy(submissionDocumentCriterias, solutionDocument)?.data;
+          evidencesObject = await transFormationHelper.getQuestionSetHierarchy(submissionDocumentCriterias, solutionDocument)?.data;
         }
 
         let criteria = criteriaQuestionDocument[0];
@@ -1141,7 +1138,7 @@ module.exports = class SurveysHelper {
             status: messageConstants.common.SUBMISSION_STATUS_STARTED,
             evidences: submissionDocumentEvidences,
             evidencesStatus: Object.values(submissionDocumentEvidences),
-            criteria: isTransformationRequired ? evidences.submissionDocumentCriterias : submissionDocumentCriterias,
+            criteria: isTransformationRequired ? evidencesObject.submissionDocumentCriterias : submissionDocumentCriterias,
             surveyInformation: {
               ..._.omit(surveyDocument, ["_id", "deleted", "__v"]),
             },
@@ -1214,7 +1211,7 @@ module.exports = class SurveysHelper {
             : false
         );
 
-        assessment.evidences = isTransformationRequired ? evidences.evidences : parsedAssessment.evidences;
+        assessment.evidences = isTransformationRequired ? evidencesObject.evidences : parsedAssessment.evidences;
         assessment.submissions = parsedAssessment.submissions;
         if (
           parsedAssessment.generalQuestions &&
@@ -1444,7 +1441,7 @@ module.exports = class SurveysHelper {
    * @returns {JSON}               - List or count of surveys for specific user.
    */
 
-  static overview(requestUserId, stats=true) {
+  static overview(requestUserId, stats = true) {
     return new Promise(async (resolve, reject) => {
       try {
         // Check if the 'stats' query parameter is false

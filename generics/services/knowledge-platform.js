@@ -68,12 +68,12 @@ const updateQuestionSetHierarchy = function (req) {
 
             let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
             function updateQuestionSetHierarchyCallBack(err, res) {
-                if (err || res.body.responseCode !== "OK") {
+                if (err || res.body.responseCode !== httpStatusCode.ok.code) {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (res.body.responseCode === "OK") {
+                } else if (res.body.responseCode === httpStatusCode.ok.code) {
                     return resolve({
                         status: 200
                     })
@@ -94,13 +94,13 @@ const publishQuestionSet = function (questionsetId) {
 
             let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
             async function publishQuestionSetCallBack(err, res) {
-                if (err || res.body.responseCode !== "OK") {
+                if (err || res.body.responseCode !== httpStatusCode.ok.code) {
                     const errmsg = JSON.parse(res.body)
                     return reject({
                         message: errmsg.errmsg || messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (res.body.responseCode === "OK") {
+                } else if (res.body.responseCode === httpStatusCode.ok.code) {
                     return resolve({
                         status: 200
                     })
@@ -172,7 +172,7 @@ const readQuestion = function (questionId) {
                     result.success = false;
                 } else {
                     let response = JSON.parse(data.body);
-                    if (response.responseCode === httpStatusCode["ok"].code) {
+                    if (response.responseCode === httpStatusCode.ok.code) {
                         result["data"] = response?.result?.question;
                     } else {
                         result.success = false;
