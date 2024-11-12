@@ -8,18 +8,20 @@ const { criteriaTemplate, defaultCriteria } = require(MODULES_BASE_PATH +
   "/criteria/criteriaTemplate");
 const { baseAssessment, assessmentTemplate } = require(MODULES_BASE_PATH +
   "/assessments/assessmentTemplate");
+const { setKey, getKey } = require(ROOT_PATH +
+  "/generics/redis-communication")
+
 
 module.exports = class Transformation {
   /**
    * Fetches the question set hierarchy for a solution and handles evidence generation.
    * Caches the result if not already cached.
-   *
    * @method
    * @name getQuestionSetHierarchy
    * @param {Object} submissionDocumentCriterias - Criteria from the submission document to process the question set.
    * @param {Object} solutionDocument
    * @param {Boolean} [isPageQuestionsRequired=true] - Optional flag to determine if page questions are required.
-   * @returns {Promise<JSON>} - Resolves with the question set hierarchy and evidences or rejects with an error.
+   * @returns {Object} - return evidence Object.
    */
   static getQuestionSetHierarchy(
     submissionDocumentCriterias,
@@ -30,12 +32,10 @@ module.exports = class Transformation {
       try {
         const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
 
-        const cacheData = await redisCache
-          .get(referenceQuestionSetId)
-          .catch((err) => {
-            console.log("Error in getting data from redis:", err);
-          });
-
+        const cacheData = await getKey(referenceQuestionSetId).catch((err) => {
+          console.log("Error in getting data from Redis:", err);
+        });
+        //if cache data present
         if (cacheData) {
           resolve({
             success: true,
@@ -43,6 +43,7 @@ module.exports = class Transformation {
             data: JSON.parse(cacheData),
           });
         } else {
+          // get data from the creation portal
           const res = await readQuestionSet(referenceQuestionSetId).catch(
             (err) => {
               console.log("Error", err?.response?.data);
@@ -53,6 +54,13 @@ module.exports = class Transformation {
               });
             }
           );
+
+          if (res.body.responseCode !== httpStatusCode.ok.code) {
+            return reject({
+              message: res.params.errmsg,
+              status: httpStatusCode.bad_request.status,
+            })
+          }
 
           const questionSetHierarchy =
             res?.result?.questionSet || res?.result?.questionset;
@@ -80,13 +88,13 @@ module.exports = class Transformation {
           assessmentTemplate.assessment.evidences[0].description =
             questionSetHierarchy?.description || "";
 
-          await redisCache.setEx(
+          await setKey(
             solutionDocument.referenceQuestionSetId,
-            cacheTtl,
-            JSON.stringify({
+            {
               ...evidences,
               evidences: assessmentTemplate.assessment.evidences,
-            })
+            },
+            cacheTtl
           );
 
           resolve({
@@ -188,7 +196,6 @@ module.exports = class Transformation {
 
   /**
    * Processes child questions for a given criteria and updates page questions with transformed data.
-   *
    * @method
    * @name getPageQuestions
    * @param {Object} criteria - The criteria object.
@@ -202,6 +209,13 @@ module.exports = class Transformation {
       const processChild = async (j) => {
         try {
           const res = await readQuestion(children[j]?.identifier);
+
+          if (res.body.responseCode !== httpStatusCode.ok.code) {
+            return reject({
+              message: res.params.errmsg,
+              status: httpStatusCode.bad_request.status,
+            })
+          }
 
           let childData = res?.data;
           readQuestions.push(childData);
@@ -272,7 +286,7 @@ module.exports = class Transformation {
     } else if (responseType === "multiselect multiple choice question") {
       type =
         childData?.responseDeclaration?.response1?.cardinality.toLowerCase() ===
-        "single"
+          "single"
           ? "radio"
           : "multiselect";
     } else {
@@ -322,6 +336,12 @@ module.exports = class Transformation {
             });
             branchingQuestionId = branchingQuestion?.identifier;
             const res = await readQuestion(branchingQuestionId);
+            if (res.body.responseCode !== httpStatusCode.ok.code) {
+              return reject({
+                message: res.params.errmsg,
+                status: httpStatusCode.bad_request.status,
+              })
+            }
             branchingQuestion = res?.data;
           }
 
@@ -415,11 +435,11 @@ module.exports = class Transformation {
               const slider =
                 type === "slider"
                   ? childData?.interactions.response1.validation.range[
-                      childrenKey
-                    ]
+                  childrenKey
+                  ]
                   : type === "date"
-                  ? childData?.interactions.validation[childrenKey]
-                  : "";
+                    ? childData?.interactions.validation[childrenKey]
+                    : "";
               obj[childrenKey] = slider;
             }
           }
@@ -470,8 +490,8 @@ module.exports = class Transformation {
           childQuestion[key] = childData[keyData]
             ? childData[keyData]
             : child[keyData]
-            ? child[keyData]
-            : "";
+              ? child[keyData]
+              : "";
         }
       }
       resolve({

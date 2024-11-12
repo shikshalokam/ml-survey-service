@@ -47,7 +47,6 @@ const creation_portal_url = CONFIG.HOST.creation_portal;
         }
     }
 }
-* 
 * @returns {Object} - return Questionset Object with unique identifier Id ( do_21376612089008128017430 )
 */
 
@@ -155,9 +154,8 @@ const createQuestionSet = function (templateData) {
             }
         }
     }
-}
-* 
-  * @returns {QuestionSetHierarchyObject} - Object
+} 
+* @returns {QuestionSetHierarchyObject} - Object
 */
 
 const updateQuestionSetHierarchy = function (templateData) {
@@ -196,7 +194,6 @@ const updateQuestionSetHierarchy = function (templateData) {
  * @method
  * @name publishQuestionSet
  * @param {String} questionsetId - do_21376461469939302415285
- *
  * @returns {Object} - responseObject with Question identifier (ex. "do_21376461469939302415285" )
  */
 const publishQuestionSet = function (questionsetId) {
@@ -236,7 +233,6 @@ const publishQuestionSet = function (questionsetId) {
  * @method
  * @name readQuestionSetHierarchy
  * @param {String} questionsetId - do_21376461469939302415285
- *
  * @returns {JSON} - returns questionset with hierarchy
  */
 

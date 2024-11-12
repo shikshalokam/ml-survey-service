@@ -29,13 +29,13 @@ const obj = {
         FAILED_CODE: 'KENDRA_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Kendra service is not healthy'
     },
-    IMPROVEMENT_SERVICE: {
-        NAME: 'improvementservice.api',
+     REDIS_SERVICE: {
+        NAME: 'Redis.db',
         FAILED_CODE: 'REDIS_HEALTH_FAILED',
         FAILED_MESSAGE: 'Redis db is not connected'
     },
-    REDIS_SERVICE :{
-        NAME: 'Redis.db',
+    IMPROVEMENT_SERVICE :{
+        NAME:'improvementservice.api',
         FAILED_CODE: 'IMPROVEMENT_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Improvement service is not healthy'
     },
