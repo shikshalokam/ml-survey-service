@@ -14,13 +14,17 @@ const { searchUser, getOpenSaberUserOrgId } = require("./api-list/user");
  **/
 const getUserIds = async () => {
   try {
+    // Create a database connection
     const dbInstance = await createDBInstance();
+
+    // Fetch solutions from the database that meet the specific criteria
     const solutionData = await findAll(CONFIG.DB.TABLES.solutions, {
       programId: { $exists: true },
       isRubricDriven: false,
       type: { $in: ["observation", "survey"] },
     });
 
+    // Extract user IDs (authors) and other relevant solution details
     const userIds = solutionData.map((solution) => solution.author);
     const solutionDetails = solutionData.map((solution) => {
       const programName = `${solution.name} sourcing project`;
@@ -33,15 +37,18 @@ const getUserIds = async () => {
       };
     });
 
+    // Remove duplicate and falsy user IDs
     let uniqueUserIds = uniq(userIds);
     uniqueUserIds = compact(uniqueUserIds);
 
+    // Fetch user details from the searchUser API
     let usersList = null;
     const userListResponse = await searchUser(uniqueUserIds);
     if (userListResponse?.responseCode === httpStatusCode.ok.code) {
       usersList = userListResponse?.result?.response?.content;
     }
 
+    // Fetch user organization details from OpenSaber API
     let openSaberOrganizations = null;
     const openSaberOrgResponse = await getOpenSaberUserOrgId(uniqueUserIds);
     if (openSaberOrgResponse?.responseCode === httpStatusCode.ok.code) {
@@ -138,8 +145,10 @@ const extractAsCSV = (users, usersIdsInDb, openSaberOrg, solutions) => {
     }`;
   });
 
+  // Remove duplicates and empty rows
   rows = uniq(rows);
   rows = compact(rows);
+  // Combine header and rows into CSV format
   const d = header.concat(rows).join("\n");
   return d;
 };

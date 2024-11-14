@@ -47,30 +47,36 @@ const getDateTemplate = (question) => {
 
   console.log("getDate");
 
+  // Iterate through each key in the date template configuration.
   for (const key of Object.keys(questionDate)) {
     const questionKey = questionDate[key];
     const questionValue = question[questionKey];
     const keyInLowerCase = key.toLowerCase();
 
+    // Directly assign static values from the date template.
     if (questionStaticDate.includes(key)) {
       template[key] = questionDate[key];
     } else {
       switch (keyInLowerCase) {
         case "interactiontypes":
+          // Wrap interaction type in an array.
           template[key] = [questionValue];
           break;
 
         case "body":
+          // Format the body of the question as HTML.
           template[key] = getQuestionBodyParagraph(questionValue);
           break;
 
         case "editorstate":
+          // Set editor state with formatted question body.
           template[key] = {
             question: getQuestionBodyParagraph(question[questionDate.body]),
           };
           break;
 
         case "interactions":
+          // Define interactions with date validation pattern and autoCapture.
           template[key] = {
             validation: {
               required: question?.validation?.required ? "Yes" : "No",
@@ -85,6 +91,7 @@ const getDateTemplate = (question) => {
           break;
 
         case "evidence":
+          // Set evidence details, including mimeType.
           template[key] = question?.file
             ? { ...question.file, mimeType: question.file.type }
             : { mimeType: [] };
@@ -92,18 +99,22 @@ const getDateTemplate = (question) => {
           break;
 
         case "instructions":
+          // Set default instructions based on the question tip.
           template[key] = { default: question?.tip || "" };
           break;
 
         case "showremarks":
+          // Determine if remarks should be shown.
           template[key] = questionValue ? "Yes" : "No";
           break;
 
         case "name":
+          // Set the question name, defaulting to "Question" if empty.
           template[key] = questionValue?.[0] || "Question";
           break;
 
         default:
+          // Assign other data directly or set to an empty string.
           template[key] = questionValue || "";
           break;
       }
@@ -128,30 +139,36 @@ const getSliderTemplate = (question) => {
   const { slider: questionSlider } = questionTemplate;
   const { slider: questionStaticSlider } = questionStatic;
 
+  // Iterate through each key in the slider template configuration.
   for (const key of Object.keys(questionSlider)) {
     const questionKey = questionSlider[key];
     const questionValue = question[questionKey];
     const keyL = key.toLowerCase();
 
+    // Directly assign static values from the slider template.
     if (questionStaticSlider.includes(key)) {
       template[key] = questionSlider[key];
     } else {
       switch (keyL) {
         case "interactiontypes":
+          // Wrap interaction type in an array.
           template[key] = [questionValue];
           break;
 
         case "body":
+          // Format the body of the question as HTML.
           template[key] = getQuestionBodyParagraph(questionValue);
           break;
 
         case "editorstate":
+          // Set editor state with formatted question body.
           template[key] = {
             question: getQuestionBodyParagraph(question[questionSlider.body]),
           };
           break;
 
         case "interactions":
+          // Define interactions with range and step settings for slider.
           template[key] = {
             validation: {
               required: question?.validation?.required ? "Yes" : "No",
@@ -169,6 +186,7 @@ const getSliderTemplate = (question) => {
           break;
 
         case "evidence":
+          // Set evidence details, including mimeType.
           template[key] = question?.file
             ? { ...question.file, mimeType: question.file.type }
             : { mimeType: [] };
@@ -176,18 +194,22 @@ const getSliderTemplate = (question) => {
           break;
 
         case "instructions":
+          // Set default instructions based on the question tip.
           template[key] = { default: question?.tip || "" };
           break;
 
         case "showremarks":
+          // Determine if remarks should be shown.
           template[key] = questionValue ? "Yes" : "No";
           break;
 
         case "name":
+          // Set the question name, defaulting to "Question" if empty.
           template[key] = questionValue?.[0] || "Question";
           break;
 
         default:
+          // Assign other data directly or set to an empty string.
           template[key] = questionValue || "";
           break;
       }
@@ -196,7 +218,6 @@ const getSliderTemplate = (question) => {
 
   return template;
 };
-
 /**
  * To get question options and update the object values as strings
  * @method
@@ -242,26 +263,31 @@ const getEditorOptions = (options) => {
  **/
 const getMultipleSelectMCQTemplate = (question) => {
   const template = {};
-
   console.log("getMultipleSelectMCQ");
+
 
   for (let key in questionTemplate.multiselect) {
     const keyL = key.toLowerCase();
+
+    // If the key is static, directly assign its value from the template.
     if (questionStatic.multiselect.includes(key)) {
       template[key] = questionTemplate.multiselect[key];
     } else {
+
       switch (keyL) {
         case "interactiontypes":
           template[key] = [question[questionTemplate.multiselect[key]]];
           break;
 
         case "body":
+          // Convert the question body into a structured HTML div format.
           template[key] = getQuestionBodyDiv(
             question[questionTemplate.multiselect[key]]
           );
           break;
 
         case "editorstate":
+          // Set the editor state with the formatted question body and options.
           template[key] = {
             question: getQuestionBodyDiv(
               question[questionTemplate.multiselect["body"]]
@@ -271,6 +297,7 @@ const getMultipleSelectMCQTemplate = (question) => {
           break;
 
         case "interactions":
+          // Define interactions with validation and options settings.
           template[key] = {
             validation: {
               required: question["validation"]["required"] ? "Yes" : "No",
@@ -283,6 +310,7 @@ const getMultipleSelectMCQTemplate = (question) => {
           break;
 
         case "evidence":
+          // Set evidence details, including mimeType.
           template[key] = question["file"]
             ? { ...question["file"], mimeType: question["file"]["type"] }
             : { mimeType: [] };
@@ -292,15 +320,18 @@ const getMultipleSelectMCQTemplate = (question) => {
           break;
 
         case "instructions":
+          // Assign default instructions from the question tip.
           template[key] = { default: question["tip"] };
           break;
 
         case "showremarks":
+          // Determine if remarks should be shown.
           template[key] =
             question[questionTemplate.multiselect[key]] === true ? "Yes" : "No";
           break;
 
         case "name":
+          // Set the name of the question, defaulting to "Question" if empty.
           template[key] =
             question[questionTemplate.multiselect[key]]?.length > 0
               ? question[questionTemplate.multiselect[key]][0]
@@ -308,6 +339,7 @@ const getMultipleSelectMCQTemplate = (question) => {
           break;
 
         default:
+          // Assign any other data directly or default to an empty string.
           template[key] = question[questionTemplate.multiselect[key]] || "";
           break;
       }
@@ -316,6 +348,8 @@ const getMultipleSelectMCQTemplate = (question) => {
 
   return template;
 };
+
+
 
 /**
  * To map the question type mcq
@@ -328,13 +362,17 @@ const getMCQTemplate = (question) => {
   const template = {};
   console.log("getMcq");
 
+  // Format the date if a dateFormat is provided in the question.
   const dateFormat = question?.dateFormat?.replace("-", "/") || "";
+
+  // Retrieve the MCQ-specific template and static configuration.
   const mcqTemplate = questionTemplate.mcq;
   const mcqStatic = questionStatic.mcq;
 
   for (const key of Object.keys(mcqTemplate)) {
     const keyL = key.toLowerCase();
 
+    // If the key is static, directly assign its value from the template.
     if (mcqStatic.includes(key)) {
       template[key] = mcqTemplate[key];
       continue;
@@ -348,10 +386,12 @@ const getMCQTemplate = (question) => {
         break;
 
       case "body":
+        // Convert the question body into a structured HTML div format.
         template[key] = getQuestionBodyDiv(questionData);
         break;
 
       case "editorstate":
+        // Set the editor state with the formatted question body and options.
         template[key] = {
           question: getQuestionBodyDiv(question[mcqTemplate.body]),
           options: getEditorOptions(question.options),
@@ -359,6 +399,7 @@ const getMCQTemplate = (question) => {
         break;
 
       case "interactions":
+        // Define interactions with validation and options settings.
         template[key] = {
           validation: {
             required: question?.validation?.required ? "Yes" : "No",
@@ -371,6 +412,7 @@ const getMCQTemplate = (question) => {
         break;
 
       case "evidence":
+        // Set evidence details, including mimeType.
         template[key] = question.file
           ? { ...question.file, mimeType: question.file.type }
           : { mimeType: [] };
@@ -378,18 +420,22 @@ const getMCQTemplate = (question) => {
         break;
 
       case "instructions":
+        // Assign default instructions from the question tip.
         template[key] = { default: question.tip };
         break;
 
       case "showremarks":
+        // Determine if remarks should be shown.
         template[key] = questionData ? "Yes" : "No";
         break;
 
       case "name":
+        // Set the name of the question, defaulting to "Question" if empty.
         template[key] = questionData?.length > 0 ? questionData[0] : "Question";
         break;
 
       default:
+        // Assign any other data directly or default to an empty string.
         template[key] = questionData || "";
         break;
     }
@@ -397,6 +443,7 @@ const getMCQTemplate = (question) => {
 
   return template;
 };
+
 
 
 /**
@@ -410,12 +457,15 @@ const getTextTemplate = (question, type) => {
   const template = {};
   console.log("getText");
 
+  // Retrieve the text-specific template and static configuration.
   const textTemplate = questionTemplate.text;
   const textStatic = questionStatic.text;
 
+  // Iterate over each key in the text template.
   for (const key of Object.keys(textTemplate)) {
     const keyL = key.toLowerCase();
 
+    // If the key is static, directly assign its value from the template.
     if (textStatic.includes(key)) {
       template[key] = textTemplate[key];
       continue;
@@ -425,20 +475,24 @@ const getTextTemplate = (question, type) => {
 
     switch (keyL) {
       case "interactiontypes":
+        // Wrap the interaction type in an array.
         template[key] = [questionData];
         break;
 
       case "body":
+        // Convert the question body into HTML paragraph format.
         template[key] = getQuestionBodyParagraph(questionData);
         break;
 
       case "editorstate":
+        // Set the editor state with the formatted question body.
         template[key] = {
           question: getQuestionBodyParagraph(question[textTemplate.body]),
         };
         break;
 
       case "interactions":
+        // Define interactions with validation and type settings.
         template[key] = {
           validation: {
             required: question?.validation?.required ? "Yes" : "No",
@@ -462,6 +516,7 @@ const getTextTemplate = (question, type) => {
         break;
 
       case "evidence":
+        // Set evidence details, including mimeType.
         template[key] = question.file
           ? { ...question.file, mimeType: question.file.type }
           : { mimeType: [] };
@@ -469,18 +524,22 @@ const getTextTemplate = (question, type) => {
         break;
 
       case "instructions":
+        // Assign default instructions from the question tip.
         template[key] = { default: question.tip };
         break;
 
       case "showremarks":
+        // Determine if remarks should be shown.
         template[key] = questionData ? "Yes" : "No";
         break;
 
       case "name":
+        // Set the name of the question, defaulting to "Question" if empty.
         template[key] = questionData?.length > 0 ? questionData[0] : "Question";
         break;
 
       default:
+        // Assign any other data directly or default to an empty string.
         template[key] = questionData || "";
         break;
     }
@@ -488,7 +547,6 @@ const getTextTemplate = (question, type) => {
 
   return template;
 };
-
 
 module.exports = {
   getDateTemplate,

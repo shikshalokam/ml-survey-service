@@ -19,9 +19,9 @@ module.exports = class Transformation {
    * @method
    * @name getQuestionSetHierarchy
    * @param {Object} submissionDocumentCriterias - Criteria from the submission document to process the question set.
-   * @param {Object} solutionDocument
+   * @param {Object} solutionDocument - The solution document containing reference question set ID.
    * @param {Boolean} [isPageQuestionsRequired=true] - Optional flag to determine if page questions are required.
-   * @returns {Object} - return evidence Object.
+   * @returns {Object} - Returns an object containing evidence data.
    */
   static getQuestionSetHierarchy(
     submissionDocumentCriterias,
@@ -30,12 +30,15 @@ module.exports = class Transformation {
   ) {
     return new Promise(async (resolve, reject) => {
       try {
+        // Extract the reference question set ID from the solution document
         const referenceQuestionSetId = solutionDocument?.referenceQuestionSetId;
 
+        // Attempt to retrieve cached data using the reference question set ID
         const cacheData = await getKey(referenceQuestionSetId).catch((err) => {
           console.log("Error in getting data from Redis:", err);
         });
-        //if cache data present
+
+        // If cache data is present, resolve with the cached evidence data
         if (cacheData) {
           resolve({
             success: true,
@@ -43,28 +46,22 @@ module.exports = class Transformation {
             data: JSON.parse(cacheData),
           });
         } else {
-          // get data from the creation portal
-          const res = await readQuestionSet(referenceQuestionSetId).catch(
-            (err) => {
-              console.log("Error", err?.response?.data);
-              reject({
-                success: false,
-                message: err?.response?.data,
-                data: false,
-              });
-            }
-          );
+          // Retrieve data from the creation portal if no cache is found
+          const res = await readQuestionSet(referenceQuestionSetId);
 
           if (res.body.responseCode !== httpStatusCode.ok.code) {
             return reject({
+              success: false,
               message: res.params.errmsg,
               status: httpStatusCode.bad_request.status,
-            })
+            });
           }
 
+          // Extract the question set hierarchy from the response
           const questionSetHierarchy =
             res?.result?.questionSet || res?.result?.questionset;
 
+          // Gather questions from the hierarchy based on the criteria provided
           const migratedCriteriaQuestions =
             questionSetHierarchy?.children || [];
           const evidences = await this.questionEvidences(
@@ -73,13 +70,13 @@ module.exports = class Transformation {
             isPageQuestionsRequired
           )?.data;
 
+          // Format the assessment template with relevant evidence data
           assessmentTemplate.assessment.evidences[0].name = capitalize(
             solutionDocument?.type
           );
           assessmentTemplate.assessment.evidences[0].sections[0].name = `${capitalize(
             solutionDocument?.type
           )} Questions`;
-
           assessmentTemplate.assessment.evidences[0].sections[0].questions =
             evidences?.evidenceSections || [];
           assessmentTemplate.assessment.evidences[0].sections[0].code = "SQ";
@@ -88,6 +85,7 @@ module.exports = class Transformation {
           assessmentTemplate.assessment.evidences[0].description =
             questionSetHierarchy?.description || "";
 
+          // Cache the formatted evidence data
           await setKey(
             solutionDocument.referenceQuestionSetId,
             {
@@ -97,6 +95,7 @@ module.exports = class Transformation {
             cacheTtl
           );
 
+          // Resolve with the formatted evidence data
           resolve({
             success: true,
             message: messageConstants.apiResponses.EVIDENCE_FETCHED,
@@ -107,6 +106,7 @@ module.exports = class Transformation {
           });
         }
       } catch (error) {
+        // Handle any errors that occur during the process
         return reject({
           success: false,
           message: error.message,
@@ -118,7 +118,6 @@ module.exports = class Transformation {
 
   /**
    * Processes criteria questions and generates evidence sections.
-   *
    * @method
    * @name questionEvidences
    * @param {Array} criteriaQuestions - Array of criteria questions.
@@ -139,6 +138,7 @@ module.exports = class Transformation {
           const assessment = { ...baseAssessment };
           const criteriaObj = {};
 
+          // Populate criteria object with necessary data
           for (let key in criteriaTemplate) {
             if (key === messageConstants.common.CREATED_FOR) {
               criteriaObj[key] = criteria[criteriaTemplate[key]]
@@ -151,10 +151,12 @@ module.exports = class Transformation {
             }
           }
 
+          // Assign a page identifier to the assessment
           assessment.page = "p" + (i + 1);
 
           const children = criteria?.children || [];
 
+          // Process page questions if required
           if (isPageQuestionsRequired && children.length > 0) {
             const pageQuestions = await this.getPageQuestions(
               criteria,
@@ -164,6 +166,7 @@ module.exports = class Transformation {
 
             const isMatrixQuestion = criteria?.instances?.label;
 
+          // If current question is matrix type, add associated matrix questions to pageQuestions
             let matrixQuestion = {};
             if (isMatrixQuestion) {
               matrixQuestion = this.getMatrixQuestions(criteria);
@@ -176,6 +179,7 @@ module.exports = class Transformation {
           submissionDocumentCriterias.push(criteriaObj);
           if (children.length > 0) evidenceSections.push(assessment);
         }
+        // Resolve with the evidence sections and updated criteria
         resolve({
           success: true,
           message: messageConstants.apiResponses.EVIDENCE_FETCHED,
@@ -199,8 +203,8 @@ module.exports = class Transformation {
    * @method
    * @name getPageQuestions
    * @param {Object} criteria - The criteria object.
-   * @param {Array} children - Array of child question.
-   * @param {Array} pageQuestions
+   * @param {Array} children - Array of child questions.
+   * @param {Array} pageQuestions - Array to store transformed page questions.
    * @returns {Promise<Array>} - Resolves with the updated array of transformed page questions.
    */
   static getPageQuestions(criteria, children, pageQuestions) {
@@ -208,19 +212,21 @@ module.exports = class Transformation {
     return new Promise((resolve, reject) => {
       const processChild = async (j) => {
         try {
+          // Read question data for each child
           const res = await readQuestion(children[j]?.identifier);
 
           if (res.body.responseCode !== httpStatusCode.ok.code) {
             return reject({
+              success: false,
               message: res.params.errmsg,
               status: httpStatusCode.bad_request.status,
-            })
+            });
           }
 
           let childData = res?.data;
           readQuestions.push(childData);
 
-          // branchingLogic - Branching logic refers to the condition where, if a question has a visibleIf property, we add branching logic. This means that if certain options are selected, new questions are triggered based on the option selected.
+          // Apply branching logic if applicable
           const branching = criteria?.branchingLogic;
 
           if (!isEmpty(branching) && childData) {
@@ -232,7 +238,7 @@ module.exports = class Transformation {
             )?.data;
           }
 
-          // question transformation
+          // Transform question data
           const childTemplate = await this.transformQuestionData(
             {},
             childData,
@@ -254,6 +260,7 @@ module.exports = class Transformation {
         for (let j = 0; j < children.length; j++) {
           await processChild(j);
         }
+        // Resolve with the transformed page questions
         resolve({
           success: true,
           message: messageConstants.apiResponses.PAGE_QUESTION_FETCHED,
@@ -269,13 +276,13 @@ module.exports = class Transformation {
 
   /**
    * Retrieves the template type of a given question.
-   *
    * @method
    * @name getTemplateType
    * @param {Object} childData - The child question data object.
    * @returns {String} - The determined question template type.
    */
   static getTemplateType(childData) {
+    // Determine the question type based on the primary category - text, number , multiselect, radio, single choice ext.
     const responseType = childData?.primaryCategory?.toLowerCase();
     let type = "";
     if (responseType === "text") {
@@ -297,7 +304,6 @@ module.exports = class Transformation {
 
   /**
    * Updates the child data with branching.
-   *
    * @method
    * @name updateChildDataWithBranching
    * @param {Object} branching - The branching logic object.
@@ -313,40 +319,49 @@ module.exports = class Transformation {
     children
   ) {
     return new Promise(async (resolve, reject) => {
+      // Check if the current child has branching logic
       if (branching.hasOwnProperty(childData?.identifier)) {
         const question = branching[childData.identifier];
         if (question?.target?.length > 0) {
+          // Set target children and options if branching targets exist
           childData.children = question.target || [];
           childData.options = childData?.interactions?.response1.options;
         } else if (!isEmpty(question?.preCondition)) {
+          // Handle preconditions for branching
           const operator = Object.keys(question?.preCondition?.and[0]);
 
           const index = question?.preCondition?.and[0][operator];
 
+          // extract branching question
           let branchingQuestion = find(readQuestions, {
             identifier: question?.source[0],
           });
+
           let branchingQuestionId = !isEmpty(branchingQuestion)
             ? branchingQuestion?.identifier
             : "";
-
+          
+          // if branchingQuestionId not present the check into children Question
           if (!branchingQuestionId) {
             branchingQuestion = find(children, {
               identifier: question?.source[0],
             });
             branchingQuestionId = branchingQuestion?.identifier;
+
+            // fetch all the question related to brach
             const res = await readQuestion(branchingQuestionId);
             if (res.body.responseCode !== httpStatusCode.ok.code) {
               return reject({
                 message: res.params.errmsg,
                 status: httpStatusCode.bad_request.status,
-              })
+              });
             }
             branchingQuestion = res?.data;
           }
 
           const i = index[1] === -1 ? 0 : index[1];
 
+          // Define visibility conditions based on branching logic
           const visibleIf = [
             {
               operator: operator[0] === "eq" ? "===" : "!==",
@@ -378,7 +393,6 @@ module.exports = class Transformation {
 
   /**
    * Transformation of the question.
-   *
    * @method
    * @name transformQuestionData
    * @param {Object} childQuestion - The initial child question template.
@@ -388,16 +402,20 @@ module.exports = class Transformation {
    * @returns {Promise<Object>} - Resolves with the transformed question data.
    */
   static transformQuestionData(childQuestion, childData, index, child) {
+    // Determine the question type
     const type = this.getTemplateType(childData);
 
     return new Promise((resolve, reject) => {
       for (let key in questionType[type]) {
         const keyData = questionType[type][key];
         if (questionType.defaultFields.includes(key)) {
+          // Assign default fields
           childQuestion[key] = keyData;
         } else if (questionType.arrayFields.includes(key)) {
+          // Assign array fields related to question type
           childQuestion[key] = childData[keyData] || [];
         } else if (key === "question") {
+          // Extract and clean question text
           const questionData = [];
           let str = childData[keyData] ? childData[keyData] : "";
           while (str.length > 0) {
@@ -415,11 +433,14 @@ module.exports = class Transformation {
             } else str = "";
           }
 
+          // Assign the processed question data to the specified key in the childQuestion object
           childQuestion[key] = questionData;
         } else if (key === "validation") {
+          // Handle validation logic
           const obj = {};
           for (const childrenKey in keyData) {
             if (childrenKey === "required") {
+              // modified datatype string to common boolean 
               const require = childData?.interactions?.validation?.required;
 
               obj[childrenKey] =
@@ -427,11 +448,13 @@ module.exports = class Transformation {
                   ? true
                   : false;
             } else if (childrenKey === "IsNumber") {
+              // modified datatype string to common boolean 
               const typeofChild =
                 childData?.interactions?.response1?.type?.number;
               obj[childrenKey] =
                 typeofChild.toLowerCase() === "yes" ? true : false;
             } else if (childrenKey === "max" || childrenKey === "min") {
+              // add  common timer to both slider and date question type
               const slider =
                 type === "slider"
                   ? childData?.interactions.response1.validation.range[
@@ -445,12 +468,14 @@ module.exports = class Transformation {
           }
           childQuestion[key] = obj;
         } else if (key === "payload") {
+          // Assign payload data
           childQuestion[key] = {
             ...keyData,
             criteriaId: childData.identifier,
             responseType: type,
           };
         } else if (key === "file") {
+          // Handle file-related data
           if (
             childData[keyData["type"]] &&
             childData[keyData["type"]].length > 0
@@ -466,14 +491,18 @@ module.exports = class Transformation {
             };
           } else childQuestion[key] = "";
         } else if (key === "updatedAt" || key === "createdAt") {
+          // Assign timestamps
           childQuestion[key] = child[keyData];
         } else if (key === "dateFormat") {
+          // Assign date format
           childQuestion[key] =
             childData?.interactions?.response1?.validation?.pattern || "";
         } else if (key === "options") {
+          // Assign options
           childQuestion[key] =
             childData?.interactions?.response1?.options || [];
         } else if (key === "showRemarks" || key === "autoCapture") {
+          // Handle boolean fields
           const typeofChildren = childData[keyData];
           childQuestion[key] =
             key !== "autoCapture"
@@ -484,9 +513,11 @@ module.exports = class Transformation {
                 : false
               : childData[keyData] || false;
         } else if (key === "questionNumber" || key === "page") {
+          // Assign question number and page
           childQuestion[key] =
             key === "questionNumber" ? `${index + 1}` : baseAssessment.page;
         } else {
+          // Assign other fields
           childQuestion[key] = childData[keyData]
             ? childData[keyData]
             : child[keyData]
@@ -494,6 +525,7 @@ module.exports = class Transformation {
               : "";
         }
       }
+      // Resolve with the transformed question data
       resolve({
         success: true,
         message: messageConstants.apiResponses.EVIDENCE_FETCHED,
@@ -506,7 +538,6 @@ module.exports = class Transformation {
 
   /**
    * Generates matrix questions based on the criteria.
-   *
    * @method
    * @name getMatrixQuestions
    * @param {Object} criteria - The criteria object.
@@ -516,22 +547,27 @@ module.exports = class Transformation {
     const matrixObj = {};
     for (let key in questionType.matrix) {
       if (key === "instanceIdentifier") {
+        // Assign instance identifier
         matrixObj["instanceIdentifier"] = criteria?.instances?.label || "";
       } else if (key === "payload") {
+        // Assign payload data
         matrixObj[key] = {
           ...questionType.matrix.payload,
           criteriaId: criteria.identifier,
           responseType: "matrix",
         };
       } else if (questionType.arrayFields.includes(key)) {
+        // Assign array fields
         matrixObj[key] =
           key !== "children" ? criteria[questionType.matrix[key]] : [];
       } else if (
         questionType.defaultFields.includes(key) ||
         key === "validation"
       ) {
+        // Assign default fields and validation
         matrixObj[key] = questionType.matrix[key] || "";
       } else if (key !== "validation") {
+        // Assign other fields
         matrixObj[key] = criteria[questionType.matrix[key]] || "";
       }
     }

@@ -21,7 +21,6 @@ const constants = require("../../constant");
  * @param {number} increment - increment
  * @returns {Date} - date
  */
-
 const getDate = (increment) => {
   const date = new Date(
     new Date().setDate(new Date().getDate() + increment)
@@ -428,6 +427,7 @@ const updateSolutionDb = async (query, solution, migratedCount) => {
     return;
   }
 
+  // Define a mapping of migration reference keys to their corresponding field names for incrementing counts.
   const migrationFields = {
     [constants.MIGRATION_REFERENCE.SOURCING_PROGRAM_ID]: "migrated",
     [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_UPDATED]: "updated",
@@ -437,6 +437,7 @@ const updateSolutionDb = async (query, solution, migratedCount) => {
     [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ACCEPTED]: "accepted",
   };
 
+  // Iterate over each entry in the migrationFields mapping.
   for (const [key, field] of Object.entries(migrationFields)) {
     if (query.hasOwnProperty(key)) {
       migratedCount.success.program.current[field]++;

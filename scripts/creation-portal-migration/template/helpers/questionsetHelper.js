@@ -53,7 +53,7 @@ const setQuestionSetTemplate = (solution, programId, contributor) => {
     ],
     channel:
       contributor?.rootOrgId || process.env.DEFAULT_SRC_ORG_ADMIN_ROOT_ORG_ID,
-    programId: programId, // Not needed in migration question but for our consumption side
+    programId: programId,
     author: contributor?.userName || process.env.DEFAULT_CONTRIBUTOR_USER_NAME,
     framework: process.env.DEFAULT_FRAMEWORK_ID,
   };
@@ -70,10 +70,12 @@ const setQuestionSetTemplate = (solution, programId, contributor) => {
  * @returns {JSON} - return the mapped migrated question
  **/
 const createQuestionTemplate = async (question, migratedCount) => {
+  // Fetch the existing question from the database based on its ID
   const migratedQuestion = await findAll(CONFIG.DB.TABLES.questions, {
     _id: question?._id,
   }).catch((err) => {});
 
+  // If the question is already migrated, use it instead of the input question
   if (migratedQuestion?.length > 0) {
     question = migratedQuestion[0];
   }
@@ -82,8 +84,9 @@ const createQuestionTemplate = async (question, migratedCount) => {
   let referenceQuestionId = question?.referenceQuestionId;
   let query = {};
   let questionToMigrate = {};
-  let typeInLowerCase = type.toLowerCase();
+  let typeInLowerCase = type?.toLowerCase();
 
+  // Determine the template based on the question's response type
   if (type) {
     if (typeInLowerCase === constants.DATE) {
       questionToMigrate = getDateTemplate(question);
@@ -104,6 +107,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
       questionToMigrate = getTextTemplate(question, type);
     }
 
+    // If a template is created and the question doesn't have a reference ID, create the question via API
     if (!isEmpty(questionToMigrate) && !referenceQuestionId) {
       // call the api to create the question
       const response = await createQuestions(questionToMigrate, question._id);
@@ -112,11 +116,13 @@ const createQuestionTemplate = async (question, migratedCount) => {
         return;
       }
 
+      // Set the referenceQuestionId from the API response
       referenceQuestionId = response?.result?.identifier;
       question.referenceQuestionId = referenceQuestionId;
     }
   }
 
+  // Prepare the query object to update the question in the database
   if (referenceQuestionId) {
     question.referenceQuestionId = referenceQuestionId;
     query = {
@@ -128,6 +134,7 @@ const createQuestionTemplate = async (question, migratedCount) => {
     };
   }
 
+  // Update the question in the database with the new reference ID or other details
   if (!isEmpty(query) && question) {
     // update the questionId and published status in db
     await updateById(CONFIG.DB.TABLES.questions, question._id, {

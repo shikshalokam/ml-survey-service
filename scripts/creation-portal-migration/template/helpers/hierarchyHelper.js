@@ -9,7 +9,6 @@ const { updateById } = require("../../db");
 const logger = require("../../logger");
 const constants = require("../../constant");
 
-
 /**
  * Update the query fields in solutions collections
  * @method
@@ -91,7 +90,7 @@ const updateHierarchyTemplate = async (
       }
     });
 
-    if (response.responseCode !== httpStatusCode.ok.code ) {
+    if (response.responseCode !== httpStatusCode.ok.code) {
       await updateSolutionsDb(query, solution?._id?.toString(), migratedCount);
       return;
     }
@@ -235,7 +234,7 @@ const updateHierarchyTemplate = async (
 **/
 
 const getHierarchyData = (sectionsList, solution, result = {}) => {
-  const sectionKeys = Object.keys(sectionsList);
+  // Initialize the response structure with a request object containing nodesModified and hierarchy.
   const hierarchyData = {
     request: {
       data: {
@@ -245,11 +244,16 @@ const getHierarchyData = (sectionsList, solution, result = {}) => {
     },
   };
 
+  const sectionKeys = Object.keys(sectionsList);
+
   sectionKeys.map((section) => {
+    // Check if the current section has child nodes.
     if (sectionsList[section]?.children?.length > 0) {
+      // Determine the section title, which could vary based on the result object.
       const sectionTitle = !isEmpty(result)
         ? result[sectionsList[section]?.sectionData?.name]
         : sectionsList[section]?.sectionData?.name;
+      // Extract necessary metadata from the section's data.
       const metadata = pick(sectionsList[section].sectionData, [
         "code",
         "name",
@@ -259,6 +263,7 @@ const getHierarchyData = (sectionsList, solution, result = {}) => {
         "allowMultipleInstances",
         "instances",
       ]);
+      // Add or update nodesModified for the current section.
       if (
         !hierarchyData.request.data.nodesModified.hasOwnProperty(sectionTitle)
       ) {
@@ -282,12 +287,14 @@ const getHierarchyData = (sectionsList, solution, result = {}) => {
               isNew: true,
             };
       }
+      // Merge additional nodesModified from the result if it exists.
       if (!isEmpty(result)) {
         hierarchyData.request.data.nodesModified = {
           ...hierarchyData.request.data.nodesModified,
           ...sectionsList[section]?.nodesModified,
         };
       }
+      // Add the current section to the solution's hierarchy, ensuring no duplicates.
       if (
         !hierarchyData?.request?.data?.hierarchy[
           solution?.referenceQuestionSetId
@@ -309,6 +316,7 @@ const getHierarchyData = (sectionsList, solution, result = {}) => {
           };
         }
       }
+      // Define the hierarchy structure for the current section if it doesn't already exist.
       if (
         !hierarchyData?.request?.data?.hierarchy.hasOwnProperty(sectionTitle)
       ) {
@@ -330,7 +338,6 @@ const getHierarchyData = (sectionsList, solution, result = {}) => {
  * @param {Object[]} sectionsList - sectionsList.
  * @returns {JSON} - returns the formatted request hierarchy with branching Logic
  **/
-
 const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
   logger.debug("branchingQuestionSetHierarchy", JSON.stringify(sectionsList));
   let questionSetHierarchy = {};
@@ -346,7 +353,7 @@ const branchingQuestionSetHierarchy = async (solution, sectionsList) => {
       return;
     });
 
-    if(response?.responseCode !== httpStatusCode.ok.code){
+    if (response?.responseCode !== httpStatusCode.ok.code) {
       //nothing do further
       return;
     }

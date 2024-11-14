@@ -442,7 +442,6 @@ module.exports = class ProgramsHelper {
 
 
   /**
- * 
  * @method
  * @name mapObservation
  * @param {String} programId - Program Id.
@@ -462,6 +461,8 @@ module.exports = class ProgramsHelper {
             status: httpStatusCode.bad_request.status,
           });
         }
+
+        // Copy the question set associated with the given questionSetId.
         const copyQuestionSetRes = await questionSetService.copyQuestionSet(copyReq, questionSetId);
 
         if (copiedQuestionsetId.responseCode !== httpStatusCode.ok.code) {
@@ -471,16 +472,21 @@ module.exports = class ProgramsHelper {
             message: copyQuestionSetRes.params.errmsg
           };
         }
+        // Extract the ID of the copied question set.
         const copiedQuestionsetId = copyQuestionSetRes.result.node_id[questionSetId]
+        // Read the copied question set to fetch its details.
         const readRes = await questionSetService.readQuestionSet(copiedQuestionsetId);
-        if (!readRes?.result?.questionSet) {
+
+        if (readRes.responseCode !== httpStatusCode.ok.code) {
           return {
             success: false,
             status: httpStatusCode.bad_request.status,
             message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND
           };
         }
-        let readQuestionSetRes = readRes.result.questionSet
+        let readQuestionSetRes = readRes.result.questionSet;
+
+        // Prepare an update request to modify the visibility and hierarchy of the question set.
         let updateRequest = {
           request: {
             data: {
@@ -501,8 +507,11 @@ module.exports = class ProgramsHelper {
             }
           }
         }
+
+        // Update the question set hierarchy and metadata.
         const updateRes = await questionSetService.updateQuestionSetHierarchy(updateRequest)
         if (updateRes.status === httpStatusCode.ok.status) {
+          // If the update is successful, proceed to publish the question set.
           let publishRes = await questionSetService.publishQuestionSet(copiedQuestionsetId);
           if (publishRes.status === httpStatusCode.ok.status) {
             let solution = {}
@@ -515,7 +524,8 @@ module.exports = class ProgramsHelper {
             solution["externalId"] = programData.externalId;
             solution["type"] = readQuestionSetRes.primaryCategory;
             solution["subType"] = readQuestionSetRes.entityType;
-            let solutionDocument
+            let solutionDocument;
+            // Save the solution in the database
             try {
               solutionDocument = await database.models.solutions.create(
                 solution
@@ -554,8 +564,7 @@ module.exports = class ProgramsHelper {
   }
 
 
-  /**
-* 
+/**
 * @method
 * @name mapObservation
 * @param {String} programId - Program Id.
@@ -566,11 +575,12 @@ module.exports = class ProgramsHelper {
 static mapUpdateObservation(solutionId, updateReq) {
   return new Promise(async (resolve, reject) => {
     try {
-
+      // Fetch the solution document by ID to validate its existence.
       let solutionDocument = await database.models.solutions.findOne({
         _id: solutionId,
       }).lean();
 
+      // Return a failure response if the solution does not exist.
       if (!solutionDocument) {
         return resolve({
           success: false,
@@ -579,6 +589,7 @@ static mapUpdateObservation(solutionId, updateReq) {
         });
       }
 
+      // Update the question set using the provided update request and the solution's migrated ID.
       const updateRes = await questionSetService.updateQuestionSet(updateReq, solutionDocument.migratedId);
       if (updateRes.status !== 200) {
         throw {
@@ -588,6 +599,7 @@ static mapUpdateObservation(solutionId, updateReq) {
         };
       }
 
+      // Publish the updated question set.
       const publishQuestionSetRes = await questionSetService.publishQuestionSet(solutionDocument.migratedId);
       if (publishQuestionSetRes.status !== 200) {
         throw {
@@ -597,6 +609,7 @@ static mapUpdateObservation(solutionId, updateReq) {
         };
       }
 
+      // Prepare the update query for the solution document based on the request.
       let updateQuery = { "$set": {} };
       if (updateReq.name) {
         updateQuery["$set"]["name"] = updateReq.name;
