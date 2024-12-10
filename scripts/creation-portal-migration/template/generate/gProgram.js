@@ -63,8 +63,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
   // To get srcorgadmin and contributorOrgAdmin from csv
   let userData = await getContributorAndSrcAdminData(solution).catch((err) => {
     logger.error(
-      `Error while fetching details of contributor and src admin from CSV for solution_id: ${
-        solution?._id
+      `Error while fetching details of contributor and src admin from CSV for solution_id: ${solution?._id
       }. Error: ${JSON.stringify(err?.response?.data || err)}`
     );
   });
@@ -84,7 +83,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
     return;
   }
 
-  if (has(solution, "migrationReference")) {
+  if (has(solution, constants.MIGRATION_REFERENCE.NAME)) {
     // update solution sourcingProgramId if the programId is already migrated for the same other but for other solution and present in csv then assign programId from if not will be same as solution sourcingProgramId
     solution.migrationReference.sourcingProgramId = !isEmpty(
       userData?.srcOrgAdmin?.programId
@@ -121,8 +120,8 @@ const createProgramTemplate = async (solution, migratedCount) => {
     shortlisting_enddate: `${getDate(1)}`,
     enddate: `${getDate(2)}`,
     content_submission_enddate: `${getDate(1)}`,
-    type: "public",
-    target_type: "searchCriteria",
+    type: constants.PUBLIC,
+    target_type: constants.SEARCH_CRITERIA,
     content_types: [],
     target_collection_category: [],
     sourcing_org_name:
@@ -133,7 +132,7 @@ const createProgramTemplate = async (solution, migratedCount) => {
     createdOn: `${getDate(0)}`,
     startdate: `${getDate(1)}`,
     slug: process.env.DEFAULT_SLUG,
-    status: "Draft",
+    status: constants.DRAFT,
     program_id: "",
     rolemapping: [],
     config: {
@@ -163,9 +162,8 @@ const createProgramTemplate = async (solution, migratedCount) => {
   // If sourcingProgramId is not created then create using above the formed template;
   if (isEmpty(programId)) {
     const res = await createProgram(template).catch((err) => {
-      logger.error(`Error while creating program for solution_id: ${
-        solution?._id
-      } Error:
+      logger.error(`Error while creating program for solution_id: ${solution?._id
+        } Error:
        ${JSON.stringify(err?.response?.data)}`);
 
       // increment program migrated failed count and store the id
@@ -281,9 +279,8 @@ const createProgramTemplate = async (solution, migratedCount) => {
         if (!migratedCount.failed.program.nominated.ids.includes(id)) {
           migratedCount.failed.program.nominated.ids.push(id);
         }
-        logger.error(`Error while nominating program for solution_id: ${
-          solution?._id
-        } Error:
+        logger.error(`Error while nominating program for solution_id: ${solution?._id
+          } Error:
       ${JSON.stringify(err?.response?.data)}`);
       }
     );
@@ -329,9 +326,8 @@ const createProgramTemplate = async (solution, migratedCount) => {
         migratedCount.failed.program.contributor.ids.push(id);
       }
 
-      logger.error(`Error while adding contributor program for solution_id: ${
-        solution?._id
-      } Error:
+      logger.error(`Error while adding contributor program for solution_id: ${solution?._id
+        } Error:
         ${JSON.stringify(err?.response?.data)}`);
     });
 
@@ -361,16 +357,15 @@ const createProgramTemplate = async (solution, migratedCount) => {
       user_id:
         userData?.srcOrgAdmin?.mappedUserId ||
         process.env.DEFAULT_CONTRIBUTOR_ORG_ADMIN_ID,
-      status: "Approved",
+      status: constants.APPROVED,
       updatedby: userId,
     };
     // call the api to accept contributor
     const updateNomination = await updateContributorToProgram(
       accept_contributor
     ).catch((err) => {
-      logger.error(`Error while accepting nomination to the program for solution_id: ${
-        solution?._id
-      } Error:
+      logger.error(`Error while accepting nomination to the program for solution_id: ${solution?._id
+        } Error:
         ${JSON.stringify(err?.response?.data)}`);
       // increment program contributor accepted failed count and store the id
       migratedCount.failed.program.accepted.count++;
@@ -429,12 +424,12 @@ const updateSolutionDb = async (query, solution, migratedCount) => {
 
   // Define a mapping of migration reference keys to their corresponding field names for incrementing counts.
   const migrationFields = {
-    [constants.MIGRATION_REFERENCE.SOURCING_PROGRAM_ID]: "migrated",
-    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_UPDATED]: "updated",
-    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_PUBLISHED]: "published",
-    [constants.MIGRATION_REFERENCE.IS_NOMINATED]: "nominated",
-    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ADDED]: "contributor",
-    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ACCEPTED]: "accepted",
+    [constants.MIGRATION_REFERENCE.SOURCING_PROGRAM_ID]: constants.MIGRATED,
+    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_UPDATED]: constants.UPDATED,
+    [constants.MIGRATION_REFERENCE.IS_SRC_PROGRAM_PUBLISHED]: constants.PUBLISHED,
+    [constants.MIGRATION_REFERENCE.IS_NOMINATED]: constants.NOMINATED,
+    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ADDED]: constants.CONTRIBUTOR,
+    [constants.MIGRATION_REFERENCE.IS_CONTRIBUTOR_ACCEPTED]: constants.ACCEPTED,
   };
 
   // Iterate over each entry in the migrationFields mapping.
@@ -500,9 +495,8 @@ const updateProgramTemplate = async (programId, solution) => {
 
   // call the api to update program with the above template
   const updateRes = await updateProgram(template).catch((err) => {
-    logger.error(`Error while updating program for solution_id: ${
-      solution?._id
-    } Error:
+    logger.error(`Error while updating program for solution_id: ${solution?._id
+      } Error:
       ${JSON.stringify(err?.response?.data)}`);
   });
 

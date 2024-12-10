@@ -22,6 +22,8 @@ const {
   updateQuestionMappingInCSV,
 } = require("../helpers/migrationcsv");
 
+const constants = require('../../constant')
+
 /**
  * Loop through all the solutions from mongo and create the program and migrate the solutions under that program
  * @method
@@ -64,7 +66,7 @@ const createProgramAndQuestionsets = async (solutions, migratedCount) => {
         });
         solution = solData[0];
       }
-      
+
       // Migrate the questionsets associated with the solution under the newly created program.
       await migrateQuestionset(
         solution,
@@ -262,7 +264,7 @@ const migrateQuestionset = async (
 
       writeCSV({
         solutionId: questionSetId,
-        isFailed: "YES",
+        isFailed: "Yes",
         reasons: `${JSON.stringify(err?.response?.data)}`,
       });
 
@@ -326,12 +328,16 @@ const migrateQuestionset = async (
 **/
 const getThemeChildrenCriteria = (theme, criterias = []) => {
   // Check if the theme has children
-  if (theme?.hasOwnProperty("children") && theme?.children?.length > 0) {
-    for (let i = 0; i < theme?.children?.length; i++) {
-      const childCriteria = theme?.children[i];
+  if (
+    theme?.hasOwnProperty(constants.CHILDREN) &&
+    theme?.[constants.CHILDREN]?.length > 0
+  ) {
+    for (let i = 0; i < theme?.[constants.CHILDREN]?.length; i++) {
+      const childCriteria = theme?.[constants.CHILDREN][i];
+
       // If the child has criteria, add them to the list
-      if (childCriteria?.hasOwnProperty("criteria")) {
-        criterias = [...criterias, ...childCriteria?.criteria];
+      if (childCriteria?.hasOwnProperty(constants.CRITERIA)) {
+        criterias = [...criterias, ...childCriteria?.[constants.CRITERIA]];
       } else {
         // Recursively call the function for deeper levels of children
         return getThemeChildrenCriteria(childCriteria, criterias);
@@ -361,18 +367,18 @@ const getAllCriterias = async (
   // Check if the solution has a single theme with criteria
   if (
     solution?.themes?.length <= 1 &&
-    solution?.themes[0]?.hasOwnProperty("criteria")
+    solution?.themes[0]?.hasOwnProperty(constants.CRITERIA)
   ) {
     // Directly assign criteria from the theme
     criteriaIds = solution?.themes[0]?.criteria || [];
   } else {
     for (let j = 0; j < solution?.themes?.length; j++) {
       const theme = solution?.themes[j];
-      if (theme?.hasOwnProperty("children")) {
+      if (theme?.hasOwnProperty(constants.CHILDREN)) {
         // Recursively gather criteria from theme children
         const criterias = getThemeChildrenCriteria(theme, criteriaIds);
         criteriaIds = [...criteriaIds, ...criterias];
-      } else if (theme?.hasOwnProperty("criteria")) {
+      } else if (theme?.hasOwnProperty(constants.CRITERIA)) {
         // Add criteria directly from the theme
         criteriaIds = [...criteriaIds, ...theme?.criteria];
       }
@@ -516,7 +522,7 @@ const getMatrixAndNonMatrixQuestions = (
     const id = question?._id?.toString();
 
     // Check if the question is of type "matrix"
-    if (question?.responseType === "matrix") {
+    if (question?.responseType === constants.MATRIX) {
       matrixQuestionIds.push(id);
       // Include instance and children question IDs if they exist
       if (
@@ -525,18 +531,18 @@ const getMatrixAndNonMatrixQuestions = (
       ) {
         matrixQuestionIds = [
           ...matrixQuestionIds,
-          ...getInstanceQuestionIds(question, "instance"),
-          ...getInstanceQuestionIds(question, "children"),
+          ...getInstanceQuestionIds(question, constants.INSTANCE),
+          ...getInstanceQuestionIds(question, constants.CHILDREN),
         ];
       } else if (question?.instanceQuestions?.length > 0) {
         matrixQuestionIds = [
           ...matrixQuestionIds,
-          ...getInstanceQuestionIds(question, "instance"),
+          ...getInstanceQuestionIds(question, constants.INSTANCE),
         ];
       } else if (question?.children?.length > 0) {
         matrixQuestionIds = [
           ...matrixQuestionIds,
-          ...getInstanceQuestionIds(question, "children"),
+          ...getInstanceQuestionIds(question, constants.CHILDREN),
         ];
       }
     } else if (!matrixQuestionIds?.includes(id)) {
@@ -584,7 +590,7 @@ const getMatrixSectionData = async (
     // Proceed if the question is not empty
     if (!isEmpty(question)) {
       // Check if the question is of type "matrix"
-      if (question?.responseType === "matrix") {
+      if (question?.responseType === constants.MATRIX) {
         // If the section for this question ID does not exist, create it
         if (!sections?.hasOwnProperty(qid)) {
           // Get the question section
@@ -601,20 +607,20 @@ const getMatrixSectionData = async (
           ) {
             instanceQuestionsIds = [
               ...instanceQuestionsIds,
-              ...getInstanceQuestionIds(question, "instance"),
-              ...getInstanceQuestionIds(question, "children"),
+              ...getInstanceQuestionIds(question, constants.INSTANCE),
+              ...getInstanceQuestionIds(question, constants.CHILDREN),
             ];
           } // update the instanceQuestionIds if a question has only instancequestions
           else if (question?.instanceQuestions?.length > 0) {
             instanceQuestionsIds = [
               ...instanceQuestionsIds,
-              ...getInstanceQuestionIds(question, "instance"),
+              ...getInstanceQuestionIds(question, constants.INSTANCE),
             ];
           } // update the instanceQuestionIds if a question has only children
           else if (question?.children?.length > 0) {
             instanceQuestionsIds = [
               ...instanceQuestionsIds,
-              ...getInstanceQuestionIds(question, "children"),
+              ...getInstanceQuestionIds(question, constants.CHILDREN),
             ];
           }
 
@@ -626,7 +632,7 @@ const getMatrixSectionData = async (
             name =
               question?.question?.length > 0
                 ? question?.question[0]
-                : "Matrix Section";
+                : constants.MATRIX_SECTION;
             if (obj?.sectionData?.name === name) {
               return obj;
             }
@@ -649,10 +655,10 @@ const getMatrixSectionData = async (
               solutionType,
               question
             ),
-            type: "matrix",
+            type: constants.MATRIX,
             instanceQuestions: instanceQuestionsIds,
             branchingLogic: {},
-            allowMultipleInstances: "Yes",
+            allowMultipleInstances: constants.YES,
             instances: { label: question?.instanceIdentifier },
             nodesModified: {},
           };
@@ -673,7 +679,7 @@ const getMatrixSectionData = async (
               [qid]: {
                 id: "",
                 status: "",
-                isFailed: "YES",
+                isFailed: constants.YES,
                 reasons: `${JSON.stringify(err?.response?.data)}`,
               },
             },
@@ -709,13 +715,13 @@ const getMatrixSectionData = async (
         ] = {
           isNew: false,
           metadata: {
-            ...omit(migratedQuestion, "referenceQuestionId"),
-            visibility: "Parent",
+            ...omit(migratedQuestion, constants.REFERENCE_QUESTION_ID),
+            visibility: constants.PARENT,
           },
-          objectType: "Question",
+          objectType: constants.QUESTION,
           root: false,
         };
-        migratedQuestion = omit(migratedQuestion, "referenceQuestionId");
+        migratedQuestion = omit(migratedQuestion, constants.REFERENCE_QUESTION_ID);
       }
     }
   }
@@ -844,23 +850,23 @@ const getNonMatrixSectionData = async (
             )
           ) {
             sectionData.branchingLogic[migratedQuestion?.referenceQuestionId] =
-              {
-                target: [],
-                preCondition: {},
-                source: [],
-              };
+            {
+              target: [],
+              preCondition: {},
+              source: [],
+            };
           }
           // Add the question data to nodesModified changing the visibility to parent
           sectionData.nodesModified[migratedQuestion?.referenceQuestionId] = {
             isNew: false,
             metadata: {
-              ...omit(migratedQuestion, "referenceQuestionId"),
-              visibility: "Parent",
+              ...omit(migratedQuestion, constants.REFERENCE_QUESTION_ID),
+              visibility: constants.PARENT,
             },
-            objectType: "Question",
+            objectType: constants.QUESTION,
             root: false,
           };
-          migratedQuestion = omit(migratedQuestion, "referenceQuestionId");
+          migratedQuestion = omit(migratedQuestion, constants.REFERENCE_QUESTION_ID);
 
           // Update the section with the latest data
           sections[sectionData?.sectionId] = {
@@ -882,7 +888,7 @@ const getNonMatrixSectionData = async (
         if (parentQuestion?.children?.length <= 0) {
           const data = await findAll(CONFIG.DB.TABLES.questions, {
             _id: parentQuestion?._id,
-          }).catch((err) => {});
+          }).catch((err) => { });
           parentQuestion = data[0];
         }
         const parentSectionId = parentQuestionCriteria?.sectionId;
@@ -1022,26 +1028,26 @@ const getNonMatrixSectionData = async (
             const visible = question?.visibleIf ? question?.visibleIf[0] : {};
             // Update the branching logic with the question predefined conditions
             sectionData.branchingLogic[migratedQuestion?.referenceQuestionId] =
-              {
-                target: [],
-                preCondition: getPrecondition(
-                  visible,
-                  parentReferenceQuestionId,
-                  parentQuestion
-                ),
-                source: [parentReferenceQuestionId],
-              };
+            {
+              target: [],
+              preCondition: getPrecondition(
+                visible,
+                parentReferenceQuestionId,
+                parentQuestion
+              ),
+              source: [parentReferenceQuestionId],
+            };
             // Update nodes modified with metadata
             sectionData.nodesModified[migratedQuestion?.referenceQuestionId] = {
               isNew: false,
               metadata: {
-                ...omit(migratedQuestion, "referenceQuestionId"),
-                visibility: "Parent",
+                ...omit(migratedQuestion, constants.REFERENCE_QUESTION_ID),
+                visibility: constants.PARENT,
               },
-              objectType: "Question",
+              objectType: constants.QUESTION,
               root: false,
             };
-            migratedQuestion = omit(migratedQuestion, "referenceQuestionId");
+            migratedQuestion = omit(migratedQuestion, constants.REFERENCE_QUESTION_ID);
             // Update the section with the modified data
             sections[sectionData?.sectionId] = {
               ...sections[sectionData?.sectionId],
@@ -1122,13 +1128,13 @@ const getNonMatrixSectionData = async (
           sectionData.nodesModified[migratedQuestion?.referenceQuestionId] = {
             isNew: false,
             metadata: {
-              ...omit(migratedQuestion, "referenceQuestionId"),
-              visibility: "Parent",
+              ...omit(migratedQuestion, constants.REFERENCE_QUESTION_ID),
+              visibility: constants.PARENT,
             },
-            objectType: "Question",
+            objectType: constants.QUESTION,
             root: false,
           };
-          migratedQuestion = omit(migratedQuestion, "referenceQuestionId");
+          migratedQuestion = omit(migratedQuestion, constants.REFERENCE_QUESTION_ID);
           // Update the sections object with the updated section data
           sections[sectionData?.sectionId] = {
             ...sections[sectionData?.sectionId],
@@ -1174,7 +1180,7 @@ const getMatrixQueCriteriaIdAndData = (qid, sections) => {
   let criteriaData = {};
   sectionIds.map((sectionId) => {
     if (
-      sections[sectionId]?.type === "matrix" &&
+      sections[sectionId]?.type === constants.MATRIX &&
       sections[sectionId]?.instanceQuestions.includes(qid)
     ) {
       criteriaData = sections[sectionId];
@@ -1193,11 +1199,11 @@ const getMatrixQueCriteriaIdAndData = (qid, sections) => {
  **/
 const getInstanceQuestionIds = (question, type = "") => {
   let instanceQuestionsIds = [];
-  if (type === "instance") {
+  if (type === constants.INSTANCE) {
     instanceQuestionsIds = question?.instanceQuestions.map((que) =>
       que?._id?.toString()
     );
-  } else if (type === "children") {
+  } else if (type === constants.CHILDREN) {
     instanceQuestionsIds = question?.children.map((que) =>
       que?._id?.toString()
     );
@@ -1256,7 +1262,7 @@ const getPageSection = (questionCriteria, pageName, solutionType) => {
       { ...questionCriteria?.sectionData, name: pageName },
       solutionType
     ),
-    type: "nonmatrix",
+    type: constants.NON_MATRIX,
     branchingLogic: {},
     allowMultipleInstances: "",
     instances: {},
@@ -1279,7 +1285,7 @@ const getNonPageSection = (questionCriteria, sectionId, solutionType) => {
     questionIds: [],
     children: [],
     sectionData: getCriteriaData(questionCriteria?.sectionData, solutionType),
-    type: "nonmatrix",
+    type: constants.NON_MATRIX,
     branchingLogic: {},
     allowMultipleInstances: "",
     instances: {},

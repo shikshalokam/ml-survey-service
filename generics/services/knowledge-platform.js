@@ -33,7 +33,6 @@ const headers = {
 }
  */
 const copyQuestionSet = function (copyReq, questionSetId) {
-    const copyQuestionSetUrl = CREATION_PORTAL_URL + messageConstants.endpoints.COPY_QUESTION_SET + "/" + questionSetId;
     const options = {
         headers,
         json: { request: { questionset: copyReq } }
@@ -41,13 +40,15 @@ const copyQuestionSet = function (copyReq, questionSetId) {
 
     return new Promise((resolve, reject) => {
         try {
+            const copyQuestionSetUrl = CREATION_PORTAL_URL + messageConstants.endpoints.COPY_QUESTION_SET + "/" + questionSetId;
+
             const copyQuestionSetCallback = function (err, data) {
-                if (err || data.statusCode != 200) {
+                if (err || data.statusCode != httpStatusCode.ok.status) {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (data.statusCode == 200) {
+                } else if (data.statusCode == httpStatusCode.ok.status) {
                     let response = data.body
                     return resolve(response);
                 }
@@ -123,23 +124,22 @@ const copyQuestionSet = function (copyReq, questionSetId) {
 const readQuestionSet = function (copiedQuestionsetId) {
     return new Promise((resolve, reject) => {
         try {
+            let readQuestionSeturl = CREATION_PORTAL_URL + messageConstants.endpoints.READ_QUESTION_SET + "/" + copiedQuestionsetId + "?mode=edit";
 
-            let url = CREATION_PORTAL_URL + messageConstants.endpoints.READ_QUESTION_SET + "/" + copiedQuestionsetId + "?mode=edit";
             const readQuestionSetCallBack = function (err, data) {
-                if (err || data.statusCode != 200) {
+                if (err || data.statusCode != httpStatusCode.ok.status) {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (data.statusCode == 200) {
+                } else if (data.statusCode == httpStatusCode.ok.status) {
                     let readRes = JSON.parse(data.body)
                     return resolve(readRes)
                 }
             }
-            request.get(url, { headers: headers }, readQuestionSetCallBack)
+            request.get(readQuestionSeturl, { headers: headers }, readQuestionSetCallBack)
 
         } catch (error) {
-            console.log("err", error)
             return reject(error);
         }
     })
@@ -214,14 +214,17 @@ const readQuestionSet = function (copiedQuestionsetId) {
         }
     }
 } 
-* @returns {QuestionSetHierarchyObject} - Object
+* @returns {QuestionSetHierarchy status} - statusCode - {
+    status : 200
+}
 */
+
 
 const updateQuestionSetHierarchy = function (templateData) {
     return new Promise((resolve, reject) => {
         try {
+            let updateQuestionSetHierarchyUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
 
-            let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
             function updateQuestionSetHierarchyCallBack(err, res) {
                 if (err || res.body.responseCode !== httpStatusCode.ok.code) {
                     return reject({
@@ -230,11 +233,11 @@ const updateQuestionSetHierarchy = function (templateData) {
                     })
                 } else if (res.body.responseCode === httpStatusCode.ok.code) {
                     return resolve({
-                        status: 200
+                        status: httpStatusCode.ok.status
                     })
                 }
             }
-            request.patch(updateUrl, { headers: headers, json: true, json: templateData }, updateQuestionSetHierarchyCallBack)
+            request.patch(updateQuestionSetHierarchyUrl, { headers: headers, json: true, json: templateData }, updateQuestionSetHierarchyCallBack)
 
         } catch (error) {
             return reject(error);
@@ -248,13 +251,15 @@ const updateQuestionSetHierarchy = function (templateData) {
  * @method
  * @name publishQuestionSet
  * @param {String} questionsetId - do_21376461469939302415285
- * @returns {Number} - return status code
+ * @returns {Number} - return status code -{
+    status : 200
+}
  */
 const publishQuestionSet = function (questionsetId) {
     return new Promise((resolve, reject) => {
         try {
-
             let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
+
             async function publishQuestionSetCallBack(err, res) {
                 if (err || res.body.responseCode !== httpStatusCode.ok.code) {
                     const errmsg = JSON.parse(res.body)
@@ -264,7 +269,7 @@ const publishQuestionSet = function (questionsetId) {
                     })
                 } else if (res.body.responseCode === httpStatusCode.ok.code) {
                     return resolve({
-                        status: 200
+                        status: httpStatusCode.ok.status
                     })
                 }
             }
@@ -283,24 +288,27 @@ const publishQuestionSet = function (questionsetId) {
  * @name updateQuestionSet
  * @param {Object} updateReq - The request payload containing question set update details
  * @param {String} migratedId - Unique identifier for the question set to be updated
- * @returns {Number} - return status code
+ * @returns {Number} - return status code -{
+    status : 200
+}
  */
 const updateQuestionSet = function (updateReq, migratedId) {
     return new Promise((resolve, reject) => {
         try {
             let updateUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET + "/" + migratedId;
+
             const options = {
                 headers,
                 json: true,
                 json: { request: { questionset: updateReq } }
             };
             function updateQuestionSetCallBack(err, data) {
-                if (err || data.statusCode != 200) {
+                if (err || data.statusCode != httpStatusCode.ok.status) {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (data.statusCode == 200) {
+                } else if (data.statusCode == httpStatusCode.ok.status) {
                     return resolve({
                         status: data.statusCode
                     })
@@ -320,11 +328,50 @@ const updateQuestionSet = function (updateReq, migratedId) {
  * @name readQuestion
  * @param {String} questionId - Unique identifier for the question to be read
  * @returns {JSON} - Question Object
+ *  {
+            "name": "Date of the Training",
+            "code": "PS08_1597311656239",
+            "mimeType": "application/vnd.sunbird.question",
+            "primaryCategory": "date",
+            "interactionTypes": [
+              "date"
+            ],
+            "showRemarks": "No",
+            "instructions": {
+              "default": ""
+            },
+            "body": "<p>Date of the Training</p><p></p>",
+            "editorState": {
+              "question": "<p>Date of the Training</p><p></p>"
+            },
+            "responseDeclaration": {
+              "response1": {
+                "type": "string"
+              }
+            },
+            "interactions": {
+              "validation": {
+                "required": "Yes"
+              },
+              "response1": {
+                "validation": {
+                  "pattern": "DD/MM/YYYY"
+                },
+                "autoCapture": false
+              }
+            },
+            "hints": "",
+            "evidence": {
+              "mimeType": []
+            }
+    }
  */
+
 const readQuestion = function (questionId) {
     return new Promise(async (resolve, reject) => {
         try {
             let readquestionurl = CREATION_PORTAL_URL + messageConstants.endpoints.READ_QUESTION;
+
             const fields = ["body", "question", "primaryCategory", "mimeType", "qType", "answer", "templateId", "responseDeclaration", "interactionTypes", "interactions", "name", "solutions", "editorState", "media", "remarks", "evidence", "hints", "instructions", "numberOnly", "characterLimit", "showEvidence", "evidenceMimeType", "showRemarks", "remarksLimit", "markAsNotMandatory"]
             if (questionId !== "") {
                 url =
@@ -376,10 +423,10 @@ const readQuestion = function (questionId) {
 
 
 module.exports = {
-    copyQuestionSet: copyQuestionSet,
-    readQuestionSet: readQuestionSet,
-    updateQuestionSetHierarchy: updateQuestionSetHierarchy,
-    publishQuestionSet: publishQuestionSet,
-    updateQuestionSet: updateQuestionSet,
-    readQuestion: readQuestion,
+    copyQuestionSet,
+    readQuestionSet,
+    updateQuestionSetHierarchy,
+    publishQuestionSet,
+    updateQuestionSet,
+    readQuestion
 }

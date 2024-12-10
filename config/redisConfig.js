@@ -5,7 +5,7 @@ var Connect = function () {
   var client = redis.createClient({
     url: process.env.REDIS_URL,
     socket: {
-      connectTimeout: process.env.REDIS_TTL
+      connectTimeout: parseInt(process.env.REDIS_TTL, 10)
     }
   });
 

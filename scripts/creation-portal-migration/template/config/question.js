@@ -1,3 +1,5 @@
+// This is a base question template using key-value pairs, 
+// which maps keys to their corresponding actual question values.
 const questionTemplate = {
   date: {
     name: "question",
@@ -274,6 +276,7 @@ const questionTemplate = {
   },
 };
 
+// Similar templates for different types of questions may include some additional key-value pairs.
 const questionStatic = {
   date: ["mimeType", "responseDeclaration"],
   slider: ["mimeType", "responseDeclaration"],

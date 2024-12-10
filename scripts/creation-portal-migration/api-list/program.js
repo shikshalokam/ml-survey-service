@@ -57,7 +57,21 @@ const creationPortalUrl = CONFIG.HOST.creation_portal;
     }
 }
 * 
-* @returns {Object} - return newly created Program object with ProgramId in the response 
+* @returns {Object} - return newly created Program object with ProgramId in the response - {
+        "id": "api.program.create",
+        "ts": "2022-12-20T09:24:07.416Z",
+        "params": {
+          "resmsgid": "0db28f81-8048-11ed-be8b-9962d8844469",
+          "msgid": "0db28f80-8048-11ed-be8b-9962d8844469",
+          "status": "successful",
+          "err": null,
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "program_id": "0d8abc30-8048-11ed-be8b-9962d8844469"
+        }
+      }
 */
 
 const createProgram = function (templateData) {
@@ -155,7 +169,21 @@ const createProgram = function (templateData) {
     }
 }
 * 
-*  @returns {JSON} - Updates the program with the updated program template
+*  @returns {JSON} - Updates the program with the updated program template -{
+        "id": "api.program.update",
+        "ts": "2022-12-20T09:58:55.641Z",
+        "params": {
+          "resmsgid": "ea606891-804c-11ed-be8b-9962d8844469",
+          "msgid": "ea606890-804c-11ed-be8b-9962d8844469",
+          "status": "successful",
+          "err": null,
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "program_id": "a043dc40-3497-11eb-9c32-15914148e3ce"
+        }
+      }
 */
 const updateProgram = function (templateData) {
   const url = creationPortalUrl + CONFIG.APIS.update_program;
@@ -205,7 +233,47 @@ const updateProgram = function (templateData) {
     }
 }
 * 
-* @returns {JSON} - Published the program 
+* @returns {JSON} - Published the program  - {
+        "id": "api.v1.publish",
+        "ver": "1.0",
+        "ts": "2022-12-20T09:32:09.710Z",
+        "params": {
+          "resmsgid": "2d2ac8e0-8049-11ed-be8b-9962d8844469",
+          "msgid": "2c4c4fc0-8049-11ed-be8b-9962d8844469",
+          "status": "successful",
+          "err": null,
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "program_id": "a043dc40-3497-11eb-9c32-15914148e3ce",
+          "afterPublishResponse": {
+            "nomination": {
+              "error": null,
+              "result": {
+                "program_id": "a043dc40-3497-11eb-9c32-15914148e3ce",
+                "user_id": "48dc0e70-2775-474b-9b78-def27d047836",
+                "organisation_id": "e0ab89f4-0fcb-47ea-9b70-3ed0f12b1b7a",
+                "status": "Approved",
+                "collection_ids": [
+                  "do_11369316334888550414055",
+                  "do_11369316334883635214053",
+                  "do_11369316334885273614054"
+                ],
+                "content_types": [
+                  "Course Assessment",
+                  "eTextbook",
+                  "Explanation Content",
+                  "Learning Resource",
+                  "Practice Question Set",
+                  "Teacher Resource"
+                ]
+              }
+            },
+            "userMapping": {}
+          }
+        }
+      }
 */
 
 const publishProgram = function (templateData) {
@@ -274,7 +342,22 @@ const publishProgram = function (templateData) {
     }
 }
 * 
-* @returns {JSON} - Nominates the program
+* @returns {JSON} - Nominates the program - {
+        "id": "api.nomination.add",
+        "ts": "2022-01-30T09:22:15.027Z",
+        "params": {
+          "resmsgid": "950c85b1-a07f-11ed-a249-d1c2d4936c48",
+          "msgid": "950c85b0-a07f-11ed-a249-d1c2d4936c48",
+          "status": "successful",
+          "err": null,
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "program_id": "c43f7790-0a2a-11eb-a2e9-4fe29a51bb70",
+          "user_id": "19ba0e4e-9285-4335-8dd0-f674bf03fa4d"
+        }
+      }
 **/
 const nominateProgram = function (program_id, orgAdmin) {
   const url = creationPortalUrl + CONFIG.APIS.add_program_nomination;
@@ -350,7 +433,22 @@ const nominateProgram = function (program_id, orgAdmin) {
     }
 }
 * 
-* @returns {JSON} - updates the contributor to the program
+* @returns {JSON} - updates the contributor to the program - {
+        "id": "api.nomination.update",
+        "ts": "2023-01-30T09:22:14.027Z",
+        "params": {
+          "resmsgid": "950c85b1-a07f-11ed-a249-d1c2d4936c48",
+          "msgid": "950c85b0-a07f-11ed-a249-d1c2d4936c48",
+          "status": "successful",
+          "err": null,
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "program_id": "c43f7790-0a2a-11eb-a2e9-4fe29a51bb70",
+          "user_id": "19ba0e4e-9285-4335-8dd0-f674bf03fa4d"
+        }
+      }
 **/
 const updateContributorToProgram = function (reqData) {
   const url = creationPortalUrl + CONFIG.APIS.update_program_nomination;

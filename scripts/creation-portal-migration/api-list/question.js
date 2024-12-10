@@ -47,7 +47,23 @@ const creation_portal_url = CONFIG.HOST.creation_portal;
         }
     }
 }
-* @returns {Object} - return Questionset Object with unique identifier Id ( do_21376612089008128017430 )
+* @returns {Object} - return Questionset Object with unique identifier Id ( do_113208291312132096114 ) - {
+    id: 'api.questionset.create',
+    ver: '3.0',
+    ts: '2021-02-03T08:17:28ZZ',
+    params: {
+      resmsgid: '4c45a5e2-c3b4-47c1-95a2-3a31f7e7c1ca',
+      msgid: null,
+      err: null,
+      status: 'successful',
+      errmsg: null
+    },
+    responseCode: 'OK',
+    result: {
+      identifier: 'do_113208291312132096114',
+      versionKey: '1612340248069'
+    }
+}
 */
 
 const createQuestionSet = function (templateData) {
@@ -155,7 +171,26 @@ const createQuestionSet = function (templateData) {
         }
     }
 } 
-* @returns {QuestionSetHierarchyObject} - Object
+* @returns {QuestionSetHierarchyObject} - Object - {
+        "id": "api.questionset.hierarchy.update",
+        "ver": "3.0",
+        "ts": "2021-02-03T13:06:12ZZ",
+        "params": {
+          "resmsgid": "221f9cdb-c220-4d3f-a579-4e7b82facf89",
+          "msgid": null,
+          "err": null,
+          "status": "successful",
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "identifier": "do_113208431570984960123",
+          "identifiers": {
+            "section-1": "do_113208433229889536126",
+            "question-1": "do_113208433229873152124"
+          }
+        }
+      }
 */
 
 const updateQuestionSetHierarchy = function (templateData) {
@@ -194,7 +229,23 @@ const updateQuestionSetHierarchy = function (templateData) {
  * @method
  * @name publishQuestionSet
  * @param {String} questionsetId - do_21376461469939302415285
- * @returns {Object} - responseObject with Question identifier (ex. "do_21376461469939302415285" )
+ * @returns {Object} - responseObject with Question identifier (ex. "do_21376461469939302415285" ) - {
+        "id": "api.questionset.publish",
+        "ver": "3.0",
+        "ts": "2021-02-03T09:39:14ZZ",
+        "params": {
+          "resmsgid": "62f7e310-39e1-4287-bc9f-f8e6ac5f5bd3",
+          "msgid": null,
+          "err": null,
+          "status": "successful",
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "message": "Question is successfully sent for Publish",
+          "identifier": "do_113208323801554944120"
+        }
+      }
  */
 const publishQuestionSet = function (questionsetId) {
   const url =
@@ -233,7 +284,48 @@ const publishQuestionSet = function (questionsetId) {
  * @method
  * @name readQuestionSetHierarchy
  * @param {String} questionsetId - do_21376461469939302415285
- * @returns {JSON} - returns questionset with hierarchy
+ * @returns {JSON} - returns questionset with hierarchy -
+ * {
+          "questionset": {
+            "code": "finemanfine",
+            "allowSkip": "Yes",
+            "containsUserData": "No",
+            "description": "hey",
+            "language": [
+              "English"
+            ],
+            "mimeType": "application/vnd.sunbird.questionset",
+            "showHints": "No",
+            "createdOn": "2021-02-03T09:23:34.060+0000",
+            "objectType": "QuestionSet",
+            "primaryCategory": "Practice Question Set",
+            "contentDisposition": "inline",
+            "lastUpdatedOn": "2021-02-03T09:23:34.060+0000",
+            "contentEncoding": "gzip",
+            "showSolutions": "Yes",
+            "allowAnonymousAccess": "Yes",
+            "identifier": "do_113208323801554944120",
+            "lastStatusChangedOn": "2021-02-03T09:23:34.060+0000",
+            "requiresSubmit": "Yes",
+            "visibility": "Default",
+            "showTimer": "No",
+            "summaryType": "Complete",
+            "consumerId": "fa13b438-8a3d-41b1-8278-33b0c50210e4",
+            "setType": "materialised",
+            "languageCode": [
+              "en"
+            ],
+            "version": 1,
+            "versionKey": "1612344214060",
+            "showFeedback": "Yes",
+            "license": "CC BY 4.0",
+            "compatibilityLevel": 4,
+            "name": "Test Question Set",
+            "navigationMode": "linear",
+            "shuffle": "Yes",
+            "status": "Draft"
+          }
+        }
  */
 
 const readQuestionSetHierarchy = function (questionSetId) {
@@ -270,7 +362,6 @@ const readQuestionSetHierarchy = function (questionSetId) {
   });
 };
 
-
 // Questions
 /**
  * To create the questions in creation portal
@@ -278,7 +369,24 @@ const readQuestionSetHierarchy = function (questionSetId) {
  * @name createQuestions
  * @param {String} questionId - do_213771658975903744111423
  * @param {Object} templateData - {"name":"What medium of instruction would you prefer for trainings?","code":"PS25_1597311656239","description":"","showRemarks":"Yes","mimeType":"application/vnd.sunbird.question","primaryCategory":"Multiselect Multiple Choice Question","interactionTypes":["choice"],"body":"<div class='question-body'><div class='mcq-title'><p>What medium of instruction would you prefer for trainings?&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div><div class='mcq-title'><p>&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>","interactions":{"validation":{"required":"Yes"},"response1":{"type":"choice","options":[{"value":"R1","label":"English"},{"value":"R2","label":"Hindi"},{"value":"R3","label":"Bi-lingual"}]}},"editorState":{"question":"<div class='question-body'><div class='mcq-title'><p>What medium of instruction would you prefer for trainings?&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div><div class='mcq-title'><p>&nbsp</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>","options":[{"answer":false,"value":{"body":"<p>English</p>","value":0}},{"answer":false,"value":{"body":"<p>Hindi</p>","value":1}},{"answer":false,"value":{"body":"<p>Bi-lingual</p>","value":2}}]},"responseDeclaration":{"response1":{"maxScore":0,"cardinality":"single","type":"integer","correctResponse":{"outcomes":{"SCORE":0}}}},"instructions":{"default":""},"hints":"","evidence":{"mimeType":[]}}
- * @returns {Object} -  return QuestionObject with unique identifier Id
+ * @returns {Object} -  return QuestionObject with unique identifier Id -
+ * {
+        "id": "api.question.create",
+        "ver": "3.0",
+        "ts": "2021-02-02T19:28:24ZZ",
+        "params": {
+          "resmsgid": "8b75d237-1028-4e38-a94a-9ff4ca784d76",
+          "msgid": null,
+          "err": null,
+          "status": "successful",
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "identifier": "do_11320791330308096015",
+          "versionKey": "1612294104382"
+        }
+    }
  */
 const createQuestions = function (templateData, questionId) {
   const url = creation_portal_url + CONFIG.APIS.create_question;
@@ -321,10 +429,28 @@ const createQuestions = function (templateData, questionId) {
  * @method
  * @name publishQuestion
  * @param {String} questionId - do_21376461469939302415285
- * @returns {JSON} - return question responseObject with unique identifierID
+ * @returns {JSON} - return question responseObject with unique identifierID -
+ * {
+        "id": "api.question.publish",
+        "ver": "3.0",
+        "ts": "2021-02-02T20:15:02ZZ",
+        "params": {
+          "resmsgid": "9c64cc9c-bed5-44c7-85bf-4918c3a42f58",
+          "msgid": null,
+          "err": null,
+          "status": "successful",
+          "errmsg": null
+        },
+        "responseCode": "OK",
+        "result": {
+          "message": "Question is successfully sent for Publish",
+          "identifier": "do_113207931921555456111"
+        }
+    }
  */
 const publishQuestion = function (questionId) {
-  const url = creation_portal_url + CONFIG.APIS.publish_question + "/" + questionId;
+  const url =
+    creation_portal_url + CONFIG.APIS.publish_question + "/" + questionId;
   const config = {
     method: constants.METHOD.POST,
     url: url,
@@ -351,8 +477,6 @@ const publishQuestion = function (questionId) {
     }
   });
 };
-
-
 
 module.exports = {
   createQuestionSet,

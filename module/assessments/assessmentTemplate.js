@@ -1,3 +1,5 @@
+// The baseAssessment is used for creating the evidence of the solution, 
+// which is further utilized for generating the question set hierarchy
 const baseAssessment = {
     _id: "",                          // string
     question: "",                     // string
@@ -50,6 +52,8 @@ const baseAssessment = {
 };
 
 
+// The baseAssessment is used for creating the evidence of the solution, 
+// which is further utilized for generating the question set hierarchy
 const assessmentTemplate = {
     assessment: {
         evidences: [                     // Array<{}>
