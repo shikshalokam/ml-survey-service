@@ -49,7 +49,7 @@ module.exports = class Transformation {
           // Retrieve data from the creation portal if no cache is found
           const res = await readQuestionSet(referenceQuestionSetId);
 
-          if (res.body.responseCode !== httpStatusCode.ok.code) {
+          if (res.responseCode !== httpStatusCode.ok.code) {
             return reject({
               success: false,
               message: res.params.errmsg,
@@ -215,7 +215,7 @@ module.exports = class Transformation {
           // Read question data for each child
           const res = await readQuestion(children[j]?.identifier);
 
-          if (res.body.responseCode !== httpStatusCode.ok.code) {
+          if (res.responseCode !== httpStatusCode.ok.code) {
             return reject({
               success: false,
               message: res.params.errmsg,
@@ -350,7 +350,7 @@ module.exports = class Transformation {
 
             // fetch all the question related to brach
             const res = await readQuestion(branchingQuestionId);
-            if (res.body.responseCode !== httpStatusCode.ok.code) {
+            if (res.responseCode !== httpStatusCode.ok.code) {
               return reject({
                 message: res.params.errmsg,
                 status: httpStatusCode.bad_request.status,

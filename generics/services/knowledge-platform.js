@@ -226,12 +226,12 @@ const updateQuestionSetHierarchy = function (templateData) {
             let updateQuestionSetHierarchyUrl = CREATION_PORTAL_URL + messageConstants.endpoints.UPDATE_QUESTION_SET_HIERARCHY;
 
             function updateQuestionSetHierarchyCallBack(err, res) {
-                if (err || res.body.responseCode !== httpStatusCode.ok.code) {
+                if (err || res.responseCode !== httpStatusCode.ok.code) {
                     return reject({
                         message: messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (res.body.responseCode === httpStatusCode.ok.code) {
+                } else if (res.responseCode === httpStatusCode.ok.code) {
                     return resolve({
                         status: httpStatusCode.ok.status
                     })
@@ -261,13 +261,13 @@ const publishQuestionSet = function (questionsetId) {
             let publishUrl = `${CREATION_PORTAL_URL}${messageConstants.endpoints.PUBLISH_QUESTION_SET}/${questionsetId}`;
 
             async function publishQuestionSetCallBack(err, res) {
-                if (err || res.body.responseCode !== httpStatusCode.ok.code) {
-                    const errmsg = JSON.parse(res.body)
+                if (err || res.responseCode !== httpStatusCode.ok.code) {
+                    const errmsg = JSON.parse(res)
                     return reject({
                         message: errmsg.errmsg || messageConstants.apiResponses.QUESTIONSET_NOT_FOUND,
                         status: httpStatusCode.bad_request.status,
                     })
-                } else if (res.body.responseCode === httpStatusCode.ok.code) {
+                } else if (res.responseCode === httpStatusCode.ok.code) {
                     return resolve({
                         status: httpStatusCode.ok.status
                     })

@@ -143,7 +143,7 @@ const updateHierarchyTemplate = async (
         }
       });
 
-      if (res.body.responseCode !== httpStatusCode.ok.code) {
+      if (res.responseCode !== httpStatusCode.ok.code) {
         // Update the solutions collection with hierarchy update  status
         await updateSolutionsDb(
           query,
