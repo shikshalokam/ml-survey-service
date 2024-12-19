@@ -614,59 +614,57 @@ module.exports = class Surveys extends Abstract {
 
   async details(req) {
     return new Promise(async (resolve, reject) => {
-      try {
-        let appVersion = req.headers["x-app-ver"]
-          ? req.headers["x-app-ver"]
-          : req.headers.appversion
-          ? req.headers.appversion
-          : "";
-        let appName = req.headers["x-app-id"]
-          ? req.headers["x-app-id"]
-          : req.headers.appname
-          ? req.headers.appname
-          : "";
-        let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
+        try {
+            let appVersion = req.headers["x-app-ver"] ? req.headers["x-app-ver"] : req.headers.appversion ? req.headers.appversion : "";
+            let appName = req.headers["x-app-id"]  ? req.headers["x-app-id"]  : req.headers.appname ? req.headers.appname : "";
+            let validateSurveyId = gen.utils.isValidMongoId(req.params._id);
 
-        let surveyDetails = {};
+            let surveyDetails = {};
 
-        if (validateSurveyId || req.query.solutionId) {
-          let surveyId = req.params._id ? req.params._id : "";
+            if( validateSurveyId || req.query.solutionId ) {
+                
+                let surveyId = req.params._id ? req.params._id : "";
+       
+                surveyDetails = await surveysHelper.detailsV3
+                (   
+                    req.body,
+                    surveyId,
+                    req.query.solutionId,
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
+                    appVersion,
+                    appName,
+                    true
+                );
+                
+            } else {
 
-          surveyDetails = await surveysHelper.detailsV3(
-            req.body,
-            surveyId,
-            req.query.solutionId,
-            req.userDetails.userId,
-            req.userDetails.userToken,
-            appVersion,
-            appName
-          );
-        } else {
-          let bodyData = req.body ? req.body : {};
+                let bodyData = req.body ? req.body : {};
 
-          surveyDetails = await surveysHelper.getDetailsByLink(
-            req.params._id,
-            req.userDetails.userId,
-            req.userDetails.userToken,
-            bodyData,
-            "",
-            appVersion,
-            appName
-          );
+                surveyDetails = await surveysHelper.getDetailsByLink(
+                    req.params._id,
+                    req.userDetails.userId,
+                    req.userDetails.userToken,
+                    bodyData,
+                    "",
+                    appVersion,
+                    appName,
+                    true
+                );
+            }
+
+            return resolve({
+                message: surveyDetails.message,
+                result: surveyDetails.data
+            });
+
+        } catch (error) {
+            return reject({
+                status: error.status || httpStatusCode.internal_server_error.status,
+                message: error.message || httpStatusCode.internal_server_error.message,
+                errorObject: error
+            });
         }
-
-        return resolve({
-          message: surveyDetails.message,
-          result: surveyDetails.data,
-        });
-      } catch (error) {
-        return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message:
-            error.message || httpStatusCode.internal_server_error.message,
-          errorObject: error,
-        });
-      }
     });
   }
 

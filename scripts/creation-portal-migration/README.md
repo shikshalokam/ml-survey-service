@@ -1,0 +1,146 @@
+# ML - Migration Script
+
+
+### Pre Installation Steps
+
+ ##### Prerequisities
+	- mongo
+	- node
+	- redis
+
+##### Configuring the Environment
+
+
+######  Mongo
+MONGODB_URL = mongodb://localhost:27017/ml-survey   `default`
+
+###### Redis
+REDIS_URL=redis://user:Password@localhost:6379/1
+REDIS_TTL=86400
+
+######  creation-portal-migration
+
+	- MASTER_USER_EMAIL = "n11@yopmail.com"             
+														// base user name of the sunbird environment
+	- MASTER_USER_PWD = "password"                       		
+														// base user pwd of the sunbird environment
+	- TOKEN_GEN_GRANT_TYPE = "password-grant"               		
+														// base grant of the sunbird environment
+	- TOKEN_GEN_CLIENT = "client-id"                   		
+														// base client of the sunbird environment
+	- TOKEN_GEN_CLIENT_SECRET = "client-secret-key"    		
+														// base client secret of the sunbird environment
+
+	- ED_BASE_URL = "https://dev.sunbirded.org/"    		
+														// base host url of the sunbird environment
+
+	- ED_AUTHORIZATION = "Bearer + 'token'"            		
+														// base bearer token with all the permissions to run the script of the sunbird environment
+
+	- CREATION_PORTAL_URL = "https://dock.sunbirded.org/"
+														// creation portal Url
+
+	- CREATION_PORTAL_AUTHORIZATION= "Bearer + 'token'"  	
+														// creation portal bearer token with all the permissions 
+
+
+###  Installing and running Migration script
+
+- CSV Data
+	- fileName: SL-DataMapping.csv
+	- Columns: authorId,mappedUserId,userName,rootOrgId,rootOrgName,org_id,srcOrgAdminId,srcOrgAdminUserName,contributorOrgAdminId,contributorOrgAdminUserName,programId,programName
+
+		- authorId 						:	userId in mongo
+
+		- mappedUserId 					:	userId in creation-portal
+
+		- userName						:	userName in creation-portal
+
+		- rootOrgId						:	rootOrgId of mappedUserId in creation-portal
+
+		- rootOrgName					:	rootOrgName of mappedUserId in creation-portal
+
+		- org_id						: 	org_id of mappedUserId in creation-portal from opensaber
+
+		- srcOrgAdminId					: 	srcOrgAdminId of mappedUserId rootOrg in creation-portal
+
+		- srcOrgAdminUserName			: 	srcOrgAdminUserName of mappedUserId rootOrg in creation-portal
+
+		- contributorOrgAdminId			: 	contributorOrgAdminId of mappedUserId rootOrg in creation-portal
+
+		- contributorOrgAdminUserName	:	contributorOrgAdminUserName of mappedUserId rootOrg in creation-portal
+
+		- programId						:	migrated programId in creation-portal
+		
+		- programName					:	programName is same as the solution name in mongo
+											EX:	"solutionName sourcing project"
+
+	- To generate the csv
+		- cd scripts/creation-portal-migration
+		- node orgDetails
+	
+	- Data updated is csv 
+		- If authorId is not present in creation-portal
+			- Then columns with data in csv are
+				- authorId
+				- programId	
+				- programName
+		- If authorId is present but opensaber org id not present in creation-portal
+			- Then columns with data in csv are
+				- authorId
+				- mappedUserId
+				- userName
+				- rootOrgId
+				- rootOrgName
+				- programId
+				- programName
+		- If authorId is present and opensaber org id also present in creation-portal
+			- Then columns with data in csv are
+				- authorId
+				- mappedUserId
+				- userName
+				- rootOrgId
+				- rootOrgName
+				- org_id
+				- programId
+				- programName
+
+		- If the program is already migrated
+			- Only Then we can see this values
+				- programId	
+				- programName
+
+
+
+
+***Note:*** To run the migration script CSV data is required
+
+- To migrate the data
+	- cd scripts/creation-portal-migration
+	- node index.js
+	or 
+	- npm run creation-portal-script
+
+
+- To publish the data
+  - cd scripts/creation-portal-migration
+  - node publish.js
+
+## Logging System and Rerunning the Script
+
+This project includes a robust logging system to track the script's execution and identify errors if they occur. The logs are stored in the `logs` folder, with separate log files created daily. The naming convention for the log files is as follows:
+
+- `DD-MM-YYYY-debug.log`: Contains detailed debug-level information for in-depth troubleshooting.
+- `DD-MM-YYYY-error.log`: Contains error-level logs for issues encountered during script execution.
+- `DD-MM-YYYY-info.log`: Contains general information about the script's execution.
+
+### When to Rerun the Script
+
+If any error occurs during script execution, the errors will be logged in the `error.log` file under the `logs` folder. You can inspect the log file to identify the issue and take appropriate action to resolve it.
+
+To rerun the script:
+
+1. Address the issues mentioned in the `error.log` file.
+2. Restart the script as mentioned in the "Installing and running Migration script" section.
+
+By reviewing the log files, you can ensure smooth script execution and troubleshoot problems effectively.

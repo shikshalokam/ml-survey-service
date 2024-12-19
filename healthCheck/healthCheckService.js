@@ -11,6 +11,7 @@ const kendraHealthCheck = require("./kendra");
 const mongodbHealthCheck = require("./mongodb");
 const kafkaHealthCheck = require("./kafka");
 const improvementHealthCheck = require("./improvement-project");
+const redisHealthCheck = require("./redis");
 
 const obj = {
     MONGO_DB: {
@@ -28,8 +29,13 @@ const obj = {
         FAILED_CODE: 'KENDRA_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Kendra service is not healthy'
     },
-    IMPROVEMENT_SERVICE: {
-        NAME: 'improvementservice.api',
+     REDIS_SERVICE: {
+        NAME: 'Redis.db',
+        FAILED_CODE: 'REDIS_HEALTH_FAILED',
+        FAILED_MESSAGE: 'Redis db is not connected'
+    },
+    IMPROVEMENT_SERVICE :{
+        NAME:'improvementservice.api',
         FAILED_CODE: 'IMPROVEMENT_SERVICE_HEALTH_FAILED',
         FAILED_MESSAGE: 'Improvement service is not healthy'
     },
@@ -47,11 +53,13 @@ let health_check = async function(req,res) {
     let elasticSearchConnection = await elasticSearchHealthCheck.health_check();
   
     let improvementHealthCheckStatus = await improvementHealthCheck.health_check();
+    let redisConnection = await redisHealthCheck.health_check();
 
     checks.push(checkResult("KAFKA",kafkaConnection));
     checks.push(checkResult("MONGO_DB",mongodbConnection));
     checks.push(checkResult("KENDRA_SERVICE",coreServiceStatus));
     checks.push(checkResult("IMPROVEMENT_SERVICE",improvementHealthCheckStatus));
+    checks.push(checkResult("REDIS",redisConnection));
 
     let checkServices = checks.filter( check => check.healthy === false);
 

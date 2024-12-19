@@ -132,7 +132,16 @@ let enviromentVariables = {
     "message" : "Program Join on/off",
     "optional" : false,
     "default" : "ON"
-  }
+  },
+  "REDIS_URL": {
+    "message" : "Required redis url which include both username and password",
+    "optional" : false
+  },
+  "REDIS_TTL": {
+    "message" : "Required redis ttl",
+    "optional" : true,
+    "default": 86400
+  },
 }
 
 let success = true;
