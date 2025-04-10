@@ -131,6 +131,7 @@ module.exports = {
         type: Number,
         default: 1
     },
-    reportInformation : Object
+    reportInformation : Object,
+    projectTemplateId : "ObjectId"
   }
 };
