@@ -309,6 +309,47 @@ function checkIfStringIsNumber(str) {
   return /^[0-9]+$/.test(str);
 }
 
+/**
+ * Normalizes string values to lowercase.
+ *
+ * @function
+ * @name normalizeToLower
+ * @param {string | string[]} input
+ *   - A single string
+ *   - A comma-separated string
+ *   - An array of strings
+ *
+ * @returns {string | string[]}
+ *   Returns the normalized value in the same data structure.
+ */
+
+function normalizeToLower(input) {
+  // Case 1: Array of strings
+  if (Array.isArray(input)) {
+    return input.map(value =>
+      typeof value === 'string' ? value.toLowerCase() : value
+    )
+  }
+
+  // Case 2: String
+  if (typeof input === 'string') {
+    // Check if it's a comma-separated string
+    if (input.includes(',')) {
+      return input
+        .split(',')
+        .map(value => value.trim().toLowerCase())
+        .join(',')
+    }
+
+    // Normal single string
+    return input.toLowerCase()
+  }
+
+  // Fallback: return input as-is
+  return input
+}
+
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
@@ -333,5 +374,6 @@ module.exports = {
   convertStringToBoolean : convertStringToBoolean,
   checkIfValidUUID : checkIfValidUUID,
   filterLocationIdandCode :filterLocationIdandCode,
-  checkIfStringIsNumber : checkIfStringIsNumber
+  checkIfStringIsNumber : checkIfStringIsNumber,
+  normalizeToLower : normalizeToLower
 };
