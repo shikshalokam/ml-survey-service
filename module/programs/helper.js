@@ -340,7 +340,8 @@ module.exports = class ProgramsHelper {
 
             let updateSolution = 
             await database.models.programs.findOneAndUpdate({
-              _id : programId
+              _id : programId,
+              isAPrivateProgram:true 
             },{
               $pull : {
                 components : { $in : updateSolutionIds }
