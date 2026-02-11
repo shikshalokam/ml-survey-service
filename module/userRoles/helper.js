@@ -28,6 +28,9 @@ module.exports = class UserRolesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
+                if(filterQueryObject.code){
+                    filterQueryObject.code = gen.utils.normalizeToLower(filterQueryObject.code)
+                }
                 let userRolesData = await database.models.userRoles.find(filterQueryObject,projectionQueryObject).lean();
 
                 return resolve(userRolesData);
@@ -62,7 +65,9 @@ module.exports = class UserRolesHelper {
                         try {
                             
                             userRole = gen.utils.valueParser(userRole);
-
+                            if(userRole.code){
+                                userRole.code = gen.utils.normalizeToLower(userRole.code)
+                            }
                             if(userRole.entityTypes != "") {
                                 let roleEntityTypes = userRole.entityTypes.split(",");
                                 roleEntityTypes = _.uniq(roleEntityTypes);
@@ -151,6 +156,10 @@ module.exports = class UserRolesHelper {
                         try {
                             
                             userRole = gen.utils.valueParser(userRole);
+
+                            if(userRole.code){
+                                userRole.code = gen.utils.normalizeToLower(userRole.code)
+                            }
 
                             if(userRole.entityTypes != "") {
                                 let roleEntityTypes = userRole.entityTypes.split(",");
