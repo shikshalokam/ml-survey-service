@@ -1115,9 +1115,10 @@ module.exports = class Observations extends Abstract {
                 entityDocument.metaInformation.hierarchy = entityHierarchy;
 
                 const submissionNumber = req.query.submissionNumber && req.query.submissionNumber > 1 ? parseInt(req.query.submissionNumber) : 1;
+                 /* We are not applying the status filter here because if the user has already consumed the solution and created at least one observation,
+                new submissions should be allowed. Additionally, the logic above ensures that we verify the existence of the observation. */
                 let solutionQueryObject = {
-                    _id: observationDocument.solutionId,
-                    status: "active",
+                    _id: observationDocument.solutionId
                 };
 
                 let solutionDocumentProjectionFields = await observationsHelper.solutionDocumentProjectionFieldsForDetailsAPI()

@@ -142,10 +142,10 @@ module.exports = class ObservationSubmissions extends Abstract {
 
         let entityHierarchy = await userProfileService.getParentEntities( entityDocument._id );
         entityDocument.metaInformation.hierarchy = entityHierarchy;
-
+         /* We are not applying the status filter here because if the user has already consumed the solution and created at least one observation,
+         new submissions should be allowed. Additionally, the logic above ensures that we verify the existence of the observation. */
         let solutionDocument = await solutionsHelper.solutionDocuments({
           _id: observationDocument.solutionId,
-          status: "active",
         }, [
           "externalId",
           "themes",
@@ -1545,4 +1545,3 @@ module.exports = class ObservationSubmissions extends Abstract {
   }
 
 };
-
