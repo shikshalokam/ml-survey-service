@@ -6,6 +6,32 @@ This script is intended to a update the new roles in solution and program 5,1.0 
 
 In order to execute this migration script, we need to first log in to the pod where the service is running and then proceed with the provided instructions.
 
+---
+
+## Pre-Migration Setup (Prerequisites)
+
+Before executing the migration scripts, ensure the following steps are completed:
+
+- Verify the availability of required sub-roles in the `userRoles` collection.
+- Identify any new sub-roles that need to be added as part of this release.
+- If a sub-role does not exist, create it using the bulkCreate API.
+
+### API Details
+
+- **Endpoint:** `/mlsurvey/api/v1/userRoles/bulkCreate`
+- **Purpose:** Create new sub-roles required for solution and program mapping.
+
+### Responsibility
+
+- This step must be completed by the **Support Team**.
+
+### Important Notes
+
+- Ensure all required sub-roles are created before running the migration.
+- Missing sub-roles may cause migration failure or incorrect mappings.
+
+---
+
 ### sample CSV file - 
 https://docs.google.com/spreadsheets/d/10__4a6qPwT78rawaCnePxQtdEHtfZtoC1llZ_bG6m0c/edit?gid=1431178524#gid=1431178524
 
