@@ -66,12 +66,19 @@ function generateUUId() {
                  throw Error(`${roleUpdateinScope.newRoleCode} Role is not available`)
               }
 
+          function escapeRegex(text) {
+            return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          }
+          let oldRole = roleUpdateinScope.oldRoleCode.trim();
           let matchQuery = {
-            "scope.roles.code": roleUpdateinScope.oldRoleCode,
+            "scope.roles.code": {
+              $regex: `^${escapeRegex(oldRole)}$`,
+              $options: "i"   //handles case-insensitive match
+            }
           };
 
           let updatedRole = {
-            $addToSet: { "scope.roles": roleToUpdate },
+            $addToSet: { "scope.roles": roleToUpdate},
           };
           let projection = {
             projection: { _id: 1, externalId: 1, name: 1 },
