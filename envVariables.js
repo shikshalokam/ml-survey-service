@@ -92,9 +92,9 @@ let enviromentVariables = {
     "default" : "http://player:3000"
   },
   "NORMALISED_FIELDS" : {
-    "message" : "Required user service base url",
+    "message" : "Required comma-separated fields to lowercase-normalise",
     "optional" : false,
-    "default" : ""
+    "default" : "roles"
   }
 }
 
