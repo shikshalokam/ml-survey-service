@@ -2,6 +2,7 @@ let authenticator = require(ROOT_PATH + "/generics/middleware/authenticator");
 let pagination = require(ROOT_PATH + "/generics/middleware/pagination");
 let dataRangeFilter = require(ROOT_PATH + "/generics/middleware/dateRangeFilter");
 let userPrograms = require(ROOT_PATH + "/generics/middleware/userPrograms");
+const normaliseFields = require(ROOT_PATH + "/generics/middleware/normaliseFields");
 const fs = require("fs");
 const inputValidator = require(ROOT_PATH + "/generics/middleware/validator");
 
@@ -11,6 +12,7 @@ module.exports = function (app) {
   app.use(pagination);
   app.use(dataRangeFilter);
   app.use(userPrograms);
+  app.use(normaliseFields);
 
   var router = async function (req, res, next) {
 
