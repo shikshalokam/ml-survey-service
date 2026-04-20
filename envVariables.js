@@ -90,6 +90,11 @@ let enviromentVariables = {
     "message" : "Form service base url",
     "optional" : true,
     "default" : "http://player:3000"
+  },
+  "NORMALISED_FIELDS" : {
+    "message" : "Required user service base url",
+    "optional" : false,
+    "default" : ""
   }
 }
 
