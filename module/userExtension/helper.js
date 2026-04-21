@@ -259,6 +259,7 @@ module.exports = class UserExtensionHelper {
 
                     let userRole = gen.utils.valueParser(userRolesCSVData[csvRowNumber]);
                     userRole["_SYSTEM_ID"] = "";
+                    if (userRole.platform_role) userRole.platform_role = gen.utils.normalizeToLower(userRole.platform_role);
                     aclData(userRole);
 
                     try {
