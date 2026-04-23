@@ -18,6 +18,7 @@
  *   - skippedIds.txt  : _id of documents whose platformRoles were already clean.
  */
 
+require("dotenv").config();
 const { MongoClient, ObjectId } = require("mongodb")
 const fs = require("fs")
 const path = require("path")
