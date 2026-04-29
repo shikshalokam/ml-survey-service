@@ -2314,9 +2314,9 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
                     if(userProfile.profileUserTypes && Array.isArray(userProfile.profileUserTypes) && userProfile.profileUserTypes.length >0) {
                         if(!_.find(userProfile.profileUserTypes, { 'type': subRole.toLowerCase() }) && !_.find(userProfile.profileUserTypes, { 'subType': subRole.toLowerCase() })) { 
                             updateUserProfileRoleInformation = true; // Need to update userProfile.profileUserTypes
-                            if(subRole.toUpperCase() === "TEACHER") { // If subRole is not teacher
+                            if(subRole.toUpperCase().startsWith("TEACHER")) { // If subRole is not teacher
                                 userProfile.profileUserTypes.push({
-                                    "subType" : null,
+                                    "subType" : subRole.toLowerCase(),
                                     "type" : "teacher"
                                 })
                             } else { // If subRole is not teacher
@@ -2329,9 +2329,9 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
                     } else { // Make a new entry if userProfile.profileUserTypes is empty or does not exist.
                         updateUserProfileRoleInformation = true; // Need to update userProfile.profileUserTypes
                         userProfile.profileUserTypes = new Array;
-                        if(subRole.toUpperCase() === "TEACHER") { // If subRole is teacher
+                        if(subRole.toUpperCase().startsWith("TEACHER")) { // If subRole is teacher
                             userProfile.profileUserTypes.push({
-                                "subType" : null,
+                                "subType" : subRole.toLowerCase(),
                                 "type" : "teacher"
                             })
                         } else { // If subRole is not teacher
