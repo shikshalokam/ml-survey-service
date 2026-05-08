@@ -2312,7 +2312,12 @@ function _updateUserProfileBasedOnUserRoleInfo(userProfile, userRoleInformation)
                     const subRole = rolesInUserRoleInformation[pointerToRolesInUserInformation];
                     // Check if userProfile.profileUserTypes exists and is an array of length > 0
                     if(userProfile.profileUserTypes && Array.isArray(userProfile.profileUserTypes) && userProfile.profileUserTypes.length >0) {
-                        if(!_.find(userProfile.profileUserTypes, { 'type': subRole.toLowerCase() }) && !_.find(userProfile.profileUserTypes, { 'subType': subRole.toLowerCase() })) { 
+                        const subRoleLower = subRole.toLowerCase();
+                        const roleAlreadyExists = userProfile.profileUserTypes.some(userType =>
+                            (userType.subType && userType.subType.toLowerCase() === subRoleLower) ||
+                            (userType.type && userType.type.toLowerCase() === subRoleLower)
+                        );
+                        if(!roleAlreadyExists) { 
                             updateUserProfileRoleInformation = true; // Need to update userProfile.profileUserTypes
                             if(subRole.toUpperCase().startsWith("TEACHER")) { // If subRole is not teacher
                                 userProfile.profileUserTypes.push({
